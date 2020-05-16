@@ -12,15 +12,15 @@ class Lexer():
         self.lexer.add('IMPORT', r'import')
 
         # Other characters
-        self.lexer.add('OPEN_PAREN', r'\(')
-        self.lexer.add('CLOSE_PAREN', r'\)')
+        #self.lexer.add('OPEN_PAREN', r'\(')
+        #self.lexer.add('CLOSE_PAREN', r'\)')
 
         self.lexer.add('OPEN_BRACKET', r'\[')
         self.lexer.add('CLOSE_BRACKET', r'\]')
         self.lexer.add('COLON', r'\:')
         self.lexer.add('SEMICOLON', r'\;')
         self.lexer.add('COMMA', r'\,')
-        self.lexer.add('HASH', r'\#')
+        #self.lexer.add('HASH', r'\#')
 
         self.lexer.add('NUMBER', r'\d+')
         self.lexer.add('IDENTIFIER', r'\w[\w\d]*')

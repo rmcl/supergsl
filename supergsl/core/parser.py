@@ -1,8 +1,8 @@
 from rply import ParserGenerator
-import ast
+from . import ast
 
 
-class Parser(object):
+class ParserBuilder(object):
     def __init__(self):
         self.pg = ParserGenerator(
             # A list of all token names accepted by the parser.
@@ -10,14 +10,11 @@ class Parser(object):
                 'FROM',
                 'IMPORT',
 
-                'OPEN_PAREN',
-                'CLOSE_PAREN',
                 'OPEN_BRACKET',
                 'CLOSE_BRACKET',
                 'COLON',
                 'SEMICOLON',
                 'COMMA',
-                'HASH',
                 'NUMBER',
                 'IDENTIFIER'
             ]
