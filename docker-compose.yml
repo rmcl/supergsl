@@ -1,0 +1,11 @@
+version: '3.7'
+
+services:
+  supergsl:
+    container_name: supergsl
+    tty: true
+    build:
+      dockerfile: Dockerfile
+      context: .
+    volumes:
+      - .:/code/

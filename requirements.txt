@@ -1,0 +1,3 @@
+llvmlite
+rply
+nose
