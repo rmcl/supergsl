@@ -1,2 +1,0 @@
-from S288C import ADHA, ERG10, HO
-uHO ; pADH1 ; gERG10[1:728] ; dHO

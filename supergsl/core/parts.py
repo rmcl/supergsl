@@ -24,4 +24,14 @@ class PartProvider(object):
         raise NotImplemented('Subclass to implement.')
 
 class PartProviderFactory(object):
+    pass
 
+
+from supergsl.core.backend import BackendPipelinePass
+
+
+class DottyASTGenerator(BackendPipelinePass):
+    def perform(self, ast):
+        """Resolve parts present in the AST and load them into the PartsTable."""
+
+        ast.add_symbol_table('parts', PartTable())

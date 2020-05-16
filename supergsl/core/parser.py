@@ -42,7 +42,7 @@ class ParserBuilder(object):
                 p[0].append(p[1])
                 return p[0]
             else:
-                return ast.ProgramImportList([p[0]])
+                return [p[0]]
 
         @self.pg.production('import : FROM IDENTIFIER IMPORT import_identifiers')
         def program_import(p):
@@ -67,7 +67,7 @@ class ParserBuilder(object):
         @self.pg.production('part_list : part')
         def part_list(p):
             if len(p) == 1:
-                return ast.PartList([p[0]])
+                return [p[0]]
             elif len(p) == 3:
                 p[0].append(p[2])
                 return p[0]

@@ -1,3 +1,15 @@
+class Root(object):
+
+    def __init__(self):
+        self._symbols = {}
+
+    def add_symbol_table(self, name, table_obj):
+        if name in self._symbols:
+            raise Exception('Symbol table collision. Table %s is already present in global symbol table.' % name)
+
+        self._symbols[name] = table_obj
+
+
 class Program(object):
     def __init__(self, imports, assembly_list):
         self.assembly_list = assembly_list
@@ -6,7 +18,10 @@ class Program(object):
     def eval(self):
         return {
             'node': 'Program',
-            'imports': self.imports.eval() if self.imports else None,
+            'imports': [
+                impor.eval()
+                for impor in self.imports
+            ],
             'assemblies': self.assembly_list.eval()
         }
 
@@ -29,22 +44,12 @@ class Assembly(object):
     def eval(self):
         return {
             'node': 'Assembly',
-            'parts': self.part_list.eval()
+            'parts': [
+                part.eval()
+                for part in self.part_list
+            ]
         }
 
-class PartList(object):
-
-    def __init__(self, parts):
-        self.parts = parts
-
-    def append(self, part):
-        self.parts.append(part)
-
-    def eval(self):
-        return [
-            part.eval()
-            for part in self.parts
-        ]
 
 
 class Part(object):
@@ -70,10 +75,12 @@ class Slice(object):
 
     def eval(self):
         return {
+            'node': 'Slice',
             'start': self.start,
             'end': self.end
         }
 
+"""
 class ProgramImportList(object):
     def __init__(self, program_imports):
         self.program_imports = program_imports
@@ -86,6 +93,7 @@ class ProgramImportList(object):
             program_import.eval()
             for program_import in self.program_imports
         ]
+"""
 
 class ProgramImport(object):
     def __init__(self, module_path, import_identifiers):
