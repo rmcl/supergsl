@@ -101,5 +101,4 @@ class ResolvePartPass(BreadthFirstNodeFilteredPass):
 
     def visit_part_node(self, node):
         part = self.part_symbol_table.get_part(node.part_name)
-        print(node)
         node.part = part
