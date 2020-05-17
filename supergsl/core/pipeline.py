@@ -1,11 +1,11 @@
 from .lexer import Lexer
 from .parser import ParserBuilder
 
+
 class CompilerPipeline(object):
 
     def get_backend_passes(self):
         return [
-            # DottyASTGenerator
         ]
 
     def perform_frontend_compile(self, source_code):
@@ -30,7 +30,7 @@ class CompilerPipeline(object):
         for backend_pass_class in pass_classes:
             backend_pass_inst = backend_pass_class()
 
-            print('performing pass... %s' % backend_pass_inst.name)
+            print('performing pass... %s' % backend_pass_inst.get_pass_name())
             ast = backend_pass_inst.perform(ast)
 
         return ast

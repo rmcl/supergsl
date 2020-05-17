@@ -1,3 +1,8 @@
+class Node(object):
+    def child_nodes(self):
+        return []
+
+
 class Root(object):
 
     def __init__(self):
@@ -10,7 +15,7 @@ class Root(object):
         self._symbols[name] = table_obj
 
 
-class Program(object):
+class Program(Node):
     def __init__(self, imports, assembly_list):
         self.assembly_list = assembly_list
         self.imports = imports
@@ -22,11 +27,17 @@ class Program(object):
                 impor.eval()
                 for impor in self.imports
             ],
-            'assemblies': self.assembly_list.eval()
+            'assemblies': [
+                assembly.eval()
+                for assembly in self.assembly_list
+            ]
         }
 
+    def child_nodes(self):
+        return self.imports + self.assembly_list
 
-class AssemblyList(object):
+
+class AssemblyList(Node):
     def __init__(self, assemblies):
         self.assemblies = assemblies
 
@@ -36,23 +47,28 @@ class AssemblyList(object):
             for assembly in self.assemblies
         ]
 
+    def child_nodes(self):
+        return self.assemblies
 
-class Assembly(object):
-    def __init__(self, part_list):
-        self.part_list = part_list
+
+class Assembly(Node):
+    def __init__(self, parts):
+        self.parts = parts
 
     def eval(self):
         return {
             'node': 'Assembly',
             'parts': [
                 part.eval()
-                for part in self.part_list
+                for part in self.parts
             ]
         }
 
+    def child_nodes(self):
+        return self.parts
 
 
-class Part(object):
+class Part(Node):
     def __init__(self, identifier, slice=None):
         self.identifier = identifier
         self.slice = slice
@@ -68,7 +84,13 @@ class Part(object):
 
         return result
 
-class Slice(object):
+    def child_nodes(self):
+        if self.slice:
+            return [self.slice]
+        return []
+
+
+class Slice(Node):
     def __init__(self, start, end):
         self.start = start
         self.end = end
@@ -80,22 +102,8 @@ class Slice(object):
             'end': self.end
         }
 
-"""
-class ProgramImportList(object):
-    def __init__(self, program_imports):
-        self.program_imports = program_imports
 
-    def append(self, program_import):
-        self.program_imports.append(program_import)
-
-    def eval(self):
-        return [
-            program_import.eval()
-            for program_import in self.program_imports
-        ]
-"""
-
-class ProgramImport(object):
+class ProgramImport(Node):
     def __init__(self, module_path, import_identifiers):
         self.module = module_path
         self.import_identifiers = import_identifiers
@@ -104,18 +112,21 @@ class ProgramImport(object):
         return {
             'node': 'Import',
             'module': self.module,
-            'imports': self.import_identifiers.eval()
+            'imports': [
+                import_identifier.eval()
+                for import_identifier in self.import_identifiers
+            ]
         }
 
-class ProgramImportIdentifiers(object):
-    def __init__(self, identifiers):
-        self.identifiers = identifiers
+    def child_nodes(self):
+        return self.import_identifiers
 
-    def append(self, identifier):
-        self.identifiers.append(identifier)
+
+class ProgramImportIdentifier(Node):
+    def __init__(self, identifier):
+        self.identifier = identifier
 
     def eval(self):
-        return [
-            identifier
-            for identifier in self.identifiers
-        ]
+        return {
+            'identifier': self.identifier
+        }

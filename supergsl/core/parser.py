@@ -29,9 +29,9 @@ class ParserBuilder(object):
             if len(p) == 2:
                 # we have at least one import
                 imports = p[0]
-                assembly = p[1]
+                assembly = [p[1]]
             else:
-                assembly = p[0]
+                assembly = [p[0]]
 
             return ast.Program(imports, assembly)
 
@@ -52,12 +52,11 @@ class ParserBuilder(object):
         @self.pg.production('import_identifiers : IDENTIFIER')
         def program_import_identifiers(p):
             if len(p) == 3:
-                p[0].append(p[2].value)
+                pi = ast.ProgramImportIdentifier(p[2].value)
+                p[0].append(pi)
                 return p[0]
             else:
-                return ast.ProgramImportIdentifiers([p[0].value])
-
-
+                return [ast.ProgramImportIdentifier(p[0].value)]
 
         @self.pg.production('assembly : part_list')
         def assembly(p):
@@ -73,9 +72,6 @@ class ParserBuilder(object):
                 return p[0]
 
             assert('Cant reach this point.')
-
-        #@self.pg.production('part : IDENTIFIER')
-
 
         @self.pg.production('part : IDENTIFIER slice')
         def sliced_part(p):
