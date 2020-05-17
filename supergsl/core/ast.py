@@ -3,12 +3,12 @@ class Node(object):
         return []
 
 
-class Root(object):
+class SymbolRepository(object):
 
     def __init__(self):
         self._symbols = {}
 
-    def add_symbol_table(self, name, table_obj):
+    def register(self, name, table_obj):
         if name in self._symbols:
             raise Exception('Symbol table collision. Table %s is already present in global symbol table.' % name)
 
@@ -71,12 +71,37 @@ class Assembly(Node):
 class Part(Node):
     def __init__(self, identifier, slice=None):
         self.identifier = identifier
+        self.operator_prefix = identifier[0]
+        self.part_name = identifier[1:]
         self.slice = slice
+
+        self.validate_part_prefix()
+
+    def validate_part_prefix(self):
+        """Validate the part prefix.
+
+        From the GSL Paper, valid part prefixes are the following:
+        g prefix gene locus gADH1
+        p prefix promoter part pERG10
+        t prefix terminator part tERG10
+        u prefix upstream part uHO
+        d prefix downstream part dHO
+        o prefix open reading frame oERG10
+        f prefix fusible ORF, no stop codon fERG10
+        m prefix mRNA (ORF + terminator)
+        """
+        if self.operator_prefix not in 'gptudofm':
+            raise Exception('Invalid part prefix "%s" in "%s".' % (
+                self.operator_prefix,
+                self.identifier
+            ))
 
     def eval(self):
         result = {
             'node': 'Part',
-            'identifier': self.identifier
+            'operator_prefix': self.operator_prefix,
+            'part_name': self.part_name,
+            'part': self.part
         }
 
         if self.slice:
@@ -106,20 +131,20 @@ class Slice(Node):
 class ProgramImport(Node):
     def __init__(self, module_path, import_identifiers):
         self.module = module_path
-        self.import_identifiers = import_identifiers
+        self.imports = import_identifiers
 
     def eval(self):
         return {
             'node': 'Import',
             'module': self.module,
             'imports': [
-                import_identifier.eval()
-                for import_identifier in self.import_identifiers
+                progam_import.eval()
+                for progam_import in self.imports
             ]
         }
 
     def child_nodes(self):
-        return self.import_identifiers
+        return self.imports
 
 
 class ProgramImportIdentifier(Node):

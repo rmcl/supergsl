@@ -1,11 +1,16 @@
 from .lexer import Lexer
 from .parser import ParserBuilder
 
+from supergsl.backend.symbol_table import AttachSymbolRepositoryPass
+from supergsl.backend.parts import ResolvePartPass
+
 
 class CompilerPipeline(object):
 
     def get_backend_passes(self):
         return [
+            AttachSymbolRepositoryPass,
+            ResolvePartPass
         ]
 
     def perform_frontend_compile(self, source_code):
@@ -44,6 +49,4 @@ class CompilerPipeline(object):
         return Lexer().get_lexer()
 
     def get_parser(self):
-        parser_generator = ParserBuilder()
-        parser_generator.parse()
-        return parser_generator.get_parser()
+        return ParserBuilder()

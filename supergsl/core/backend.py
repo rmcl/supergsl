@@ -55,13 +55,20 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
         """
         return {}
 
-    def perform(self, ast):
-        node_visit_queue = ast.child_nodes().copy()
+    def before_pass(self, ast):
+        return ast
 
+    def after_pass(self, ast):
+        return ast
+
+    def perform(self, ast):
+        ast = self.before_pass(ast)
+        node_visit_queue = [ast]
         while len(node_visit_queue) > 0:
             cur_node = node_visit_queue.pop(0)
 
             self.visit(cur_node)
             node_visit_queue += cur_node.child_nodes()
 
+        ast = self.after_pass(ast)
         return ast
