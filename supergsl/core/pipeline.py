@@ -2,7 +2,8 @@ from .lexer import Lexer
 from .parser import ParserBuilder
 
 from supergsl.backend.symbol_table import AttachSymbolRepositoryPass
-from supergsl.backend.parts import ResolvePartPass
+from supergsl.backend.parts import ResolvePartPass, SliceAndBuildPartSequence
+from supergsl.plugins.sbol_output import SBOLOutputPass
 
 
 class CompilerPipeline(object):
@@ -10,7 +11,9 @@ class CompilerPipeline(object):
     def get_backend_passes(self):
         return [
             AttachSymbolRepositoryPass,
-            ResolvePartPass
+            ResolvePartPass,
+            SliceAndBuildPartSequence,
+            SBOLOutputPass
         ]
 
     def perform_frontend_compile(self, source_code):

@@ -75,10 +75,12 @@ class Part(Node):
         self.part_name = identifier[1:]
         self.slice = slice
 
-        self.validate_part_prefix()
+        self.part_type = self.get_part_type()
 
-    def validate_part_prefix(self):
+    def get_part_type(self):
         """Validate the part prefix.
+
+        https://github.com/Amyris/GslCore/blob/b738b3e107b91ed50a573b48d0dcf1be69c4ce6a/src/GslCore/CommonTypes.fs#L60
 
         From the GSL Paper, valid part prefixes are the following:
         g prefix gene locus gADH1
@@ -90,7 +92,21 @@ class Part(Node):
         f prefix fusible ORF, no stop codon fERG10
         m prefix mRNA (ORF + terminator)
         """
-        if self.operator_prefix not in 'gptudofm':
+
+        PART_TYPES = {
+            'g': 'gene',
+            'p': 'promoter',
+            't': 'terminator',
+            'u': 'upstream',
+            'd': 'downstream',
+            'o': 'orf',
+            'f': 'fusible_orf',
+            'm': 'mRNA'
+        }
+
+        try:
+            return PART_TYPES[self.operator_prefix]
+        except KeyError:
             raise Exception('Invalid part prefix "%s" in "%s".' % (
                 self.operator_prefix,
                 self.identifier
@@ -101,7 +117,8 @@ class Part(Node):
             'node': 'Part',
             'operator_prefix': self.operator_prefix,
             'part_name': self.part_name,
-            'part': self.part
+            'part': self.part,
+            'part_type': self.part_type
         }
 
         if self.slice:

@@ -20,6 +20,7 @@ class Lexer():
         self.lexer.add('COLON', r'\:')
         self.lexer.add('SEMICOLON', r'\;')
         self.lexer.add('COMMA', r'\,')
+        self.lexer.add('PERIOD', r'\.')
         #self.lexer.add('HASH', r'\#')
 
         self.lexer.add('NUMBER', r'\d+')

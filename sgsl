@@ -17,8 +17,8 @@ def main():
 
     print('Compiling "%s".' % args.input_file)
     pipeline = CompilerPipeline()
-    input_file_fp = open(args.input_file, 'r')
-    result = pipeline.compile(input_file_fp.read())
+    with open(args.input_file, 'r') as input_file_fp:
+        result = pipeline.compile(input_file_fp.read())
 
     pprint.pprint(result)
 

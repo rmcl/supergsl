@@ -2,3 +2,4 @@ llvmlite
 rply
 nose
 biopython
+pysbol

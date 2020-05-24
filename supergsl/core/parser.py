@@ -20,6 +20,7 @@ class ParserBuilder(object):
                 'COLON',
                 'SEMICOLON',
                 'COMMA',
+                'PERIOD',
                 'NUMBER',
                 'IDENTIFIER'
             ]
@@ -51,9 +52,17 @@ class ParserBuilder(object):
             else:
                 return [p[0]]
 
-        @self.pg.production('import : FROM IDENTIFIER IMPORT import_identifiers')
+        @self.pg.production('import : FROM import_module IMPORT import_identifiers')
         def program_import(state, p):
-            return ast.ProgramImport(p[1].value, p[3])
+            return ast.ProgramImport(p[1], p[3])
+
+        @self.pg.production('import_module : import_module PERIOD IDENTIFIER')
+        @self.pg.production('import_module : IDENTIFIER')
+        def program_import_module(state, p):
+            if len(p) == 3:
+                return p[0] + [p[2].value]
+            else:
+                return [p[0].value]
 
         @self.pg.production('import_identifiers : import_identifiers COMMA IDENTIFIER')
         @self.pg.production('import_identifiers : IDENTIFIER')

@@ -1,2 +1,2 @@
-from S288C import ADH1, ERG10, HO
-uHO ; pADH1 ; gERG10[1:728] ; dHO
+from genebank.S288C import ADH1, ERG10, HO
+uHO ; pADH1 ; gERG10[1:728] ; tADH1 ; dHO
