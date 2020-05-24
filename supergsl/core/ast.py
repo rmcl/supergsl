@@ -37,20 +37,6 @@ class Program(Node):
         return self.imports + self.assembly_list
 
 
-class AssemblyList(Node):
-    def __init__(self, assemblies):
-        self.assemblies = assemblies
-
-    def eval(self):
-        return [
-            assembly.eval()
-            for assembly in self.assemblies
-        ]
-
-    def child_nodes(self):
-        return self.assemblies
-
-
 class Assembly(Node):
     def __init__(self, parts):
         self.parts = parts
@@ -117,7 +103,7 @@ class Part(Node):
             'node': 'Part',
             'operator_prefix': self.operator_prefix,
             'part_name': self.part_name,
-            'part': self.part,
+            'source_part': self.source_part,
             'part_type': self.part_type
         }
 

@@ -56,8 +56,8 @@ class PartSymbolTable(object):
 
 class Part(object):
     def __init__(self, name, sequence):
-        self.name = None
-        self.sequence = None
+        self.name = name
+        self.sequence = sequence
 
 
 class PartProvider(object):
@@ -95,10 +95,23 @@ class ResolvePartPass(BreadthFirstNodeFilteredPass):
     def visit_import_node(self, node):
         for program_import in node.imports:
             self.part_symbol_table.resolve_part(
-                node.module,
+                '.'.join(node.module),
                 program_import.identifier
             )
 
     def visit_part_node(self, node):
-        part = self.part_symbol_table.get_part(node.part_name)
-        node.part = part
+        node.source_part = self.part_symbol_table.get_part(node.part_name)
+
+
+class SliceAndBuildPartSequence(BreadthFirstNodeFilteredPass):
+    """Visit each assembly part, slice and determine final sequence."""
+
+    def get_node_handlers(self):
+        return {
+            'Part': self.visit_part_node,
+        }
+
+    def visit_part_node(self, node):
+        part_type = node.get_part_type()
+
+        print(node.identifier, part_type)
