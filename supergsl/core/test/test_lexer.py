@@ -1,13 +1,13 @@
 import unittest
-from supergsl.lexer import Lexer
+from supergsl.core.lexer import Lexer
 
 
 class LexerTestCase(unittest.TestCase):
+    """Test that the lexer correctly translates source code into tokens."""
     maxDiff = None
 
     def setUp(self):
         self.lexer = Lexer().get_lexer()
-
 
     def test_scan_some_examples(self):
         for idx, example in enumerate(examples):
@@ -77,10 +77,3 @@ examples = [
         ('IDENTIFIER', 'dHO')
     )
 ]
-
-# I guess ### means marker based on a pragma. We're not doing this for now.
-#ex4 = """uHO ; pADH1 ; gERG10[1:728] ; ### dHO"""
-ex4 = """
-from S288C import ADHA, ERG10, HO
-uHO ; pADH1 ; gERG10[1:728] ; ### ; dHO
-"""
