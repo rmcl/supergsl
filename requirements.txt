@@ -3,3 +3,4 @@ rply
 nose
 biopython
 pysbol
+mock

@@ -97,8 +97,12 @@ class ParserBuilder(object):
         def simple_part(state, p):
             return ast.Part(p[0].value)
 
-        @self.pg.production('slice : OPEN_BRACKET NUMBER COLON NUMBER CLOSE_BRACKET')
+        @self.pg.production('slice : OPEN_BRACKET index_slice CLOSE_BRACKET')
         def slice(state, p):
+            return p[1]
+
+        @self.pg.production('index_slice : NUMBER COLON NUMBER')
+        def index_slice(state, p):
             return ast.Slice(p[1].value, p[3].value)
 
         @self.pg.error
@@ -110,4 +114,5 @@ class ParserBuilder(object):
 
         parser_state = ParserState()
 
+        print(tokens)
         return parser.parse(tokens, state=parser_state)
