@@ -23,6 +23,28 @@ uHO ; pADH1 ; gERG10[1:728] ; ### ; dHO
 ```
 
 
+#### Part Providers
+
+Use the `supergsl-config.json` file to define many part providers to import parts from local files or remote services such as [synbiohub](https://synbiohub.org/) or your companies private repository.
+
+```
+{
+    "part_providers": [
+        {
+            "name": "genebank.S288C",
+            "provider_class": "supergsl.plugins.file_part.GenbankFilePartProvider",
+            "sequence_file_path": "examples/GCF_000146045.2_R64_genomic.gbff.gz"
+        }, {
+            "name": "tab.S288C",
+            "provider_class": "supergsl.plugins.file_part.FeatureTableWithFastaPartProvider",
+            "fasta_file_path": "examples/S288C/S288C.fsa",
+            "feature_file_path": "examples/S288C/S288C_features.tab"
+        }
+    ]
+}
+```
+
+
 #### Part Slicing and Hierarchial Parts
 
 *fGSL* had the concept of part slicing. There are two types of slicing.. part region prefix and index slice: 
