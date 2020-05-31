@@ -6,6 +6,23 @@ I'm refering to the original GSL as *fGSL* (original gsl is written in F#).
 
 ### New Features in SuperGSL
 
+#### Explicit Imports
+
+In *fGSL* you specify the refgenome pragmas so that the compiler knows where to find genes and what their sequences are.
+
+```
+#refgenome S288C
+uHO ; pADH1 ; gERG10[1:728] ; ### ; dHO
+```
+In contrast, in superGSL the import statement allows you to bring in genomes of organisms:
+
+```
+from S288C import ADH1, ERG10, HO
+
+uHO ; pADH1 ; gERG10[1:728] ; ### ; dHO
+```
+
+
 #### Part Slicing and Hierarchial Parts
 
 *fGSL* had the concept of part slicing. There are two types of slicing.. part region prefix and index slice: 
