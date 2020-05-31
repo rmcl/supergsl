@@ -8,7 +8,7 @@ I'm refering to the original GSL as *fGSL* (original gsl is written in F#).
 
 #### Explicit Imports
 
-In *fGSL* you specify the refgenome pragmas so that the compiler knows where to find genes and what their sequences are.
+In *fGSL* you specify the refgenome pragma so that the compiler knows where to find genes and what their sequences are.
 
 ```
 #refgenome S288C
