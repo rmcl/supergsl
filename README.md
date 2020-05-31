@@ -47,19 +47,37 @@ Use the `supergsl-config.json` file to define many part providers to import part
 
 #### Part Slicing and Hierarchial Parts
 
-*fGSL* had the concept of part slicing. There are two types of slicing.. part region prefix and index slice: 
+In SuperGSL, parts can be sliced to return subsequences of supplied genetic parts.
 
-##### Prefix Slice
-Region prefix slicing involves prefixing a part with a single letter to identify which region of the part was desired. For example, in the case of the GAL1 gene, `pGAL1` referes to the first 500 basepairs (bp) of the gene loosely corresponding to the promoter region.
+Classic *fGSL* Slice Syntax:
 
-##### Index-based Slice
-Index-based slicing will feel familiar to anyone who has used a programming language with arrays, but particularly python or numpy/pandas. Index-based slices allow a user to specify an exact range of basepairs to include. For example, `GAL1[200:300]` will yield a 100 bp part corresponding to the nucleotides at 200-300 of the GAL1 gene.
+`<prefix>PARTNAME[<slice>]`
+1. Use the <prefix> to determine the part type slice, for example `pGAL1`.
+2. Use the <slice> to determine the sub-region of the part type for example pGAL1[1:300] will
+    return the first 300 bp of the promoter region.
 
-The SBOL definition defines the concept of hierarchial genetic parts.
 
-<find image>
-  
-Proposed syntax: `GAL1.ORF` or `GAL1['ORF']`
+Hierarchical Part Syntax
+
+```
+PARTNAME[<subcomponent>]
+PARTNAME[<subcomponent>]
+```
+
+Use the bracket notation to access child parts. This syntax supports infinite child components, though in practice
+more than one or two is likely to rather confusing.
+
+```
+PARTNAME[<subcomponent>][<child-of-subcomponent]
+```
+
+You cannot utilize *fGSL* part prefix with hierarchical parts, but you can prepend `.promoter`, `.terminator`, etc
+to access these regions based on standard GSL semantics. i.e `promoter` standards for first 500 bp by default or is
+overriden by PROMOTER_LENGTH setting.
+
+```
+PARTNAME[<subcomponent>].promoter
+```
   
 
 
