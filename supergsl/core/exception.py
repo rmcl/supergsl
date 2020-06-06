@@ -4,3 +4,7 @@ class ConfigurationException(Exception):
 
 class PartLocatorException(Exception):
     pass
+
+
+class PartNotFoundException(Exception):
+    pass
