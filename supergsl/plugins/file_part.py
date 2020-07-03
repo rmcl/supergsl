@@ -1,5 +1,7 @@
 import csv
 import gzip
+from mimetypes import guess_type
+from functools import partial
 from Bio import SeqIO
 
 from supergsl.core.exception import PartLocatorException, PartNotFoundException
@@ -16,12 +18,15 @@ class FeatureTableWithFastaPartProvider(PartProvider):
 
     def open_feature_file(self):
         if self.feature_file_path[-2:] == 'gz':
+            print('HI!')
             return gzip.open(self.feature_file_path, "rt")
         else:
             return open(self.feature_file_path, "rt")
 
     def load(self):
-        with self.open_feature_file() as handle_fp:
+        encoding = guess_type(self.feature_file_path)[1]
+        _open_feature_file = partial(gzip.open, mode='rt') if encoding == 'gzip' else open
+        with _open_feature_file(self.feature_file_path) as handle_fp:
             reader = csv.DictReader(handle_fp, fieldnames=None, delimiter='\t')
             features = list(reader)
 
@@ -30,7 +35,15 @@ class FeatureTableWithFastaPartProvider(PartProvider):
                 for feature in features
             }
 
-        self._sequence_by_chromosome = list(SeqIO.parse(self.fasta_file_path, 'fasta'))
+        encoding = guess_type(self.fasta_file_path)[1]
+        _open = partial(gzip.open, mode='rt') if encoding == 'gzip' else open
+        with _open(self.fasta_file_path) as fp:
+            chromosomes = SeqIO.parse(fp, 'fasta')
+
+            self._sequence_by_chromosome = {
+                chromosome.name: chromosome
+                for chromosome in chromosomes
+            }
 
     def get_gene(self, gene_name):
 
@@ -43,8 +56,8 @@ class FeatureTableWithFastaPartProvider(PartProvider):
             raise PartNotFoundException('Part not found "%s" in %s.' % (
                 gene_name, self.get_provider_name()))
 
-        chromosome_num = int(feature['chrom#'])
-        chromosome_sequence = self._sequence_by_chromosome[chromosome_num - 1]
+        chromosome_num = feature['chrom#']
+        chromosome_sequence = self._sequence_by_chromosome[chromosome_num]
 
         loc = (
             int(feature['from']),
