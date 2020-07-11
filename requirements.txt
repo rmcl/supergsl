@@ -4,3 +4,5 @@ nose
 biopython
 pysbol
 mock
+mypy
+mypy-extensions

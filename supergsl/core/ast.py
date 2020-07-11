@@ -1,5 +1,7 @@
+from typing import Dict, List, Optional
+
 class Node(object):
-    def child_nodes(self):
+    def child_nodes(self) -> List[Node]:
         return []
 
 
@@ -8,7 +10,7 @@ class SymbolRepository(object):
     def __init__(self):
         self._symbols = {}
 
-    def register(self, name, table_obj):
+    def register(self, name : str, table_obj):
         if name in self._symbols:
             raise Exception('Symbol table collision. Table %s is already present in global symbol table.' % name)
 
@@ -16,11 +18,11 @@ class SymbolRepository(object):
 
 
 class Program(Node):
-    def __init__(self, imports, assembly_list):
+    def __init__(self, imports, assembly_list : List[Assembly]):
         self.assembly_list = assembly_list
         self.imports = imports
 
-    def eval(self):
+    def eval(self) -> dict:
         return {
             'node': 'Program',
             'imports': [
@@ -33,15 +35,15 @@ class Program(Node):
             ]
         }
 
-    def child_nodes(self):
+    def child_nodes(self) -> List[Node]:
         return self.imports + self.assembly_list
 
 
 class Assembly(Node):
-    def __init__(self, parts):
+    def __init__(self, parts : List[Part]):
         self.parts = parts
 
-    def eval(self):
+    def eval(self) -> Dict:
         return {
             'node': 'Assembly',
             'parts': [
@@ -55,7 +57,7 @@ class Assembly(Node):
 
 
 class Part(Node):
-    def __init__(self, identifier, slice=None):
+    def __init__(self, identifier : str, slice : Optional[None] = None):
         self.identifier = identifier
         self.operator_prefix = identifier[0]
         self.part_name = identifier[1:]
@@ -63,7 +65,7 @@ class Part(Node):
 
         self.part_type = self.get_part_type()
 
-    def get_part_type(self):
+    def get_part_type(self) -> str:
         """Validate the part prefix.
 
         https://github.com/Amyris/GslCore/blob/b738b3e107b91ed50a573b48d0dcf1be69c4ce6a/src/GslCore/CommonTypes.fs#L60
@@ -98,12 +100,12 @@ class Part(Node):
                 self.identifier
             ))
 
-    def eval(self):
+    def eval(self) -> dict:
         result = {
             'node': 'Part',
             'operator_prefix': self.operator_prefix,
             'part_name': self.part_name,
-            'source_part': self.source_part,
+            #'source_part': self.source_part,
             'part_type': self.part_type
         }
 
@@ -119,11 +121,11 @@ class Part(Node):
 
 
 class Slice(Node):
-    def __init__(self, start, end):
+    def __init__(self, start : int, end : int):
         self.start = start
         self.end = end
 
-    def eval(self):
+    def eval(self) -> dict:
         return {
             'node': 'Slice',
             'start': self.start,
@@ -132,7 +134,7 @@ class Slice(Node):
 
 
 class ProgramImport(Node):
-    def __init__(self, module_path, import_identifiers):
+    def __init__(self, module_path : str, import_identifiers : List[ProgramImportIdentifier]):
         self.module = module_path
         self.imports = import_identifiers
 
@@ -151,10 +153,10 @@ class ProgramImport(Node):
 
 
 class ProgramImportIdentifier(Node):
-    def __init__(self, identifier):
-        self.identifier = identifier
+    def __init__(self, identifier : str):
+        self.identifier : str = identifier
 
-    def eval(self):
+    def eval(self) -> dict:
         return {
             'identifier': self.identifier
         }

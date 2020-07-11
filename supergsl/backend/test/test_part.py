@@ -39,9 +39,9 @@ class PartTestCase(TestCase):
 
         p = SliceAndBuildPartSequencePass()
         source_part = Part(
-            name='pTEST'
-            sequence=
+            name='pTEST',
+            sequence='',
             parent_part=None
         )
 
-        dna_slice = p.build_part_type_slice(source_part, 'promoter'
+        dna_slice = p.build_part_type_slice(source_part, 'promoter')
