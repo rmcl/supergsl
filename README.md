@@ -86,11 +86,16 @@ PARTNAME[<subcomponent>].promoter
 
 Using docker you can do the following:
 
+
+#### Run the tests
+
 To run tests and mypy type validations:
 
 ```
 docker-compose run supergsl test
 ```
+
+#### Run the Compiler
 
 To run the compiler (Note: This sort of doesn't work right now because you would somehow need to get the input file into the docker container, but is useful to me for testing):
 ```
