@@ -1,39 +1,44 @@
 from rply import ParserGenerator
 from . import ast
-
+from .exception import ParsingError
 
 class ParserState(object):
-    def __init__(self):
-        pass
+    def __init__(self, filename=None):
+        self.filename = filename
+
+        # Flag set to True when at least one assembly has been
+        # defined. If we reach the end of compiler input and this
+        # is false then we should raise an error.
+        self.one_assembly_defined = False
+
 
 
 class ParserBuilder(object):
+    # A list of all token names accepted by the parser.
+    ACCEPTED_TOKENS = (
+        'FROM',
+        'IMPORT',
+
+        'OPEN_BRACKET',
+        'CLOSE_BRACKET',
+        'COLON',
+        'SEMICOLON',
+        'COMMA',
+        'PERIOD',
+        'NUMBER',
+        'IDENTIFIER'
+    )
+
     def __init__(self):
-        self.pg = ParserGenerator(
-            # A list of all token names accepted by the parser.
-            [
-                'FROM',
-                'IMPORT',
-
-                'OPEN_BRACKET',
-                'CLOSE_BRACKET',
-                'COLON',
-                'SEMICOLON',
-                'COMMA',
-                'PERIOD',
-                'NUMBER',
-                'IDENTIFIER'
-            ]
-        )
-
+        self.pg = ParserGenerator(self.ACCEPTED_TOKENS)
         self.build_parser()
 
     def build_parser(self):
-
+        """Define the parser rules."""
         @self.pg.production('program : import_list assembly')
         @self.pg.production('program : assembly')
         def program(state, p):
-            imports = None
+            imports = []
             if len(p) == 2:
                 # we have at least one import
                 imports = p[0]
@@ -106,13 +111,16 @@ class ParserBuilder(object):
             return ast.Slice(p[1].value, p[3].value)
 
         @self.pg.error
-        def error_handle(token):
-            raise ValueError(token)
+        def error_handle(state, lookahead):
+            reached_end_of_file = lookahead.value == '$end'
+            if reached_end_of_file:
+                if not state.one_assembly_defined:
+                    raise ParsingError('At least one assembly must be defined.')
+
+            raise ValueError(state)
 
     def parse(self, tokens):
         parser = self.pg.build()
 
         parser_state = ParserState()
-
-        print(tokens)
         return parser.parse(tokens, state=parser_state)

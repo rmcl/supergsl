@@ -1,9 +1,16 @@
+from typing import Optional, Dict, Callable
+from .ast import Node
+
+# Define a mypy type alias for node handler methods.
+ASTNodeHandlerMethod = Callable[[Node], Node]
+
 class BackendException(Exception):
     pass
 
 
 class BackendPipelinePass(object):
-    name = None
+    """Base class for implementing a traversal of the AST."""
+    name : Optional[str] = None
 
     def get_pass_name(self):
         if not self.name:
@@ -11,16 +18,14 @@ class BackendPipelinePass(object):
 
         return self.name
 
-    def perform(self, ast):
+    def perform(self, ast : Node) -> Node:
         raise NotImplemented('Must subclass and implement perform')
 
 
 class BreadthFirstNodeFilteredPass(BackendPipelinePass):
     """Perform a breadth first traversal of the AST and only visit a subset of node types."""
 
-    name = None
-
-    def visit(self, node):
+    def visit(self, node : Node) -> None:
         """Visit a node.
 
         This method is called for every node in the AST. The default implementation uses
@@ -30,9 +35,10 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
         If you want a catch-all handler specify "None" in get_node_handlers. If you
         just want a simple pass you can override this method.
         """
-        handlers = self.get_node_handlers()
-        handler_method = None
-        node_type = type(node).__name__
+        handlers : Dict[Optional[str], ASTNodeHandlerMethod] = self.get_node_handlers()
+        handler_method : Optional[ASTNodeHandlerMethod] = None
+
+        node_type : str = type(node).__name__
         try:
             handler_method = handlers[node_type]
         except KeyError:
@@ -48,20 +54,20 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
         if handler_method:
             handler_method(node)
 
-    def get_node_handlers(self):
+    def get_node_handlers(self) -> Dict[Optional[str], ASTNodeHandlerMethod]:
         """Define handler methods for each node type.
 
         Returns a dictionary of
         """
         return {}
 
-    def before_pass(self, ast):
+    def before_pass(self, ast : Node) -> Node:
         return ast
 
-    def after_pass(self, ast):
+    def after_pass(self, ast : Node) -> Node:
         return ast
 
-    def perform(self, ast):
+    def perform(self, ast : Node) -> Node:
         ast = self.before_pass(ast)
         node_visit_queue = [ast]
         while len(node_visit_queue) > 0:

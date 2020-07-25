@@ -1,6 +1,9 @@
+invoke
 llvmlite
 rply
 nose
 biopython
 pysbol
 mock
+mypy
+mypy-extensions

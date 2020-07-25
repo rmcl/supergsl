@@ -71,5 +71,6 @@ venv/
 # Cython
 *.c
 
-# rtrade specific
-trade_engine/config/settings_creds.py
+# supergsl specific
+examples
+notebooks

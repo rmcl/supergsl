@@ -1,6 +1,12 @@
+from __future__ import annotations
+from typing import cast, Dict, List, Optional, Any
+
 class Node(object):
-    def child_nodes(self):
+    def child_nodes(self) -> List[Node]:
         return []
+
+    def eval(self) -> Dict[str, Any]:
+        return {}
 
 
 class SymbolRepository(object):
@@ -8,54 +14,28 @@ class SymbolRepository(object):
     def __init__(self):
         self._symbols = {}
 
-    def register(self, name, table_obj):
+    def register(self, name : str, table_obj):
         if name in self._symbols:
             raise Exception('Symbol table collision. Table %s is already present in global symbol table.' % name)
 
         self._symbols[name] = table_obj
 
 
-class Program(Node):
-    def __init__(self, imports, assembly_list):
-        self.assembly_list = assembly_list
-        self.imports = imports
+class Slice(Node):
+    def __init__(self, start : int, end : int):
+        self.start = start
+        self.end = end
 
-    def eval(self):
+    def eval(self) -> Dict[str, Any]:
         return {
-            'node': 'Program',
-            'imports': [
-                impor.eval()
-                for impor in self.imports
-            ],
-            'assemblies': [
-                assembly.eval()
-                for assembly in self.assembly_list
-            ]
+            'node': 'Slice',
+            'start': self.start,
+            'end': self.end
         }
-
-    def child_nodes(self):
-        return self.imports + self.assembly_list
-
-
-class Assembly(Node):
-    def __init__(self, parts):
-        self.parts = parts
-
-    def eval(self):
-        return {
-            'node': 'Assembly',
-            'parts': [
-                part.eval()
-                for part in self.parts
-            ]
-        }
-
-    def child_nodes(self):
-        return self.parts
 
 
 class Part(Node):
-    def __init__(self, identifier, slice=None):
+    def __init__(self, identifier : str, slice : Optional[Slice] = None):
         self.identifier = identifier
         self.operator_prefix = identifier[0]
         self.part_name = identifier[1:]
@@ -63,7 +43,7 @@ class Part(Node):
 
         self.part_type = self.get_part_type()
 
-    def get_part_type(self):
+    def get_part_type(self) -> str:
         """Validate the part prefix.
 
         https://github.com/Amyris/GslCore/blob/b738b3e107b91ed50a573b48d0dcf1be69c4ce6a/src/GslCore/CommonTypes.fs#L60
@@ -98,12 +78,12 @@ class Part(Node):
                 self.identifier
             ))
 
-    def eval(self):
-        result = {
+    def eval(self) -> Dict[str, Any]:
+        result : Dict[str, Any] = {
             'node': 'Part',
             'operator_prefix': self.operator_prefix,
             'part_name': self.part_name,
-            'source_part': self.source_part,
+            #'source_part': self.source_part,
             'part_type': self.part_type
         }
 
@@ -118,21 +98,18 @@ class Part(Node):
         return []
 
 
-class Slice(Node):
-    def __init__(self, start, end):
-        self.start = start
-        self.end = end
+class ProgramImportIdentifier(Node):
+    def __init__(self, identifier : str):
+        self.identifier : str = identifier
 
-    def eval(self):
+    def eval(self) -> dict:
         return {
-            'node': 'Slice',
-            'start': self.start,
-            'end': self.end
+            'identifier': self.identifier
         }
 
 
 class ProgramImport(Node):
-    def __init__(self, module_path, import_identifiers):
+    def __init__(self, module_path : str, import_identifiers : List[ProgramImportIdentifier]):
         self.module = module_path
         self.imports = import_identifiers
 
@@ -150,11 +127,40 @@ class ProgramImport(Node):
         return self.imports
 
 
-class ProgramImportIdentifier(Node):
-    def __init__(self, identifier):
-        self.identifier = identifier
+class Assembly(Node):
+    def __init__(self, parts : List[Part]):
+        self.parts = parts
 
-    def eval(self):
+    def eval(self) -> Dict:
         return {
-            'identifier': self.identifier
+            'node': 'Assembly',
+            'parts': [
+                part.eval()
+                for part in self.parts
+            ]
         }
+
+    def child_nodes(self):
+        return self.parts
+
+
+class Program(Node):
+    def __init__(self, imports : List[ProgramImport], assembly_list : List[Assembly]):
+        self.assembly_list = assembly_list
+        self.imports = imports
+
+    def eval(self) -> dict:
+        return {
+            'node': 'Program',
+            'imports': [
+                impor.eval()
+                for impor in self.imports
+            ],
+            'assemblies': [
+                assembly.eval()
+                for assembly in self.assembly_list
+            ]
+        }
+
+    def child_nodes(self) -> List[Node]:
+        return cast(List[Node], self.imports) + cast(List[Node], self.assembly_list)
