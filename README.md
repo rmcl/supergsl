@@ -1,4 +1,4 @@
-*SuperGSL* is a toy reimplementation of the Genome Specification Language written in python.
+*SuperGSL* is a reimplementation of the Genome Specification Language written in python.
 
 SuperGSL is inspired by the original Genome Specification Language (See: [Paper](https://pubs.acs.org/doi/abs/10.1021/acssynbio.5b00194) & [Code](https://github.com/Amyris/GslCore)) written by Erin Wilson, Darren Platt and many others at Amyris. 
 
@@ -72,7 +72,7 @@ PARTNAME[<subcomponent>][<child-of-subcomponent]
 ```
 
 You cannot utilize *fGSL* part prefix with hierarchical parts, but you can prepend `.promoter`, `.terminator`, etc
-to access these regions based on standard GSL semantics. i.e `promoter` standards for first 500 bp by default or is
+to access these regions based on standard GSL semantics. i.e `promoter` stands for first 500 bp by default or is
 overriden by PROMOTER_LENGTH setting.
 
 ```
