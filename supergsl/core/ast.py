@@ -1,9 +1,12 @@
 from __future__ import annotations
-from typing import Dict, List, Optional
+from typing import cast, Dict, List, Optional, Any
 
 class Node(object):
     def child_nodes(self) -> List[Node]:
         return []
+
+    def eval(self) -> Dict[str, Any]:
+        return {}
 
 
 class SymbolRepository(object):
@@ -18,8 +21,21 @@ class SymbolRepository(object):
         self._symbols[name] = table_obj
 
 
+class Slice(Node):
+    def __init__(self, start : int, end : int):
+        self.start = start
+        self.end = end
+
+    def eval(self) -> Dict[str, Any]:
+        return {
+            'node': 'Slice',
+            'start': self.start,
+            'end': self.end
+        }
+
+
 class Part(Node):
-    def __init__(self, identifier : str, slice : Optional[None] = None):
+    def __init__(self, identifier : str, slice : Optional[Slice] = None):
         self.identifier = identifier
         self.operator_prefix = identifier[0]
         self.part_name = identifier[1:]
@@ -62,8 +78,8 @@ class Part(Node):
                 self.identifier
             ))
 
-    def eval(self) -> dict:
-        result = {
+    def eval(self) -> Dict[str, Any]:
+        result : Dict[str, Any] = {
             'node': 'Part',
             'operator_prefix': self.operator_prefix,
             'part_name': self.part_name,
@@ -80,19 +96,6 @@ class Part(Node):
         if self.slice:
             return [self.slice]
         return []
-
-
-class Slice(Node):
-    def __init__(self, start : int, end : int):
-        self.start = start
-        self.end = end
-
-    def eval(self) -> dict:
-        return {
-            'node': 'Slice',
-            'start': self.start,
-            'end': self.end
-        }
 
 
 class ProgramImportIdentifier(Node):
@@ -142,7 +145,7 @@ class Assembly(Node):
 
 
 class Program(Node):
-    def __init__(self, imports, assembly_list : List[Assembly]):
+    def __init__(self, imports : List[ProgramImport], assembly_list : List[Assembly]):
         self.assembly_list = assembly_list
         self.imports = imports
 
@@ -160,4 +163,4 @@ class Program(Node):
         }
 
     def child_nodes(self) -> List[Node]:
-        return self.imports + self.assembly_list
+        return cast(List[Node], self.imports) + cast(List[Node], self.assembly_list)
