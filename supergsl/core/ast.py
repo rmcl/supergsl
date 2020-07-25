@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Dict, List, Optional
 
 class Node(object):
@@ -15,45 +16,6 @@ class SymbolRepository(object):
             raise Exception('Symbol table collision. Table %s is already present in global symbol table.' % name)
 
         self._symbols[name] = table_obj
-
-
-class Program(Node):
-    def __init__(self, imports, assembly_list : List[Assembly]):
-        self.assembly_list = assembly_list
-        self.imports = imports
-
-    def eval(self) -> dict:
-        return {
-            'node': 'Program',
-            'imports': [
-                impor.eval()
-                for impor in self.imports
-            ],
-            'assemblies': [
-                assembly.eval()
-                for assembly in self.assembly_list
-            ]
-        }
-
-    def child_nodes(self) -> List[Node]:
-        return self.imports + self.assembly_list
-
-
-class Assembly(Node):
-    def __init__(self, parts : List[Part]):
-        self.parts = parts
-
-    def eval(self) -> Dict:
-        return {
-            'node': 'Assembly',
-            'parts': [
-                part.eval()
-                for part in self.parts
-            ]
-        }
-
-    def child_nodes(self):
-        return self.parts
 
 
 class Part(Node):
@@ -133,6 +95,16 @@ class Slice(Node):
         }
 
 
+class ProgramImportIdentifier(Node):
+    def __init__(self, identifier : str):
+        self.identifier : str = identifier
+
+    def eval(self) -> dict:
+        return {
+            'identifier': self.identifier
+        }
+
+
 class ProgramImport(Node):
     def __init__(self, module_path : str, import_identifiers : List[ProgramImportIdentifier]):
         self.module = module_path
@@ -152,11 +124,40 @@ class ProgramImport(Node):
         return self.imports
 
 
-class ProgramImportIdentifier(Node):
-    def __init__(self, identifier : str):
-        self.identifier : str = identifier
+class Assembly(Node):
+    def __init__(self, parts : List[Part]):
+        self.parts = parts
+
+    def eval(self) -> Dict:
+        return {
+            'node': 'Assembly',
+            'parts': [
+                part.eval()
+                for part in self.parts
+            ]
+        }
+
+    def child_nodes(self):
+        return self.parts
+
+
+class Program(Node):
+    def __init__(self, imports, assembly_list : List[Assembly]):
+        self.assembly_list = assembly_list
+        self.imports = imports
 
     def eval(self) -> dict:
         return {
-            'identifier': self.identifier
+            'node': 'Program',
+            'imports': [
+                impor.eval()
+                for impor in self.imports
+            ],
+            'assemblies': [
+                assembly.eval()
+                for assembly in self.assembly_list
+            ]
         }
+
+    def child_nodes(self) -> List[Node]:
+        return self.imports + self.assembly_list
