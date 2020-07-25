@@ -1,6 +1,6 @@
 *SuperGSL* is a reimplementation of the Genome Specification Language written in python.
 
-SuperGSL is inspired by the original Genome Specification Language (See: [Paper](https://pubs.acs.org/doi/abs/10.1021/acssynbio.5b00194) & [Code](https://github.com/Amyris/GslCore)) written by Erin Wilson, Darren Platt and many others at Amyris. 
+SuperGSL is inspired by the original Genome Specification Language (See: [Paper](https://pubs.acs.org/doi/abs/10.1021/acssynbio.5b00194) & [Code](https://github.com/Amyris/GslCore)) written by Erin Wilson, Darren Platt and many others at Amyris.
 
 I'm refering to the original GSL as *fGSL* (original gsl is written in F#).
 
@@ -78,8 +78,24 @@ overriden by PROMOTER_LENGTH setting.
 ```
 PARTNAME[<subcomponent>].promoter
 ```
-  
 
+
+### Install & Running *SuperGSL*
+
+*SuperGSL* comes with a Dockerfile and docker-compose file such that you can run superGSL without polluting your local environment. If for some reason you don't want to use Docker feel free to install the python dependencies specified in requirements.txt and then execute the ./sqsl python script.
+
+Using docker you can do the following:
+
+To run tests and mypy type validations:
+
+```
+docker-compose run supergsl test
+```
+
+To run the compiler (Note: This sort of doesn't work right now because you would somehow need to get the input file into the docker container, but is useful to me for testing):
+```
+docker-compose run supergsl sgsl <input-file>
+```
 
 
 ### Inspiring Links
