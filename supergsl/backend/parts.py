@@ -65,11 +65,11 @@ class Part(object):
         """Retrieve a subsequence of this part. For example the promoter region."""
         # Obtain sliced sequence.
         left_offset = part_slice.left.x
-        if part_slice.left.relTo == 'ThreePrime':
+        if part_slice.left.rel_to == 'ThreePrime':
             left_offset *= -1
 
         right_offset = part_slice.right.x
-        if part_slice.left.relTo == 'ThreePrime':
+        if part_slice.left.rel_to == 'ThreePrime':
             left_offset *= -1
 
         sub_sequence = self.sequence[left_offset:right_offset]
@@ -122,8 +122,22 @@ class ResolvePartPass(BreadthFirstNodeFilteredPass):
 
 SequencePosition = namedtuple('SequencePosition', ['x', 'rel_to', 'approximate'])
 
-def get_promoter_len():
+def get_promoter_len() -> int:
+    """Get the configured length of a promoter region.
+
     ### TODO: REFACTOR THIS METHOD TO COME FROM CONFIG
+    """
+
+    return 500
+
+def get_terminator_len() -> int:
+    return 500
+
+def get_flank_len() -> int:
+    """Get the configured length of a flanking region.
+
+    ### TODO: REFACTOR THIS METHOD TO COME FROM CONFIG
+    """
     return 500
 
 
@@ -233,10 +247,72 @@ class SliceAndBuildPartSequencePass(BreadthFirstNodeFilteredPass):
                 )
             )
 
+        elif part_type == 'upstream':
+            return DNASlice(
+                source_part=part,
+                part_type='promoter',
+                left=SequencePosition(
+                    x=(-1 * get_flank_len()),
+                    rel_to='FivePrime',
+                    approximate=True
+                ),
+                right=SequencePosition(
+                    x=-1,
+                    rel_to='FivePrime',
+                    approximate=False
+                )
+            )
+
+        elif part_type == 'downstream':
+            return DNASlice(
+                source_part=part,
+                part_type='promoter',
+                left=SequencePosition(
+                    x=0,
+                    rel_to='ThreePrime',
+                    approximate=False
+                ),
+                right=SequencePosition(
+                    x=get_flank_len(),
+                    rel_to='ThreePrime',
+                    approximate=True
+                )
+            )
+
+        elif part_type == 'gene':
+            return DNASlice(
+                source_part=part,
+                part_type='promoter',
+                left=SequencePosition(
+                    x=0,
+                    rel_to='FivePrime',
+                    approximate=False
+                ),
+                right=SequencePosition(
+                    x=-1,
+                    rel_to='ThreePrime',
+                    approximate=False
+                )
+            )
+
         elif part_type == 'terminator':
-            raise NotImplemented('Not implemented yet.')
+            return DNASlice(
+                source_part=part,
+                part_type='promoter',
+                left=SequencePosition(
+                    x=0,
+                    rel_to='ThreePrime',
+                    approximate=False
+                ),
+                right=SequencePosition(
+                    x=get_terminator_len(),
+                    rel_to='ThreePrime',
+                    approximate=True
+                )
+            )
+
         else:
-            raise NotImplemented('Not implemented yet.')
+            raise Exception('"%s" not implemented yet.' % part_type)
 
 
 
