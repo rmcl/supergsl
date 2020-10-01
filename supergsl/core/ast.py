@@ -81,9 +81,8 @@ class Part(Node):
     def eval(self) -> Dict[str, Any]:
         result : Dict[str, Any] = {
             'node': 'Part',
-            'operator_prefix': self.operator_prefix,
-            'part_name': self.part_name,
-            #'source_part': self.source_part,
+            'part_name': '{}{}'.format(self.operator_prefix, self.part_name),
+            'source_part': self.source_part,
             'part_type': self.part_type
         }
 
@@ -96,6 +95,9 @@ class Part(Node):
         if self.slice:
             return [self.slice]
         return []
+
+    def __str__(self):
+        return self.part_name
 
 
 class ProgramImportIdentifier(Node):

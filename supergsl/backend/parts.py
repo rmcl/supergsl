@@ -76,6 +76,15 @@ class Part(object):
 
         return Part(new_part_name, sub_sequence, self)
 
+    def __eq__(self, other):
+        return self.sequence == other.sequence
+
+    def __hash__(self):
+        return hash(self.sequence)
+
+    def __repr__(self):
+        return self.name
+
 
 class PartProvider(object):
     name = None
@@ -230,6 +239,9 @@ class SliceAndBuildPartSequencePass(BreadthFirstNodeFilteredPass):
         parts often have a part type specified by the prefix, for example
         p for promoter.
 
+        Refer to translateGenePrefix in GslCore for reference logic
+        https://github.com/Amyris/GslCore/blob/d2c613907d33b110a2f53021146342234e0d8f3b/src/GslCore/DnaCreation.fs#L53
+
         """
         if part_type == 'promoter':
             return DNASlice(
@@ -313,63 +325,3 @@ class SliceAndBuildPartSequencePass(BreadthFirstNodeFilteredPass):
 
         else:
             raise Exception('"%s" not implemented yet.' % part_type)
-
-
-
-"""
-let translateGenePrefix (pragmas:PragmaCollection) (gd : GenomeDef) (gPart : StandardSlice) =
-    match gPart with
-    | PROMOTER ->
-        let leftPos =
-            match pragmas.TryGetOne "promlen" with
-            | None -> -gd.getPromLen()
-            | Some p -> (int p) * -1<OneOffset>
-        {left = {x = leftPos; relTo = FivePrime};
-         lApprox = true;
-         rApprox = false;
-         right = {x = -1<OneOffset>; relTo = FivePrime}}
-    | UPSTREAM ->
-       {left = {x = -gd.getFlank(); relTo = FivePrime};
-        lApprox = true;
-        rApprox = false;
-        right = {x = -1<OneOffset>; relTo = FivePrime}}
-    | TERMINATOR ->
-        let rightPos =
-            match pragmas.TryGetOne "termlen" with
-            | None -> gd.getTermLen()
-            | Some p -> (int p) * 1<OneOffset>
-        {left = {x = 1<OneOffset>; relTo = ThreePrime};
-         lApprox = false;
-         rApprox = true;
-         right = {x = rightPos; relTo = ThreePrime}}
-    | DOWNSTREAM ->
-        {left = {x = 1<OneOffset>; relTo = ThreePrime};
-         lApprox = false;
-         rApprox = true;
-         right = {x = gd.getFlank(); relTo = ThreePrime}}
-    | FUSABLEORF ->
-        {left = {x = 1<OneOffset>; relTo = FivePrime};
-         lApprox = false;
-         rApprox = false;
-         right = {x = -4<OneOffset>; relTo = ThreePrime}}
-    | ORF ->
-        {left = {x = 1<OneOffset>; relTo = FivePrime};
-         lApprox = false;
-         rApprox = false;
-         right = {x = -1<OneOffset>; relTo = ThreePrime}}
-    | GENE ->
-        {left = {x = 1<OneOffset>; relTo = FivePrime};
-         lApprox = false;
-         rApprox = false;
-         right = {x = -1<OneOffset>; relTo = ThreePrime}}
-    | MRNA ->
-        let rightPos =
-            match pragmas.TryGetOne "termlenmrna"  with
-            | None -> gd.getTermLenMRNA()
-            | Some p -> (int p) * 1<OneOffset>
-        {left = {x = 1<OneOffset>; relTo = FivePrime};
-         lApprox = false;
-         rApprox = true;
-         right = {x = rightPos; relTo = ThreePrime}}
-
-"""
