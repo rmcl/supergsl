@@ -4,7 +4,8 @@ from supergsl.core.test.fixtures import SuperGSLCoreFixtures
 from supergsl.backend.parts import (
     SliceAndBuildPartSequencePass,
     DNASlice,
-    SequencePosition
+    SequencePosition,
+    Part
 )
 
 
@@ -13,13 +14,6 @@ class PartTestCase(TestCase):
     @property
     def fixtures(self):
         return SuperGSLCoreFixtures()
-
-    #def test_part_slice(self):
-    #    ast = self.fixtures.get_assembly_ast()
-
-    #    print(ast)
-    #    self.assertEquals(True, False)
-
 
     def test_build_part_type_slice(self):
         p = SliceAndBuildPartSequencePass()
@@ -45,3 +39,6 @@ class PartTestCase(TestCase):
         )
 
         dna_slice = p.build_part_type_slice(source_part, 'promoter')
+
+        print(dna_slice)
+        self.assertEquals(True, False)

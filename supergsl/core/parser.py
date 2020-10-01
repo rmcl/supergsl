@@ -108,7 +108,7 @@ class ParserBuilder(object):
 
         @self.pg.production('index_slice : NUMBER COLON NUMBER')
         def index_slice(state, p):
-            return ast.Slice(p[1].value, p[3].value)
+            return ast.Slice(p[0].value, p[2].value)
 
         @self.pg.error
         def error_handle(state, lookahead):
