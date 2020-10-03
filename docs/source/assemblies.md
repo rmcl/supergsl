@@ -10,11 +10,10 @@ The most basic strategy is a "fusion" strategy where each part is annealed to it
 ```
 
 from S288C import ADH1, ERG10, HO
-from core.assemble import assemble_fusion
 
-assemble_fusion {
-	HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
-}
+assemble_fusion:
+    HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
+
 ```
 
 ### BioBricks
@@ -23,26 +22,20 @@ assemble_fusion {
 
 ```
 from S288C import ADH1, ERG10, HO
-from core.assemble import assemble_biobricks
 
-assemble_biobricks {
-	HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
-}
+assemble_biobricks:
+    HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
 
 ```
 
 ### Golden Gate Assembly
 *For an excellent overview of this method see the J5 Documentation (article)[https://j5.jbei.org/j5manual/pages/23.html]*
 
-
 ```
 from S288C import ADH1, ERG10, HO
 
-from core.assemble import assemble_linker
-
-assemble_linker {
-	HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] (gERG10_trunc) ; dHO
-}
+assemble_golden_gate:
+    HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] (gERG10_trunc) ; dHO
 ```
 
 ## Custom Assembly Protocol
@@ -51,15 +44,30 @@ Many biotechs have proprietary asssembly strategies and the infrastructure for b
 
 ```
 from S288C import ADH1, ERG10, HO
-from mycompany.part_assemble import assemble_companyparts
 
-assemble_companyparts {
-	HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
-	HO_pTDA1_gERG10: uHO ; pTDA1 ; gERG10[1:728] ; dHO
-	HO_pGAL3_gERG10: uHO ; pGAL3 ; gERG10[1:728] ; dHO
-	HO_pGAL7_gERG10: uHO ; pGAL7 ; gERG10[1:728] ; dHO
+assemble_companyparts:
+    HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
+    HO_pTDA1_gERG10: uHO ; pTDA1 ; gERG10[1:728] ; dHO
+    HO_pGAL3_gERG10: uHO ; pGAL3 ; gERG10[1:728] ; dHO
+    HO_pGAL7_gERG10: uHO ; pGAL7 ; gERG10[1:728] ; dHO
+```
+
+### Registering Custom Assembly Types
+You can use the `assembly_strategies` section of `supergsl-config.json` to register custom assembly types or to override parameters of built in assembly types.
+
+```
+{
+    "assembly_strategies": [
+        {
+            "name": "assemble_secretmethod",
+            "provider_class": "mycompany.assembly.SecretMethodAssembler",
+            "assembly_options": {
+                "Tm": 32,
+                "max_part_len": 5000
+            }
+        }
+    ]
 }
-
 ```
 
 
