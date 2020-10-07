@@ -11,7 +11,7 @@ The most basic strategy is a "fusion" strategy where each part is annealed to it
 
 from S288C import ADH1, ERG10, HO
 
-fusion {
+fuse {
     HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
 	HO_pTDA1_gERG10: uHO ; pTDA1 ; gERG10[1:728] ; dHO
 }
