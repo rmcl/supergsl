@@ -130,8 +130,9 @@ class ProgramImport(Node):
 
 
 class Assembly(Node):
-    def __init__(self, parts : List[Part]):
+    def __init__(self, parts : List[Part], label : Optional[str] = None):
         self.parts = parts
+        self.label = label
 
     def eval(self) -> Dict:
         return {
@@ -139,16 +140,36 @@ class Assembly(Node):
             'parts': [
                 part.eval()
                 for part in self.parts
-            ]
+            ],
+            'label': self.label
         }
 
     def child_nodes(self):
         return self.parts
 
 
+class AssemblyBlock(Node):
+    def __init__(self, assembly_type, assemblies: List[Assembly]):
+        self.assembly_type = assembly_type
+        self.assemblies = assemblies
+        print(self.assemblies)
+
+    def eval(self) -> Dict:
+        return {
+            'node': 'AssemblyBlock',
+            'assembly_type': self.assembly_type,
+            'assemblies': [
+                assembly.eval()
+                for assembly in self.assemblies
+            ]
+        }
+
+    def child_nodes(self):
+        return self.assemblies
+
 class Program(Node):
-    def __init__(self, imports : List[ProgramImport], assembly_list : List[Assembly]):
-        self.assembly_list = assembly_list
+    def __init__(self, imports : List[ProgramImport], assembly_blocks : List[AssemblyBlock]):
+        self.assembly_blocks = assembly_blocks
         self.imports = imports
 
     def eval(self) -> dict:
@@ -158,11 +179,11 @@ class Program(Node):
                 impor.eval()
                 for impor in self.imports
             ],
-            'assemblies': [
-                assembly.eval()
-                for assembly in self.assembly_list
+            'assembly_blocks': [
+                assembly_block.eval()
+                for assembly_block in self.assembly_blocks
             ]
         }
 
     def child_nodes(self) -> List[Node]:
-        return cast(List[Node], self.imports) + cast(List[Node], self.assembly_list)
+        return cast(List[Node], self.imports) + cast(List[Node], self.assembly_blocks)

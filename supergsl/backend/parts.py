@@ -212,7 +212,6 @@ class SliceAndBuildPartSequencePass(BreadthFirstNodeFilteredPass):
         part = node.source_part
         part_type = node.get_part_type()
 
-        print(node.identifier, part_type)
         child_part = self.slice_part_by_part_type(part, part_type)
 
         """

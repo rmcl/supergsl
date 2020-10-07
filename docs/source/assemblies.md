@@ -11,8 +11,10 @@ The most basic strategy is a "fusion" strategy where each part is annealed to it
 
 from S288C import ADH1, ERG10, HO
 
-assemble_fusion:
+fusion {
     HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
+	HO_pTDA1_gERG10: uHO ; pTDA1 ; gERG10[1:728] ; dHO
+}
 
 ```
 
@@ -23,8 +25,10 @@ assemble_fusion:
 ```
 from S288C import ADH1, ERG10, HO
 
-assemble_biobricks:
+biobrick {
     HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
+	HO_pTDA1_gERG10: uHO ; pTDA1 ; gERG10[1:728] ; dHO
+}
 
 ```
 
@@ -34,8 +38,10 @@ assemble_biobricks:
 ```
 from S288C import ADH1, ERG10, HO
 
-assemble_golden_gate:
+assemble_golden_gate {
     HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] (gERG10_trunc) ; dHO
+    HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] (gERG10_trunc) ; dHO
+}
 ```
 
 ## Custom Assembly Protocol
@@ -45,11 +51,12 @@ Many biotechs have proprietary asssembly strategies and the infrastructure for b
 ```
 from S288C import ADH1, ERG10, HO
 
-assemble_companyparts:
+assemble_company_parts {
     HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
     HO_pTDA1_gERG10: uHO ; pTDA1 ; gERG10[1:728] ; dHO
     HO_pGAL3_gERG10: uHO ; pGAL3 ; gERG10[1:728] ; dHO
     HO_pGAL7_gERG10: uHO ; pGAL7 ; gERG10[1:728] ; dHO
+}
 ```
 
 ### Registering Custom Assembly Types

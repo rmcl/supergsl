@@ -3,6 +3,8 @@ from .parser import ParserBuilder
 
 from supergsl.backend.symbol_table import AttachSymbolRepositoryPass
 from supergsl.backend.parts import ResolvePartPass, SliceAndBuildPartSequencePass
+from supergsl.backend.assembly import AssemblerPass
+
 #from supergsl.plugins.sbol_output import SBOLOutputPass
 #from supergsl.plugins.json_output import JSONOutputPass
 from supergsl.plugins.genebank_output import GeneBankOutputPass
@@ -14,6 +16,7 @@ class CompilerPipeline(object):
             AttachSymbolRepositoryPass,
             ResolvePartPass,
             SliceAndBuildPartSequencePass,
+            AssemblerPass,
             GeneBankOutputPass
             #SBOLOutputPass
             #JSONOutputPass

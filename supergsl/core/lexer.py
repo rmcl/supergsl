@@ -14,7 +14,8 @@ class Lexer():
         # Other characters
         #self.lexer.add('OPEN_PAREN', r'\(')
         #self.lexer.add('CLOSE_PAREN', r'\)')
-
+        self.lexer.add('OPEN_CURLY_BRACKET', r'\{')
+        self.lexer.add('CLOSE_CURLY_BRACKET', r'\}')
         self.lexer.add('OPEN_BRACKET', r'\[')
         self.lexer.add('CLOSE_BRACKET', r'\]')
         self.lexer.add('COLON', r'\:')
