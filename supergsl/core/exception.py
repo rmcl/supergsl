@@ -5,6 +5,7 @@ class ConfigurationException(Exception):
 class ParsingError(Exception):
     pass
 
+
 class PartLocatorException(Exception):
     pass
 

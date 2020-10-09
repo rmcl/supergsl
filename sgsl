@@ -2,10 +2,14 @@
 
 import argparse
 from supergsl.core.pipeline import CompilerPipeline
+from supergsl.core.output import OutputPipeline
 import pprint
 
 
 def main():
+
+    compiler_pipeline = CompilerPipeline()
+    output_pipeline = OutputPipeline()
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -13,13 +17,26 @@ def main():
         help="The input source code file to process",
         type=str)
 
+    parser.add_argument(
+        "-f",
+        "--output-format",
+        action='append',
+        help="Specify compiler output formats",
+        type=str,
+        required=True)
+
     args = parser.parse_args()
 
-    print('Compiling "%s".' % args.input_file)
-    pipeline = CompilerPipeline()
-    with open(args.input_file, 'r') as input_file_fp:
-        result = pipeline.compile(input_file_fp.read())
+    output_pipeline.validate_args(args)
 
+    print('Compiling "%s".' % args.input_file)
+
+    with open(args.input_file, 'r') as input_file_fp:
+        result = compiler_pipeline.compile(input_file_fp.read())
+
+    print('Compiling Complete. Storing Output.')
+
+    output_pipeline.run(result, args)
     pprint.pprint(result)
 
 

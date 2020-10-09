@@ -1,15 +1,17 @@
-from supergsl.core.backend import BreadthFirstNodeFilteredPass
+from supergsl.core.output import OutputProvider
 
 
-class JSONOutputPass(BreadthFirstNodeFilteredPass):
+class JSONOutputPass(OutputProvider):
     """Generate JSON document containing a list of parts and assemblies.
 
     Expected contents of JSON document:
-    
+
         parts
         assemblies
 
     """
+
+    name = 'json'
 
     def get_node_handlers(self):
         return {
