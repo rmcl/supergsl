@@ -73,4 +73,8 @@ venv/
 
 # supergsl specific
 examples
+test/not-converted-examples
 notebooks
+
+#docs
+docs/build
