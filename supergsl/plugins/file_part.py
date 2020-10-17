@@ -18,7 +18,6 @@ class FeatureTableWithFastaPartProvider(PartProvider):
 
     def open_feature_file(self):
         if self.feature_file_path[-2:] == 'gz':
-            print('HI!')
             return gzip.open(self.feature_file_path, "rt")
         else:
             return open(self.feature_file_path, "rt")
@@ -45,6 +44,15 @@ class FeatureTableWithFastaPartProvider(PartProvider):
                 for chromosome in chromosomes
             }
 
+    def list_parts(self):
+        if not hasattr(self, '_sequence_by_chromosome'):
+            self.load()
+
+        return [
+            self.get_part(gene_name)
+            for gene_name in self._genes.keys()
+        ]
+
     def get_gene(self, gene_name):
 
         if not hasattr(self, '_sequence_by_chromosome'):
@@ -64,15 +72,23 @@ class FeatureTableWithFastaPartProvider(PartProvider):
             int(feature['to']) + 1 # GSL uses non-zero relative indexes!! Do we want to conform to this insanity???
         )
 
-        print(gene_name, 'chrom', chromosome_sequence.id, loc, loc[1] - loc[0])
-
         strand = feature['strand']
         if strand == 'C':
-            seq = chromosome_sequence[loc[0]:loc[1]].reverse_complement().seq
+            seq = chromosome_sequence[loc[0]:loc[1]].reverse_complement()
         else:
-            seq = chromosome_sequence[loc[0]:loc[1]].seq
+            seq = chromosome_sequence[loc[0]:loc[1]]
 
         return seq, feature
+
+    def _get_alternative_names_from_feature(self, feature):
+        alternative_names = set([
+            feature['systematic']
+        ])
+        aliases = feature['aliases'].split(',')
+        if len(aliases) > 0 and aliases[0] != '':
+            alternative_names.update(aliases)
+
+        return list(alternative_names)
 
     def get_part(self, identifier):
         """Retrieve a part by identifier.
@@ -82,7 +98,14 @@ class FeatureTableWithFastaPartProvider(PartProvider):
         Return: `Part`
         """
         sequence, feature = self.get_gene(identifier)
-        part = Part(identifier, sequence)
+
+        alternative_names = self._get_alternative_names_from_feature(feature)
+
+        part = Part(
+            identifier,
+            sequence,
+            description=feature['Notes'],
+            alternative_names=alternative_names)
         part.feature = feature
         return part
 

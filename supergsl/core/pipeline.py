@@ -43,8 +43,7 @@ class CompilerPipeline(object):
 
     def compile(self, source_code):
         ast = self.perform_frontend_compile(source_code)
-
-        return self.perform_backend_compile(ast).eval()
+        return self.perform_backend_compile(ast)
 
     def get_lexer(self):
         return Lexer().get_lexer()

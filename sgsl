@@ -37,7 +37,6 @@ def main():
     print('Compiling Complete. Storing Output.')
 
     output_pipeline.run(result, args)
-    pprint.pprint(result)
 
 
 if __name__ == "__main__":

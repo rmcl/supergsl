@@ -56,10 +56,26 @@ class PartSymbolTable(object):
 
 
 class Part(object):
-    def __init__(self, name, sequence, parent_part=None):
+    def __init__(
+        self,
+        name,
+        sequence,
+        parent_part=None,
+        slice_of_parent=None,
+        forward_primer=None,
+        reverse_primer=None,
+        description=None,
+        alternative_names=None
+    ):
         self.name = name
         self.sequence = sequence
         self.parent_part = parent_part
+        self.slice_of_parent = slice_of_parent,
+        self.forward_primer = forward_primer
+        self.reverse_primer = reverse_primer
+
+        self.description = description
+        self.alternative_names = alternative_names
 
     def get_child_part(self, part_slice, new_part_name):
         """Retrieve a subsequence of this part. For example the promoter region."""
@@ -74,13 +90,24 @@ class Part(object):
 
         sub_sequence = self.sequence[left_offset:right_offset]
 
-        return Part(new_part_name, sub_sequence, self)
+        return Part(
+            new_part_name,
+            sub_sequence,
+            parent_part=self,
+            slice_of_parent=part_slice)
+
+    @property
+    def has_primers(self):
+        return (
+            self.forward_primer is not None
+            and self.reverse_primer is not None
+        )
 
     def __eq__(self, other):
         return self.sequence == other.sequence
 
     def __hash__(self):
-        return hash(self.sequence)
+        return hash(str(self.sequence))
 
     def __repr__(self):
         return self.name
@@ -95,6 +122,12 @@ class PartProvider(object):
     def get_provider_name(self):
         return self.name
 
+    def list_parts(self):
+        # The method is optional
+        raise NotImplementedError(
+            'List parts is not supported by "%s" part provider.' % self.name
+        )
+
     def get_part(self, identifier):
         """Retrieve a part from the provider.
 
@@ -102,7 +135,7 @@ class PartProvider(object):
             identifier  A identifier to select a part from this provider
         Return: `Part`
         """
-        raise NotImplemented('Subclass to implement.')
+        raise NotImplementedError('Subclass to implement.')
 
 
 class ResolvePartPass(BreadthFirstNodeFilteredPass):
@@ -222,6 +255,8 @@ class SliceAndBuildPartSequencePass(BreadthFirstNodeFilteredPass):
             raise NotImplemented('Slice not implemented yet.')
         """
 
+        node.part = child_part
+
 
     def slice_part_by_part_type(self, part, part_type):
         part_type_slice = self.build_part_type_slice(
@@ -231,7 +266,7 @@ class SliceAndBuildPartSequencePass(BreadthFirstNodeFilteredPass):
 
         new_part_name = part_type + part.name
         new_part = part.get_child_part(part_type_slice, new_part_name)
-
+        return new_part
 
     def build_part_type_slice(self, part, part_type):
         """Build the slice of a part based on the requested part type.

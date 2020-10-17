@@ -20,6 +20,12 @@ class SymbolRepository(object):
 
         self._symbols[name] = table_obj
 
+    def get_table(self, name : str):
+        try:
+            return self._symbols[name]
+        except KeyError:
+            raise Exception('Unknown symbol table "%s".' % name)
+
 
 class Slice(Node):
     def __init__(self, start : int, end : int):
@@ -82,6 +88,7 @@ class Part(Node):
         result : Dict[str, Any] = {
             'node': 'Part',
             'part_name': '{}{}'.format(self.operator_prefix, self.part_name),
+            'part': self.part,
             'source_part': self.source_part,
             'part_type': self.part_type
         }

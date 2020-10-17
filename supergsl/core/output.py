@@ -14,6 +14,17 @@ class OutputProvider(BreadthFirstNodeFilteredPass):
 
         return cls.name
 
+class ASTPrintOutputProvider(OutputProvider):
+    name = 'print'
+
+    def before_pass(self, ast):
+        """Initialize the SBOL Document."""
+
+        import pprint
+        pprint.pprint(ast.eval())
+
+        return ast
+
 
 class OutputPipeline(object):
     """Store the results of the compilation in user specified output formats."""
@@ -50,4 +61,5 @@ class OutputPipeline(object):
         """Output the compiled AST into the desired output formats."""
 
         for output_pass_inst in self.desired_output_providers:
+            print('running %s' % output_pass_inst.name)
             output_pass_inst.perform(ast)
