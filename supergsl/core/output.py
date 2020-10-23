@@ -26,6 +26,45 @@ class ASTPrintOutputProvider(OutputProvider):
         return ast
 
 
+class TestOutputProvider(OutputProvider):
+    """Output provider used by Integration tests to introspect the output of the compiler."""
+    name = 'test'
+
+    def get_node_handlers(self):
+        return {
+            'Assembly': self.visit_assembly_node,
+            'Part': self.visit_part_node,
+        }
+
+    def before_pass(self, ast):
+        """Initialize the SBOL Document."""
+        self.parts = []
+        self.assemblies = []
+        return ast
+
+    def visit_part_node(self, node):
+        self.parts.append(node.part)
+
+    def visit_assembly_node(self, node):
+        assembly_parts = [
+            part.identifier
+            for part in node.parts
+        ]
+
+        assembly_idx = len(self.assemblies)
+        self.assemblies.append({
+            'identifier': assembly_idx,
+            'parts': assembly_parts
+        })
+
+    def get_assemblies(self):
+        return self.assemblies
+
+    def get_parts(self):
+        return self.parts
+
+
+
 class OutputPipeline(object):
     """Store the results of the compilation in user specified output formats."""
 

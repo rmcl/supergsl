@@ -74,9 +74,9 @@ class FeatureTableWithFastaPartProvider(PartProvider):
 
         strand = feature['strand']
         if strand == 'C':
-            seq = chromosome_sequence[loc[0]:loc[1]].reverse_complement()
+            seq = chromosome_sequence[loc[0]:loc[1]].reverse_complement().seq
         else:
-            seq = chromosome_sequence[loc[0]:loc[1]]
+            seq = chromosome_sequence[loc[0]:loc[1]].seq
 
         return seq, feature
 
