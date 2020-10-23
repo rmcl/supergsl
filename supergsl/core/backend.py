@@ -69,6 +69,10 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
 
     def perform(self, ast : Node) -> Node:
         ast = self.before_pass(ast)
+
+        if not ast:
+            raise BackendException('before_pass of "%s" did not return an AST node object.' % self)
+
         node_visit_queue = [ast]
         while len(node_visit_queue) > 0:
             cur_node = node_visit_queue.pop(0)
@@ -77,4 +81,7 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
             node_visit_queue += cur_node.child_nodes()
 
         ast = self.after_pass(ast)
+        if not ast:
+            raise BackendException('after_pass of "%s" did not return an AST node object.' % self)
+
         return ast
