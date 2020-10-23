@@ -1,0 +1,10 @@
+{
+    "part_providers": [],
+    "assemblers": [],
+    "output_providers": [
+        "supergsl.core.output.ASTPrintOutputProvider",
+        "supergsl.plugins.sbol_output.SBOLOutputPass",
+        "supergsl.plugins.json_output.JSONOutputPass",
+        "supergsl.plugins.genebank_output.GeneBankOutputPass"
+    ]
+}
