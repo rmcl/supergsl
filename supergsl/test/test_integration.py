@@ -28,7 +28,7 @@ class SuperGSLIntegrationTestCases(TestCase):
         self.assertEquals(len(parts), 1)
 
         self.assertEquals(
-            parts[0].sequence,
+            parts[0].get_sequence(),
             self.expected_sequences.get('gHO').seq)
 
     def test_part_slice_promoter(self):
@@ -40,10 +40,10 @@ class SuperGSLIntegrationTestCases(TestCase):
         parts = result.get_parts()
         self.assertEquals(len(parts), 1)
 
-        print(parts[0].sequence)
+        print(parts[0].get_sequence())
         print()
         print(self.expected_sequences.get('pHO').seq)
 
         self.assertEquals(
-            parts[0].sequence,
+            parts[0].get_sequence(),
             self.expected_sequences.get('pHO').seq)
