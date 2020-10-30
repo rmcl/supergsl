@@ -1,4 +1,5 @@
 from supergsl.core.constants import FIVE_PRIME
+from supergsl.core.exception import PartSliceError
 from .part import Part
 from .position import SeqPosition
 
@@ -15,14 +16,14 @@ def get_promoter_len() -> int:
     return 501
 
 def get_terminator_len() -> int:
-    return 500
+    return 501
 
 def get_flank_len() -> int:
     """Get the configured length of a flanking region.
 
     ### TODO: REFACTOR THIS METHOD TO COME FROM PROVIDER CONFIG
     """
-    return 500
+    return 501
 
 class PrefixedPartSliceMixin(object):
     """A Part Mixin which enables support for fGSL prefixed-parts."""
@@ -34,7 +35,6 @@ class PrefixedPartSliceMixin(object):
             return super().get_child_part(part_prefix)
 
         start_pos, end_pos = self.build_part_type_slice_pos(part_type)
-        print('PREFIX', start_pos, end_pos)
         child_part = self.get_child_part_by_slice(
             parent_part=self,
             identifier=(alias or part_prefix),
@@ -119,7 +119,7 @@ class PrefixedPartSliceMixin(object):
 
             return self.end, new_end
 
-        raise Exception('"%s" not implemented yet.' % part_type)
+        raise PartSliceError('"%s" prefix is not implemented yet.' % part_type)
 
 class PrefixedPart(PrefixedPartSliceMixin, Part):
     pass
