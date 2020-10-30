@@ -1,4 +1,5 @@
 from supergsl.core.constants import THREE_PRIME, FIVE_PRIME
+from supergsl.core.exception import PartSliceError
 
 class SeqPosition(object):
     """Store relative positions in a reference sequence.
@@ -93,4 +94,4 @@ class SeqPosition(object):
         ref2, _ = p2.get_absolute_position_in_reference()
 
         if ref1 != ref2:
-            raise Exception('Reference sequences do not match.')
+            raise PartSliceError('Reference sequences do not match.')
