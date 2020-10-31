@@ -4,12 +4,14 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 
-from supergsl.core.backend import BreadthFirstNodeFilteredPass
+from supergsl.core.output import OutputProvider
 
 
-class GeneBankOutputPass(BreadthFirstNodeFilteredPass):
+class GeneBankOutputPass(OutputProvider):
     """Generate GeneBank file containing an annotated assembly.
     """
+
+    name = 'genebank'
 
     def get_node_handlers(self):
         return {

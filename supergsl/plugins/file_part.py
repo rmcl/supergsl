@@ -4,12 +4,24 @@ from mimetypes import guess_type
 from functools import partial
 from Bio import SeqIO
 
+from supergsl.core.constants import THREE_PRIME
+from supergsl.core.parts.position import SeqPosition
 from supergsl.core.exception import PartLocatorException, PartNotFoundException
-from supergsl.backend.parts import PartProvider, Part
+from supergsl.core.parts import PartProvider, Part
+from supergsl.core.parts.prefix_part import PrefixedPart
 
 
 class FeatureTableWithFastaPartProvider(PartProvider):
-    """This provider matches the Reference Genome files that GSL 1.0 utilizes."""
+    """Access parts provided by fGSL reference genome files.
+
+    The gsl paper [wilson 2008] describes this format as the "Saccharomyces
+    Genome Database reference file format". The paper refers to this example:
+    http://downloads.yeastgenome.org/curation/chromosomal_feature/SGD_features.tab
+
+    These files define the ORF region of genes. GSL assumes that the 500bp preceding
+    the ORF is the promoter region and 500 bp downstream are the terminator.
+
+    """
 
     def __init__(self, name, settings):
         self.name = name
@@ -18,7 +30,6 @@ class FeatureTableWithFastaPartProvider(PartProvider):
 
     def open_feature_file(self):
         if self.feature_file_path[-2:] == 'gz':
-            print('HI!')
             return gzip.open(self.feature_file_path, "rt")
         else:
             return open(self.feature_file_path, "rt")
@@ -45,6 +56,15 @@ class FeatureTableWithFastaPartProvider(PartProvider):
                 for chromosome in chromosomes
             }
 
+    def list_parts(self):
+        if not hasattr(self, '_sequence_by_chromosome'):
+            self.load()
+
+        return [
+            self.get_part(gene_name)
+            for gene_name in self._genes.keys()
+        ]
+
     def get_gene(self, gene_name):
 
         if not hasattr(self, '_sequence_by_chromosome'):
@@ -59,66 +79,33 @@ class FeatureTableWithFastaPartProvider(PartProvider):
         chromosome_num = feature['chrom#']
         chromosome_sequence = self._sequence_by_chromosome[chromosome_num]
 
-        loc = (
-            int(feature['from']),
-            int(feature['to']) + 1 # GSL uses non-zero relative indexes!! Do we want to conform to this insanity???
-        )
-
-        print(gene_name, 'chrom', chromosome_sequence.id, loc, loc[1] - loc[0])
-
         strand = feature['strand']
         if strand == 'C':
-            seq = chromosome_sequence[loc[0]:loc[1]].reverse_complement().seq
+            # Translate the position present in the file to be relative to the
+            # other strand of DNA (reverse complement).
+            reference_sequence = chromosome_sequence.reverse_complement().seq
+            reference_len = len(reference_sequence)
+
+            tmp_from = int(feature['from'])
+            feature['from'] = reference_len - int(feature['to']) - 1
+            feature['to'] = reference_len - tmp_from
+
         else:
-            seq = chromosome_sequence[loc[0]:loc[1]].seq
+            feature['from'] = int(feature['from'])
+            feature['to'] = int(feature['to']) + 1
+            reference_sequence = chromosome_sequence.seq
 
-        return seq, feature
+        return reference_sequence, feature
 
-    def get_part(self, identifier):
-        """Retrieve a part by identifier.
+    def _get_alternative_names_from_feature(self, feature):
+        alternative_names = set([
+            feature['systematic']
+        ])
+        aliases = feature['aliases'].split(',')
+        if len(aliases) > 0 and aliases[0] != '':
+            alternative_names.update(aliases)
 
-        Arguments:
-            identifier  A identifier to select a part from this provider
-        Return: `Part`
-        """
-        sequence, feature = self.get_gene(identifier)
-        part = Part(identifier, sequence)
-        part.feature = feature
-        return part
-
-
-class GenbankFilePartProvider(PartProvider):
-
-    def __init__(self, name, settings):
-        self.name = name
-        self.genbank_file_path = settings['sequence_file_path']
-
-    def load(self):
-        with gzip.open(self.genbank_file_path, "rt") as handle:
-            records = SeqIO.parse(
-                handle,
-                'genbank'
-            )
-
-            features_by_gene_name = []
-            features_by_systematic_name = []
-            for record in records:
-                features_by_gene_name += [
-                    (feature.qualifiers['gene'][0], (feature, record))
-                    for feature in record.features
-                    if feature.type == 'gene' and 'gene' in feature.qualifiers
-                ]
-
-            """
-                features_by_systematic_name += [
-                    (feature.qualifiers['locus_tag'][0], feature)
-                    for feature in record.features
-                    if feature.type == 'gene'
-                ]
-            """
-
-            self.features_by_gene_name = dict(features_by_gene_name)
-            #self.features_by_systematic_name = dict(features_by_systematic_name)
+        return list(alternative_names)
 
     def get_part(self, identifier):
         """Retrieve a part by identifier.
@@ -127,18 +114,39 @@ class GenbankFilePartProvider(PartProvider):
             identifier  A identifier to select a part from this provider
         Return: `Part`
         """
+        reference_sequence, feature = self.get_gene(identifier)
+        alternative_names = self._get_alternative_names_from_feature(feature)
 
-        if not hasattr(self, 'features_by_gene_name'):
-            self.load()
+        start = SeqPosition.from_reference(
+            x=feature['from'],
+            rel_to=THREE_PRIME,
+            approximate=False,
+            reference=reference_sequence
+        )
 
-        try:
-            feature, parent_record = self.features_by_gene_name[identifier]
-        except KeyError:
-            raise PartLocatorException('Part not found "%s" in %s.' % (identifier, self.get_provider_name()))
+        print('GET_PART', feature['from'], feature['to'])
 
-        location = feature.location
-        sequence = parent_record[location.start:location.end]
+        end = start.get_relative_position(
+            x=feature['to']-feature['from'])
 
-        part = Part(identifier, sequence)
-        part.feature = feature
+        part = PrefixedPart(
+            identifier,
+            start,
+            end,
+            provider=self,
+            description=feature['Notes'],
+            alternative_names=alternative_names)
+
         return part
+
+    def get_child_part_by_slice(self, parent_part, identifier, start, end):
+        """Return a new part which is the child of the supplied parent."""
+
+        # child parts shouldn't be prefix able.
+        return Part(
+            identifier,
+            start,
+            end,
+            provider=self,
+            parent_part=parent_part
+        )

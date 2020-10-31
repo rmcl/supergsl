@@ -3,6 +3,7 @@ llvmlite
 rply
 nose
 biopython
+pydna
 pysbol
 mock
 mypy

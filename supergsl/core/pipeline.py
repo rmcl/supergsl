@@ -1,13 +1,9 @@
 from .lexer import Lexer
 from .parser import ParserBuilder
 
-from supergsl.backend.symbol_table import AttachSymbolRepositoryPass
-from supergsl.backend.parts import ResolvePartPass, SliceAndBuildPartSequencePass
+from supergsl.core.backend import AttachSymbolRepositoryPass
+from supergsl.core.parts import ResolvePartPass
 from supergsl.backend.assembly import AssemblerPass
-
-#from supergsl.plugins.sbol_output import SBOLOutputPass
-#from supergsl.plugins.json_output import JSONOutputPass
-from supergsl.plugins.genebank_output import GeneBankOutputPass
 
 class CompilerPipeline(object):
 
@@ -15,11 +11,8 @@ class CompilerPipeline(object):
         return [
             AttachSymbolRepositoryPass,
             ResolvePartPass,
-            SliceAndBuildPartSequencePass,
+
             AssemblerPass,
-            GeneBankOutputPass
-            #SBOLOutputPass
-            #JSONOutputPass
         ]
 
     def perform_frontend_compile(self, source_code):
@@ -51,8 +44,7 @@ class CompilerPipeline(object):
 
     def compile(self, source_code):
         ast = self.perform_frontend_compile(source_code)
-
-        return self.perform_backend_compile(ast).eval()
+        return self.perform_backend_compile(ast)
 
     def get_lexer(self):
         return Lexer().get_lexer()

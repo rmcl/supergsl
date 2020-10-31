@@ -1,4 +1,4 @@
-from supergsl.core.backend import BreadthFirstNodeFilteredPass
+from supergsl.core.output import OutputProvider
 from sbol import (
     setHomespace,
     Config,
@@ -14,8 +14,10 @@ from sbol import (
 )
 
 
-class SBOLOutputPass(BreadthFirstNodeFilteredPass):
+class SBOLOutputPass(OutputProvider):
     """Generate SBOL document containing the assemblies."""
+
+    name = 'sbol'
 
     def get_node_handlers(self):
         return {
@@ -63,5 +65,3 @@ class SBOLOutputPass(BreadthFirstNodeFilteredPass):
 
         assembly.assemblePrimaryStructure(part_components)
         assembly.compile()
-
-
