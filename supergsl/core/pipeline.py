@@ -4,6 +4,7 @@ from .parser import ParserBuilder
 from supergsl.core.backend import AttachSymbolRepositoryPass
 from supergsl.core.parts import ResolvePartPass
 from supergsl.backend.assembly import AssemblerPass
+#from supergsl.plugins.primers import DesignPartAmplificationPrimers
 
 class CompilerPipeline(object):
 
@@ -13,6 +14,8 @@ class CompilerPipeline(object):
             ResolvePartPass,
 
             AssemblerPass,
+            #SliceAndBuildPartSequencePass,
+            #DesignPartAmplificationPrimers
         ]
 
     def perform_frontend_compile(self, source_code):
