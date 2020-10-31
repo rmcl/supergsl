@@ -57,7 +57,6 @@ class ResolvePartPass(BreadthFirstNodeFilteredPass):
 
     def visit_part_node(self, node):
         node.part = self.part_symbol_table.get_part(node.identifier)
-        print('hi', node, node.part)
 
 
 class PartSymbolTable(object):

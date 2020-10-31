@@ -1,3 +1,4 @@
+from typing import Optional
 from supergsl.core.backend import BreadthFirstNodeFilteredPass
 from supergsl.core.exception import ConfigurationException
 from supergsl.core.config import settings
@@ -5,7 +6,7 @@ from supergsl.utils import import_class
 
 
 class OutputProvider(BreadthFirstNodeFilteredPass):
-    name = None
+    name : Optional[str] = None
 
     @classmethod
     def get_output_name(cls):

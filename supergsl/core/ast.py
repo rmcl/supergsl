@@ -48,8 +48,7 @@ class Part(Node):
     def eval(self) -> Dict[str, Any]:
         result : Dict[str, Any] = {
             'node': 'Part',
-            'identifier': self.identifier,
-            'part': self.part,
+            'identifier': self.identifier
         }
 
         if self.slice:

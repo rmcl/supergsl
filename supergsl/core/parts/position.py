@@ -70,6 +70,17 @@ class SeqPosition(object):
         if self.parent:
             reference, ref_relative_x = self.parent.get_absolute_position_in_reference()
             ref_relative_x += self.x
+
+            if ref_relative_x < 0:
+                raise PartSliceError(
+                    'Absolute position extends beyond the 3\' end of the '
+                    'reference sequence')
+
+            if ref_relative_x > len(reference):
+                raise PartSliceError(
+                    'Absolute position extends beyond the 5\' end of the '
+                    'reference sequence.')
+
             return reference, ref_relative_x
 
         elif self.reference:
