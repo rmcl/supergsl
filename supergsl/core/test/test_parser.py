@@ -49,9 +49,7 @@ class ParserTestCase(unittest.TestCase):
                 'node': 'Assembly',
                 'parts': [{
                     'node': 'Part',
-                    'operator_prefix': 'u',
-                    'part_name': 'HO',
-                    'part_type': 'upstream'
+                    'identifier': 'uHO'
                 }]
             }],
             'imports': [{
@@ -80,14 +78,10 @@ class ParserTestCase(unittest.TestCase):
                 'node': 'Assembly',
                 'parts': [{
                     'node': 'Part',
-                    'operator_prefix': 'u',
-                    'part_name': 'HO',
-                    'part_type': 'upstream'
+                    'identifier': 'uHO',
                 }, {
                     'node': 'Part',
-                    'operator_prefix': 'p',
-                    'part_name': 'ADH1',
-                    'part_type': 'promoter'
+                    'identifier': 'pADH1',
                 }]
             }],
             'imports': [],

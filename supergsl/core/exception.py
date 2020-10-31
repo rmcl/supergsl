@@ -12,3 +12,6 @@ class PartLocatorException(Exception):
 
 class PartNotFoundException(Exception):
     pass
+
+class PartSliceError(Exception):
+    pass

@@ -17,5 +17,5 @@ def load_config_file(config_file_path, optional=False):
             raise ConfigurationException('Error loading config file: "%s"' % config_file_path, error)
 
 
-load_config_file('supergsl-config-default.json')
-load_config_file('supergsl-config.json')
+load_config_file('supergsl-config-default.json', optional=True)
+load_config_file('supergsl-config.json', optional=True)

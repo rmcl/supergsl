@@ -43,54 +43,12 @@ class Slice(Node):
 class Part(Node):
     def __init__(self, identifier : str, slice : Optional[Slice] = None):
         self.identifier = identifier
-        self.operator_prefix = identifier[0]
-        self.part_name = identifier[1:]
         self.slice = slice
-
-        self.part_type = self.get_part_type()
-
-    def get_part_type(self) -> str:
-        """Validate the part prefix.
-
-        https://github.com/Amyris/GslCore/blob/b738b3e107b91ed50a573b48d0dcf1be69c4ce6a/src/GslCore/CommonTypes.fs#L60
-
-        From the GSL Paper, valid part prefixes are the following:
-        g prefix gene locus gADH1
-        p prefix promoter part pERG10
-        t prefix terminator part tERG10
-        u prefix upstream part uHO
-        d prefix downstream part dHO
-        o prefix open reading frame oERG10
-        f prefix fusible ORF, no stop codon fERG10
-        m prefix mRNA (ORF + terminator)
-        """
-
-        PART_TYPES = {
-            'g': 'gene',
-            'p': 'promoter',
-            't': 'terminator',
-            'u': 'upstream',
-            'd': 'downstream',
-            'o': 'orf',
-            'f': 'fusible_orf',
-            'm': 'mRNA'
-        }
-
-        try:
-            return PART_TYPES[self.operator_prefix]
-        except KeyError:
-            raise Exception('Invalid part prefix "%s" in "%s".' % (
-                self.operator_prefix,
-                self.identifier
-            ))
 
     def eval(self) -> Dict[str, Any]:
         result : Dict[str, Any] = {
             'node': 'Part',
-            'part_name': '{}{}'.format(self.operator_prefix, self.part_name),
-            'part': self.part,
-            'source_part': self.source_part,
-            'part_type': self.part_type
+            'identifier': self.identifier
         }
 
         if self.slice:
@@ -104,7 +62,7 @@ class Part(Node):
         return []
 
     def __str__(self):
-        return self.part_name
+        return '(%s) %s' % (self.identifier, self.part)
 
 
 class ProgramImportIdentifier(Node):

@@ -16,10 +16,12 @@ class JSONOutputPass(OutputProvider):
     def get_node_handlers(self):
         return {
             'Assembly': self.visit_assembly_node,
+            'Part': self.visit_part_node,
         }
 
     def before_pass(self, ast):
         """Initialize the SBOL Document."""
+        self.parts = set()
         self.json_output = {
             'parts': [],
             'assemblies': []
@@ -32,15 +34,28 @@ class JSONOutputPass(OutputProvider):
         #self.sbol_doc.write('output_sbol.xml')
         return ast
 
-    def visit_assembly_node(self, node):
+    def visit_part_node(self, node):
+        part = node.part
+        if part in self.parts:
+            return
 
+        self.parts.add(part)
+        self.json_output['parts'].append({
+            'name': part.name,
+            'slice_of_parent': str(part.slice_of_parent[0]),
+            'forward_primer': str(part.forward_primer.seq),
+            'reverse_primer': str(part.reverse_primer.seq),
+            'sequence': str(part.sequence.seq),
+        })
+
+    def visit_assembly_node(self, node):
         assembly_parts = [
             part.identifier
             for part in node.parts
         ]
 
         assembly_sequence = ''.join([
-            str(part.source_part.sequence.seq)
+            str(part.sequence.seq)
             for part in node.parts
         ])
 
