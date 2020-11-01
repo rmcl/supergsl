@@ -1,7 +1,7 @@
 #!/usr/local/bin/python
 
 import argparse
-from supergsl.backend.parts import PartSymbolTable
+from supergsl.core.parts.provider import PartSymbolTable
 
 def handle_part_command(args):
     part_table = PartSymbolTable()
