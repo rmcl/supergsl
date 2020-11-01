@@ -3,8 +3,8 @@ from .parser import ParserBuilder
 
 from supergsl.core.backend import AttachSymbolRepositoryPass
 from supergsl.core.parts import ResolvePartPass
-from supergsl.backend.assembly import AssemblerPass
-#from supergsl.plugins.primers import DesignPartAmplificationPrimers
+from supergsl.core.assembly import AssemblerPass
+
 
 class CompilerPipeline(object):
 

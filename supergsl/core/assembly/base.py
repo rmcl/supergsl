@@ -46,14 +46,7 @@ class AssemblerFactory(object):
             self._assemblers[assembler_config['name']] = assembler_inst
 
 class AssemblerPass(BreadthFirstNodeFilteredPass):
-    """Visit each assembly block and execute the appropriate assembler.
-
-    Expected contents of JSON document:
-
-        parts
-        assemblies
-
-    """
+    """Visit each assembly block and execute the appropriate assembler."""
 
     def __init__(self):
         self._assembler_factory = AssemblerFactory()
