@@ -33,6 +33,10 @@ class Part(object):
         self.description = description
         self.alternative_names = alternative_names
 
+    @property
+    def has_primers(self):
+        return self.forward_primer and self.reverse_primer
+
     def set_primers(self, forward_primer, reverse_primer):
         self.forward_primer = forward_primer
         self.reverse_primer = reverse_primer
