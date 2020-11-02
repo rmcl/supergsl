@@ -7,8 +7,8 @@ SuperGSL supports building parts for several different assembly protocols and al
 ### Simple Fusion
 
 The most basic strategy is a "fusion" strategy where each part is annealed to its neighbors. The product of this strategy is likely useful for direct synthesis methods.
-```
 
+```
 from S288C import ADH1, ERG10, HO
 
 fuse {
@@ -16,15 +16,17 @@ fuse {
 	HO_pTDA1_gERG10: uHO ; pTDA1 ; gERG10[1:728] ; dHO
 }
 
+```
 
 ### Seamless Assembly
 
 Two examples of this approach are, Ligase Chain Reaction (LCR), or Seamless Ligation Cloning Extract (SLiCE). Check out the j5 manual for a description of related approaches: (The SLIC, Gibson, CPEC, and SLiCE assembly methods)[https://j5.jbei.org/j5manual/pages/22.html]
 
+```
 seamless-ligation {
     HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
 }
-
+```
 
 #### Assembly Provider Setup
 
@@ -50,7 +52,7 @@ To avail yourself of a seamless ligation based assembly strategies, add the foll
 
 ## Other Standard Methods I'd like to Implement Someday
 
-```
+
 
 ### BioBricks
 
