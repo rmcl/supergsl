@@ -25,7 +25,7 @@ class Lexer():
         #self.lexer.add('HASH', r'\#')
 
         self.lexer.add('NUMBER', r'\d+')
-        self.lexer.add('IDENTIFIER', r'\w[\w\d]*')
+        self.lexer.add('IDENTIFIER', r'\w[\w\d\_\-]*')
 
         # Ignore spaces
         self.lexer.ignore('\s+')

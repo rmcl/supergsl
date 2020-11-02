@@ -71,7 +71,7 @@ class PartSymbolTable(object):
         try:
             return self._parts[part_alias]
         except KeyError:
-            raise PartNotFoundException('Part "%s" has not been defined.' % part_alias)
+            raise PartNotFoundException('Part "%s" has not been defined. Did you forget to import it?' % part_alias)
 
     def get_prefixed_part(self, part_alias):
         """Attempt to find a part that uses fGSL prefix notation."""
@@ -81,7 +81,7 @@ class PartSymbolTable(object):
         try:
             prefixed_parent_part = self._parts[potential_part_alias]
         except KeyError:
-            raise PartNotFoundException('Part "%s" has not been defined.' % part_alias)
+            raise PartNotFoundException('Part "%s" has not been defined. Did you forget to import it?' % part_alias)
 
         if not isinstance(prefixed_parent_part, PrefixedPartSliceMixin):
             raise Exception('Part "%s" does not support prefixing "%s".' % (

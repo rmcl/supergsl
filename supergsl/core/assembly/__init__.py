@@ -1,1 +1,1 @@
-from .base import AssemblerPass
+from .base import AssemblerPass, AssemblerBase

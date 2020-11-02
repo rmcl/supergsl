@@ -1,4 +1,5 @@
 import importlib
+import logging
 
 
 def import_class(class_path_str):
@@ -7,3 +8,12 @@ def import_class(class_path_str):
     module = importlib.import_module(module_path)
 
     return getattr(module, class_name)
+
+
+def get_logger(class_inst):
+    full_path = ".".join([
+        class_inst.__class__.__module__,
+        class_inst.__class__.__name__
+    ])
+
+    return logging.getLogger(full_path)

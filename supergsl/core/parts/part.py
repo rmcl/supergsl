@@ -1,3 +1,6 @@
+from Bio.SeqRecord import SeqRecord
+
+
 class Part(object):
     """Represent a genomic piece of DNA."""
 
@@ -30,6 +33,10 @@ class Part(object):
         self.description = description
         self.alternative_names = alternative_names
 
+    def set_primers(self, forward_primer, reverse_primer):
+        self.forward_primer = forward_primer
+        self.reverse_primer = reverse_primer
+
     def get_sequence(self):
         ref, x = self.start.get_absolute_position_in_reference()
         ref_2, y = self.end.get_absolute_position_in_reference()
@@ -37,7 +44,11 @@ class Part(object):
         if ref != ref_2:
             raise Exception("Reference sequences do not match.")
 
-        return ref[x:y]
+        description = self.description or ''
+        return SeqRecord(
+            ref[x:y],
+            name=self.identifier,
+            description=description)
 
     def get_child_part_by_slice(self, parent_part, identifier, start, end):
         return self.provider.get_child_part_by_slice(
