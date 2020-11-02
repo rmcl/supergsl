@@ -16,6 +16,40 @@ fuse {
 	HO_pTDA1_gERG10: uHO ; pTDA1 ; gERG10[1:728] ; dHO
 }
 
+
+### Seamless Assembly
+
+Two examples of this approach are, Ligase Chain Reaction (LCR), or Seamless Ligation Cloning Extract (SLiCE). Check out the j5 manual for a description of related approaches: (The SLIC, Gibson, CPEC, and SLiCE assembly methods)[https://j5.jbei.org/j5manual/pages/22.html]
+
+seamless-ligation {
+    HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
+}
+
+
+#### Assembly Provider Setup
+
+To avail yourself of a seamless ligation based assembly strategies, add the following to your `supergsl-config.json`.
+
+```
+{
+    ...
+    "assemblers": [
+        ...
+        {
+            "name": "seamless-ligation",
+            "assembler_class": "supergsl.plugins.seamless_ligation.SeamlessLigationAssembler",
+            "assembler_options": {
+                "target_Tm": 32
+            }
+        }
+    ],
+    ...
+}
+```
+
+
+## Other Standard Methods I'd like to Implement Someday
+
 ```
 
 ### BioBricks
