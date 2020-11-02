@@ -100,7 +100,7 @@ You can use the `assembly_strategies` section of `supergsl-config.json` to regis
 
 ```
 {
-    "assembly_strategies": [
+    "assemblers": [
         {
             "name": "assemble_secretmethod",
             "provider_class": "mycompany.assembly.SecretMethodAssembler",
