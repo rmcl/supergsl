@@ -13,7 +13,7 @@ from S288C import ADH1, ERG10, HO
 
 fuse {
     HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
-	HO_pTDA1_gERG10: uHO ; pTDA1 ; gERG10[1:728] ; dHO
+    HO_pTDA1_gERG10: uHO ; pTDA1 ; gERG10[1:728] ; dHO
 }
 
 ```
