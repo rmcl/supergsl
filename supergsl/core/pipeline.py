@@ -12,10 +12,7 @@ class CompilerPipeline(object):
         return [
             AttachSymbolRepositoryPass,
             ResolvePartPass,
-
             AssemblerPass,
-            #SliceAndBuildPartSequencePass,
-            #DesignPartAmplificationPrimers
         ]
 
     def perform_frontend_compile(self, source_code):
