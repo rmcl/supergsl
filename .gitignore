@@ -73,6 +73,3 @@ venv/
 # supergsl specific
 examples
 notebooks
-
-#temporary-reomve this
-#supergsl/test
