@@ -16,7 +16,7 @@
                 "db": "nucleotide",
                 "id": "U89790"
             },
-            "entrez_email": "russ.mcl@gmail.com"
+            "entrez_email": "<SET ME>"
         }, {
             "name": "entrez.HumanMitochondria",
             "provider_class": "supergsl.plugins.entrez.EntrezPartProvider",
@@ -36,7 +36,7 @@
             "name": "seamless-ligation",
             "assembler_class": "supergsl.plugins.seamless_ligation.SeamlessLigationAssembler",
             "assembler_options": {
-                "target_Tm": 55.0,
+                "target_Tm": 55.0
             }
         }
     ],
