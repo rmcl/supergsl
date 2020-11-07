@@ -6,10 +6,20 @@ SuperGSL is inspired by the original Genome Specification Language (See: [Paper]
 
 See how SuperGSL differs from the original gsl [here](/docs/build/gsl_vs_supergsl)
 
+### Install *SuperGSL*
 
-### Install & Running *SuperGSL*
+SuperGSL can be installed using the python package manager.
 
-*SuperGSL* comes with a Dockerfile and docker-compose file such that you can run superGSL without polluting your local environment. If for some reason you don't want to use Docker feel free to install the python dependencies specified in requirements.txt and then execute the ./sqsl python script.
+```
+pip install supergsl
+```
+
+This will add two commands into your environment- `sgsl` and `sgsl-util`. These two commands can used to invoke the compiler and utility commands respectively.
+
+
+### Install & Running *SuperGSL* with Docker
+
+*SuperGSL* comes with a Dockerfile and docker-compose file such that you can run superGSL without polluting your local environment.
 
 Using docker you can do the following:
 
@@ -27,7 +37,3 @@ To run the compiler (Note: This sort of doesn't work right now because you would
 ```
 docker-compose run supergsl sgsl <input-file>
 ```
-
-### Inspiring Links
-
-https://blog.usejournal.com/writing-your-own-programming-language-and-compiler-with-python-a468970ae6df
