@@ -1,5 +1,53 @@
 # Getting Started with SuperGSL
 
+## Ten-minutes to genetic engineering
+
+### Install *supergsl*
+
+```
+pip install supergsl
+
+```
+
+### Option 1: Fungal Engineering with SLiC/CPAC or related technique
+
+
+
+### Option 2: I just need a sequence to synthesize
+
+
+
+### Option 3: All I want are primers!
+
+Say all you want from SuperGSL is to use its convenient slice syntax to retrieve primers of your favorite gene.
+
+Create your `primers-only.gsl` source file:
+```
+
+from S288C import HO, SDH1, GAL3
+
+primers {
+    gHO
+    tSDH1
+    pGAL3    
+}
+```
+
+Then execute the compiler with the `primers` output format:
+
+```
+sgsl -f primers primers-only.gsl
+```
+
+You should see a `primers.txt` file in your current directory with the following:
+
+```
+<enter primer.txt example here>
+```
+
+
+## Toy examples complete! Time to get serious...
+
 Before you can start editing organisms you probably need a few things...
 
 ## Get a Part Provider
