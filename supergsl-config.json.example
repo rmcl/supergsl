@@ -1,7 +1,7 @@
 {
     "part_providers": [
         {
-            "name": "genebank.S288C",
+            "name": "genbank.S288C",
             "provider_class": "supergsl.plugins.genebank_file.GenbankFilePartProvider",
             "sequence_file_path": "examples/GCF_000146045.2_R64_genomic.gbff.gz"
         }, {
