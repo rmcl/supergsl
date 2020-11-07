@@ -1,0 +1,49 @@
+{
+    "part_providers": [
+        {
+            "name": "genebank.S288C",
+            "provider_class": "supergsl.plugins.genebank_file.GenbankFilePartProvider",
+            "sequence_file_path": "examples/GCF_000146045.2_R64_genomic.gbff.gz"
+        }, {
+            "name": "tab.S288C",
+            "provider_class": "supergsl.plugins.file_part.FeatureTableWithFastaPartProvider",
+            "fasta_file_path": "examples/S288C/S288C.fsa",
+            "feature_file_path": "examples/S288C/S288C_features.tab"
+        }, {
+            "name": "entrez.AAV4",
+            "provider_class": "supergsl.plugins.entrez.EntrezPartProvider",
+            "efetch_args": {
+                "db": "nucleotide",
+                "id": "U89790"
+            },
+            "entrez_email": "russ.mcl@gmail.com"
+        }, {
+            "name": "entrez.HumanMitochondria",
+            "provider_class": "supergsl.plugins.entrez.EntrezPartProvider",
+            "efetch_args": {
+                "db": "nuccore",
+                "id": "NC_012920.1"
+            },
+            "entrez_email": "<SET ME>"
+        }
+    ],
+    "assemblers": [
+        {
+            "name": "fuse",
+            "assembler_class": "supergsl.backend.assembly.FusionAssembler",
+            "assembler_options": {}
+        }, {
+            "name": "seamless-ligation",
+            "assembler_class": "supergsl.plugins.seamless_ligation.SeamlessLigationAssembler",
+            "assembler_options": {
+                "target_Tm": 55.0,
+            }
+        }
+    ],
+    "output_providers": [
+        "supergsl.core.output.ASTPrintOutputProvider",
+        "supergsl.plugins.sbol_output.SBOLOutputPass",
+        "supergsl.plugins.json_output.JSONOutputPass",
+        "supergsl.plugins.genebank_output.GeneBankOutputPass"
+    ]
+}

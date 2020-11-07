@@ -1,3 +1,4 @@
+import csv
 from typing import Optional
 from supergsl.core.backend import BreadthFirstNodeFilteredPass
 from supergsl.core.exception import ConfigurationException
@@ -23,6 +24,46 @@ class ASTPrintOutputProvider(OutputProvider):
 
         import pprint
         pprint.pprint(ast.eval())
+
+        return ast
+
+class PrimerOutputProvider(OutputProvider):
+    name = 'primers'
+
+    def get_node_handlers(self):
+        return {
+            'Part': self.visit_part_node,
+        }
+
+    def visit_part_node(self, node):
+        part = node.part
+        self.primers[part.identifier] = {
+            'Forward Primer': part.forward_primer,
+            'Reverse Primer': part.reverse_primer
+        }
+
+    def before_pass(self, ast):
+        """Initialize the SBOL Document."""
+        self.primers = {}
+        return ast
+
+    def after_pass(self, ast):
+        """Save a TSV of part primers."""
+
+        with open('primers.txt', 'w+') as fp:
+            writer = csv.DictWriter(fp, (
+                'Part Identifier',
+                'Forward Primer',
+                'Reverse Primer'
+            ))
+
+            writer.writeheader()
+
+            for part_identifier, details in self.primers.items():
+                output = details.copy()
+                output['Part Identifier'] = part_identifier
+
+                writer.writerow(output)
 
         return ast
 

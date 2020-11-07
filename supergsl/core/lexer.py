@@ -14,7 +14,8 @@ class Lexer():
         # Other characters
         #self.lexer.add('OPEN_PAREN', r'\(')
         #self.lexer.add('CLOSE_PAREN', r'\)')
-
+        self.lexer.add('OPEN_CURLY_BRACKET', r'\{')
+        self.lexer.add('CLOSE_CURLY_BRACKET', r'\}')
         self.lexer.add('OPEN_BRACKET', r'\[')
         self.lexer.add('CLOSE_BRACKET', r'\]')
         self.lexer.add('COLON', r'\:')
@@ -24,7 +25,7 @@ class Lexer():
         #self.lexer.add('HASH', r'\#')
 
         self.lexer.add('NUMBER', r'\d+')
-        self.lexer.add('IDENTIFIER', r'\w[\w\d]*')
+        self.lexer.add('IDENTIFIER', r'\w[\w\d\_\-]*')
 
         # Ignore spaces
         self.lexer.ignore('\s+')

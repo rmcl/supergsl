@@ -3,6 +3,8 @@ from .parser import ParserBuilder
 
 from supergsl.core.backend import AttachSymbolRepositoryPass
 from supergsl.core.parts import ResolvePartPass
+from supergsl.core.assembly import AssemblerPass
+
 
 class CompilerPipeline(object):
 
@@ -10,7 +12,7 @@ class CompilerPipeline(object):
         return [
             AttachSymbolRepositoryPass,
             ResolvePartPass,
-            SliceAndBuildPartSequencePass,
+            AssemblerPass,
         ]
 
     def perform_frontend_compile(self, source_code):
