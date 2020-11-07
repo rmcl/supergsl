@@ -1,17 +1,15 @@
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import IUPAC
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 
 from supergsl.core.output import OutputProvider
 
 
-class GeneBankOutputPass(OutputProvider):
-    """Generate GeneBank file containing an annotated assembly.
-    """
+class GenBankOutputPass(OutputProvider):
+    """Generate GenBank file containing an annotated assembly."""
 
-    name = 'genebank'
+    name = 'genbank'
 
     def get_node_handlers(self):
         return {
@@ -55,7 +53,7 @@ class GeneBankOutputPass(OutputProvider):
             features.append(feature)
             part_start_pos = new_start_pos
 
-        sequence_object = Seq(assembly_sequence, IUPAC.unambiguous_dna)
+        sequence_object = Seq(assembly_sequence)
 
         record = SeqRecord(sequence_object,
            id='123456789', # random accession number

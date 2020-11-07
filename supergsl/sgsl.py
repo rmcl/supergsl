@@ -1,5 +1,4 @@
-#!/usr/local/bin/python
-
+"""Entrypoint for the `sgsl` command used to invoke the superGSL compiler."""
 import argparse
 from supergsl.core.pipeline import CompilerPipeline
 from supergsl.core.output import OutputPipeline
@@ -7,7 +6,6 @@ import pprint
 
 
 def main():
-
     compiler_pipeline = CompilerPipeline()
     output_pipeline = OutputPipeline()
 

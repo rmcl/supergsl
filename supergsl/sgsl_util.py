@@ -1,7 +1,6 @@
-#!/usr/local/bin/python
-
+"""Entrypoint for the `sgsl-util` command used to access utility functions of the SuperGSL compiler."""
 import argparse
-from supergsl.backend.parts import PartSymbolTable
+from supergsl.core.parts.provider import PartSymbolTable
 
 def handle_part_command(args):
     part_table = PartSymbolTable()
@@ -24,14 +23,14 @@ def handle_part_command(args):
         raise Exception('unknown command %s' % args.action)
 
 def main():
-
     parser = argparse.ArgumentParser()
 
     subparsers = parser.add_subparsers(
         title='subcommands',
         description='valid subcommands',
         help='additional help',
-        dest='subcommand')
+        dest='subcommand',
+        required=True)
 
     parser_parts = subparsers.add_parser('part', help='Interact with superGSL part providers.')
     parser_parts.add_argument('part_provider', type=str, help='The provider you wish to introspect.')

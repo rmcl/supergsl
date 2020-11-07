@@ -10,7 +10,7 @@ def typecheck(c):
 
 @task(typecheck)
 def test(c):
-    c.run('nosetests supergsl')
+    c.run('nosetests supergsl', pty=True)
 
 @task
 def bash(c):
