@@ -1,6 +1,10 @@
-*SuperGSL* is a reimplementation of the Genome Specification Language written in python.
+# *SuperGSL*
+
+*SuperGSL* is a python implementation of the Genome Specification Language (GSL) for genetic engineering. *SuperGSL* is very **alpha** so it's probably a bad idea to rely on it for, well, anything.
 
 SuperGSL is inspired by the original Genome Specification Language (See: [Paper](https://pubs.acs.org/doi/abs/10.1021/acssynbio.5b00194) & [Code](https://github.com/Amyris/GslCore)) written by Erin Wilson, Darren Platt and many others at Amyris.
+
+[![Documentation Status](https://readthedocs.org/projects/supergsl/badge/?version=latest)](https://supergsl.readthedocs.io/en/latest/?badge=latest)
 
 ### New Features in SuperGSL
 
