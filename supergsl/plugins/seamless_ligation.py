@@ -7,16 +7,7 @@ from pydna.assembly import Assembly
 from pydna.dseqrecord import Dseqrecord
 
 
-class SeamlessLigationAssembler(AssemblerBase):
-    """Create assemblies utilizing the primer algorithm implemented by fGSL."""
-
-    @property
-    def target_Tm(self):
-        try:
-            return self.options['target_Tm']
-        except KeyError:
-            raise Exception('`target_Tm` must be specified in Assembler options.')
-
+class PartPrimerDesignMixin(object):
 
     def _tm_func_parameters(self):
         """Override the BioPython tm calculation method.
@@ -78,25 +69,34 @@ class SeamlessLigationAssembler(AssemblerBase):
         tm_func, tm_kwargs = self._tm_func_parameters()
         return tm_func(seq, **kwargs)
 
+    def design_primer_for_part(self, part):
+        part_seq_record = part.get_sequence()
+
+        amplicon = primer_design(
+            Dseqrecord(part_seq_record),
+            fp=part.forward_primer,
+            rp=part.reverse_primer,
+            tm=self._perform_tm_func,
+            limit=13)
+
+        if not part.has_primers:
+            part.set_primers(
+                amplicon.forward_primer.seq,
+                amplicon.reverse_primer.seq)
+
+        return amplicon, part_seq_record
+
+class SeamlessLigationAssembler(AssemblerBase):
+    """Create assemblies utilizing the primer algorithm implemented by fGSL."""
+
     def assemble(self, assemblies):
         for assembly in assemblies:
             part_records = []
             part_amplicons = []
             for part_node in assembly.parts:
                 part = part_node.part
-                part_seq_record = part.get_sequence()
 
-                amplicon = primer_design(
-                    Dseqrecord(part_seq_record),
-                    fp=part.forward_primer,
-                    rp=part.reverse_primer,
-                    tm=self._perform_tm_func,
-                    limit=13)
-
-                if not part.has_primers:
-                    part.set_primers(
-                        amplicon.forward_primer.seq,
-                        amplicon.reverse_primer.seq)
+                part_amplicon, part_seq_record = self.design_primer_for_part(part)
 
                 part_records.append(part_seq_record)
                 part_amplicons.append(amplicon)

@@ -2,7 +2,7 @@
 
 SuperGSL is inspired by the original Genome Specification Language (See: [Paper](https://pubs.acs.org/doi/abs/10.1021/acssynbio.5b00194) & [Code](https://github.com/Amyris/GslCore)) written by Erin Wilson, Darren Platt and many others at Amyris.
 
-I refer to the original GSL as *fGSL* because the original gsl is written in F#.
+I refer to the original GSL as *fGSL* because the original GSL is written in F#.
 
 ### Things I don't like about *fGSL*
 
@@ -27,13 +27,13 @@ In *fGSL* you specify the refgenome pragma so that the compiler knows where to f
 #refgenome S288C
 uHO ; pADH1 ; gERG10[1:728] ; ### ; dHO
 ```
-In contrast, in superGSL the import statement allows you to bring in genomes of organisms:
+In contrast, in superGSL the import statement allows you to bring in genomes of specific organisms or parts from a specific repository or other source:
 
 ```
 from S288C import ADH1, ERG10, HO
 
 uHO ; pADH1 ; gERG10[1:728] ; ### ; dHO
-
+```
 
 #### Part Providers
 
@@ -43,7 +43,7 @@ Use the `supergsl-config.json` file to define many part providers to import part
 {
     "part_providers": [
         {
-            "name": "genebank.S288C",
+            "name": "genbank.S288C",
             "provider_class": "supergsl.plugins.file_part.GenbankFilePartProvider",
             "sequence_file_path": "examples/GCF_000146045.2_R64_genomic.gbff.gz"
         }, {
@@ -66,7 +66,7 @@ Classic *fGSL* Slice Syntax:
 `<prefix>PARTNAME[<slice>]`
 1. Use the <prefix> to determine the part type slice, for example `pGAL1`.
 2. Use the <slice> to determine the sub-region of the part type for example pGAL1[1:300] will
-    return the first 300 bp of the promoter region.
+    return the first 300 bp of the promoter region. **Note: fGSL DOES NOT use (zero-based numbering)[https://en.wikipedia.org/wiki/Zero-based_numbering]. Arrays are indexed starting with "1" referring to the first character which some people find completely maddening.**
 
 
 Hierarchical Part Syntax
