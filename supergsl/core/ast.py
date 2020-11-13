@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import cast, Dict, List, Optional, Any
+from typing import cast, Dict, List, Optional, Any, Union
 
 class Node(object):
     def child_nodes(self) -> List[Node]:
@@ -8,6 +8,9 @@ class Node(object):
     def eval(self) -> Dict[str, Any]:
         return {}
 
+    def remove(self):
+        """Remove this node and all of its children from the AST."""
+        self._remove_node = True
 
 class SymbolRepository(object):
 
@@ -113,28 +116,31 @@ class Assembly(Node):
         return self.parts
 
 
-class AssemblyBlock(Node):
-    def __init__(self, assembly_type, assemblies: List[Assembly]):
-        self.assembly_type = assembly_type
-        self.assemblies = assemblies
-        print(self.assemblies)
+Definition = List[Union['Assembly', 'FunctionInvocation']]
+
+
+class FunctionInvocation(Node):
+    def __init__(self, identifier : str, children : List[Definition]):
+        self.identifier = identifier
+        self.child_definitions = children
 
     def eval(self) -> Dict:
         return {
-            'node': 'AssemblyBlock',
-            'assembly_type': self.assembly_type,
-            'assemblies': [
-                assembly.eval()
-                for assembly in self.assemblies
+            'node': 'FunctionInvocation',
+            'identifier': self.identifier,
+            'children': [
+                definition.eval()
+                for definition in self.child_definitions
             ]
         }
 
     def child_nodes(self):
-        return self.assemblies
+        return self.child_definitions
+
 
 class Program(Node):
-    def __init__(self, imports : List[ProgramImport], assembly_blocks : List[AssemblyBlock]):
-        self.assembly_blocks = assembly_blocks
+    def __init__(self, imports : List[ProgramImport], definitions : List[Definition]):
+        self.definitions = definitions
         self.imports = imports
 
     def eval(self) -> dict:
@@ -144,11 +150,11 @@ class Program(Node):
                 impor.eval()
                 for impor in self.imports
             ],
-            'assembly_blocks': [
-                assembly_block.eval()
-                for assembly_block in self.assembly_blocks
+            'definitions': [
+                definition.eval()
+                for definition in self.definitions
             ]
         }
 
     def child_nodes(self) -> List[Node]:
-        return cast(List[Node], self.imports) + cast(List[Node], self.assembly_blocks)
+        return cast(List[Node], self.imports) + cast(List[Node], self.definitions)

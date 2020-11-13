@@ -22,6 +22,9 @@ class ParserBuilder(object):
         'OPEN_CURLY_BRACKET',
         'CLOSE_CURLY_BRACKET',
 
+        'OPEN_PAREN',
+        'CLOSE_PAREN',
+
         'OPEN_BRACKET',
         'CLOSE_BRACKET',
         'COLON',
@@ -38,18 +41,18 @@ class ParserBuilder(object):
 
     def build_parser(self):
         """Define the parser rules."""
-        @self.pg.production('program : import_list assembly_block')
-        @self.pg.production('program : assembly_block')
+        @self.pg.production('program : import_list definition_list')
+        @self.pg.production('program : definition_list')
         def program(state, p):
             imports = []
             if len(p) == 2:
                 # we have at least one import
                 imports = p[0]
-                assembly = [p[1]]
+                definition_list = p[1]
             else:
-                assembly = [p[0]]
+                definition_list = p[0]
 
-            return ast.Program(imports, assembly)
+            return ast.Program(imports, definition_list)
 
         @self.pg.production('import_list : import_list import')
         @self.pg.production('import_list : import')
@@ -80,20 +83,31 @@ class ParserBuilder(object):
                 p[0].append(pi)
                 return p[0]
             else:
+                #print(p[0].source_pos)
                 return [ast.ProgramImportIdentifier(p[0].value)]
 
-        @self.pg.production('assembly_block : IDENTIFIER OPEN_CURLY_BRACKET assembly_list CLOSE_CURLY_BRACKET')
-        def assembly_block(state, p):
-            return ast.AssemblyBlock(p[0].value, p[2])
 
-        @self.pg.production('assembly_list : assembly_list assembly')
-        @self.pg.production('assembly_list : assembly')
-        def assembly_list(state, p):
-            if len(p) == 1:
-                return [p[0]]
-            elif len(p) == 2:
-                p[0].append(p[1])
+        @self.pg.production('definition_list : definition_list function_invoke')
+        @self.pg.production('definition_list : definition_list assembly')
+        @self.pg.production('definition_list : function_invoke')
+        @self.pg.production('definition_list : assembly')
+        def definition_list(state, p):
+            if len(p) == 2:
+                p[0].extend(p[1])
                 return p[0]
+            else:
+                return [p[0]]
+
+
+        @self.pg.production('function_invoke : IDENTIFIER OPEN_PAREN CLOSE_PAREN OPEN_CURLY_BRACKET definition_list CLOSE_CURLY_BRACKET')
+        @self.pg.production('function_invoke : IDENTIFIER OPEN_CURLY_BRACKET definition_list CLOSE_CURLY_BRACKET')
+        def function_invoke(state, p):
+            # Functions can be called with or without parameters enclosed by parenthesis
+            if len(p) == 4:
+                return ast.FunctionInvocation(p[0].value, p[2])
+            elif len(p) == 6:
+                raise Exception('AHHHHHHH')
+
 
         @self.pg.production('assembly : part_list')
         @self.pg.production('assembly : IDENTIFIER COLON part_list')
