@@ -30,6 +30,7 @@ class ParserTestCase(unittest.TestCase):
         """Test building an AST from the parsed tokens of "from S288C import ADHA, ERG10, HO"."""
 
         tokens = iter((
+            # Import
             Token('FROM', 'from'),
             Token('IDENTIFIER', 'S288C'),
             Token('IMPORT', 'import'),
@@ -39,13 +40,15 @@ class ParserTestCase(unittest.TestCase):
             Token('COMMA', ','),
             Token('IDENTIFIER', 'HO'),
 
+            # Single Assembly
             Token('IDENTIFIER', 'uHO'),
         ))
         ast = self.parser.parse(tokens)
 
         self.assertEquals(type(ast), Program)
         self.assertEquals(ast.eval(), {
-            'assemblies': [{
+            'definitions': [{
+                'label': None,
                 'node': 'Assembly',
                 'parts': [{
                     'node': 'Part',
@@ -74,7 +77,8 @@ class ParserTestCase(unittest.TestCase):
 
         self.assertEquals(type(ast), Program)
         self.assertEquals(ast.eval(), {
-            'assemblies': [{
+            'definitions': [{
+                'label': None,
                 'node': 'Assembly',
                 'parts': [{
                     'node': 'Part',
@@ -82,7 +86,103 @@ class ParserTestCase(unittest.TestCase):
                 }, {
                     'node': 'Part',
                     'identifier': 'pADH1',
-                }]
+                }],
+            }],
+            'imports': [],
+            'node': 'Program'
+        })
+
+    def test_build_ast_function_call(self):
+        tokens = iter((
+            Token('IDENTIFIER', 'functest'),
+            Token('OPEN_PAREN', '('),
+            Token('CLOSE_PAREN', ')'),
+            Token('OPEN_CURLY_BRACKET', '{'),
+            Token('IDENTIFIER', 'uHO'),
+            Token('CLOSE_CURLY_BRACKET', '}')
+        ))
+        ast = self.parser.parse(tokens)
+
+        self.assertEquals(type(ast), Program)
+        self.assertEquals(ast.eval(), {
+            'definitions': [{
+                'identifier': 'functest',
+                'node': 'FunctionInvocation',
+                'children': [{
+                    'label': None,
+                    'node': 'Assembly',
+                    'parts': [{
+                        'node': 'Part',
+                        'identifier': 'uHO',
+                    }]
+                }],
+                'params': [],
+                'label': None
+            }],
+            'imports': [],
+            'node': 'Program'
+        })
+
+    def test_build_ast_function_call_with_empty_params(self):
+        tokens = iter((
+            Token('IDENTIFIER', 'functest'),
+            Token('OPEN_PAREN', '('),
+            Token('CLOSE_PAREN', ')'),
+            Token('OPEN_CURLY_BRACKET', '{'),
+            Token('IDENTIFIER', 'uHO'),
+            Token('CLOSE_CURLY_BRACKET', '}')
+        ))
+        ast = self.parser.parse(tokens)
+
+        self.assertEquals(type(ast), Program)
+        self.assertEquals(ast.eval(), {
+            'definitions': [{
+                'identifier': 'functest',
+                'node': 'FunctionInvocation',
+                'children': [{
+                    'label': None,
+                    'node': 'Assembly',
+                    'parts': [{
+                        'node': 'Part',
+                        'identifier': 'uHO',
+                    }]
+                }],
+                'params': [],
+                'label': None
+            }],
+            'imports': [],
+            'node': 'Program'
+        })
+
+    def test_build_ast_function_call_with_params(self):
+        tokens = iter((
+            Token('IDENTIFIER', 'functest'),
+            Token('OPEN_PAREN', '('),
+            Token('IDENTIFIER', 'CHEESE'),
+            Token('CLOSE_PAREN', ')'),
+            Token('OPEN_CURLY_BRACKET', '{'),
+            Token('IDENTIFIER', 'uHO'),
+            Token('CLOSE_CURLY_BRACKET', '}')
+        ))
+        ast = self.parser.parse(tokens)
+
+        self.assertEquals(type(ast), Program)
+        self.assertEquals(ast.eval(), {
+            'definitions': [{
+                'identifier': 'functest',
+                'node': 'FunctionInvocation',
+                'children': [{
+                    'label': None,
+                    'node': 'Assembly',
+                    'parts': [{
+                        'node': 'Part',
+                        'identifier': 'uHO',
+                    }]
+                }],
+                'params': [
+                    'CHEESE'
+                ],
+                'label': None
             }],
             'imports': [],
             'node': 'Program'

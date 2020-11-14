@@ -120,9 +120,11 @@ Definition = List[Union['Assembly', 'FunctionInvocation']]
 
 
 class FunctionInvocation(Node):
-    def __init__(self, identifier : str, children : List[Definition]):
+    def __init__(self, identifier : str, children : List[Definition], params : Optional[List[str]] = None, label : str = None):
         self.identifier = identifier
         self.child_definitions = children
+        self.params = params
+        self.label = label
 
     def eval(self) -> Dict:
         return {
@@ -131,7 +133,9 @@ class FunctionInvocation(Node):
             'children': [
                 definition.eval()
                 for definition in self.child_definitions
-            ]
+            ],
+            'params': self.params,
+            'label': self.label
         }
 
     def child_nodes(self):

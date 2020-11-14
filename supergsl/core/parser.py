@@ -93,20 +93,47 @@ class ParserBuilder(object):
         @self.pg.production('definition_list : assembly')
         def definition_list(state, p):
             if len(p) == 2:
-                p[0].extend(p[1])
+                p[0].append(p[1])
                 return p[0]
             else:
                 return [p[0]]
 
+        @self.pg.production('function_name_and_label : IDENTIFIER')
+        @self.pg.production('function_name_and_label : IDENTIFIER COLON IDENTIFIER')
+        def function_name_and_label(state, p):
+            if len(p) == 3:
+                # return Name and label
+                return p[2].value, p[0].value
+            else:
+                return p[0].value, None
 
-        @self.pg.production('function_invoke : IDENTIFIER OPEN_PAREN CLOSE_PAREN OPEN_CURLY_BRACKET definition_list CLOSE_CURLY_BRACKET')
-        @self.pg.production('function_invoke : IDENTIFIER OPEN_CURLY_BRACKET definition_list CLOSE_CURLY_BRACKET')
+        @self.pg.production('function_invoke : function_name_and_label function_parameter_block')
+        @self.pg.production('function_invoke : function_name_and_label function_parameter_block function_body_block')
         def function_invoke(state, p):
-            # Functions can be called with or without parameters enclosed by parenthesis
-            if len(p) == 4:
-                return ast.FunctionInvocation(p[0].value, p[2])
-            elif len(p) == 6:
-                raise Exception('AHHHHHHH')
+            if len(p) == 2:
+                return ast.FunctionInvocation(p[0][0], None, params=p[1], label=p[0][1])
+            elif len(p) == 3:
+                return ast.FunctionInvocation(p[0][0], children=p[2], params=p[1], label=p[0][1])
+
+        @self.pg.production('function_parameter_block : OPEN_PAREN function_parameters CLOSE_PAREN')
+        @self.pg.production('function_parameter_block : OPEN_PAREN CLOSE_PAREN')
+        def function_param_block(state, p):
+            if len(p) == 2:
+                return []
+            else:
+                return p[1]
+
+        @self.pg.production('function_parameters : IDENTIFIER')
+        @self.pg.production('function_parameters : IDENTIFIER COMMA function_parameters')
+        def params(state, p):
+            x = [p[0].value]
+            if len(p) == 3:
+                x.extend(p[2])
+            return x
+
+        @self.pg.production('function_body_block : OPEN_CURLY_BRACKET definition_list CLOSE_CURLY_BRACKET')
+        def function_body(state, p):
+            return p[1]
 
 
         @self.pg.production('assembly : part_list')
@@ -151,7 +178,8 @@ class ParserBuilder(object):
                 if not state.one_assembly_defined:
                     raise ParsingError('At least one assembly must be defined.')
 
-            raise ValueError(state)
+            raise ParsingError(
+                'An error occurred parsing source document at %s' % lookahead.source_pos)
 
     def parse(self, tokens):
         parser = self.pg.build()
