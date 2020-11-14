@@ -108,18 +108,18 @@ class ParserBuilder(object):
                 return p[0].value, None
 
         @self.pg.production('function_invoke : function_name_and_label function_parameter_block')
-        @self.pg.production('function_invoke : function_name_and_label function_parameter_block function_body_block')
+        @self.pg.production('function_invoke : function_name_and_label OPEN_CURLY_BRACKET definition_list CLOSE_CURLY_BRACKET')
         def function_invoke(state, p):
             if len(p) == 2:
-                return ast.FunctionInvocation(p[0][0], None, params=p[1], label=p[0][1])
-            elif len(p) == 3:
-                return ast.FunctionInvocation(p[0][0], children=p[2], params=p[1], label=p[0][1])
+                return ast.FunctionInvocation(p[0][0], children=[], params=p[1], label=p[0][1])
+            elif len(p) == 4:
+                return ast.FunctionInvocation(p[0][0], children=p[2], params=None, label=p[0][1])
 
         @self.pg.production('function_parameter_block : OPEN_PAREN function_parameters CLOSE_PAREN')
         @self.pg.production('function_parameter_block : OPEN_PAREN CLOSE_PAREN')
         def function_param_block(state, p):
             if len(p) == 2:
-                return []
+                return None
             else:
                 return p[1]
 
@@ -130,11 +130,6 @@ class ParserBuilder(object):
             if len(p) == 3:
                 x.extend(p[2])
             return x
-
-        @self.pg.production('function_body_block : OPEN_CURLY_BRACKET definition_list CLOSE_CURLY_BRACKET')
-        def function_body(state, p):
-            return p[1]
-
 
         @self.pg.production('assembly : part_list')
         @self.pg.production('assembly : IDENTIFIER COLON part_list')
