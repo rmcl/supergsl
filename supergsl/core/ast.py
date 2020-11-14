@@ -8,9 +8,6 @@ class Node(object):
     def eval(self) -> Dict[str, Any]:
         return {}
 
-    def remove(self):
-        """Remove this node and all of its children from the AST."""
-        self._remove_node = True
 
 class SymbolRepository(object):
 
