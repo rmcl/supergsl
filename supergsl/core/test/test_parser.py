@@ -173,3 +173,22 @@ class ParserTestCase(unittest.TestCase):
             'imports': [],
             'node': 'Program'
         })
+
+    def test_build_ast_nucleotide_constant(self):
+        tokens = iter((
+            Token('FORWARD_SLASH', '/'),
+            Token('IDENTIFIER', 'ATGG'),
+            Token('BACKWARD_SLASH', '\\'),
+
+        ))
+        ast = self.parser.parse(tokens)
+
+        self.assertEquals(type(ast), Program)
+        self.assertEquals(ast.eval(), {
+            'definitions': [{
+                'sequence': 'ATGG',
+                'node': 'NucleotideConstant',
+            }],
+            'imports': [],
+            'node': 'Program'
+        })

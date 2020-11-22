@@ -22,6 +22,9 @@ class ParserBuilder(object):
         'OPEN_CURLY_BRACKET',
         'CLOSE_CURLY_BRACKET',
 
+        'FORWARD_SLASH',
+        'BACKWARD_SLASH',
+
         'OPEN_PAREN',
         'CLOSE_PAREN',
 
@@ -86,16 +89,24 @@ class ParserBuilder(object):
                 return [ast.ProgramImportIdentifier(p[0].value)]
 
 
-        @self.pg.production('definition_list : definition_list function_invoke')
-        @self.pg.production('definition_list : definition_list assembly')
-        @self.pg.production('definition_list : function_invoke')
-        @self.pg.production('definition_list : assembly')
+        @self.pg.production('definition_list : definition_list definition')
+        @self.pg.production('definition_list : definition')
         def definition_list(state, p):
             if len(p) == 2:
                 p[0].append(p[1])
                 return p[0]
             else:
                 return [p[0]]
+
+        @self.pg.production('definition : function_invoke')
+        @self.pg.production('definition : assembly')
+        @self.pg.production('definition : nucleotide_constant')
+        def definition(state, p):
+            return p[0]
+
+        @self.pg.production('nucleotide_constant : FORWARD_SLASH IDENTIFIER BACKWARD_SLASH')
+        def nucleotide_constant(state, p):
+            return ast.NucleotideConstant(p[1].value)
 
         @self.pg.production('function_name_and_label : IDENTIFIER')
         @self.pg.production('function_name_and_label : IDENTIFIER COLON IDENTIFIER')
