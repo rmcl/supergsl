@@ -83,7 +83,6 @@ class ParserBuilder(object):
                 p[0].append(pi)
                 return p[0]
             else:
-                #print(p[0].source_pos)
                 return [ast.ProgramImportIdentifier(p[0].value)]
 
 
