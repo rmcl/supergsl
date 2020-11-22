@@ -1,3 +1,4 @@
+import typing
 from supergsl.core.constants import FIVE_PRIME
 from supergsl.core.exception import PartSliceError
 from .part import Part
@@ -27,6 +28,12 @@ def get_flank_len() -> int:
 
 class PrefixedPartSliceMixin(object):
     """A Part Mixin which enables support for fGSL prefixed-parts."""
+
+    # Note: This is an unfortunate check here to make mypy feel good about using
+    # self.identifier which is typically set in the parent class which this is
+    # mixed into.
+    if typing.TYPE_CHECKING:
+        identifier = None
 
     def get_child_part(self, part_prefix, alias=None):
         try:

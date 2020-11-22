@@ -95,8 +95,6 @@ class ParserTestCase(unittest.TestCase):
     def test_build_ast_function_call(self):
         tokens = iter((
             Token('IDENTIFIER', 'functest'),
-            Token('OPEN_PAREN', '('),
-            Token('CLOSE_PAREN', ')'),
             Token('OPEN_CURLY_BRACKET', '{'),
             Token('IDENTIFIER', 'uHO'),
             Token('CLOSE_CURLY_BRACKET', '}')
@@ -116,7 +114,7 @@ class ParserTestCase(unittest.TestCase):
                         'identifier': 'uHO',
                     }]
                 }],
-                'params': [],
+                'params': None,
                 'label': None
             }],
             'imports': [],
@@ -126,8 +124,6 @@ class ParserTestCase(unittest.TestCase):
     def test_build_ast_function_call_with_empty_params(self):
         tokens = iter((
             Token('IDENTIFIER', 'functest'),
-            Token('OPEN_PAREN', '('),
-            Token('CLOSE_PAREN', ')'),
             Token('OPEN_CURLY_BRACKET', '{'),
             Token('IDENTIFIER', 'uHO'),
             Token('CLOSE_CURLY_BRACKET', '}')
@@ -147,7 +143,7 @@ class ParserTestCase(unittest.TestCase):
                         'identifier': 'uHO',
                     }]
                 }],
-                'params': [],
+                'params': None,
                 'label': None
             }],
             'imports': [],
@@ -160,9 +156,6 @@ class ParserTestCase(unittest.TestCase):
             Token('OPEN_PAREN', '('),
             Token('IDENTIFIER', 'CHEESE'),
             Token('CLOSE_PAREN', ')'),
-            Token('OPEN_CURLY_BRACKET', '{'),
-            Token('IDENTIFIER', 'uHO'),
-            Token('CLOSE_CURLY_BRACKET', '}')
         ))
         ast = self.parser.parse(tokens)
 
@@ -171,14 +164,7 @@ class ParserTestCase(unittest.TestCase):
             'definitions': [{
                 'identifier': 'functest',
                 'node': 'FunctionInvocation',
-                'children': [{
-                    'label': None,
-                    'node': 'Assembly',
-                    'parts': [{
-                        'node': 'Part',
-                        'identifier': 'uHO',
-                    }]
-                }],
+                'children': [],
                 'params': [
                     'CHEESE'
                 ],

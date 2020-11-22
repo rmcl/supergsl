@@ -113,7 +113,7 @@ class Assembly(Node):
         return self.parts
 
 
-Definition = List[Union['Assembly', 'FunctionInvocation']]
+Definition = Union['Assembly', 'FunctionInvocation']
 
 
 class FunctionInvocation(Node):

@@ -22,7 +22,7 @@ class BackendPipelinePass(object):
         return self.name
 
     def perform(self, ast : Node) -> Node:
-        raise NotImplemented('Must subclass and implement perform')
+        raise NotImplementedError('Must subclass and implement perform')
 
 
 class BreadthFirstNodeFilteredPass(BackendPipelinePass):
