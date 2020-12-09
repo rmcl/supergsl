@@ -15,6 +15,9 @@ class BackendPipelinePass(object):
     """Base class for implementing a traversal of the AST."""
     name : Optional[str] = None
 
+    def __init__(self, symbol_registry):
+        self.symbol_registry = symbol_registry
+
     def get_pass_name(self):
         if not self.name:
             return type(self).__name__
@@ -90,10 +93,30 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
         return ast
 
 
-class AttachSymbolRepositoryPass(BreadthFirstNodeFilteredPass):
-    """Attach the symbol registry to each node in the AST."""
-    def __init__(self):
-        self.symbol_registry = SymbolRepository()
+class DepthFirstNodeFilteredPass(BreadthFirstNodeFilteredPass):
+    """Perform a depth first traversal of the AST and only visit a subset of node types."""
 
-    def visit(self, node):
-        node.symbol_registry = self.symbol_registry
+    def perform(self, ast : Node) -> Node:
+        ast = self.before_pass(ast)
+
+        if not ast:
+            raise BackendException('before_pass of "%s" did not return an AST node object.' % self)
+
+        node_stack = [ast]
+        discovered = set()
+
+        while len(node_stack) > 0:
+            cur_node = node_stack[-1] # peek
+
+            if cur_node in discovered:
+                node_stack.pop()
+                self.visit(cur_node)
+            else:
+                discovered.add(cur_node)
+                node_stack += cur_node.child_nodes()
+
+        ast = self.after_pass(ast)
+        if not ast:
+            raise BackendException('after_pass of "%s" did not return an AST node object.' % self)
+
+        return ast
