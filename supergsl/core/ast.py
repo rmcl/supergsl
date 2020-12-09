@@ -94,6 +94,13 @@ class ProgramImport(Node):
         return self.imports
 
 
+Definition = Union[
+    'Assembly',
+    'FunctionInvocation',
+    'NucleotideConstant'
+]
+
+
 class Assembly(Node):
     def __init__(self, parts : List[Part], label : Optional[str] = None):
         self.parts = parts
@@ -111,9 +118,6 @@ class Assembly(Node):
 
     def child_nodes(self):
         return self.parts
-
-
-Definition = Union['Assembly', 'FunctionInvocation']
 
 
 class FunctionInvocation(Node):
@@ -137,6 +141,17 @@ class FunctionInvocation(Node):
 
     def child_nodes(self):
         return self.child_definitions
+
+
+class NucleotideConstant(Node):
+    def __init__(self, sequence : str):
+        self.sequence = sequence
+
+    def eval(self) -> dict:
+        return {
+            'node': 'NucleotideConstant',
+            'sequence': self.sequence
+        }
 
 
 class Program(Node):
