@@ -23,8 +23,8 @@ class CompilerPipeline(object):
 
     def get_backend_passes(self):
         return [
-            AttachSymbolRepositoryPass,
-            ResolvePartPass,
+            ResolveImportsPass,
+            InvokeFunctionPass,
             AssemblerPass,
         ]
 
@@ -48,7 +48,7 @@ class CompilerPipeline(object):
         print('BACKEND!!!')
 
         for backend_pass_class in pass_classes:
-            backend_pass_inst = backend_pass_class()
+            backend_pass_inst = backend_pass_class(self._symbol_registry)
 
             print('performing pass... %s' % backend_pass_inst.get_pass_name())
             ast = backend_pass_inst.perform(ast)

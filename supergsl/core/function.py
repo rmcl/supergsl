@@ -94,3 +94,8 @@ class InvokeFunctionPass(DepthFirstNodeFilteredPass):
         return {
             'FunctionInvocation': self.visit_function_invoke_node,
         }
+
+    def visit_function_invoke_node(self, node):
+        function_symbol_table = node.symbol_registry.get_table('functions')
+        node.function = function_symbol_table.get_function(node.identifier)
+        raise NotImplementedError('Gotta implement!')

@@ -121,7 +121,7 @@ class OutputPipeline(object):
             except KeyError:
                 raise Exception('Unknown output format "%s".' % output_format_name)
 
-            output_inst = outputer_class()
+            output_inst = outputer_class(None)
             self.desired_output_providers.append(output_inst)
 
     def resolve_providers(self):
