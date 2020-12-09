@@ -1,20 +1,31 @@
-class ChopChopCRISPRPlugin(SuperGSLPlugin):
+from supergsl.core.plugin import SuperGSLFunction
+
+
+class ChopChopFunction(SuperGSLFunction):
     """Run the ChopChop CLI tool.
 
     http://chopchop.cbu.uib.no/
     https://bitbucket.org/valenlab/chopchop
     """
 
-    def register(self, context):
-        cut_func = FunctionRegistration(
-            'cut', self.cut, return_value=sgsl_types.PART_LIST, help=self.cut.__docstr__)
+    import_path = 'chopchop'
+    name = 'cut'
 
-        cut_fun.add_argument('target_gene', sgsl_types.PART)
-        cut_fun.add_argument('target_genome', sgsl_types.GENOME)
-        cut_fun.add_argument('target_genome', sgsl_types.GENOME)
-        cut_fun.add_argument('num_results', int)
+    def get_help(self):
+        return self.execute.__docstr__
 
-    def cut(self, sgsl_args):
+    def get_arguments(self):
+        return [
+            argument('target_gene', sgsl_types.PART),
+            argument('target_genome', sgsl_types.GENOME),
+            argument('target_genome', sgsl_types.GENOME),
+            argument('num_results', int)
+        ]
+
+    def get_return_value(self):
+        return sgsl_types.PART_LIST
+
+    def execute(self, sgsl_args):
         """
         Generate gRNA for CRISPR/Cas9
 
@@ -22,3 +33,4 @@ class ChopChopCRISPRPlugin(SuperGSLPlugin):
             from example import cut
             cut(HO, CAS9, S288C, results=5)
         """
+        print('CUT IT UP!')
