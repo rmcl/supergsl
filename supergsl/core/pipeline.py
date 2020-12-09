@@ -1,17 +1,30 @@
 from .lexer import Lexer
 from .parser import ParserBuilder
 
-from supergsl.core.backend import AttachSymbolRepositoryPass
-from supergsl.core.parts import ResolvePartPass
+from supergsl.core.ast import SymbolRepository
+from supergsl.core.parts import PartSymbolTable
+from supergsl.core.function import FunctionSymbolTable, InvokeFunctionPass
+from supergsl.core.plugin import PluginProvider
+from supergsl.core.imports import ResolveImportsPass
 from supergsl.core.assembly import AssemblerPass
 
 
 class CompilerPipeline(object):
 
+    def __init__(self):
+        self.initialize_symbol_repository()
+
+        self.plugins = PluginProvider(self._symbol_registry)
+
+    def initialize_symbol_repository(self):
+        self._symbol_registry = SymbolRepository()
+        self._symbol_registry.register('parts', PartSymbolTable())
+        self._symbol_registry.register('functions', FunctionSymbolTable())
+
     def get_backend_passes(self):
         return [
-            AttachSymbolRepositoryPass,
-            ResolvePartPass,
+            ResolveImportsPass,
+            InvokeFunctionPass,
             AssemblerPass,
         ]
 
@@ -35,7 +48,7 @@ class CompilerPipeline(object):
         print('BACKEND!!!')
 
         for backend_pass_class in pass_classes:
-            backend_pass_inst = backend_pass_class()
+            backend_pass_inst = backend_pass_class(self._symbol_registry)
 
             print('performing pass... %s' % backend_pass_inst.get_pass_name())
             ast = backend_pass_inst.perform(ast)

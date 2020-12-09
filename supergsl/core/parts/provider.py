@@ -2,8 +2,7 @@ from collections import namedtuple
 from supergsl.utils import import_class
 from supergsl.core.exception import ConfigurationException
 from supergsl.core.config import settings
-from supergsl.core.backend import BreadthFirstNodeFilteredPass
-from supergsl.core.exception import PartNotFoundException
+from supergsl.core.exception import PartNotFoundException, ProviderNotFoundException
 
 from .prefix_part import PrefixedPartSliceMixin
 
@@ -33,30 +32,6 @@ class PartProvider(object):
 
     def get_child_part(self, identifier, sub_part_identifier):
         raise NotImplementedError('Subclass to implement.')
-
-
-class ResolvePartPass(BreadthFirstNodeFilteredPass):
-
-    def get_node_handlers(self):
-        return {
-            'ProgramImport': self.visit_import_node,
-            'Part': self.visit_part_node,
-        }
-
-    def before_pass(self, ast):
-        self.part_symbol_table = PartSymbolTable()
-        ast.symbol_registry.register('parts', self.part_symbol_table)
-        return ast
-
-    def visit_import_node(self, node):
-        for program_import in node.imports:
-            self.part_symbol_table.resolve_part(
-                '.'.join(node.module),
-                program_import.identifier
-            )
-
-    def visit_part_node(self, node):
-        node.part = self.part_symbol_table.get_part(node.identifier)
 
 
 class PartSymbolTable(object):
@@ -137,4 +112,4 @@ class PartSymbolTable(object):
         try:
             return self._providers[provider_name]
         except KeyError:
-            raise Exception('Unknown part provider "%s".' % provider_name)
+            raise ProviderNotFoundException('Unknown part provider "%s".' % provider_name)

@@ -2,7 +2,7 @@ from invoke import task
 
 @task
 def sgsl(c):
-    c.run('python sgsl')
+    c.run('python supergsl/sgsl')
 
 @task
 def typecheck(c):
