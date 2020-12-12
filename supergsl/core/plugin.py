@@ -29,15 +29,14 @@ class PluginProvider(object):
         function_defined = False
         for name, mod_class in module_classes:
 
-            # Skip the base class
-            if mod_class is SuperGSLFunction:
-                print(name, mod_class)
+            mod_class_name = getattr(mod_class, 'name', None)
+            if not issubclass(mod_class, SuperGSLFunction) or not mod_class_name:
+                print('IGNORING', name, mod_class)
                 continue
 
-            if issubclass(mod_class, SuperGSLFunction):
-                print(name, mod_class, 'YESS')
-                function_symbol_table.register_function(mod_class)
-                function_defined = True
+            print('REGISTERING ', mod_class)
+            function_symbol_table.register_function(mod_class)
+            function_defined = True
 
         #if not function_defined:
         #    raise ConfigurationException('Plugin "%s" did not define anything.' % module_path)

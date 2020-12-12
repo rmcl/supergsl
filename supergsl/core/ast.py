@@ -1,12 +1,16 @@
 from __future__ import annotations
 from typing import cast, Dict, List, Optional, Any, Union
 
+
 class Node(object):
     def child_nodes(self) -> List[Node]:
         return []
 
     def eval(self) -> Dict[str, Any]:
         return {}
+
+    def replace_child_node(self, cur_node, new_node):
+        raise NotImplementedError('"%s" does not implement `replace_child_node`.' % self)
 
 
 class SymbolRepository(object):
@@ -56,7 +60,7 @@ class Part(Node):
 
         return result
 
-    def child_nodes(self):
+    def child_nodes(self) -> List[Node]:
         if self.slice:
             return [self.slice]
         return []
@@ -90,7 +94,7 @@ class ProgramImport(Node):
             ]
         }
 
-    def child_nodes(self):
+    def child_nodes(self) -> List[Node]:
         return self.imports
 
 
@@ -100,6 +104,31 @@ Definition = Union[
     'NucleotideConstant'
 ]
 
+class DefinitionList(Node):
+    def __init__(self, definitions: List[Definition]):
+        self.definitions = definitions
+
+    def add_definition(self, definition : Definition):
+        self.definitions.append(definition)
+
+    def eval(self) -> dict:
+        return {
+            'node': 'DefinitionList',
+            'items': [
+                definition.eval()
+                for definition in self.definitions
+            ]
+        }
+
+    def child_nodes(self) -> List[Node]:
+        return self.definitions
+
+    def replace_child_node(self, old_node, new_node):
+        """Replace an existing child node with a new replacement node."""
+        self.definitions = [
+            new_node if node is old_node else node
+            for node in self.definitions
+        ]
 
 class Assembly(Node):
     def __init__(self, parts : List[Part], label : Optional[str] = None):
@@ -116,14 +145,14 @@ class Assembly(Node):
             'label': self.label
         }
 
-    def child_nodes(self):
+    def child_nodes(self) -> List[Node]:
         return self.parts
 
 
 class FunctionInvocation(Node):
-    def __init__(self, identifier : str, children : List[Definition], params : Optional[List[str]] = None, label : str = None):
+    def __init__(self, identifier : str, child_definition_list : DefinitionList, params : Optional[List[str]] = None, label : str = None):
         self.identifier = identifier
-        self.child_definitions = children
+        self.child_definition_list = child_definition_list
         self.params = params
         self.label = label
 
@@ -131,16 +160,18 @@ class FunctionInvocation(Node):
         return {
             'node': 'FunctionInvocation',
             'identifier': self.identifier,
-            'children': [
-                definition.eval()
-                for definition in self.child_definitions
-            ],
+            'children': self.child_definition_list.eval() if self.child_definition_list else None,
             'params': self.params,
             'label': self.label
         }
 
+    def get_definition_list(self):
+        return self.child_definition_list
+
     def child_nodes(self):
-        return self.child_definitions
+        if self.child_definition_list:
+            return [self.child_definition_list]
+        return []
 
 
 class NucleotideConstant(Node):
@@ -155,7 +186,7 @@ class NucleotideConstant(Node):
 
 
 class Program(Node):
-    def __init__(self, imports : List[ProgramImport], definitions : List[Definition]):
+    def __init__(self, imports : List[ProgramImport], definitions : DefinitionList):
         self.definitions = definitions
         self.imports = imports
 
@@ -166,11 +197,10 @@ class Program(Node):
                 impor.eval()
                 for impor in self.imports
             ],
-            'definitions': [
-                definition.eval()
-                for definition in self.definitions
-            ]
+            'definition_list': self.definitions.eval()
         }
 
     def child_nodes(self) -> List[Node]:
-        return cast(List[Node], self.imports) + cast(List[Node], self.definitions)
+        children : List[Node] = cast(List[Node], self.imports.copy())
+        children.append(cast(List[Node], self.definitions))
+        return children

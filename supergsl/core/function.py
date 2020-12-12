@@ -1,5 +1,5 @@
 from supergsl.core.backend import DepthFirstNodeFilteredPass
-from supergsl.core.exception import FunctionNotFoundException
+from supergsl.core.exception import FunctionNotFoundException, FunctionInvokeError
 
 class SuperGSLFunction(object):
     """Add a callable function to SuperGSL."""
@@ -32,11 +32,11 @@ class SuperGSLFunction(object):
         return []
 
     @classmethod
-    def get_return_value(cls):
+    def get_return_type(cls):
         """Return the expected return value of the function."""
         return None
 
-    def execute(self, sgsl_args):
+    def execute(self, sgsl_args, child_nodes=None):
         """Called when the function is invoke in SuperGSL."""
         pass
 
@@ -96,6 +96,20 @@ class InvokeFunctionPass(DepthFirstNodeFilteredPass):
         }
 
     def visit_function_invoke_node(self, node):
-        function_symbol_table = node.symbol_registry.get_table('functions')
-        node.function = function_symbol_table.get_function(node.identifier)
-        raise NotImplementedError('Gotta implement!')
+        print('INVOKE', node.params)
+
+        if node.params is not None:
+            print('WARNING!!! PASSING PARAMS NOT IMPLEMENTED YET!!!!!!!')
+            #raise NotImplementedError('Passing parameters to functions is not yet implemented.')
+
+        args = {}
+        result_node = node.function.execute(args, node.get_definition_list())
+        expected_return_type = node.function.get_return_type()
+        if not isinstance(result_node, expected_return_type):
+            raise FunctionInvokeError('"%s" Return type does not match expectation. Expected: "%s", Actual: "%s"' % (
+                node.function,
+                expected_return_type,
+                type(result_node[0])
+            ))
+
+        return result_node

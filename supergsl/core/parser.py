@@ -93,10 +93,10 @@ class ParserBuilder(object):
         @self.pg.production('definition_list : definition')
         def definition_list(state, p):
             if len(p) == 2:
-                p[0].append(p[1])
+                p[0].add_definition(p[1])
                 return p[0]
             else:
-                return [p[0]]
+                return ast.DefinitionList([p[0]])
 
         @self.pg.production('definition : function_invoke')
         @self.pg.production('definition : assembly')
@@ -121,9 +121,9 @@ class ParserBuilder(object):
         @self.pg.production('function_invoke : function_name_and_label OPEN_CURLY_BRACKET definition_list CLOSE_CURLY_BRACKET')
         def function_invoke(state, p):
             if len(p) == 2:
-                return ast.FunctionInvocation(p[0][0], children=[], params=p[1], label=p[0][1])
+                return ast.FunctionInvocation(p[0][0], child_definition_list=None, params=p[1], label=p[0][1])
             elif len(p) == 4:
-                return ast.FunctionInvocation(p[0][0], children=p[2], params=None, label=p[0][1])
+                return ast.FunctionInvocation(p[0][0], child_definition_list=p[2], params=None, label=p[0][1])
 
         @self.pg.production('function_parameter_block : OPEN_PAREN function_parameters CLOSE_PAREN')
         @self.pg.production('function_parameter_block : OPEN_PAREN CLOSE_PAREN')

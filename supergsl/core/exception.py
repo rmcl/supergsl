@@ -25,5 +25,9 @@ class PartNotFoundException(Exception):
     pass
 
 
+class FunctionInvokeError(Exception):
+    pass
+
+
 class PartSliceError(Exception):
     pass

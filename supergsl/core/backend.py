@@ -31,7 +31,7 @@ class BackendPipelinePass(object):
 class BreadthFirstNodeFilteredPass(BackendPipelinePass):
     """Perform a breadth first traversal of the AST and only visit a subset of node types."""
 
-    def visit(self, node : Node) -> None:
+    def visit(self, node : Node, parent_node : Optional[Node]) -> None:
         """Visit a node.
 
         This method is called for every node in the AST. The default implementation uses
@@ -58,7 +58,18 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
             pass
 
         if handler_method:
-            handler_method(node)
+            result_node = handler_method(node)
+
+            if result_node is None:
+                raise Exception('Node handler "%s" must return either the supplied AST node or a replacement node.' % handler_method)
+
+            print('VISIT', result_node, node, parent_node)
+            if result_node != node:
+                if not parent_node:
+                    raise Exception('You cannot update the root Program AST node. Tried to update "%s"' % node)
+
+                parent_node.replace_child_node(node, result_node)
+
 
     def get_node_handlers(self) -> Dict[Optional[str], ASTNodeHandlerMethod]:
         """Define handler methods for each node type.
@@ -79,12 +90,15 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
         if not ast:
             raise BackendException('before_pass of "%s" did not return an AST node object.' % self)
 
-        node_visit_queue = [ast]
+        node_visit_queue = [(ast, None)]
         while len(node_visit_queue) > 0:
-            cur_node = node_visit_queue.pop(0)
+            cur_node, cur_node_parent = node_visit_queue.pop(0)
 
-            self.visit(cur_node)
-            node_visit_queue += cur_node.child_nodes()
+            self.visit(cur_node, cur_node_parent)
+            node_visit_queue += [
+                (child, cur_node)
+                for child in cur_node.child_nodes()
+            ]
 
         ast = self.after_pass(ast)
         if not ast:
@@ -102,18 +116,21 @@ class DepthFirstNodeFilteredPass(BreadthFirstNodeFilteredPass):
         if not ast:
             raise BackendException('before_pass of "%s" did not return an AST node object.' % self)
 
-        node_stack = [ast]
+        node_stack = [(ast, None)]
         discovered = set()
 
         while len(node_stack) > 0:
-            cur_node = node_stack[-1] # peek
+            cur_node, cur_node_parent = node_stack[-1] # peek
 
             if cur_node in discovered:
                 node_stack.pop()
-                self.visit(cur_node)
+                self.visit(cur_node, cur_node_parent)
             else:
                 discovered.add(cur_node)
-                node_stack += cur_node.child_nodes()
+                node_stack += [
+                    (child_node, cur_node) # Store both current node and parent.
+                    for child_node in cur_node.child_nodes()
+                ]
 
         ast = self.after_pass(ast)
         if not ast:

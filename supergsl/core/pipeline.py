@@ -6,7 +6,6 @@ from supergsl.core.parts import PartSymbolTable
 from supergsl.core.function import FunctionSymbolTable, InvokeFunctionPass
 from supergsl.core.plugin import PluginProvider
 from supergsl.core.imports import ResolveImportsPass
-from supergsl.core.assembly import AssemblerPass
 
 
 class CompilerPipeline(object):
@@ -25,7 +24,6 @@ class CompilerPipeline(object):
         return [
             ResolveImportsPass,
             InvokeFunctionPass,
-            AssemblerPass,
         ]
 
     def perform_frontend_compile(self, source_code):
