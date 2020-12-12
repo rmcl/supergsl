@@ -1,11 +1,12 @@
+from typing import Optional
 from supergsl.core.backend import DepthFirstNodeFilteredPass
 from supergsl.core.exception import FunctionNotFoundException, FunctionInvokeError
 
 class SuperGSLFunction(object):
     """Add a callable function to SuperGSL."""
 
-    import_path = None
-    name = None
+    import_path : Optional[str] = None
+    name : Optional[str] = None
 
     @classmethod
     def get_name(cls):

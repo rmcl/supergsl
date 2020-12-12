@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Callable
+from typing import List, Tuple, Optional, Dict, Callable
 from .ast import Node
 
 from supergsl.core.ast import SymbolRepository
@@ -29,7 +29,7 @@ class BackendPipelinePass(object):
 
 
 class BreadthFirstNodeFilteredPass(BackendPipelinePass):
-    """Perform a breadth first traversal of the AST and only visit a subset of node types."""
+    """Perform a preorder breadth first traversal of the AST and only visit a subset of node types."""
 
     def visit(self, node : Node, parent_node : Optional[Node]) -> None:
         """Visit a node.
@@ -45,17 +45,11 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
         handler_method : Optional[ASTNodeHandlerMethod] = None
 
         node_type : str = type(node).__name__
-        try:
-            handler_method = handlers[node_type]
-        except KeyError:
-            pass
-
-        # Node specific handler defined for this node_type
-        # see if there is a default handler defined.
-        try:
-            handler_method = handlers[None]
-        except KeyError:
-            pass
+        handler_method = handlers.get(node_type, None)
+        if not handler_method:
+            # No Node specific handler defined for this node_type
+            # see if there is a default handler defined.
+            handler_method = handlers.get(None, None)
 
         if handler_method:
             result_node = handler_method(node)
@@ -69,7 +63,6 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
                     raise Exception('You cannot update the root Program AST node. Tried to update "%s"' % node)
 
                 parent_node.replace_child_node(node, result_node)
-
 
     def get_node_handlers(self) -> Dict[Optional[str], ASTNodeHandlerMethod]:
         """Define handler methods for each node type.
@@ -90,7 +83,7 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
         if not ast:
             raise BackendException('before_pass of "%s" did not return an AST node object.' % self)
 
-        node_visit_queue = [(ast, None)]
+        node_visit_queue : List[Tuple[Node, Optional[Node]]] = [(ast, None)]
         while len(node_visit_queue) > 0:
             cur_node, cur_node_parent = node_visit_queue.pop(0)
 
@@ -108,7 +101,7 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
 
 
 class DepthFirstNodeFilteredPass(BreadthFirstNodeFilteredPass):
-    """Perform a depth first traversal of the AST and only visit a subset of node types."""
+    """Perform a postorder depth first traversal of the AST and only visit a subset of node types."""
 
     def perform(self, ast : Node) -> Node:
         ast = self.before_pass(ast)
@@ -116,7 +109,7 @@ class DepthFirstNodeFilteredPass(BreadthFirstNodeFilteredPass):
         if not ast:
             raise BackendException('before_pass of "%s" did not return an AST node object.' % self)
 
-        node_stack = [(ast, None)]
+        node_stack : List[Tuple[Node, Optional[Node]]] = [(ast, None)]
         discovered = set()
 
         while len(node_stack) > 0:

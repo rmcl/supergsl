@@ -1,5 +1,5 @@
 from supergsl.core.plugin import SuperGSLFunction
-
+from supergsl.core.ast import Assembly, NucleotideConstant
 
 class ChopChopFunction(SuperGSLFunction):
     """Run the ChopChop CLI tool.
@@ -22,10 +22,10 @@ class ChopChopFunction(SuperGSLFunction):
             argument('num_results', int)
         ]
 
-    def get_return_value(self):
-        return sgsl_types.PART_LIST
+    def get_return_type(self):
+        return NucleotideConstant
 
-    def execute(self, sgsl_args):
+    def execute(self, sgsl_args, child_nodes=None):
         """
         Generate gRNA for CRISPR/Cas9
 
@@ -34,3 +34,4 @@ class ChopChopFunction(SuperGSLFunction):
             cut(HO, CAS9, S288C, results=5)
         """
         print('CUT IT UP!')
+        return NucleotideConstant('TTA')

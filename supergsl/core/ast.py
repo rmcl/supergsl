@@ -95,7 +95,7 @@ class ProgramImport(Node):
         }
 
     def child_nodes(self) -> List[Node]:
-        return self.imports
+        return cast(List[Node], self.imports)
 
 
 Definition = Union[
@@ -121,7 +121,7 @@ class DefinitionList(Node):
         }
 
     def child_nodes(self) -> List[Node]:
-        return self.definitions
+        return cast(List[Node], self.definitions)
 
     def replace_child_node(self, old_node, new_node):
         """Replace an existing child node with a new replacement node."""
@@ -132,8 +132,8 @@ class DefinitionList(Node):
 
 class Assembly(Node):
     def __init__(self, parts : List[Part], label : Optional[str] = None):
-        self.parts = parts
-        self.label = label
+        self.parts : List[Part] = parts
+        self.label : Optional[str] = label
 
     def eval(self) -> Dict:
         return {
@@ -146,7 +146,7 @@ class Assembly(Node):
         }
 
     def child_nodes(self) -> List[Node]:
-        return self.parts
+        return cast(List[Node], self.parts)
 
 
 class FunctionInvocation(Node):
@@ -187,8 +187,8 @@ class NucleotideConstant(Node):
 
 class Program(Node):
     def __init__(self, imports : List[ProgramImport], definitions : DefinitionList):
-        self.definitions = definitions
-        self.imports = imports
+        self.definitions : DefinitionList = definitions
+        self.imports : List[ProgramImport] = imports
 
     def eval(self) -> dict:
         return {
@@ -202,5 +202,5 @@ class Program(Node):
 
     def child_nodes(self) -> List[Node]:
         children : List[Node] = cast(List[Node], self.imports.copy())
-        children.append(cast(List[Node], self.definitions))
+        children.append(cast(Node, self.definitions))
         return children
