@@ -100,8 +100,7 @@ class ProgramImport(Node):
 
 Definition = Union[
     'Assembly',
-    'FunctionInvocation',
-    'NucleotideConstant'
+    'FunctionInvocation'
 ]
 
 class DefinitionList(Node):
@@ -150,9 +149,9 @@ class Assembly(Node):
 
 
 class FunctionInvocation(Node):
-    def __init__(self, identifier : str, child_definition_list : DefinitionList, params : Optional[List[str]] = None, label : str = None):
+    def __init__(self, identifier : str, children : DefinitionList, params : Optional[List[str]] = None, label : str = None):
         self.identifier = identifier
-        self.child_definition_list = child_definition_list
+        self.children = children
         self.params = params
         self.label = label
 
@@ -160,7 +159,7 @@ class FunctionInvocation(Node):
         return {
             'node': 'FunctionInvocation',
             'identifier': self.identifier,
-            'children': self.child_definition_list.eval() if self.child_definition_list else None,
+            'children': self.children.eval() if self.children else None,
             'params': self.params,
             'label': self.label
         }
@@ -197,7 +196,7 @@ class Program(Node):
                 impor.eval()
                 for impor in self.imports
             ],
-            'definition_list': self.definitions.eval()
+            'definitions': self.definitions.eval()
         }
 
     def child_nodes(self) -> List[Node]:

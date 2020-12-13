@@ -19,7 +19,7 @@ class Lexer():
         self.lexer.add('OPEN_BRACKET', r'\[')
         self.lexer.add('CLOSE_BRACKET', r'\]')
         self.lexer.add('FORWARD_SLASH', r'\/')
-        self.lexer.add('BACKWARD_SLASH', r'\\')
+        #self.lexer.add('BACKWARD_SLASH', r'\\')
         self.lexer.add('COLON', r'\:')
         self.lexer.add('SEMICOLON', r'\;')
         self.lexer.add('COMMA', r'\,')

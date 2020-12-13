@@ -31,10 +31,9 @@ class PluginProvider(object):
 
             mod_class_name = getattr(mod_class, 'name', None)
             if not issubclass(mod_class, SuperGSLFunction) or not mod_class_name:
-                print('IGNORING', name, mod_class)
                 continue
 
-            print('REGISTERING ', mod_class)
+            print('Registering plugin...', mod_class)
             function_symbol_table.register_function(mod_class)
             function_defined = True
 

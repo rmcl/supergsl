@@ -1,5 +1,6 @@
 import csv
 from typing import Optional
+from supergsl.core.ast import Node
 from supergsl.core.backend import BreadthFirstNodeFilteredPass
 from supergsl.core.exception import ConfigurationException
 from supergsl.core.config import settings
@@ -16,6 +17,12 @@ class OutputProvider(BreadthFirstNodeFilteredPass):
 
         return cls.name
 
+    def before_pass(self, ast : Node) -> Node:
+        pass
+
+    def after_pass(self, ast : Node) -> Node:
+        pass
+
 class ASTPrintOutputProvider(OutputProvider):
     name = 'print'
 
@@ -25,7 +32,6 @@ class ASTPrintOutputProvider(OutputProvider):
         import pprint
         pprint.pprint(ast.eval())
 
-        return ast
 
 class PrimerOutputProvider(OutputProvider):
     name = 'primers'
@@ -45,7 +51,6 @@ class PrimerOutputProvider(OutputProvider):
     def before_pass(self, ast):
         """Initialize the SBOL Document."""
         self.primers = {}
-        return ast
 
     def after_pass(self, ast):
         """Save a TSV of part primers."""
@@ -65,7 +70,6 @@ class PrimerOutputProvider(OutputProvider):
 
                 writer.writerow(output)
 
-        return ast
 
 
 class TestOutputProvider(OutputProvider):
@@ -82,7 +86,6 @@ class TestOutputProvider(OutputProvider):
         """Initialize the SBOL Document."""
         self.parts = []
         self.assemblies = []
-        return ast
 
     def visit_part_node(self, node):
         self.parts.append(node.part)
@@ -121,7 +124,7 @@ class OutputPipeline(object):
             except KeyError:
                 raise Exception('Unknown output format "%s".' % output_format_name)
 
-            output_inst = outputer_class(None)
+            output_inst = outputer_class(None, allow_modification=False)
             self.desired_output_providers.append(output_inst)
 
     def resolve_providers(self):

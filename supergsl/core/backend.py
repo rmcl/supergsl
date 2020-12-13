@@ -15,14 +15,36 @@ class BackendPipelinePass(object):
     """Base class for implementing a traversal of the AST."""
     name : Optional[str] = None
 
-    def __init__(self, symbol_registry):
+    def __init__(self, symbol_registry, allow_modification : bool = True):
         self.symbol_registry = symbol_registry
+        self.allow_modification = allow_modification
 
     def get_pass_name(self):
         if not self.name:
             return type(self).__name__
 
         return self.name
+
+    def call_handler_and_check_result(self, handler, ast_node):
+        """Call handler method on an AST node and check to if the node was modified.
+
+        Apply rules based on the initialization of the pipeline.
+        """
+        new_ast_node = handler(ast_node)
+
+        if not self.allow_modification:
+            if new_ast_node:
+                raise BackendException(
+                    'Handler of "%s" should not modify the AST. Your node handlers should return `None`.' % (
+                        handler
+                    ))
+        else:
+            if not new_ast_node:
+                raise BackendException(
+                    'Handler "%s" pass did not return an AST node object.' % handler)
+
+        return new_ast_node or ast_node
+
 
     def perform(self, ast : Node) -> Node:
         raise NotImplementedError('Must subclass and implement perform')
@@ -52,10 +74,7 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
             handler_method = handlers.get(None, None)
 
         if handler_method:
-            result_node = handler_method(node)
-
-            if result_node is None:
-                raise Exception('Node handler "%s" must return either the supplied AST node or a replacement node.' % handler_method)
+            result_node = self.call_handler_and_check_result(handler_method, node)
 
             print('VISIT', result_node, node, parent_node)
             if result_node != node:
@@ -78,10 +97,7 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
         return ast
 
     def perform(self, ast : Node) -> Node:
-        ast = self.before_pass(ast)
-
-        if not ast:
-            raise BackendException('before_pass of "%s" did not return an AST node object.' % self)
+        ast = self.call_handler_and_check_result(self.before_pass, ast)
 
         node_visit_queue : List[Tuple[Node, Optional[Node]]] = [(ast, None)]
         while len(node_visit_queue) > 0:
@@ -93,10 +109,7 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
                 for child in cur_node.child_nodes()
             ]
 
-        ast = self.after_pass(ast)
-        if not ast:
-            raise BackendException('after_pass of "%s" did not return an AST node object.' % self)
-
+        ast = self.call_handler_and_check_result(self.after_pass, ast)
         return ast
 
 

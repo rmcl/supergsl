@@ -23,7 +23,6 @@ class ParserBuilder(object):
         'CLOSE_CURLY_BRACKET',
 
         'FORWARD_SLASH',
-        'BACKWARD_SLASH',
 
         'OPEN_PAREN',
         'CLOSE_PAREN',
@@ -100,13 +99,8 @@ class ParserBuilder(object):
 
         @self.pg.production('definition : function_invoke')
         @self.pg.production('definition : assembly')
-        @self.pg.production('definition : nucleotide_constant')
         def definition(state, p):
             return p[0]
-
-        @self.pg.production('nucleotide_constant : FORWARD_SLASH IDENTIFIER BACKWARD_SLASH')
-        def nucleotide_constant(state, p):
-            return ast.NucleotideConstant(p[1].value)
 
         @self.pg.production('function_name_and_label : IDENTIFIER')
         @self.pg.production('function_name_and_label : IDENTIFIER COLON IDENTIFIER')
@@ -121,9 +115,9 @@ class ParserBuilder(object):
         @self.pg.production('function_invoke : function_name_and_label OPEN_CURLY_BRACKET definition_list CLOSE_CURLY_BRACKET')
         def function_invoke(state, p):
             if len(p) == 2:
-                return ast.FunctionInvocation(p[0][0], child_definition_list=None, params=p[1], label=p[0][1])
+                return ast.FunctionInvocation(p[0][0], None, p[1], p[0][1])
             elif len(p) == 4:
-                return ast.FunctionInvocation(p[0][0], child_definition_list=p[2], params=None, label=p[0][1])
+                return ast.FunctionInvocation(p[0][0], p[2], None, p[0][1])
 
         @self.pg.production('function_parameter_block : OPEN_PAREN function_parameters CLOSE_PAREN')
         @self.pg.production('function_parameter_block : OPEN_PAREN CLOSE_PAREN')
@@ -151,6 +145,8 @@ class ParserBuilder(object):
 
         @self.pg.production('part_list : part_list SEMICOLON part')
         @self.pg.production('part_list : part')
+        @self.pg.production('part_list : part_list SEMICOLON nucleotide_constant')
+        @self.pg.production('part_list : nucleotide_constant')
         def part_list(state, p):
             if len(p) == 1:
                 return [p[0]]
@@ -159,6 +155,10 @@ class ParserBuilder(object):
                 return p[0]
 
             assert('Cant reach this point.')
+
+        @self.pg.production('nucleotide_constant : FORWARD_SLASH IDENTIFIER FORWARD_SLASH')
+        def nucleotide_constant(state, p):
+            return ast.NucleotideConstant(p[1].value)
 
         @self.pg.production('part : IDENTIFIER slice')
         def sliced_part(state, p):

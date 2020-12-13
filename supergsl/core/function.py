@@ -61,8 +61,6 @@ class FunctionSymbolTable(object):
 
         print('Attempting to resolve function: %s, %s, %s' % (provider_path, function_name, alias))
 
-        print(self._registered_functions)
-
         try:
             function_class = self._registered_functions[(provider_path, function_name)]
         except KeyError:

@@ -47,14 +47,17 @@ class ParserTestCase(unittest.TestCase):
 
         self.assertEquals(type(ast), Program)
         self.assertEquals(ast.eval(), {
-            'definitions': [{
-                'label': None,
-                'node': 'Assembly',
-                'parts': [{
-                    'node': 'Part',
-                    'identifier': 'uHO'
-                }]
-            }],
+            'definitions': {
+                'items': [{
+                    'label': None,
+                    'node': 'Assembly',
+                    'parts': [{
+                        'node': 'Part',
+                        'identifier': 'uHO'
+                    }]
+                }],
+                'node': 'DefinitionList'
+            },
             'imports': [{
                 'imports': [
                     {'identifier': 'ADHA'},
@@ -77,17 +80,20 @@ class ParserTestCase(unittest.TestCase):
 
         self.assertEquals(type(ast), Program)
         self.assertEquals(ast.eval(), {
-            'definitions': [{
-                'label': None,
-                'node': 'Assembly',
-                'parts': [{
-                    'node': 'Part',
-                    'identifier': 'uHO',
-                }, {
-                    'node': 'Part',
-                    'identifier': 'pADH1',
-                }],
-            }],
+            'definitions': {
+                'node': 'DefinitionList',
+                'items': [{
+                    'label': None,
+                    'node': 'Assembly',
+                    'parts': [{
+                        'node': 'Part',
+                        'identifier': 'uHO',
+                    }, {
+                        'node': 'Part',
+                        'identifier': 'pADH1',
+                    }],
+                }]
+            },
             'imports': [],
             'node': 'Program'
         })
@@ -103,20 +109,26 @@ class ParserTestCase(unittest.TestCase):
 
         self.assertEquals(type(ast), Program)
         self.assertEquals(ast.eval(), {
-            'definitions': [{
-                'identifier': 'functest',
-                'node': 'FunctionInvocation',
-                'children': [{
-                    'label': None,
-                    'node': 'Assembly',
-                    'parts': [{
-                        'node': 'Part',
-                        'identifier': 'uHO',
-                    }]
-                }],
-                'params': None,
-                'label': None
-            }],
+            'definitions': {
+                'node': 'DefinitionList',
+                'items': [{
+                    'identifier': 'functest',
+                    'node': 'FunctionInvocation',
+                    'children': {
+                        'node': 'DefinitionList',
+                        'items': [{
+                            'label': None,
+                            'node': 'Assembly',
+                            'parts': [{
+                                'node': 'Part',
+                                'identifier': 'uHO',
+                            }]
+                        }]
+                    },
+                    'params': None,
+                    'label': None
+                }]
+            },
             'imports': [],
             'node': 'Program'
         })
@@ -132,20 +144,26 @@ class ParserTestCase(unittest.TestCase):
 
         self.assertEquals(type(ast), Program)
         self.assertEquals(ast.eval(), {
-            'definitions': [{
-                'identifier': 'functest',
-                'node': 'FunctionInvocation',
-                'children': [{
-                    'label': None,
-                    'node': 'Assembly',
-                    'parts': [{
-                        'node': 'Part',
-                        'identifier': 'uHO',
-                    }]
-                }],
-                'params': None,
-                'label': None
-            }],
+            'definitions': {
+                'node': 'DefinitionList',
+                'items': [{
+                    'identifier': 'functest',
+                    'node': 'FunctionInvocation',
+                    'children': {
+                        'node': 'DefinitionList',
+                        'items': [{
+                            'label': None,
+                            'node': 'Assembly',
+                            'parts': [{
+                                'node': 'Part',
+                                'identifier': 'uHO',
+                            }]
+                        }]
+                    },
+                    'params': None,
+                    'label': None
+                }]
+            },
             'imports': [],
             'node': 'Program'
         })
@@ -161,15 +179,18 @@ class ParserTestCase(unittest.TestCase):
 
         self.assertEquals(type(ast), Program)
         self.assertEquals(ast.eval(), {
-            'definitions': [{
-                'identifier': 'functest',
-                'node': 'FunctionInvocation',
-                'children': [],
-                'params': [
-                    'CHEESE'
-                ],
-                'label': None
-            }],
+            'definitions': {
+                'node': 'DefinitionList',
+                'items': [{
+                    'identifier': 'functest',
+                    'node': 'FunctionInvocation',
+                    'children': None,
+                    'params': [
+                        'CHEESE'
+                    ],
+                    'label': None
+                }]
+            },
             'imports': [],
             'node': 'Program'
         })
@@ -178,17 +199,24 @@ class ParserTestCase(unittest.TestCase):
         tokens = iter((
             Token('FORWARD_SLASH', '/'),
             Token('IDENTIFIER', 'ATGG'),
-            Token('BACKWARD_SLASH', '\\'),
+            Token('FORWARD_SLASH', '/'),
 
         ))
         ast = self.parser.parse(tokens)
 
         self.assertEquals(type(ast), Program)
         self.assertEquals(ast.eval(), {
-            'definitions': [{
-                'sequence': 'ATGG',
-                'node': 'NucleotideConstant',
-            }],
+            'definitions': {
+                'node': 'DefinitionList',
+                'items': [{
+                    'label': None,
+                    'node': 'Assembly',
+                    'parts': [{
+                        'node': 'NucleotideConstant',
+                        'sequence': 'ATGG'
+                    }]
+                }],
+            },
             'imports': [],
             'node': 'Program'
         })
