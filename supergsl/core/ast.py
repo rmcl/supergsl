@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import cast, Dict, List, Optional, Any
+from typing import cast, Dict, List, Optional, Any, Union
+
 
 class Node(object):
     def child_nodes(self) -> List[Node]:
@@ -7,6 +8,9 @@ class Node(object):
 
     def eval(self) -> Dict[str, Any]:
         return {}
+
+    def replace_child_node(self, cur_node, new_node):
+        raise NotImplementedError('"%s" does not implement `replace_child_node`.' % self)
 
 
 class SymbolRepository(object):
@@ -56,7 +60,7 @@ class Part(Node):
 
         return result
 
-    def child_nodes(self):
+    def child_nodes(self) -> List[Node]:
         if self.slice:
             return [self.slice]
         return []
@@ -90,14 +94,45 @@ class ProgramImport(Node):
             ]
         }
 
-    def child_nodes(self):
-        return self.imports
+    def child_nodes(self) -> List[Node]:
+        return cast(List[Node], self.imports)
 
+
+Definition = Union[
+    'Assembly',
+    'FunctionInvocation'
+]
+
+class DefinitionList(Node):
+    def __init__(self, definitions: List[Definition]):
+        self.definitions = definitions
+
+    def add_definition(self, definition : Definition):
+        self.definitions.append(definition)
+
+    def eval(self) -> dict:
+        return {
+            'node': 'DefinitionList',
+            'items': [
+                definition.eval()
+                for definition in self.definitions
+            ]
+        }
+
+    def child_nodes(self) -> List[Node]:
+        return cast(List[Node], self.definitions)
+
+    def replace_child_node(self, old_node, new_node):
+        """Replace an existing child node with a new replacement node."""
+        self.definitions = [
+            new_node if node is old_node else node
+            for node in self.definitions
+        ]
 
 class Assembly(Node):
     def __init__(self, parts : List[Part], label : Optional[str] = None):
-        self.parts = parts
-        self.label = label
+        self.parts : List[Part] = parts
+        self.label : Optional[str] = label
 
     def eval(self) -> Dict:
         return {
@@ -109,33 +144,50 @@ class Assembly(Node):
             'label': self.label
         }
 
-    def child_nodes(self):
-        return self.parts
+    def child_nodes(self) -> List[Node]:
+        return cast(List[Node], self.parts)
 
 
-class AssemblyBlock(Node):
-    def __init__(self, assembly_type, assemblies: List[Assembly]):
-        self.assembly_type = assembly_type
-        self.assemblies = assemblies
-        print(self.assemblies)
+class FunctionInvocation(Node):
+    def __init__(self, identifier : str, children : DefinitionList, params : Optional[List[str]] = None, label : str = None):
+        self.identifier = identifier
+        self.children = children
+        self.params = params
+        self.label = label
 
     def eval(self) -> Dict:
         return {
-            'node': 'AssemblyBlock',
-            'assembly_type': self.assembly_type,
-            'assemblies': [
-                assembly.eval()
-                for assembly in self.assemblies
-            ]
+            'node': 'FunctionInvocation',
+            'identifier': self.identifier,
+            'children': self.children.eval() if self.children else None,
+            'params': self.params,
+            'label': self.label
         }
 
+    def get_definition_list(self):
+        return self.child_definition_list
+
     def child_nodes(self):
-        return self.assemblies
+        if self.child_definition_list:
+            return [self.child_definition_list]
+        return []
+
+
+class NucleotideConstant(Node):
+    def __init__(self, sequence : str):
+        self.sequence = sequence
+
+    def eval(self) -> dict:
+        return {
+            'node': 'NucleotideConstant',
+            'sequence': self.sequence
+        }
+
 
 class Program(Node):
-    def __init__(self, imports : List[ProgramImport], assembly_blocks : List[AssemblyBlock]):
-        self.assembly_blocks = assembly_blocks
-        self.imports = imports
+    def __init__(self, imports : List[ProgramImport], definitions : DefinitionList):
+        self.definitions : DefinitionList = definitions
+        self.imports : List[ProgramImport] = imports
 
     def eval(self) -> dict:
         return {
@@ -144,11 +196,10 @@ class Program(Node):
                 impor.eval()
                 for impor in self.imports
             ],
-            'assembly_blocks': [
-                assembly_block.eval()
-                for assembly_block in self.assembly_blocks
-            ]
+            'definitions': self.definitions.eval()
         }
 
     def child_nodes(self) -> List[Node]:
-        return cast(List[Node], self.imports) + cast(List[Node], self.assembly_blocks)
+        children : List[Node] = cast(List[Node], self.imports.copy())
+        children.append(cast(Node, self.definitions))
+        return children

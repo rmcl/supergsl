@@ -13,7 +13,7 @@ class SuperGSLIntegrationTestCases(TestCase):
         pipeline = CompilerPipeline()
         ast = pipeline.compile(source_code)
 
-        output = TestOutputProvider()
+        output = TestOutputProvider(None, False)
         output.perform(ast)
 
         return output
@@ -39,6 +39,6 @@ class SuperGSLIntegrationTestCases(TestCase):
             parts = result.get_parts()
             self.assertEquals(len(parts), 1)
             self.assertEquals(
-                parts[0].get_sequence(),
+                parts[0].get_sequence().seq,
                 self.expected_sequences.get(part_name).seq,
                 '%s sequence does not match expection' % part_name)

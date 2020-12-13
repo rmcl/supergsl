@@ -22,6 +22,11 @@ class ParserBuilder(object):
         'OPEN_CURLY_BRACKET',
         'CLOSE_CURLY_BRACKET',
 
+        'FORWARD_SLASH',
+
+        'OPEN_PAREN',
+        'CLOSE_PAREN',
+
         'OPEN_BRACKET',
         'CLOSE_BRACKET',
         'COLON',
@@ -38,18 +43,18 @@ class ParserBuilder(object):
 
     def build_parser(self):
         """Define the parser rules."""
-        @self.pg.production('program : import_list assembly_block')
-        @self.pg.production('program : assembly_block')
+        @self.pg.production('program : import_list definition_list')
+        @self.pg.production('program : definition_list')
         def program(state, p):
             imports = []
             if len(p) == 2:
                 # we have at least one import
                 imports = p[0]
-                assembly = [p[1]]
+                definition_list = p[1]
             else:
-                assembly = [p[0]]
+                definition_list = p[0]
 
-            return ast.Program(imports, assembly)
+            return ast.Program(imports, definition_list)
 
         @self.pg.production('import_list : import_list import')
         @self.pg.production('import_list : import')
@@ -82,18 +87,53 @@ class ParserBuilder(object):
             else:
                 return [ast.ProgramImportIdentifier(p[0].value)]
 
-        @self.pg.production('assembly_block : IDENTIFIER OPEN_CURLY_BRACKET assembly_list CLOSE_CURLY_BRACKET')
-        def assembly_block(state, p):
-            return ast.AssemblyBlock(p[0].value, p[2])
 
-        @self.pg.production('assembly_list : assembly_list assembly')
-        @self.pg.production('assembly_list : assembly')
-        def assembly_list(state, p):
-            if len(p) == 1:
-                return [p[0]]
-            elif len(p) == 2:
-                p[0].append(p[1])
+        @self.pg.production('definition_list : definition_list definition')
+        @self.pg.production('definition_list : definition')
+        def definition_list(state, p):
+            if len(p) == 2:
+                p[0].add_definition(p[1])
                 return p[0]
+            else:
+                return ast.DefinitionList([p[0]])
+
+        @self.pg.production('definition : function_invoke')
+        @self.pg.production('definition : assembly')
+        def definition(state, p):
+            return p[0]
+
+        @self.pg.production('function_name_and_label : IDENTIFIER')
+        @self.pg.production('function_name_and_label : IDENTIFIER COLON IDENTIFIER')
+        def function_name_and_label(state, p):
+            if len(p) == 3:
+                # return Name and label
+                return p[2].value, p[0].value
+            else:
+                return p[0].value, None
+
+        @self.pg.production('function_invoke : function_name_and_label function_parameter_block')
+        @self.pg.production('function_invoke : function_name_and_label OPEN_CURLY_BRACKET definition_list CLOSE_CURLY_BRACKET')
+        def function_invoke(state, p):
+            if len(p) == 2:
+                return ast.FunctionInvocation(p[0][0], None, p[1], p[0][1])
+            elif len(p) == 4:
+                return ast.FunctionInvocation(p[0][0], p[2], None, p[0][1])
+
+        @self.pg.production('function_parameter_block : OPEN_PAREN function_parameters CLOSE_PAREN')
+        @self.pg.production('function_parameter_block : OPEN_PAREN CLOSE_PAREN')
+        def function_param_block(state, p):
+            if len(p) == 2:
+                return None
+            else:
+                return p[1]
+
+        @self.pg.production('function_parameters : IDENTIFIER')
+        @self.pg.production('function_parameters : IDENTIFIER COMMA function_parameters')
+        def params(state, p):
+            x = [p[0].value]
+            if len(p) == 3:
+                x.extend(p[2])
+            return x
 
         @self.pg.production('assembly : part_list')
         @self.pg.production('assembly : IDENTIFIER COLON part_list')
@@ -105,6 +145,8 @@ class ParserBuilder(object):
 
         @self.pg.production('part_list : part_list SEMICOLON part')
         @self.pg.production('part_list : part')
+        @self.pg.production('part_list : part_list SEMICOLON nucleotide_constant')
+        @self.pg.production('part_list : nucleotide_constant')
         def part_list(state, p):
             if len(p) == 1:
                 return [p[0]]
@@ -113,6 +155,10 @@ class ParserBuilder(object):
                 return p[0]
 
             assert('Cant reach this point.')
+
+        @self.pg.production('nucleotide_constant : FORWARD_SLASH IDENTIFIER FORWARD_SLASH')
+        def nucleotide_constant(state, p):
+            return ast.NucleotideConstant(p[1].value)
 
         @self.pg.production('part : IDENTIFIER slice')
         def sliced_part(state, p):
@@ -137,7 +183,8 @@ class ParserBuilder(object):
                 if not state.one_assembly_defined:
                     raise ParsingError('At least one assembly must be defined.')
 
-            raise ValueError(state)
+            raise ParsingError(
+                'An error occurred parsing source document at %s' % lookahead.source_pos)
 
     def parse(self, tokens):
         parser = self.pg.build()

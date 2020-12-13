@@ -86,8 +86,11 @@ class PartPrimerDesignMixin(object):
 
         return amplicon, part_seq_record
 
-class SeamlessLigationAssembler(AssemblerBase):
+class SeamlessLigationAssembler(PartPrimerDesignMixin, AssemblerBase):
     """Create assemblies utilizing the primer algorithm implemented by fGSL."""
+
+    import_path = 'seamless'
+    name = 'seamless-ligation'
 
     def assemble(self, assemblies):
         for assembly in assemblies:
@@ -99,7 +102,7 @@ class SeamlessLigationAssembler(AssemblerBase):
                 part_amplicon, part_seq_record = self.design_primer_for_part(part)
 
                 part_records.append(part_seq_record)
-                part_amplicons.append(amplicon)
+                part_amplicons.append(part_amplicon)
 
             fragments = assembly_fragments(part_amplicons)
             for idx in range(len(fragments)):
@@ -117,3 +120,5 @@ class SeamlessLigationAssembler(AssemblerBase):
 
             assembly.contig = linear_contigs[0]
             #print(assembly.contig.figure())
+
+        return assemblies
