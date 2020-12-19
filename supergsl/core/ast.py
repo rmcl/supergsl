@@ -32,7 +32,7 @@ class SymbolRepository(object):
 
 
 class SlicePosition(Node):
-    def __init__(self, index: int, postfix : str, approximate : boolean):
+    def __init__(self, index: int, postfix : str, approximate : bool):
         self.index = index
         self.postfix = postfix
         self.approximate = approximate
@@ -46,7 +46,7 @@ class SlicePosition(Node):
         }
 
 class Slice(Node):
-    def __init__(self, start : int, end : int):
+    def __init__(self, start : SlicePosition, end : SlicePosition):
         self.start = start
         self.end = end
 
