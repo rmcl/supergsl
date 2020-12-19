@@ -34,7 +34,8 @@ class ParserBuilder(object):
         'COMMA',
         'PERIOD',
         'NUMBER',
-        'IDENTIFIER'
+        'IDENTIFIER',
+        'TILDE',
     )
 
     def __init__(self):
@@ -168,13 +169,37 @@ class ParserBuilder(object):
         def simple_part(state, p):
             return ast.Part(p[0].value)
 
-        @self.pg.production('slice : OPEN_BRACKET index_slice CLOSE_BRACKET')
+        @self.pg.production('slice : OPEN_BRACKET slice_index CLOSE_BRACKET')
         def slice(state, p):
             return p[1]
 
-        @self.pg.production('index_slice : NUMBER COLON NUMBER')
+        @self.pg.production('slice_index : slice_position COLON slice_position')
         def index_slice(state, p):
-            return ast.Slice(p[0].value, p[2].value)
+            return ast.Slice(p[0], p[2])
+
+        @self.pg.production('slice_position : TILDE slice_coordinates')
+        @self.pg.production('slice_position : slice_coordinates')
+        def slice_position(state, p):
+            if len(p) == 2:
+                approximate = True
+                position_index, postfix = p[1]
+            else:
+                approximate = False
+                position_index, postfix = p[0]
+
+            return ast.SlicePosition(position_index, postfix, approximate)
+
+        @self.pg.production('slice_coordinates : NUMBER')
+        @self.pg.production('slice_coordinates : NUMBER IDENTIFIER')
+        def slice_position(state, p):
+            position_index = p[0].value
+            postfix = None
+            if len(p) == 2:
+                postfix = p[1].value
+                if postfix not in ['S', 'E']:
+                    raise ParsingError('Slice postfix can only be "S" or "E"')
+
+            return (position_index, postfix)
 
         @self.pg.error
         def error_handle(state, lookahead):

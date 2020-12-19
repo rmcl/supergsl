@@ -26,7 +26,8 @@ class Lexer():
         self.lexer.add('PERIOD', r'\.')
         #self.lexer.add('HASH', r'\#')
 
-        self.lexer.add('NUMBER', r'\d+')
+        self.lexer.add('TILDE', r'~')
+        self.lexer.add('NUMBER', r'-?\d+')
         self.lexer.add('IDENTIFIER', r'\w[\w\d\_\-]*')
 
         # Ignore spaces

@@ -31,6 +31,20 @@ class SymbolRepository(object):
             raise Exception('Unknown symbol table "%s".' % name)
 
 
+class SlicePosition(Node):
+    def __init__(self, index: int, postfix : str, approximate : boolean):
+        self.index = index
+        self.postfix = postfix
+        self.approximate = approximate
+
+    def eval(self) -> Dict[str, Any]:
+        return {
+            'node': 'SlicePosition',
+            'index': self.index,
+            'postfix': self.postfix,
+            'approximate': self.approximate
+        }
+
 class Slice(Node):
     def __init__(self, start : int, end : int):
         self.start = start
@@ -39,8 +53,8 @@ class Slice(Node):
     def eval(self) -> Dict[str, Any]:
         return {
             'node': 'Slice',
-            'start': self.start,
-            'end': self.end
+            'start': self.start.eval(),
+            'end': self.end.eval()
         }
 
 
