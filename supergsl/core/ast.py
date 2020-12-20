@@ -59,20 +59,18 @@ class Slice(Node):
 
 
 class Part(Node):
-    def __init__(self, identifier : str, slice : Optional[Slice] = None):
+    def __init__(self, identifier : str, slice : Optional[Slice], invert : bool):
         self.identifier = identifier
         self.slice = slice
+        self.invert = invert
 
     def eval(self) -> Dict[str, Any]:
-        result : Dict[str, Any] = {
+        return {
             'node': 'Part',
-            'identifier': self.identifier
+            'identifier': self.identifier,
+            'invert': self.invert,
+            'slice': self.slice.eval() if self.slice else None
         }
-
-        if self.slice:
-            result['slice'] = self.slice.eval()
-
-        return result
 
     def child_nodes(self) -> List[Node]:
         if self.slice:

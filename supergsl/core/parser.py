@@ -36,6 +36,7 @@ class ParserBuilder(object):
         'NUMBER',
         'IDENTIFIER',
         'TILDE',
+        'EXCLAMATION',
     )
 
     def __init__(self):
@@ -161,17 +162,28 @@ class ParserBuilder(object):
         def nucleotide_constant(state, p):
             return ast.NucleotideConstant(p[1].value)
 
-        @self.pg.production('part : IDENTIFIER slice')
-        def sliced_part(state, p):
-            return ast.Part(p[0].value, p[1])
+        @self.pg.production('part : part_identifier OPEN_BRACKET slice_index CLOSE_BRACKET')
+        @self.pg.production('part : part_identifier')
+        def part(state, p):
+            identifier, invert = p[0]
+            slice = None
+            if len(p) == 4:
+                slice = p[2]
 
-        @self.pg.production('part : IDENTIFIER')
-        def simple_part(state, p):
-            return ast.Part(p[0].value)
+            return ast.Part(identifier, slice, invert)
 
-        @self.pg.production('slice : OPEN_BRACKET slice_index CLOSE_BRACKET')
-        def slice(state, p):
-            return p[1]
+
+        @self.pg.production('part_identifier : EXCLAMATION IDENTIFIER')
+        @self.pg.production('part_identifier : IDENTIFIER')
+        def part_identifier(state, p):
+            if len(p) == 2:
+                invert = True
+                identifier = p[1].value
+            else:
+                invert = False
+                identifier = p[0].value
+
+            return (identifier, invert)
 
         @self.pg.production('slice_index : slice_position COLON slice_position')
         def index_slice(state, p):
@@ -191,8 +203,8 @@ class ParserBuilder(object):
 
         @self.pg.production('slice_coordinates : NUMBER')
         @self.pg.production('slice_coordinates : NUMBER IDENTIFIER')
-        def slice_position(state, p):
-            position_index = p[0].value
+        def slice_coordinates(state, p):
+            position_index = int(p[0].value)
             postfix = None
             if len(p) == 2:
                 postfix = p[1].value
