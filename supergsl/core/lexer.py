@@ -28,7 +28,6 @@ class Lexer():
 
         self.lexer.add('TILDE', r'~')
         self.lexer.add('EXCLAMATION', r'!')
-        self.lexer.add('TILDE', r'~')
         self.lexer.add('NUMBER', r'-?\d+')
         self.lexer.add('IDENTIFIER', r'\w[\w\d\_\-]*')
 
