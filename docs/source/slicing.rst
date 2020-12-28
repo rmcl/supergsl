@@ -33,7 +33,7 @@ Use positional slice notation
 *******************************************************************************
 
 .. warning::
-   SuperGSL using zero-relative indexing!!!!!!!
+   SuperGSL uses zero-relative indexing!! fGSL starts indexing its parts by 1.
 
 
 =============================================================================
