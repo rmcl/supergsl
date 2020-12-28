@@ -41,8 +41,6 @@ class SuperGSLIntegrationTestCases(TestCase):
             expected = self.expected_sequences.get(part_name, None)
             assert expected is not None, 'Could not find sequence %s' % (part_name)
 
-            print('GENERATED', parts[0].get_sequence().seq)
-            print('EXPECTED', expected.seq)
             self.assertEquals(
                 parts[0].get_sequence().seq,
                 self.expected_sequences.get(part_name).seq,
