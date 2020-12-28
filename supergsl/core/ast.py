@@ -31,34 +31,46 @@ class SymbolRepository(object):
             raise Exception('Unknown symbol table "%s".' % name)
 
 
+class SlicePosition(Node):
+    def __init__(self, index: int, postfix : str, approximate : bool):
+        self.index = index
+        self.postfix = postfix
+        self.approximate = approximate
+
+    def eval(self) -> Dict[str, Any]:
+        return {
+            'node': 'SlicePosition',
+            'index': self.index,
+            'postfix': self.postfix,
+            'approximate': self.approximate
+        }
+
 class Slice(Node):
-    def __init__(self, start : int, end : int):
+    def __init__(self, start : SlicePosition, end : SlicePosition):
         self.start = start
         self.end = end
 
     def eval(self) -> Dict[str, Any]:
         return {
             'node': 'Slice',
-            'start': self.start,
-            'end': self.end
+            'start': self.start.eval(),
+            'end': self.end.eval()
         }
 
 
 class Part(Node):
-    def __init__(self, identifier : str, slice : Optional[Slice] = None):
+    def __init__(self, identifier : str, slice : Optional[Slice], invert : bool):
         self.identifier = identifier
         self.slice = slice
+        self.invert = invert
 
     def eval(self) -> Dict[str, Any]:
-        result : Dict[str, Any] = {
+        return {
             'node': 'Part',
-            'identifier': self.identifier
+            'identifier': self.identifier,
+            'invert': self.invert,
+            'slice': self.slice.eval() if self.slice else None
         }
-
-        if self.slice:
-            result['slice'] = self.slice.eval()
-
-        return result
 
     def child_nodes(self) -> List[Node]:
         if self.slice:
@@ -66,7 +78,7 @@ class Part(Node):
         return []
 
     def __str__(self):
-        return '(%s) %s' % (self.identifier, self.part)
+        return self.identifier
 
 
 class ProgramImportIdentifier(Node):

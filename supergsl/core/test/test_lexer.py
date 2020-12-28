@@ -75,5 +75,15 @@ examples = [
         ('CLOSE_BRACKET', ']'),
         ('SEMICOLON', ';'),
         ('IDENTIFIER', 'dHO')
+    ), (
+        "/* HELLO THIS IS A \n\n COMMENT */ uHO ; pADH1",
+        ('IDENTIFIER', 'uHO'),
+        ('SEMICOLON', ';'),
+        ('IDENTIFIER', 'pADH1')
+    ), (
+        "/* COMMENT */ uHO ; /* COMMENT \n\n\n COMMENT */ pADH1 /* COMMENT */",
+        ('IDENTIFIER', 'uHO'),
+        ('SEMICOLON', ';'),
+        ('IDENTIFIER', 'pADH1')
     )
 ]

@@ -6,6 +6,7 @@ from supergsl.core.parts import PartSymbolTable
 from supergsl.core.function import FunctionSymbolTable, InvokeFunctionPass
 from supergsl.core.plugin import PluginProvider
 from supergsl.core.imports import ResolveImportsPass
+from supergsl.core.parts.slice import ResolvePartSlicePass
 
 
 class CompilerPipeline(object):
@@ -23,6 +24,7 @@ class CompilerPipeline(object):
     def get_backend_passes(self):
         return [
             ResolveImportsPass,
+            ResolvePartSlicePass,
             InvokeFunctionPass,
         ]
 
