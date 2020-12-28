@@ -78,7 +78,7 @@ class Part(Node):
         return []
 
     def __str__(self):
-        return '(%s) %s' % (self.identifier, self.part)
+        return self.identifier
 
 
 class ProgramImportIdentifier(Node):

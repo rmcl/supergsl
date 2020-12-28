@@ -36,9 +36,10 @@ class ResolvePartSlicePass(BreadthFirstNodeFilteredPass):
 
     def visit_part_node(self, node):
         """Visit each `ast.Part` node and perform part slicing if neccessary."""
+
         if not node.slice:
-            print(node, ' does not require slicing. no slice specified.')
-            return
+            print(node, 'does not require slicing. no slice specified.')
+            return node
 
         parent_part = node.part
         node.parent_parts = [node.part]

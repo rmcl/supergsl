@@ -53,7 +53,9 @@ class ParserTestCase(unittest.TestCase):
                     'node': 'Assembly',
                     'parts': [{
                         'node': 'Part',
-                        'identifier': 'uHO'
+                        'identifier': 'uHO',
+                        'invert': False,
+                        'slice': None
                     }]
                 }],
                 'node': 'DefinitionList'
@@ -88,9 +90,13 @@ class ParserTestCase(unittest.TestCase):
                     'parts': [{
                         'node': 'Part',
                         'identifier': 'uHO',
+                        'invert': False,
+                        'slice': None
                     }, {
                         'node': 'Part',
                         'identifier': 'pADH1',
+                        'invert': False,
+                        'slice': None
                     }],
                 }]
             },
@@ -122,6 +128,8 @@ class ParserTestCase(unittest.TestCase):
                             'parts': [{
                                 'node': 'Part',
                                 'identifier': 'uHO',
+                                'invert': False,
+                                'slice': None
                             }]
                         }]
                     },
@@ -157,6 +165,8 @@ class ParserTestCase(unittest.TestCase):
                             'parts': [{
                                 'node': 'Part',
                                 'identifier': 'uHO',
+                                'invert': False,
+                                'slice': None
                             }]
                         }]
                     },
