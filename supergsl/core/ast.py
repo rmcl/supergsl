@@ -177,12 +177,13 @@ class FunctionInvocation(Node):
         }
 
     def get_definition_list(self):
-        return self.child_definition_list
+        return self.children
 
     def child_nodes(self):
-        if self.child_definition_list:
-            return [self.child_definition_list]
-        return []
+        if self.children:
+            return [self.children]
+        else:
+            return []
 
 
 class NucleotideConstant(Node):
