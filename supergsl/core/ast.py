@@ -82,12 +82,14 @@ class Part(Node):
 
 
 class ProgramImportIdentifier(Node):
-    def __init__(self, identifier : str):
+    def __init__(self, identifier : str, alias : Optional[str]):
         self.identifier : str = identifier
+        self.alias : Optional[str] = alias
 
     def eval(self) -> dict:
         return {
-            'identifier': self.identifier
+            'identifier': self.identifier,
+            'alias': self.alias
         }
 
 

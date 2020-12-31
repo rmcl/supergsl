@@ -12,12 +12,12 @@ class ParserState(object):
         self.one_assembly_defined = False
 
 
-
 class ParserBuilder(object):
     # A list of all token names accepted by the parser.
     ACCEPTED_TOKENS = (
         'FROM',
         'IMPORT',
+        'AS',
 
         'OPEN_CURLY_BRACKET',
         'CLOSE_CURLY_BRACKET',
@@ -79,16 +79,25 @@ class ParserBuilder(object):
             else:
                 return [p[0].value]
 
-        @self.pg.production('import_identifiers : import_identifiers COMMA IDENTIFIER')
-        @self.pg.production('import_identifiers : IDENTIFIER')
+        @self.pg.production('import_identifiers : import_identifiers COMMA import_identifier')
+        @self.pg.production('import_identifiers : import_identifier')
         def program_import_identifiers(state, p):
             if len(p) == 3:
-                pi = ast.ProgramImportIdentifier(p[2].value)
-                p[0].append(pi)
+                p[0].append(p[2])
                 return p[0]
             else:
-                return [ast.ProgramImportIdentifier(p[0].value)]
+                return [p[0]]
 
+        @self.pg.production('import_identifier : IDENTIFIER AS IDENTIFIER')
+        @self.pg.production('import_identifier : IDENTIFIER')
+        def import_identifier(state, p):
+            import_identifier = p[0].value
+            if len(p) == 3:
+                alias_identifier = p[2].value
+            else:
+                alias_identifier = None
+
+            return ast.ProgramImportIdentifier(import_identifier, alias_identifier)
 
         @self.pg.production('definition_list : definition_list definition')
         @self.pg.production('definition_list : definition')
