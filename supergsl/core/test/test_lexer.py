@@ -14,18 +14,19 @@ class LexerTestCase(unittest.TestCase):
             inp = example[0]
             expected_tokens = list(example[1:])
 
-        tokens = [
-            (
-                token.gettokentype(),
-                token.value
-            )
-            for token in self.lexer.lex(inp)
-        ]
+            tokens = [
+                (
+                    token.gettokentype(),
+                    token.value
+                )
+                for token in self.lexer.lex(inp)
+            ]
 
-        self.assertEqual(
-            tokens,
-            expected_tokens,
-            'Unexpected tokens for example %d' % idx)
+            print(tokens)
+            self.assertEqual(
+                tokens,
+                expected_tokens,
+                'Unexpected tokens for example %d' % idx)
 
 
 examples = [
@@ -51,13 +52,15 @@ examples = [
         ('IDENTIFIER', 'dHO')
     ), (
         """
-        from S288C import ADHA, ERG10, HO
+        from S288C import ADHA as ADHA_is_great, ERG10, HO
         uHO ; pADH1 ; gERG10[1:728] ; dHO
         """,
         ('FROM', 'from'),
         ('IDENTIFIER', 'S288C'),
         ('IMPORT', 'import'),
         ('IDENTIFIER', 'ADHA'),
+        ('AS', 'as'),
+        ('IDENTIFIER', 'ADHA_is_great'),
         ('COMMA', ','),
         ('IDENTIFIER', 'ERG10'),
         ('COMMA', ','),

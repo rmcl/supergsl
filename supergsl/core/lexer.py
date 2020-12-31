@@ -9,6 +9,7 @@ class Lexer():
         # Reserved Words
         self.lexer.add('FROM', r'from')
         self.lexer.add('IMPORT', r'import')
+        self.lexer.add('AS', r'as')
 
         # Other characters
         self.lexer.add('OPEN_PAREN', r'\(')

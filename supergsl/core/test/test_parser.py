@@ -35,6 +35,8 @@ class ParserTestCase(unittest.TestCase):
             Token('IDENTIFIER', 'S288C'),
             Token('IMPORT', 'import'),
             Token('IDENTIFIER', 'ADHA'),
+            Token('AS', 'as'),
+            Token('IDENTIFIER', 'BLOOP'),
             Token('COMMA', ','),
             Token('IDENTIFIER', 'ERG10'),
             Token('COMMA', ','),
@@ -62,9 +64,9 @@ class ParserTestCase(unittest.TestCase):
             },
             'imports': [{
                 'imports': [
-                    {'identifier': 'ADHA'},
-                    {'identifier': 'ERG10'},
-                    {'identifier': 'HO'}
+                    {'alias': 'BLOOP', 'identifier': 'ADHA'},
+                    {'alias': None, 'identifier': 'ERG10'},
+                    {'alias': None, 'identifier': 'HO'}
                 ],
                 'module': ['S288C'],
                 'node': 'Import'
