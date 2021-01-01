@@ -40,7 +40,7 @@ Use positional slice notation
 Approximate Positions
 =============================================================================
 
-The "~" prefix in slice notation specifies that the range is approximate and can be adjusted by the compiler to optimize primer anneal efficiency (if supported by your desired [Assembler](assemblies)).
+The "~" prefix in slice notation specifies that the range is approximate and can be adjusted by the compiler to optimize primer anneal efficiency (if supported by your desired :ref:`assemblies:Assembly Strategies`).
 
 =============================================================================
 Postfixes
