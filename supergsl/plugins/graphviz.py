@@ -1,4 +1,4 @@
-from graphviz import Digraph, Graph
+from graphviz import Digraph
 
 from supergsl.core.backend import BreadthFirstNodeFilteredPass
 from supergsl.core.output import OutputProvider
