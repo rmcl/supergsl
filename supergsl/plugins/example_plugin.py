@@ -1,7 +1,12 @@
-class ExamplePlugin(SuperGSLPlugin):
+from supergsl.core.function import SuperGSLFunction
+
+
+class ExamplePlugin(SuperGSLFunction):
 
     # Types of plugins
-    #    - SuperGSL Function
+    #   - SuperGSL Function
+    #   - Part Provider?
+    #   - Output Provider
 
 
     def register(self, context):

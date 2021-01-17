@@ -1,4 +1,7 @@
 from supergsl.core.output import OutputProvider
+
+import sbol3
+"""
 from sbol import (
     setHomespace,
     Config,
@@ -12,6 +15,7 @@ from sbol import (
     SO_MISC,
     SO_CDS,
 )
+"""
 
 
 class SBOLOutputPass(OutputProvider):

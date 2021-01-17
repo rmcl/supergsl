@@ -1,3 +1,5 @@
+from rply.errors import LexingError
+
 from .lexer import Lexer
 from .parser import ParserBuilder
 
@@ -8,6 +10,7 @@ from supergsl.core.plugin import PluginProvider
 from supergsl.core.imports import ResolveImportsPass
 from supergsl.core.parts.slice import ResolvePartSlicePass
 
+from supergsl.plugins.graphviz import ASTGraphPass
 
 class CompilerPipeline(object):
 
@@ -25,6 +28,7 @@ class CompilerPipeline(object):
         return [
             ResolveImportsPass,
             ResolvePartSlicePass,
+            ASTGraphPass,
             InvokeFunctionPass,
         ]
 
@@ -40,7 +44,23 @@ class CompilerPipeline(object):
         tokens = self.get_lexer().lex(source_code)
 
         parser = self.get_parser()
-        return parser.parse(tokens)
+
+        try:
+            return parser.parse(tokens)
+        except LexingError as error:
+
+            ## Todo(rmcl): BIG TODO HERE! How do we want to display lex errors?
+            error_pos = error.getsourcepos().idx
+            context_start = min(error_pos-25, 0)
+            context_end = max(error_pos+50, len(source_code))
+            code_context = '%s**%s**%s' % (
+                source_code[context_start:error_pos],
+                source_code[error_pos],
+                source_code[error_pos+1:context_end]
+            )
+
+
+            print('Syntax error: %s' % code_context)
 
     def perform_backend_compile(self, ast):
         pass_classes = self.get_backend_passes()

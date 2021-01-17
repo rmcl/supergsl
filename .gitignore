@@ -71,8 +71,13 @@ venv/
 *.c
 
 # supergsl specific
-examples
+#examples
 notebooks
 
 #docs
 docs/build
+
+# temp
+supergsl/test/not-converted-examples
+sgsl-lib/
+examples/Gslc-master

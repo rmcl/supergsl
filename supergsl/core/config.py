@@ -1,3 +1,4 @@
+import os
 import logging
 import json
 from json import JSONDecodeError
@@ -19,5 +20,8 @@ def load_config_file(config_file_path, optional=False):
     except JSONDecodeError as error:
         raise ConfigurationException('Error parsing config file: "%s"' % config_file_path, error)
 
-load_config_file('supergsl-config-default.json', optional=True)
-load_config_file('supergsl-config.json', optional=False)
+
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/../'
+
+load_config_file('%s/supergsl-config-default.json' % base_dir, optional=True)
+load_config_file('%s/supergsl-config.json' % base_dir, optional=False)
