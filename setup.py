@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="supergsl", # Replace with your own username
+    name="supergsl",
     version="0.0.1",
     author="Russell McLoughlin",
     author_email="russ.mcl@gmail.com",
@@ -26,11 +26,18 @@ setuptools.setup(
         'nose',
         'biopython',
         'pydna',
-        'pysbol',
         'mock',
         'mypy',
         'mypy-extensions',
+
     ],
+    extras_require={
+        "plugins": [
+            'docker',
+            'dnachisel',
+            'sbol3',
+        ]
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
@@ -38,5 +45,5 @@ setuptools.setup(
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
 )
