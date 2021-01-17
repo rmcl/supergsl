@@ -12,6 +12,8 @@ class Node(object):
     def replace_child_node(self, cur_node, new_node):
         raise NotImplementedError('"%s" does not implement `replace_child_node`.' % self)
 
+    def get_node_label(self):
+        return str(self.__class__.__name__)
 
 class SymbolRepository(object):
 
@@ -45,6 +47,13 @@ class SlicePosition(Node):
             'approximate': self.approximate
         }
 
+    def get_slice_pos_str(self):
+        return '%s%d%s' % (
+            '~' if self.approximate else '',
+            self.index,
+            self.postfix if self.postfix else ''
+        )
+
 class Slice(Node):
     def __init__(self, start : SlicePosition, end : SlicePosition):
         self.start = start
@@ -56,6 +65,12 @@ class Slice(Node):
             'start': self.start.eval(),
             'end': self.end.eval()
         }
+
+    def get_slice_str(self):
+        return '%s:%s' % (
+            self.start.get_slice_pos_str(),
+            self.end.get_slice_pos_str()
+        )
 
 
 class Part(Node):
@@ -80,6 +95,8 @@ class Part(Node):
     def __str__(self):
         return self.identifier
 
+    def get_node_label(self):
+        return '%s:%s' % (self.__class__.__name__, self.identifier)
 
 
 class ImportIdentifier(Node):
@@ -92,6 +109,15 @@ class ImportIdentifier(Node):
             'identifier': self.identifier,
             'alias': self.alias
         }
+
+    def get_node_label(self):
+        label = '%s: %s' % (
+            self.__class__.__name__,
+            self.identifier,
+        )
+        if self.alias:
+            label = label + ' (%s)' % self.alias
+        return label
 
 class Import(Node):
     def __init__(self, module_path : str, import_identifiers : List[ImportIdentifier]):
@@ -110,6 +136,9 @@ class Import(Node):
 
     def child_nodes(self) -> List[Node]:
         return cast(List[Node], self.imports)
+
+    def get_node_label(self):
+        return '%s:%s' % (self.__class__.__name__, '.'.join(self.module))
 
 
 Definition = Union[
