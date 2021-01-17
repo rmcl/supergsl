@@ -10,7 +10,7 @@ class ResolveImportsPass(BreadthFirstNodeFilteredPass):
 
     def get_node_handlers(self):
         return {
-            'ProgramImport': self.visit_import_node,
+            'Import': self.visit_import_node,
             'Part': self.visit_part_node,
             'FunctionInvocation': self.visit_function_invoke_node,
         }

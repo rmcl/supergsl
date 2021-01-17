@@ -81,7 +81,8 @@ class Part(Node):
         return self.identifier
 
 
-class ProgramImportIdentifier(Node):
+
+class ImportIdentifier(Node):
     def __init__(self, identifier : str, alias : Optional[str]):
         self.identifier : str = identifier
         self.alias : Optional[str] = alias
@@ -92,9 +93,8 @@ class ProgramImportIdentifier(Node):
             'alias': self.alias
         }
 
-
-class ProgramImport(Node):
-    def __init__(self, module_path : str, import_identifiers : List[ProgramImportIdentifier]):
+class Import(Node):
+    def __init__(self, module_path : str, import_identifiers : List[ImportIdentifier]):
         self.module = module_path
         self.imports = import_identifiers
 
@@ -200,9 +200,9 @@ class NucleotideConstant(Node):
 
 
 class Program(Node):
-    def __init__(self, imports : List[ProgramImport], definitions : DefinitionList):
+    def __init__(self, imports : List[Import], definitions : DefinitionList):
         self.definitions : DefinitionList = definitions
-        self.imports : List[ProgramImport] = imports
+        self.imports : List[Import] = imports
 
     def eval(self) -> dict:
         return {

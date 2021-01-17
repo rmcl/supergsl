@@ -69,7 +69,7 @@ class ParserBuilder(object):
 
         @self.pg.production('import : FROM import_module IMPORT import_identifiers')
         def program_import(state, p):
-            return ast.ProgramImport(p[1], p[3])
+            return ast.Import(p[1], p[3])
 
         @self.pg.production('import_module : import_module PERIOD IDENTIFIER')
         @self.pg.production('import_module : IDENTIFIER')
@@ -97,7 +97,7 @@ class ParserBuilder(object):
             else:
                 alias_identifier = None
 
-            return ast.ProgramImportIdentifier(import_identifier, alias_identifier)
+            return ast.ImportIdentifier(import_identifier, alias_identifier)
 
         @self.pg.production('definition_list : definition_list definition')
         @self.pg.production('definition_list : definition')
