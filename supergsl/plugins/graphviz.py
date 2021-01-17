@@ -1,9 +1,10 @@
 from graphviz import Digraph, Graph
 
 from supergsl.core.backend import BreadthFirstNodeFilteredPass
+from supergsl.core.output import OutputProvider
 
-
-class PartSliceTreePass(BreadthFirstNodeFilteredPass):
+class PartSliceTreeOutputProvider(OutputProvider):
+    name = 'part-slice-graph'
 
     def get_node_handlers(self):
         return {
@@ -24,11 +25,10 @@ class PartSliceTreePass(BreadthFirstNodeFilteredPass):
         self._node_names = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
         self.cur_node_count = 0
         self.graph = Digraph(comment='Parts')
-        return ast
 
     def after_pass(self, ast):
         print(self.graph.source)
-        return ast
+
 
     def visit_part(self, part_graph, part):
         part_node_name = self.get_node_name(part)
@@ -56,7 +56,6 @@ class PartSliceTreePass(BreadthFirstNodeFilteredPass):
             assembly_graph.subgraph(part_graph)
 
         self.graph.subgraph(assembly_graph)
-        return assembly_node
 
 class ASTGraphPass(BreadthFirstNodeFilteredPass):
     name = 'ASTDotGraph'
