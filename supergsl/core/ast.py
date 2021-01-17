@@ -1,4 +1,3 @@
-from __future__ import annotations
 from typing import cast, Dict, List, Optional, Any, Union
 
 
