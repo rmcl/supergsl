@@ -3,6 +3,7 @@ from graphviz import Digraph
 from supergsl.core.backend import BreadthFirstNodeFilteredPass
 from supergsl.core.output import OutputProvider
 
+
 class PartSliceTreeOutputProvider(OutputProvider):
     name = 'part-slice-graph'
 
@@ -41,11 +42,11 @@ class PartSliceTreeOutputProvider(OutputProvider):
         elif part.start.reference:
             reference = part.provider
             reference_node_name = self.get_node_name(reference)
-            part_graph.node(reference_node_name, reference.name)
+            part_graph.node(reference_node_name, reference.name, shape='diamond', style='filled', color='lightgrey')
             part_graph.edge(part_node_name, reference_node_name)
 
     def visit_assembly(self, assembly_node):
-        assembly_graph = Digraph(name=str(assembly_node))
+        #assembly_graph = Digraph(name=str(assembly_node))
 
         for part_node in assembly_node.parts:
             part_graph = Digraph(name=part_node.identifier)
@@ -53,9 +54,9 @@ class PartSliceTreeOutputProvider(OutputProvider):
 
             self.visit_part(part_graph, part)
 
-            assembly_graph.subgraph(part_graph)
+            #assembly_graph.subgraph(part_graph)
 
-        self.graph.subgraph(assembly_graph)
+            self.graph.subgraph(part_graph)
 
 class ASTGraphPass(BreadthFirstNodeFilteredPass):
     name = 'ASTDotGraph'
