@@ -31,7 +31,6 @@ class JSONOutputPass(OutputProvider):
     def after_pass(self, ast):
         import pprint
         pprint.pprint(self.json_output)
-        #self.sbol_doc.write('output_sbol.xml')
         return ast
 
     def visit_part_node(self, node):

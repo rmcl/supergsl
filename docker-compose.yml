@@ -9,3 +9,15 @@ services:
       context: .
     volumes:
       - .:/code/
+
+
+  # fGSL helpful docker container.
+  # Run the original GSL in a docker container. This may be useful for debugging
+  # purposes.
+
+  fgsl:
+    container_name: fgsl
+    tty: true
+    build:
+      dockerfile: Dockerfile
+      context: supergsl/plugins/fgsl/

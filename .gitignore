@@ -73,3 +73,6 @@ venv/
 # supergsl specific
 examples
 notebooks
+
+#docs
+docs/build

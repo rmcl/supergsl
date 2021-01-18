@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.0.1",
     author="Russell McLoughlin",
     author_email="russ.mcl@gmail.com",
-    description="A python implemention of the Genome Specification Language (GSL) for genetic engineering.",
+    description="A python implementation of the Genome Specification Language (GSL) for genetic engineering.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/rmcl/supergsl",
@@ -38,5 +38,5 @@ setuptools.setup(
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
 )

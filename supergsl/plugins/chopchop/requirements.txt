@@ -1,0 +1,7 @@
+biopython==1.76
+pandas
+numpy
+scipy
+argparse
+scikit-learn==0.18.1
+invoke
