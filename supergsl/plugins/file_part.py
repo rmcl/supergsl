@@ -71,31 +71,35 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
             self.load()
 
         try:
-            feature = self._genes[gene_name]
+            reference_feature = self._genes[gene_name]
         except KeyError:
             raise PartNotFoundException('Part not found "%s" in %s.' % (
                 gene_name, self.get_provider_name()))
 
-        chromosome_num = feature['chrom#']
+        # Make a copy of the reference feature and modify it to conform
+        # to possibly complemented reference sequence
+        new_gene_feature = reference_feature.copy()
+
+        chromosome_num = new_gene_feature['chrom#']
         chromosome_sequence = self._sequence_by_chromosome[chromosome_num]
 
-        strand = feature['strand']
+        strand = new_gene_feature['strand']
         if strand == 'C':
             # Translate the position present in the file to be relative to the
             # other strand of DNA (reverse complement).
             reference_sequence = chromosome_sequence.reverse_complement().seq
             reference_len = len(reference_sequence)
 
-            tmp_from = int(feature['from'])
-            feature['from'] = reference_len - int(feature['to']) - 1
-            feature['to'] = reference_len - tmp_from
+            tmp_from = int(new_gene_feature['from'])
+            new_gene_feature['from'] = reference_len - int(new_gene_feature['to']) - 1
+            new_gene_feature['to'] = reference_len - tmp_from
 
         else:
-            feature['from'] = int(feature['from'])
-            feature['to'] = int(feature['to']) + 1
+            new_gene_feature['from'] = int(new_gene_feature['from'])
+            new_gene_feature['to'] = int(new_gene_feature['to']) + 1
             reference_sequence = chromosome_sequence.seq
 
-        return reference_sequence, feature
+        return reference_sequence, new_gene_feature
 
     def _get_alternative_names_from_feature(self, feature):
         alternative_names = set([
