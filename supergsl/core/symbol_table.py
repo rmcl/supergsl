@@ -7,14 +7,14 @@ class SymbolTable(object):
 
     def __init__(self):
         self._path_to_plugins = {}
-        self._symbols : Tuple[Pattern, ] = []
+        self._symbols_providers : Tuple[Pattern, object] = []
+        self._symbols = {}
 
     def register(self, plugin_import_path : str, plugin_class) -> None:
         """Register a plugin provider to be available for import a given import path."""
         self._path_to_plugins[plugin_import_path] = plugin_class
 
     def get_plugin_provider(self, plugin_import_path):
-        print(self._path_to_plugins)
         provider = self._path_to_plugins.get(plugin_import_path, None)
         if not provider:
             raise Exception('No plugin PROVIDER!', plugin_import_path)
@@ -42,15 +42,21 @@ class SymbolTable(object):
         plugin_provider = self.get_plugin_provider(plugin_import_path)
         alias_pattern = plugin_provider.resolve_import(import_name, active_alias)
 
-        self._symbols.append((alias_pattern, plugin_provider))
+        self._symbols_providers.append((alias_pattern, plugin_provider))
         return self.get_symbol(active_alias)
 
     def get_symbol(self, identifier):
         """Retrieve an imported symbol."""
 
-        for symbol_pattern, symbol_handler in self._symbols:
+        try:
+            return self._symbols[identifier]
+        except KeyError:
+            pass
+
+        for symbol_pattern, symbol_handler in self._symbols_providers:
             match = symbol_pattern.fullmatch(identifier)
             if match:
-                return symbol_handler.get_symbol(match)
+                self._symbols[identifier] = symbol_handler.get_symbol(match)
+                return self._symbols[identifier]
 
         raise SymbolNotFoundException('"%s" is not defined.' % identifier)
