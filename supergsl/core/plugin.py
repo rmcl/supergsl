@@ -1,15 +1,22 @@
 import inspect
 import importlib
 from supergsl.core.config import settings
-from .function import FunctionSymbolTable, SuperGSLFunction
+
+class SuperGSLPlugin(object):
+
+    def register(self, symbol_table):
+        """Register Functions, enums, etc that the plugin provides.
+
+        Example: symbol_table.register(import_path, mod_class)
+        """
+        pass
 
 
 class PluginProvider(object):
 
-    def __init__(self, symbol_registry):
+    def __init__(self, symbol_table):
         self._plugins : Dict[str, SuperGSLPluginConfig] = {}
-
-        self.symbol_registry = symbol_registry
+        self._symbol_table = symbol_table
 
         if 'plugins' not in settings:
             raise ConfigurationException('No plugins have been defined. Check your supergGSL settings.')
@@ -24,18 +31,18 @@ class PluginProvider(object):
         module = importlib.import_module(module_path)
         module_classes = inspect.getmembers(module, inspect.isclass)
 
-        function_symbol_table = self.symbol_registry.get_table('functions')
-
-        function_defined = False
-        for name, mod_class in module_classes:
-
-            mod_class_name = getattr(mod_class, 'name', None)
-            if not issubclass(mod_class, SuperGSLFunction) or not mod_class_name:
+        for name, plugin_class in module_classes:
+            mod_class_name = getattr(plugin_class, 'name', None)
+            if not mod_class_name:
+                # Do not register if name is not defined.
                 continue
 
-            print('Registering plugin...', mod_class)
-            function_symbol_table.register_function(mod_class)
-            function_defined = True
+            if issubclass(plugin_class, SuperGSLPlugin):
+                print('Registering plugin...', plugin_class)
+
+                plugin_inst = plugin_class()
+                plugin_inst.register(self._symbol_table)
+
 
         #if not function_defined:
         #    raise ConfigurationException('Plugin "%s" did not define anything.' % module_path)

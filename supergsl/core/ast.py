@@ -13,24 +13,6 @@ class Node(object):
         raise NotImplementedError('"%s" does not implement `replace_child_node`.' % self)
 
 
-class SymbolRepository(object):
-
-    def __init__(self):
-        self._symbols = {}
-
-    def register(self, name : str, table_obj):
-        if name in self._symbols:
-            raise Exception('Symbol table collision. Table %s is already present in global symbol table.' % name)
-
-        self._symbols[name] = table_obj
-
-    def get_table(self, name : str):
-        try:
-            return self._symbols[name]
-        except KeyError:
-            raise Exception('Unknown symbol table "%s".' % name)
-
-
 class SlicePosition(Node):
     def __init__(self, index: int, postfix : str, approximate : bool):
         self.index = index

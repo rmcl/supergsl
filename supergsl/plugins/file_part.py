@@ -8,10 +8,10 @@ from supergsl.core.constants import THREE_PRIME
 from supergsl.core.parts.position import SeqPosition
 from supergsl.core.exception import PartLocatorException, PartNotFoundException
 from supergsl.core.parts import PartProvider, Part
-from supergsl.core.parts.prefix_part import PrefixedPart
+from supergsl.core.parts.prefix_part import PrefixedSlicePartProviderMixin
 
 
-class FeatureTableWithFastaPartProvider(PartProvider):
+class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProvider):
     """Access parts provided by fGSL reference genome files.
 
     The gsl paper [wilson 2008] describes this format as the "Saccharomyces
@@ -114,6 +114,7 @@ class FeatureTableWithFastaPartProvider(PartProvider):
             identifier  A identifier to select a part from this provider
         Return: `Part`
         """
+
         reference_sequence, feature = self.get_gene(identifier)
         alternative_names = self._get_alternative_names_from_feature(feature)
 
@@ -129,7 +130,7 @@ class FeatureTableWithFastaPartProvider(PartProvider):
         end = start.get_relative_position(
             x=feature['to']-feature['from'])
 
-        part = PrefixedPart(
+        part = Part(
             identifier,
             start,
             end,

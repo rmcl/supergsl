@@ -48,7 +48,7 @@ class ResolvePartSlicePass(BreadthFirstNodeFilteredPass):
         end = self.convert_slice_position_to_seq_position(parent_part, node.slice.end)
 
         node.part = parent_part.get_child_part_by_slice(
-            parent_part, node.identifier, start, end)
+            node.identifier, start, end)
 
         if node.invert:
             raise NotImplementedError('Inverted parts not implemented yet!')
