@@ -31,18 +31,9 @@ class PluginProvider(object):
         module = importlib.import_module(module_path)
         module_classes = inspect.getmembers(module, inspect.isclass)
 
-        for name, plugin_class in module_classes:
-            mod_class_name = getattr(plugin_class, 'name', None)
-            if not mod_class_name:
-                # Do not register if name is not defined.
-                continue
-
+        for _, plugin_class in module_classes:
             if issubclass(plugin_class, SuperGSLPlugin):
                 print('Registering plugin...', plugin_class)
 
                 plugin_inst = plugin_class()
                 plugin_inst.register(self._symbol_table)
-
-
-        #if not function_defined:
-        #    raise ConfigurationException('Plugin "%s" did not define anything.' % module_path)

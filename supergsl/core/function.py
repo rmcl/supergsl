@@ -11,24 +11,17 @@ class SuperGSLFunction(object):
 
     name : Optional[str] = None
 
-    def resolve_import(self, identifier : str, alias : str) -> Tuple[Pattern, Callable[[str], Part]]:
+    def resolve_import(self, identifier : str, alias : str) -> Pattern:
         """Resolve the import of a function from this provider.
 
         Return a tuple with:
             * A regular expression to match symbols against
             * A callback method that given the actual identifier will return the `Part`.
         """
+        return re.compile(identifier or alias)
 
-        if identifier != self.name:
-            raise NotImplementedError('sGSL function "%s" does not define "%s".' % (
-                cls, self.name))
-
-        pattern = re.compile(identifier)
-
-        def get_function_handler(identifier : str, pattern_match : Match):
-            return self
-
-        return pattern, get_function_handler
+    def get_symbol(self, identifier_match : Match):
+        return self
 
     @classmethod
     def get_name(cls):

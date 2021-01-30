@@ -1,4 +1,5 @@
 import re
+from re import Pattern, Match
 from collections import namedtuple
 from typing import Callable, Tuple
 from supergsl.utils import import_class
@@ -23,15 +24,17 @@ class PartProvider(object):
             'List parts is not supported by "%s" part provider.' % self.name
         )
 
-    def resolve_import(self, identifier : str, alias : str) -> Tuple[re.Pattern, Callable[[str], Part]]:
+    def resolve_import(self, identifier : str, alias : str) -> Pattern:
         """Resolve the import of a part from this provider.
 
         Return a tuple with:
             * A regular expression to match symbols against
             * A callback method that given the actual identifier will return the `Part`.
         """
-        pattern = re.compile(alias or identifier)
-        return pattern, self.get_part
+        return re.compile(alias or identifier)
+
+    def get_symbol(self, match : Match):
+        raise NotImplementedError('Subclass to implement.')
 
     def get_part(self, identifier : str) -> Part:
         """Retrieve a part from the provider.

@@ -2,7 +2,7 @@ from typing import cast, Dict, List, Optional, Any, Union
 
 
 class Node(object):
-    def child_nodes(self) -> List[Node]:
+    def child_nodes(self) -> List['Node']:
         return []
 
     def eval(self) -> Dict[str, Any]:

@@ -39,34 +39,32 @@ class PrefixedSlicePartProviderMixin(object):
     if typing.TYPE_CHECKING:
         identifier = None
 
-    def resolve_import(self, identifier : str, alias : str) -> Tuple[Pattern, Callable[[str], Part]]:
+    def resolve_import(self, identifier : str, alias : str) -> Pattern:
         """Resolve the import of a part from this provider."""
+        return self.get_prefix_pattern(alias or identifier)
 
-        pattern = self.get_prefix_pattern(alias or identifier)
+    def get_symbol(self, identifier_match : Match):
+        full_identifier = identifier_match.string
+        matched_identifier = identifier_match.group('identifier')
+        matched_prefix = identifier_match.group('prefix')
 
-        def get_part_handler(identifier : str, pattern_match : Match):
-            matched_identifier = pattern_match.group('identifier')
-            matched_prefix = pattern_match.group('prefix')
+        parent_part = self.get_part(matched_identifier)
+        if matched_prefix == '':
+            return parent_part
+        else:
+            part_type = self.get_part_type(matched_prefix)
+            start_pos, end_pos = self.build_part_type_slice_pos(parent_part, part_type)
+            return self.get_child_part_by_slice(
+                parent_part=parent_part,
+                identifier=full_identifier,
+                start=start_pos,
+                end=end_pos)
 
-            parent_part = self.get_part(matched_identifier)
-            if matched_prefix == '':
-                return parent_part
-            else:
-                part_type = self.get_part_type(matched_prefix)
-                start_pos, end_pos = self.build_part_type_slice_pos(parent_part, part_type)
-                return self.get_child_part_by_slice(
-                    parent_part=parent_part,
-                    identifier=identifier,
-                    start=start_pos,
-                    end=end_pos)
+        print(identifier, matched_identifier, matched_prefix)
 
-            print(identifier, matched_identifier, matched_prefix)
-
-            return self.get_child_part(
-                matched_prefix,
-                alias=identifier)
-
-        return pattern, get_part_handler
+        return self.get_child_part(
+            matched_prefix,
+            alias=identifier)
 
     def get_prefix_pattern(self, identifier):
         allowed_prefixes = ''.join(self.PART_TYPES.keys())
