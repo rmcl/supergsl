@@ -1,8 +1,9 @@
 import csv
 import gzip
+from typing import Dict, List, Tuple, Any, TextIO
 from mimetypes import guess_type
-from functools import partial
 from Bio import SeqIO
+from Bio.Seq import Seq
 
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.parts.position import SeqPosition
@@ -23,21 +24,23 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
 
     """
 
-    def __init__(self, name, settings):
+    def __init__(self, name : str, settings : dict):
         self.name = name
-        self.fasta_file_path = settings['fasta_file_path']
-        self.feature_file_path = settings['feature_file_path']
+        self.fasta_file_path : str = settings['fasta_file_path']
+        self.feature_file_path : str = settings['feature_file_path']
+        self._cached_parts : Dict[str, Part] = {}
 
-    def open_feature_file(self):
-        if self.feature_file_path[-2:] == 'gz':
-            return gzip.open(self.feature_file_path, "rt")
-        else:
-            return open(self.feature_file_path, "rt")
-
-    def load(self):
+    def load(self) -> None:
         encoding = guess_type(self.feature_file_path)[1]
-        _open_feature_file = partial(gzip.open, mode='rt') if encoding == 'gzip' else open
-        with _open_feature_file(self.feature_file_path) as handle_fp:
+
+        def _open(file_path : str) -> TextIO:
+            encoding = guess_type(file_path)[1]
+            if encoding == 'gzip':
+                return gzip.open(file_path, mode='rt')
+            else:
+                return open(file_path, mode='rt')
+
+        with _open(self.feature_file_path) as handle_fp:
             reader = csv.DictReader(handle_fp, fieldnames=None, delimiter='\t')
             features = list(reader)
 
@@ -46,8 +49,6 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
                 for feature in features
             }
 
-        encoding = guess_type(self.fasta_file_path)[1]
-        _open = partial(gzip.open, mode='rt') if encoding == 'gzip' else open
         with _open(self.fasta_file_path) as fp:
             chromosomes = SeqIO.parse(fp, 'fasta')
 
@@ -65,7 +66,7 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
             for gene_name in self._genes.keys()
         ]
 
-    def get_gene(self, gene_name):
+    def get_gene(self, gene_name : str) -> Tuple[Seq, dict]:
 
         if not hasattr(self, '_sequence_by_chromosome'):
             self.load()
@@ -78,7 +79,7 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
 
         # Make a copy of the reference feature and modify it to conform
         # to possibly complemented reference sequence
-        new_gene_feature = reference_feature.copy()
+        new_gene_feature : Dict[str, Any] = reference_feature.copy()
 
         chromosome_num = new_gene_feature['chrom#']
         chromosome_sequence = self._sequence_by_chromosome[chromosome_num]
@@ -90,18 +91,17 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
             reference_sequence = chromosome_sequence.reverse_complement().seq
             reference_len = len(reference_sequence)
 
-            tmp_from = int(new_gene_feature['from'])
-            new_gene_feature['from'] = reference_len - int(new_gene_feature['to']) - 1
-            new_gene_feature['to'] = reference_len - tmp_from
+            new_gene_feature['from'] = reference_len - int(reference_feature['to']) - 1
+            new_gene_feature['to'] = reference_len - int(reference_feature['from'])
 
         else:
-            new_gene_feature['from'] = int(new_gene_feature['from'])
-            new_gene_feature['to'] = int(new_gene_feature['to']) + 1
+            new_gene_feature['from'] = int(reference_feature['from'])
+            new_gene_feature['to'] = int(reference_feature['to']) + 1
             reference_sequence = chromosome_sequence.seq
 
         return reference_sequence, new_gene_feature
 
-    def _get_alternative_names_from_feature(self, feature):
+    def _get_alternative_names_from_feature(self, feature : dict) -> List[str]:
         alternative_names = set([
             feature['systematic']
         ])
@@ -111,13 +111,18 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
 
         return list(alternative_names)
 
-    def get_part(self, identifier):
+    def get_part(self, identifier : str) -> Part:
         """Retrieve a part by identifier.
 
         Arguments:
             identifier  A identifier to select a part from this provider
         Return: `Part`
         """
+
+        try:
+            return self._cached_parts[identifier]
+        except KeyError:
+            pass
 
         reference_sequence, feature = self.get_gene(identifier)
         alternative_names = self._get_alternative_names_from_feature(feature)
@@ -142,6 +147,7 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
             description=feature['Notes'],
             alternative_names=alternative_names)
 
+        self._cached_parts[identifier] = part
         return part
 
     def get_child_part_by_slice(
