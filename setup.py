@@ -31,6 +31,14 @@ setuptools.setup(
         'mypy',
         'mypy-extensions',
     ],
+    extras_require={
+        "plugins": [
+            'docker',
+            'dnachisel',
+            'sbol3',
+            'graphviz',
+        ]
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

@@ -75,7 +75,7 @@ class ResolvePartSlicePassTestCase(unittest.TestCase):
         create_child_args = pre_slice_part.provider.get_child_part_by_slice.call_args.args
 
         self.assertEquals(create_child_args[0], pre_slice_part)
-        self.assertEquals(create_child_args[1], 'TEST')
+        self.assertEquals(create_child_args[1], 'TEST[~-125E:~0E]')
 
         part_start = create_child_args[2]
         self.assertEquals(part_start.x, -125)
