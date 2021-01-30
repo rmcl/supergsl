@@ -140,10 +140,15 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
 
         return part
 
-    def get_child_part_by_slice(self, parent_part, identifier, start, end):
+    def get_child_part_by_slice(
+        self,
+        parent_part : Part,
+        identifier : str,
+        start : SeqPosition,
+        end : SeqPosition
+    ) -> Part:
         """Return a new part which is the child of the supplied parent."""
 
-        # child parts shouldn't be prefix able.
         return Part(
             identifier,
             start,

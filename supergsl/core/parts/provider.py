@@ -7,7 +7,7 @@ from supergsl.core.exception import ConfigurationException
 from supergsl.core.config import settings
 from supergsl.core.exception import PartNotFoundException, ProviderNotFoundException
 from supergsl.core.plugin import SuperGSLPlugin
-from supergsl.core.parts import Part
+from supergsl.core.parts import Part, SeqPosition
 
 class PartProvider(object):
     name = None
@@ -45,9 +45,15 @@ class PartProvider(object):
         """
         raise NotImplementedError('Subclass to implement.')
 
-    def get_child_part(self, identifier : str, sub_part_identifier : str) -> Part:
-        raise NotImplementedError('Subclass to implement.')
-
+    def get_child_part_by_slice(
+        self,
+        parent_part : Part,
+        identifier : str,
+        start : SeqPosition,
+        end : SeqPosition
+    ) -> Part:
+        """Return a new part which is the child of the supplied parent."""
+        raise NotImplementedError('Subclass to implement')
 
 class PartProviderPlugin(SuperGSLPlugin):
     name = 'part_provider'
