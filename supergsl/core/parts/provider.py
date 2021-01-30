@@ -1,7 +1,7 @@
 import re
 from re import Pattern, Match
 from collections import namedtuple
-from typing import Callable, Tuple
+from typing import Callable, Tuple, Optional
 from supergsl.utils import import_class
 from supergsl.core.exception import ConfigurationException
 from supergsl.core.config import settings
@@ -10,7 +10,7 @@ from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.parts import Part, SeqPosition
 
 class PartProvider(object):
-    name = None
+    name : Optional[str] = None
 
     def __init__(self, name):
         self.name = name
