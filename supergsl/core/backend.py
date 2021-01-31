@@ -75,8 +75,6 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
 
         if handler_method:
             result_node = self.call_handler_and_check_result(handler_method, node)
-
-            print('VISIT', result_node, node, parent_node)
             if result_node != node:
                 if not parent_node:
                     raise Exception('You cannot update the root Program AST node. Tried to update "%s"' % node)

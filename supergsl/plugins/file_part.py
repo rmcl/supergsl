@@ -134,8 +134,6 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
             reference=reference_sequence
         )
 
-        print('GET_PART', feature['from'], feature['to'])
-
         end = start.get_relative_position(
             x=feature['to']-feature['from'])
 
