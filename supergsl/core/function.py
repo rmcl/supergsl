@@ -4,23 +4,21 @@ from re import Pattern, Match
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.parts import Part
 from supergsl.core.backend import DepthFirstNodeFilteredPass
-from supergsl.core.exception import FunctionNotFoundException, FunctionInvokeError
+from supergsl.core.exception import FunctionInvokeError
 
 class SuperGSLFunction(object):
     """Add a callable function to SuperGSL."""
 
-    name : Optional[str] = None
+    name: Optional[str] = None
 
-    def resolve_import(self, identifier : str, alias : str) -> Pattern:
+    def resolve_import(self, identifier: str, alias: str) -> Pattern:
         """Resolve the import of a function from this provider.
 
-        Return a tuple with:
-            * A regular expression to match symbols against
-            * A callback method that given the actual identifier will return the `Part`.
+        Return: a regular expression to match symbols against
         """
         return re.compile(identifier or alias)
 
-    def get_symbol(self, identifier_match : Match):
+    def get_symbol(self, identifier_match: Match):
         return self
 
     @classmethod
