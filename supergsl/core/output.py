@@ -8,10 +8,14 @@ from supergsl.utils import import_class
 
 
 class OutputProvider(BreadthFirstNodeFilteredPass):
-    name : Optional[str] = None
+    """OutputProviders perform an AST pass to generate a usable output.
+    This is a base class."""
+
+    name: Optional[str] = None
 
     @classmethod
     def get_output_name(cls):
+        """Get the Output Provider's name."""
         if cls.name is None:
             raise ConfigurationException('%s does not specify its output name.')
 
@@ -24,6 +28,7 @@ class OutputProvider(BreadthFirstNodeFilteredPass):
         pass
 
 class ASTPrintOutputProvider(OutputProvider):
+    """Generate a pretty print output of the AST and write it to stdout."""
     name = 'print'
 
     def before_pass(self, ast):

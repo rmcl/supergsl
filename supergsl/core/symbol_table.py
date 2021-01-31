@@ -1,31 +1,32 @@
 from re import Pattern
-from typing import Optional
+from typing import Optional, Tuple
 from collections import OrderedDict
 from supergsl.core.exception import SymbolNotFoundException
+from supergsl.core.exception import ProviderNotFoundException
 
 class SymbolTable(object):
 
     def __init__(self):
         self._path_to_plugins = {}
-        self._symbols_providers : Tuple[Pattern, object] = []
+        self._symbols_providers: Tuple[Pattern, object] = []
         self._symbols = {}
 
-    def register(self, plugin_import_path : str, plugin_class) -> None:
+    def register(self, plugin_import_path: str, plugin_class: object) -> None:
         """Register a plugin provider to be available for import a given import path."""
         self._path_to_plugins[plugin_import_path] = plugin_class
 
     def get_plugin_provider(self, plugin_import_path):
         provider = self._path_to_plugins.get(plugin_import_path, None)
         if not provider:
-            raise Exception('No plugin PROVIDER!', plugin_import_path)
+            raise ProviderNotFoundException('Provider for %s not found.' % plugin_import_path)
 
         return provider
 
     def resolve_symbol(
         self,
-        plugin_import_path : str,
-        import_name : str,
-        alias : Optional[str] = None
+        plugin_import_path: str,
+        import_name: str,
+        alias: Optional[str] = None
     ):
         """Resolve a symbol from an import statement of a superGSL program."""
 
