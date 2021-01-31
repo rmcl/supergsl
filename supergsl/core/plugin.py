@@ -1,18 +1,33 @@
+"""Support for SuperGSL's plugin infrastructure."""
+
 import inspect
 import importlib
+from typing import Dict
 from supergsl.core.config import settings
-from .function import FunctionSymbolTable, SuperGSLFunction
+from supergsl.core.exception import ConfigurationException
+from supergsl.core.symbol_table import SymbolTable
+
+class SuperGSLPlugin(object):
+    """Base class for defining a SuperGSL Plugin."""
+
+    def register(self, symbol_table):
+        """Register Functions, enums, etc that the plugin provides.
+
+        Example: symbol_table.register(import_path, mod_class)
+        """
+        pass
 
 
 class PluginProvider(object):
+    """Resolve and register SuperGSL plugins."""
 
-    def __init__(self, symbol_registry):
-        self._plugins : Dict[str, SuperGSLPluginConfig] = {}
-
-        self.symbol_registry = symbol_registry
+    def __init__(self, symbol_table: SymbolTable):
+        self._plugins: Dict[str, SuperGSLPlugin] = {}
+        self._symbol_table: SymbolTable = symbol_table
 
         if 'plugins' not in settings:
-            raise ConfigurationException('No plugins have been defined. Check your supergGSL settings.')
+            raise ConfigurationException(
+                'No plugins have been defined. Check your supergGSL settings.')
 
         for plugin_path in settings['plugins']:
             print('Resolving plugin "%s"' % plugin_path)
@@ -20,22 +35,14 @@ class PluginProvider(object):
             self.resolve_plugins_from_config(plugin_path)
 
 
-    def resolve_plugins_from_config(self, module_path):
+    def resolve_plugins_from_config(self, module_path: str) -> None:
+        """Attempt to resolve and register a plugin at a specific path."""
         module = importlib.import_module(module_path)
         module_classes = inspect.getmembers(module, inspect.isclass)
 
-        function_symbol_table = self.symbol_registry.get_table('functions')
+        for _, plugin_class in module_classes:
+            if issubclass(plugin_class, SuperGSLPlugin):
+                print('Registering plugin...', plugin_class)
 
-        function_defined = False
-        for name, mod_class in module_classes:
-
-            mod_class_name = getattr(mod_class, 'name', None)
-            if not issubclass(mod_class, SuperGSLFunction) or not mod_class_name:
-                continue
-
-            print('Registering plugin...', mod_class)
-            function_symbol_table.register_function(mod_class)
-            function_defined = True
-
-        #if not function_defined:
-        #    raise ConfigurationException('Plugin "%s" did not define anything.' % module_path)
+                plugin_inst = plugin_class()
+                plugin_inst.register(self._symbol_table)

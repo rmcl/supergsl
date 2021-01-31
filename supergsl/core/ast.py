@@ -3,7 +3,7 @@ from typing import cast, Dict, List, Optional, Any, Union
 
 
 class Node(object):
-    def child_nodes(self) -> List[Node]:
+    def child_nodes(self) -> List['Node']:
         return []
 
     def eval(self) -> Dict[str, Any]:
@@ -14,24 +14,6 @@ class Node(object):
 
     def get_node_label(self):
         return str(self.__class__.__name__)
-
-class SymbolRepository(object):
-
-    def __init__(self):
-        self._symbols = {}
-
-    def register(self, name : str, table_obj):
-        if name in self._symbols:
-            raise Exception('Symbol table collision. Table %s is already present in global symbol table.' % name)
-
-        self._symbols[name] = table_obj
-
-    def get_table(self, name : str):
-        try:
-            return self._symbols[name]
-        except KeyError:
-            raise Exception('Unknown symbol table "%s".' % name)
-
 
 class SlicePosition(Node):
     def __init__(self, index: int, postfix : str, approximate : bool):
