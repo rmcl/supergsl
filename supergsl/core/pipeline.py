@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, cast
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.function import InvokeFunctionPass
 from supergsl.core.plugin import PluginProvider
@@ -19,11 +19,11 @@ class CompilerPipeline(object):
 
     def get_backend_passes(self) -> List[BackendPipelinePass]:
         """Return an ordered list of compiler backend passes to be executed."""
-        return [
+        return cast(List[BackendPipelinePass], [
             ResolveImportsPass,
             ResolvePartSlicePass,
             InvokeFunctionPass,
-        ]
+        ])
 
     def perform_frontend_compile(self, source_code):
         """Generate an IR from SuperGSL source code.

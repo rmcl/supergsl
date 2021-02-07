@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import cast, Dict, List, Optional, Any, Union
 
+from supergsl.core.parts.part import Part as CorePart
 
 class Node(object):
     def child_nodes(self) -> List['Node']:
@@ -60,6 +61,9 @@ class Part(Node):
         self.identifier = identifier
         self.slice = slice
         self.invert = invert
+
+        self.part : Optional[CorePart] = None
+        self.parent_parts : List[CorePart] = []
 
     def eval(self) -> Dict[str, Any]:
         return {

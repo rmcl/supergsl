@@ -50,8 +50,11 @@ class ResolvePartSlicePass(BreadthFirstNodeFilteredPass):
             # This node does not require slicing. no slice has been specified.
             return node
 
+        if not node.part:
+            raise Exception('Node part not defined. Previous import pass failed.')
+
         parent_part = node.part
-        node.parent_parts = [node.part]
+        node.parent_parts = [parent_part]
 
         start = self.convert_slice_position_to_seq_position(parent_part, node.slice.start)
         end = self.convert_slice_position_to_seq_position(parent_part, node.slice.end)
