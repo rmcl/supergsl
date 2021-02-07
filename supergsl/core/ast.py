@@ -1,8 +1,9 @@
+from __future__ import annotations
 from typing import cast, Dict, List, Optional, Any, Union
 
 
 class Node(object):
-    def child_nodes(self) -> List[Node]:
+    def child_nodes(self) -> List['Node']:
         return []
 
     def eval(self) -> Dict[str, Any]:
@@ -11,24 +12,8 @@ class Node(object):
     def replace_child_node(self, cur_node, new_node):
         raise NotImplementedError('"%s" does not implement `replace_child_node`.' % self)
 
-
-class SymbolRepository(object):
-
-    def __init__(self):
-        self._symbols = {}
-
-    def register(self, name : str, table_obj):
-        if name in self._symbols:
-            raise Exception('Symbol table collision. Table %s is already present in global symbol table.' % name)
-
-        self._symbols[name] = table_obj
-
-    def get_table(self, name : str):
-        try:
-            return self._symbols[name]
-        except KeyError:
-            raise Exception('Unknown symbol table "%s".' % name)
-
+    def get_node_label(self):
+        return str(self.__class__.__name__)
 
 class SlicePosition(Node):
     def __init__(self, index: int, postfix : str, approximate : bool):
@@ -44,6 +29,13 @@ class SlicePosition(Node):
             'approximate': self.approximate
         }
 
+    def get_slice_pos_str(self):
+        return '%s%d%s' % (
+            '~' if self.approximate else '',
+            self.index,
+            self.postfix if self.postfix else ''
+        )
+
 class Slice(Node):
     def __init__(self, start : SlicePosition, end : SlicePosition):
         self.start = start
@@ -55,6 +47,12 @@ class Slice(Node):
             'start': self.start.eval(),
             'end': self.end.eval()
         }
+
+    def get_slice_str(self):
+        return '%s:%s' % (
+            self.start.get_slice_pos_str(),
+            self.end.get_slice_pos_str()
+        )
 
 
 class Part(Node):
@@ -79,8 +77,11 @@ class Part(Node):
     def __str__(self):
         return self.identifier
 
+    def get_node_label(self):
+        return '%s:%s' % (self.__class__.__name__, self.identifier)
 
-class ProgramImportIdentifier(Node):
+
+class ImportIdentifier(Node):
     def __init__(self, identifier : str, alias : Optional[str]):
         self.identifier : str = identifier
         self.alias : Optional[str] = alias
@@ -91,9 +92,17 @@ class ProgramImportIdentifier(Node):
             'alias': self.alias
         }
 
+    def get_node_label(self):
+        label = '%s: %s' % (
+            self.__class__.__name__,
+            self.identifier,
+        )
+        if self.alias:
+            label = label + ' (%s)' % self.alias
+        return label
 
-class ProgramImport(Node):
-    def __init__(self, module_path : str, import_identifiers : List[ProgramImportIdentifier]):
+class Import(Node):
+    def __init__(self, module_path : str, import_identifiers : List[ImportIdentifier]):
         self.module = module_path
         self.imports = import_identifiers
 
@@ -109,6 +118,9 @@ class ProgramImport(Node):
 
     def child_nodes(self) -> List[Node]:
         return cast(List[Node], self.imports)
+
+    def get_node_label(self):
+        return '%s:%s' % (self.__class__.__name__, '.'.join(self.module))
 
 
 Definition = Union[
@@ -199,9 +211,9 @@ class NucleotideConstant(Node):
 
 
 class Program(Node):
-    def __init__(self, imports : List[ProgramImport], definitions : DefinitionList):
+    def __init__(self, imports : List[Import], definitions : DefinitionList):
         self.definitions : DefinitionList = definitions
-        self.imports : List[ProgramImport] = imports
+        self.imports : List[Import] = imports
 
     def eval(self) -> dict:
         return {

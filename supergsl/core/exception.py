@@ -31,3 +31,6 @@ class FunctionInvokeError(Exception):
 
 class PartSliceError(Exception):
     pass
+
+class SymbolNotFoundException(Exception):
+    pass

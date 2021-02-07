@@ -36,6 +36,7 @@ setuptools.setup(
             'docker',
             'dnachisel',
             'sbol3',
+            'graphviz',
         ]
     },
     classifiers=[

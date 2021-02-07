@@ -1,12 +1,15 @@
 """Entrypoint for the `sgsl-util` command used to access utility functions of the SuperGSL compiler."""
 import argparse
-from supergsl.core.parts.provider import PartSymbolTable
+from supergsl.core.symbol_table import SymbolTable
+from supergsl.core.parts.provider import PartProviderPlugin
 
 def handle_part_command(args):
-    part_table = PartSymbolTable()
+    symbol_table = SymbolTable()
+    part_provider = PartProviderPlugin()
+    part_provider.register(symbol_table)
 
     if args.action == 'list':
-        part_provider = part_table.resolve_provider(args.part_provider)
+        part_provider = symbol_table.get_plugin_provider(args.part_provider)
         parts = part_provider.list_parts()
 
         print('\t'.join([
