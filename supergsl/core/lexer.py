@@ -34,10 +34,12 @@ class Lexer():
         # Ignore spaces
         self.lexer.ignore('\s+')
 
-        # Ignore multiline comments in c syntax
+        # Comments - Ignore multiline comments in c syntax
         # Example: /* This is a comment! */
-        # todo(rmcl): Consider passing comments as tokens?
         self.lexer.ignore(r'/\*([\s\S]*?)\*/\s*')
+
+        # Comments - Ignore remainder of line starting with "#".
+        self.lexer.ignore(r'#.*\n')
 
     def get_lexer(self):
         self._add_tokens()
