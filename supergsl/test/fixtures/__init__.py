@@ -19,7 +19,6 @@ class SuperGSLIntegrationFixtures(object):
                 "supergsl.core.output.ASTPrintOutputProvider"
             ],
             "plugins": [
-                "supergsl.core.variables",
                 "supergsl.core.parts.provider",
                 "supergsl.plugins.chopchop.plugin"
             ]
