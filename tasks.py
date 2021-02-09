@@ -10,6 +10,7 @@ def typecheck(c):
 
 @task(typecheck)
 def test(c):
+    c.run('pwd')
     c.run('nosetests supergsl', pty=True)
 
 @task(typecheck)
