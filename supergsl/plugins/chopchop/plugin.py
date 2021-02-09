@@ -40,6 +40,6 @@ class ChopChopFunction(SuperGSLFunction):
 
 class ChopChopPlugin(SuperGSLPlugin):
 
-    def register(self, symbol_table):
+    def register(self, symbol_table, compiler_settings):
         """Register functions provide by chopchop."""
         symbol_table.register('chopchop', ChopChopFunction())
