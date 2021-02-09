@@ -2,8 +2,8 @@ import os
 import inspect
 import docker
 from docker.errors import ImageNotFound
+from supergsl.core.function import SuperGSLFunction
 
-from supergsl.core.plugin import SuperGSLFunction
 
 class DockerPlugin(SuperGSLFunction):
     image_tag = None
