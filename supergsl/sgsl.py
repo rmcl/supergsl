@@ -1,13 +1,15 @@
 """Entrypoint for the `sgsl` command used to invoke the superGSL compiler."""
 import argparse
+from supergsl.core.config import load_settings
 from supergsl.core.pipeline import CompilerPipeline
 from supergsl.core.output import OutputPipeline
 import pprint
 
 
 def main():
-    compiler_pipeline = CompilerPipeline()
-    output_pipeline = OutputPipeline()
+    settings = load_settings()
+    compiler_pipeline = CompilerPipeline(settings)
+    output_pipeline = OutputPipeline(settings)
 
     parser = argparse.ArgumentParser()
     parser.add_argument(

@@ -12,6 +12,10 @@ def typecheck(c):
 def test(c):
     c.run('nosetests supergsl', pty=True)
 
+@task(typecheck)
+def lint(c):
+    c.run('pylint `ls -R|grep .py$|xargs`', pty=True)
+
 @task
 def bash(c):
     c.run("bash", pty=True)

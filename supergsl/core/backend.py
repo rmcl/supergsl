@@ -1,7 +1,7 @@
 from typing import List, Tuple, Optional, Dict, Callable
 from .ast import Node
 
-from supergsl.core.ast import SymbolRepository
+from supergsl.core.symbol_table import SymbolTable
 
 
 # Define a mypy type alias for node handler methods.
@@ -15,8 +15,8 @@ class BackendPipelinePass(object):
     """Base class for implementing a traversal of the AST."""
     name : Optional[str] = None
 
-    def __init__(self, symbol_registry, allow_modification : bool = True):
-        self.symbol_registry = symbol_registry
+    def __init__(self, symbol_table, allow_modification : bool = True):
+        self.symbol_table = symbol_table
         self.allow_modification = allow_modification
 
     def get_pass_name(self):
@@ -75,8 +75,6 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
 
         if handler_method:
             result_node = self.call_handler_and_check_result(handler_method, node)
-
-            print('VISIT', result_node, node, parent_node)
             if result_node != node:
                 if not parent_node:
                     raise Exception('You cannot update the root Program AST node. Tried to update "%s"' % node)

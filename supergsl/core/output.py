@@ -3,15 +3,18 @@ from typing import Optional
 from supergsl.core.ast import Node
 from supergsl.core.backend import BreadthFirstNodeFilteredPass
 from supergsl.core.exception import ConfigurationException
-from supergsl.core.config import settings
 from supergsl.utils import import_class
 
 
 class OutputProvider(BreadthFirstNodeFilteredPass):
-    name : Optional[str] = None
+    """OutputProviders perform an AST pass to generate a usable output.
+    This is a base class."""
+
+    name: Optional[str] = None
 
     @classmethod
     def get_output_name(cls):
+        """Get the Output Provider's name."""
         if cls.name is None:
             raise ConfigurationException('%s does not specify its output name.')
 
@@ -24,6 +27,7 @@ class OutputProvider(BreadthFirstNodeFilteredPass):
         pass
 
 class ASTPrintOutputProvider(OutputProvider):
+    """Generate a pretty print output of the AST and write it to stdout."""
     name = 'print'
 
     def before_pass(self, ast):
@@ -113,7 +117,8 @@ class TestOutputProvider(OutputProvider):
 class OutputPipeline(object):
     """Store the results of the compilation in user specified output formats."""
 
-    def __init__(self):
+    def __init__(self, compiler_settings):
+        self.settings = compiler_settings
         self.resolve_providers()
 
     def validate_args(self, args):
@@ -131,7 +136,7 @@ class OutputPipeline(object):
         """Resolve the output providers from the supergsl-config settings."""
 
         self.available_outputers = {}
-        for provider_class_path in settings['output_providers']:
+        for provider_class_path in self.settings['output_providers']:
             provider_class = import_class(provider_class_path)
 
             if not issubclass(provider_class, OutputProvider):

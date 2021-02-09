@@ -1,5 +1,4 @@
 from typing import List
-from supergsl.core.config import settings
 from supergsl.core.backend import BreadthFirstNodeFilteredPass
 from supergsl.core.function import SuperGSLFunction
 from supergsl.core.exception import ConfigurationException

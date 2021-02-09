@@ -54,9 +54,9 @@ class Part(object):
             name=self.identifier,
             description=description)
 
-    def get_child_part_by_slice(self, parent_part, identifier, start, end):
+    def get_child_part_by_slice(self, identifier, start, end):
         return self.provider.get_child_part_by_slice(
-            parent_part,
+            self,
             identifier,
             start,
             end
