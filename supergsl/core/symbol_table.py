@@ -1,5 +1,5 @@
 from re import Pattern
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 from collections import OrderedDict
 from supergsl.core.exception import SymbolNotFoundException
 from supergsl.core.exception import ProviderNotFoundException
@@ -8,7 +8,7 @@ class SymbolTable(object):
 
     def __init__(self):
         self._path_to_plugins = {}
-        self._symbols_providers: Tuple[Pattern, object] = []
+        self._symbols_providers: List[Tuple[Pattern, object]] = []
         self._symbols = {}
 
     def register(self, plugin_import_path: str, plugin_class: object) -> None:

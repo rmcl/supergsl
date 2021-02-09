@@ -5,6 +5,7 @@
 SuperGSL is inspired by the original Genome Specification Language (See: [Paper](https://pubs.acs.org/doi/abs/10.1021/acssynbio.5b00194) & [Code](https://github.com/Amyris/GslCore)) written by Erin Wilson, Darren Platt and many others at Amyris.
 
 [![Documentation Status](https://readthedocs.org/projects/supergsl/badge/?version=latest)](https://supergsl.readthedocs.io/en/latest/?badge=latest)
+![SuperGSL Tests](https://github.com/rmcl/supergsl/workflows/SuperGSL%20Tests/badge.svg)
 
 ### New Features in SuperGSL
 
