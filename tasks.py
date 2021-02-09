@@ -12,6 +12,8 @@ def typecheck(c):
 def test(c):
     c.run('pwd')
     c.run('ls -la')
+    c.run('ls -la supergsl/test/fixtures/')
+    c.run('ls -la supergsl/test/fixtures/S288C_truncated/')
     c.run('nosetests supergsl', pty=True)
 
 @task(typecheck)
