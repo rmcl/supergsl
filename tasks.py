@@ -11,6 +11,7 @@ def typecheck(c):
 @task(typecheck)
 def test(c):
     c.run('pwd')
+    c.run('ls -la')
     c.run('nosetests supergsl', pty=True)
 
 @task(typecheck)
