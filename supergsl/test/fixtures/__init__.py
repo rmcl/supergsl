@@ -11,8 +11,8 @@ class SuperGSLIntegrationFixtures(object):
                 {
                     "name": "truncated.S288C",
                     "provider_class": "supergsl.plugins.file_part.FeatureTableWithFastaPartProvider",
-                    "fasta_file_path": "supergsl/test/fixtures/S288C_truncated/genome.fa.gz",
-                    "feature_file_path": "supergsl/test/fixtures/S288C_truncated/genome.tsv"
+                    "fasta_file_path": "supergsl/test/fixtures/s288C_truncated/genome.fa.gz",
+                    "feature_file_path": "supergsl/test/fixtures/s288C_truncated/genome.tsv"
                 }
             ],
             "output_providers": [
