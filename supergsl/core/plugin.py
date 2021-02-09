@@ -3,7 +3,6 @@
 import inspect
 import importlib
 from typing import Dict
-from supergsl.core.config import settings
 from supergsl.core.exception import ConfigurationException
 from supergsl.core.symbol_table import SymbolTable
 
@@ -37,7 +36,7 @@ class SuperGSLPlugin(object):
             ""
     """
 
-    def register(self, symbol_table):
+    def register(self, symbol_table, compiler_settings):
         """Register Functions, enums, etc that the plugin provides.
 
         Example: symbol_table.register(import_path, mod_class)
@@ -48,15 +47,16 @@ class SuperGSLPlugin(object):
 class PluginProvider(object):
     """Resolve and register SuperGSL plugins."""
 
-    def __init__(self, symbol_table: SymbolTable):
+    def __init__(self, symbol_table: SymbolTable, compiler_settings : dict):
         self._plugins: Dict[str, SuperGSLPlugin] = {}
         self._symbol_table: SymbolTable = symbol_table
+        self._compiler_settings = compiler_settings
 
-        if 'plugins' not in settings:
+        if 'plugins' not in compiler_settings:
             raise ConfigurationException(
                 'No plugins have been defined. Check your supergGSL settings.')
 
-        for plugin_path in settings['plugins']:
+        for plugin_path in compiler_settings['plugins']:
             print('Resolving plugin "%s"' % plugin_path)
 
             self.resolve_plugins_from_config(plugin_path)
@@ -72,4 +72,4 @@ class PluginProvider(object):
                 print('Registering plugin...', plugin_class)
 
                 plugin_inst = plugin_class()
-                plugin_inst.register(self._symbol_table)
+                plugin_inst.register(self._symbol_table, self._compiler_settings)

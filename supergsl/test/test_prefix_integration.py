@@ -2,6 +2,8 @@ from unittest import TestCase
 from Bio import SeqIO
 from supergsl.core.pipeline import CompilerPipeline
 from supergsl.core.output import TestOutputProvider
+from supergsl.test.fixtures import SuperGSLIntegrationFixtures
+
 
 class SuperGSLIntegrationTestCases(TestCase):
 
@@ -9,8 +11,11 @@ class SuperGSLIntegrationTestCases(TestCase):
         self.expected_sequences = SeqIO.index(
             'supergsl/test/expected_sequences.fasta', 'fasta')
 
+        self.fixtures = SuperGSLIntegrationFixtures()
+        self.compiler_settings = self.fixtures.get_supergsl_settings()
+
     def run_supergsl(self, source_code):
-        pipeline = CompilerPipeline()
+        pipeline = CompilerPipeline(self.compiler_settings)
         ast = pipeline.compile(source_code)
 
         output = TestOutputProvider(None, False)
@@ -21,7 +26,7 @@ class SuperGSLIntegrationTestCases(TestCase):
     def test_part_prefix_slice_locus(self):
 
         gsl_template = '''
-            from tab.S288C import HO
+            from truncated.S288C import HO
             %s'''
 
         # Currently ommitting dHO and tHO. I think that the primer designer may

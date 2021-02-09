@@ -13,9 +13,10 @@ from .parser import ParserBuilder
 class CompilerPipeline(object):
     """Orchestrate the conversion of superGSL source code to compiled sequences."""
 
-    def __init__(self):
+    def __init__(self, settings):
         self._symbol_table = SymbolTable()
-        self.plugins = PluginProvider(self._symbol_table)
+        self._settings = settings
+        self.plugins = PluginProvider(self._symbol_table, self._settings)
 
     def get_backend_passes(self) -> List[BackendPipelinePass]:
         """Return an ordered list of compiler backend passes to be executed."""
