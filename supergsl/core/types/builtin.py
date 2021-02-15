@@ -31,6 +31,7 @@ class CodonFrequencyTable(SuperGSLType):
     """
     https://github.com/Edinburgh-Genome-Foundry/codon-usage-tables/tree/master/codon_usage_data/tables
     """
+    pass
 
 
 class CodonTranslationTable(SuperGSLType):
@@ -39,3 +40,4 @@ class CodonTranslationTable(SuperGSLType):
     This is a thin wrapper around biopython's `Bio.Data.CodonTable`
     https://biopython.org/docs/1.75/api/Bio.Data.CodonTable.html
     """
+    pass
