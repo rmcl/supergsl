@@ -203,13 +203,15 @@ class FunctionInvocation(Node):
             return []
 
 
-class NucleotideConstant(Node):
-    def __init__(self, sequence : str):
+class SequenceConstant(Node):
+    def __init__(self, sequence : str, sequence_type : str):
         self.sequence = sequence
+        self.sequence_type = sequence_type
 
     def eval(self) -> dict:
         return {
-            'node': 'NucleotideConstant',
+            'node': 'SequenceConstant',
+            'type': self.sequence_type,
             'sequence': self.sequence
         }
 

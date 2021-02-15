@@ -1,6 +1,7 @@
 from supergsl.core.function import SuperGSLFunction
 from supergsl.core.plugin import SuperGSLPlugin
-from supergsl.core.ast import Assembly, NucleotideConstant
+from supergsl.core.ast import Assembly
+from supergsl.core.types import NucleotideSequence
 
 
 class ChopChopFunction(SuperGSLFunction):
@@ -35,7 +36,7 @@ class ChopChopFunction(SuperGSLFunction):
             cut(HO, CAS9, S288C, results=5)
         """
         print('CUT IT UP!')
-        return NucleotideConstant('TTA')
+        return NucleotideSequence('TTA')
 
 
 class ChopChopPlugin(SuperGSLPlugin):
