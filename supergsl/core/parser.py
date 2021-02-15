@@ -132,20 +132,40 @@ class ParserBuilder(object):
             return p[0]
 
         @self.pg.production('variable_definition : LET IDENTIFIER EQUAL list_definition')
+        @self.pg.production('variable_definition : LET IDENTIFIER type_declaration EQUAL list_definition')
         def variable_definition(state, p):
-            return ast.VariableDefinition(p[1].value, p[4])
+            variable_identifier = p[1].value
+            if len(p) == 4:
+                variable_type = None
+                definition = p[3]
+            elif len(p) == 5:
+                variable_type = p[2]
+                definition = p[4]
+
+            return ast.VariableDefinition(variable_identifier, variable_type, definition)
+
+        @self.pg.production('type_declaration : OPEN_BRACKET IDENTIFIER CLOSE_BRACKET')
+        def type_declaration(state, p):
+            return ast.TypeDeclaration(p[1].value)
+
 
         @self.pg.production('list_definition : OPEN_BRACKET list_items CLOSE_BRACKET')
         def list_definition(state, p):
             return ast.PartList(p[1])
 
-        @self.pg.production('list_items : part')
-        @self.pg.production('list_items : part COMMA list_items')
+        @self.pg.production('list_items : list_item')
+        @self.pg.production('list_items : list_item COMMA list_items')
         def list_items(state, p):
             new_list = [p[0]]
             if len(p) == 3:
                 new_list.extend(p[2])
             return new_list
+
+        @self.pg.production('list_item : part')
+        @self.pg.production('list_item : nucleotide_constant')
+        @self.pg.production('list_item : amino_acid_constant')
+        def list_item(state, p):
+            return p[0]
 
         @self.pg.production('function_name_and_label : IDENTIFIER')
         @self.pg.production('function_name_and_label : IDENTIFIER COLON IDENTIFIER')

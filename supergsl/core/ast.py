@@ -158,20 +158,34 @@ class DefinitionList(Node):
             for node in self.definitions
         ]
 
-class VariableDefinition(Node):
-    def __init__(self, identifier: str, part_list : PartList):
+class TypeDeclaration(Node):
+    def __init__(self, identifier: str):
         self.identifier : str = identifier
+
+    def eval(self) -> dict:
+        return {
+            'node': 'TypeDeclaration',
+            'identifier': self.identifier
+        }
+
+class VariableDefinition(Node):
+    def __init__(self, identifier: str, type_declaration : Optional[TypeDeclaration], part_list : PartList):
+        self.identifier : str = identifier
+        self.type_declaration : Optional[TypeDeclaration] = type_declaration
         self.part_list : PartList = part_list
 
     def eval(self) -> dict:
         return {
             'node': 'VariableDefinition',
             'identifier': self.identifier,
-            'parts': self.part_list.eval()
+            'parts': self.part_list.eval(),
+            'type_declaration': (
+                self.type_declaration.eval() if self.type_declaration else None
+            )
         }
 
     def child_nodes(self) -> List[Node]:
-        return cast(List[Node], self.part_list)
+        return [cast(Node, self.part_list)]
 
 
 class PartList(Node):
