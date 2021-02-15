@@ -34,7 +34,7 @@ class SuperGSLFunction(object):
         raise NotImplementedError('sGSL function definitions must specify a "name" in "%s".' % cls)
 
     @classmethod
-    def get_help(cls) -> str:
+    def get_help(cls) -> Optional[str]:
         return getdoc(cls)
 
     @classmethod

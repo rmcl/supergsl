@@ -1,3 +1,6 @@
+from typing import List
+
+
 class SuperGSLType(object):
     """Base class defining types available in SuperGSL."""
     pass
@@ -5,7 +8,7 @@ class SuperGSLType(object):
 
 class SuperGSLEnum(SuperGSLType):
     """Define a list of choices."""
-    options = []
+    options : List[str] = []
 
 
 class NucleotideSequence(SuperGSLType):
