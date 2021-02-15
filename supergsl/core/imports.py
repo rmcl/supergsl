@@ -5,6 +5,8 @@ from supergsl.core.exception import (
     GSLImportError
 )
 
+from supergsl.core.variables import VARIABLE_MODULE_PATH
+
 
 class ResolveImportsPass(BreadthFirstNodeFilteredPass):
 
@@ -13,6 +15,7 @@ class ResolveImportsPass(BreadthFirstNodeFilteredPass):
             'Import': self.visit_import_node,
             'Part': self.visit_part_node,
             'FunctionInvocation': self.visit_function_invoke_node,
+            'VariableDefinition': self.visit_variable_definition_node,
         }
 
     def before_pass(self, ast):
@@ -25,6 +28,12 @@ class ResolveImportsPass(BreadthFirstNodeFilteredPass):
                 module_path,
                 program_import.identifier)
 
+        return node
+
+    def visit_variable_definition_node(self, node):
+        node.variable = self.symbol_table.resolve_symbol(
+            VARIABLE_MODULE_PATH,
+            node.identifier)
         return node
 
     def visit_function_invoke_node(self, node):

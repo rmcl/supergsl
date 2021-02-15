@@ -23,6 +23,7 @@ class ParserBuilder(object):
         'FROM',
         'IMPORT',
         'AS',
+        'LET',
 
         'OPEN_CURLY_BRACKET',
         'CLOSE_CURLY_BRACKET',
@@ -40,6 +41,7 @@ class ParserBuilder(object):
         'PERIOD',
         'NUMBER',
         'IDENTIFIER',
+        'EQUAL',
         'TILDE',
         'EXCLAMATION',
         'DOLLAR_SIGN',
@@ -114,10 +116,27 @@ class ParserBuilder(object):
             else:
                 return ast.DefinitionList([p[0]])
 
+        @self.pg.production('definition : variable_definition')
         @self.pg.production('definition : function_invoke')
         @self.pg.production('definition : assembly')
         def definition(state, p):
             return p[0]
+
+        @self.pg.production('variable_definition : LET IDENTIFIER EQUAL list_definition')
+        def variable_definition(state, p):
+            return ast.VariableDefinition(p[1].value, p[4])
+
+        @self.pg.production('list : OPEN_BRACKET list_content CLOSE_BRACKET')
+        def list_definition(state, p):
+            return ast.PartList(p[1])
+
+        @self.pg.production('part_list : part')
+        @self.pg.production('part_list : part COMMA list_content')
+        def variable_list_params(state, p):
+            new_list = [p[0]]
+            if len(p) == 3:
+                new_list.extend(p[2])
+            return new_list
 
         @self.pg.production('function_name_and_label : IDENTIFIER')
         @self.pg.production('function_name_and_label : IDENTIFIER COLON IDENTIFIER')
