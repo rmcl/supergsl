@@ -159,9 +159,9 @@ class DefinitionList(Node):
         ]
 
 class VariableDefinition(Node):
-    def __init__(self, identifier: str, part_list : List[Part]):
+    def __init__(self, identifier: str, part_list : PartList):
         self.identifier : str = identifier
-        self.part_list : List[Part] = part_list
+        self.part_list : PartList = part_list
 
     def eval(self) -> dict:
         return {
