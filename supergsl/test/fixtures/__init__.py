@@ -4,9 +4,15 @@ from supergsl.core.constants import THREE_PRIME
 from supergsl.core.parts import Part, SeqPosition
 
 class SuperGSLIntegrationFixtures(object):
+    """Fixtures to assist in execution of integration tests."""
 
-    def get_supergsl_settings(self):
-        return {
+    def get_supergsl_settings(self, extra_plugins: list = None) -> dict:
+        """Return a basic nested dictionary of settings.
+
+        extra_plugins (list): a list of paths to plugins to include in the settings.
+        """
+
+        settings = {
             "part_providers": [
                 {
                     "name": "truncated.S288C",
@@ -23,3 +29,8 @@ class SuperGSLIntegrationFixtures(object):
                 "supergsl.plugins.chopchop.plugin"
             ]
         }
+
+        if extra_plugins:
+            settings['plugins'].extend(extra_plugins)
+
+        return settings
