@@ -167,14 +167,25 @@ class VariableDefinition(Node):
         return {
             'node': 'VariableDefinition',
             'identifier': self.identifier,
-            'parts': [
-                part.eval()
-                for part in self.part_list
-            ]
+            'parts': self.part_list.eval()
         }
 
     def child_nodes(self) -> List[Node]:
         return cast(List[Node], self.part_list)
+
+
+class PartList(Node):
+    def __init__(self, parts : List[Part]):
+        self.parts = parts
+
+    def eval(self) -> dict:
+        return {
+            'node': 'PartList',
+            'parts': [
+                part.eval()
+                for part in self.parts
+            ]
+        }
 
 class Assembly(Node):
     def __init__(self, parts : List[Part], label : Optional[str] = None):
