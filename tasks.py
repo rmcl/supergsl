@@ -10,7 +10,7 @@ def typecheck(c):
 
 @task(typecheck)
 def test(c):
-    c.run('nosetests supergsl', pty=True)
+    c.run('nosetests supergsl --with-coverage --cover-package=supergsl --cover-xml', pty=True)
 
 @task(typecheck)
 def lint(c):
