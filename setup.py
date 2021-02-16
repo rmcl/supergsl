@@ -24,6 +24,7 @@ setuptools.setup(
         'llvmlite',
         'rply',
         'nose',
+        'coverage',
         'biopython',
         'pydna',
         'mock',
