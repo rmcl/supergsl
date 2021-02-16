@@ -58,8 +58,7 @@ class ParserBuilder(object):
     def build_parser(self):
         """Define the parser rules."""
 
-        # rply has it's own style which does not conform to pylint's
-        # expectations.
+        # rply has it's own style which does not conform to pylint's expectations.
         # pylint: disable=W0613,C0103,W0612,C0301
 
         @self.pg.production('program : import_list definition_list')
@@ -131,8 +130,8 @@ class ParserBuilder(object):
         def definition(state, p):
             return p[0]
 
-        @self.pg.production('variable_definition : LET IDENTIFIER EQUAL list_definition')
-        @self.pg.production('variable_definition : LET IDENTIFIER type_declaration EQUAL list_definition')
+        @self.pg.production('variable_definition : LET IDENTIFIER EQUAL list_declaration')
+        @self.pg.production('variable_definition : LET IDENTIFIER type_declaration EQUAL list_declaration')
         def variable_definition(state, p):
             variable_identifier = p[1].value
             if len(p) == 4:
@@ -142,16 +141,15 @@ class ParserBuilder(object):
                 variable_type = p[2]
                 definition = p[4]
 
-            return ast.VariableDefinition(variable_identifier, variable_type, definition)
+            return ast.VariableDeclaration(variable_identifier, variable_type, definition)
 
         @self.pg.production('type_declaration : OPEN_BRACKET IDENTIFIER CLOSE_BRACKET')
         def type_declaration(state, p):
             return ast.TypeDeclaration(p[1].value)
 
-
-        @self.pg.production('list_definition : OPEN_BRACKET list_items CLOSE_BRACKET')
-        def list_definition(state, p):
-            return ast.PartList(p[1])
+        @self.pg.production('list_declaration : OPEN_BRACKET list_items CLOSE_BRACKET')
+        def list_declaration(state, p):
+            return ast.ListDeclaration(p[1])
 
         @self.pg.production('list_items : list_item')
         @self.pg.production('list_items : list_item COMMA list_items')

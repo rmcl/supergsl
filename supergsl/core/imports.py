@@ -15,7 +15,7 @@ class ResolveImportsPass(BreadthFirstNodeFilteredPass):
             'Import': self.visit_import_node,
             'Part': self.visit_part_node,
             'FunctionInvocation': self.visit_function_invoke_node,
-            'VariableDefinition': self.visit_variable_definition_node,
+            'VariableDeclaration': self.visit_variable_declaration_node,
         }
 
     def before_pass(self, ast):
@@ -30,7 +30,7 @@ class ResolveImportsPass(BreadthFirstNodeFilteredPass):
 
         return node
 
-    def visit_variable_definition_node(self, node):
+    def visit_variable_declaration_node(self, node):
         node.variable = self.symbol_table.resolve_symbol(
             VARIABLE_MODULE_PATH,
             node.identifier)
