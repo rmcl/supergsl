@@ -23,14 +23,12 @@ class SuperGSLIntegrationFixtures(object):
             ],
             "output_providers": [
                 "supergsl.core.output.ASTPrintOutputProvider"
-            ],
-            "plugins": [
-                "supergsl.core.parts.provider",
-                "supergsl.plugins.chopchop.plugin"
             ]
         }
 
-        if extra_plugins:
-            settings['plugins'].extend(extra_plugins)
+        settings['plugins'] = [
+            "supergsl.core.parts.provider",
+            "supergsl.plugins.chopchop.plugin"
+        ] + (extra_plugins or [])
 
         return settings
