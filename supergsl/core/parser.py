@@ -8,6 +8,9 @@ from supergsl.core.constants import (
 from . import ast
 from .exception import ParsingError
 
+
+
+
 class ParserState(object):
     def __init__(self, filename=None):
         self.filename = filename
@@ -24,6 +27,7 @@ class ParserBuilder(object):
         'FROM',
         'IMPORT',
         'AS',
+        'LET',
 
         'OPEN_CURLY_BRACKET',
         'CLOSE_CURLY_BRACKET',
@@ -41,6 +45,7 @@ class ParserBuilder(object):
         'PERIOD',
         'NUMBER',
         'IDENTIFIER',
+        'EQUAL',
         'TILDE',
         'EXCLAMATION',
         'DOLLAR_SIGN',
@@ -116,12 +121,48 @@ class ParserBuilder(object):
             if len(p) == 2:
                 p[0].add_definition(p[1])
                 return p[0]
-            else:
-                return ast.DefinitionList([p[0]])
 
+            return ast.DefinitionList([p[0]])
+
+        @self.pg.production('definition : variable_definition')
         @self.pg.production('definition : function_invoke')
         @self.pg.production('definition : assembly')
         def definition(state, p):
+            return p[0]
+
+        @self.pg.production('variable_definition : LET IDENTIFIER EQUAL list_declaration')
+        @self.pg.production('variable_definition : LET IDENTIFIER type_declaration EQUAL list_declaration')
+        def variable_definition(state, p):
+            variable_identifier = p[1].value
+            if len(p) == 4:
+                variable_type = None
+                definition = p[3]
+            elif len(p) == 5:
+                variable_type = p[2]
+                definition = p[4]
+
+            return ast.VariableDeclaration(variable_identifier, variable_type, definition)
+
+        @self.pg.production('type_declaration : OPEN_BRACKET IDENTIFIER CLOSE_BRACKET')
+        def type_declaration(state, p):
+            return ast.TypeDeclaration(p[1].value)
+
+        @self.pg.production('list_declaration : OPEN_BRACKET list_items CLOSE_BRACKET')
+        def list_declaration(state, p):
+            return ast.ListDeclaration(p[1])
+
+        @self.pg.production('list_items : list_item')
+        @self.pg.production('list_items : list_item COMMA list_items')
+        def list_items(state, p):
+            new_list = [p[0]]
+            if len(p) == 3:
+                new_list.extend(p[2])
+            return new_list
+
+        @self.pg.production('list_item : part')
+        @self.pg.production('list_item : nucleotide_constant')
+        @self.pg.production('list_item : amino_acid_constant')
+        def list_item(state, p):
             return p[0]
 
         @self.pg.production('function_name_and_label : IDENTIFIER')
