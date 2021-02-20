@@ -173,7 +173,8 @@ class ParserBuilder(object):
 
         @self.pg.production('nucleotide_constant : FORWARD_SLASH IDENTIFIER FORWARD_SLASH')
         def nucleotide_constant(state, p):
-            return ast.NucleotideConstant(p[1].value)
+            return ast.SequenceConstant(p[1].value, UNAMBIGUOUS_DNA_SEQUENCE)
+
 
         @self.pg.production('part : part_identifier OPEN_BRACKET slice_index CLOSE_BRACKET')
         @self.pg.production('part : part_identifier')
