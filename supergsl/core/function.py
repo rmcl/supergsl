@@ -4,7 +4,6 @@ import re
 from typing import Optional, List
 from inspect import getdoc
 from re import Pattern, Match
-from supergsl.core.types import SuperGSLType
 from supergsl.core.backend import DepthFirstNodeFilteredPass
 from supergsl.core.exception import FunctionInvokeError
 
@@ -13,8 +12,8 @@ class SuperGSLFunction(object):
     """Add a callable function to SuperGSL."""
 
     name: Optional[str] = None
-    arguments : List[SuperGSLType] = []
-    return_type : Optional[SuperGSLType] = None
+    arguments : List[str] = []
+    return_type : Optional[str] = None
 
     def resolve_import(self, identifier: str, alias: str) -> Pattern:
         """Resolve the import of a function from this provider.
