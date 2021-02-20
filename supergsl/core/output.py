@@ -48,20 +48,26 @@ class PrimerOutputProvider(OutputProvider):
         }
 
     def visit_part_node(self, node):
+        """Visit each part node and record the part's extraction primers."""
         part = node.part
         self.primers[part.identifier] = {
-            'Forward Primer': part.forward_primer,
-            'Reverse Primer': part.reverse_primer
+            'Part Identifier': part.identifier,
+            'Forward Primer': str(part.extraction_primers.forward_primer.get_sequence()),
+            'Reverse Primer': str(part.extraction_primers.reverse_primer.get_sequence())
         }
 
     def before_pass(self, ast):
         """Initialize the SBOL Document."""
         self.primers = {}
 
+    def _open_primer_file(self):
+        return open('primers.txt', 'w+')
+
     def after_pass(self, ast):
         """Save a TSV of part primers."""
 
-        with open('primers.txt', 'w+') as fp:
+        print(self.primers)
+        with self._open_primer_file() as fp:
             writer = csv.DictWriter(fp, (
                 'Part Identifier',
                 'Forward Primer',
@@ -70,10 +76,8 @@ class PrimerOutputProvider(OutputProvider):
 
             writer.writeheader()
 
-            for part_identifier, details in self.primers.items():
+            for _, details in self.primers.items():
                 output = details.copy()
-                output['Part Identifier'] = part_identifier
-
                 writer.writerow(output)
 
 
