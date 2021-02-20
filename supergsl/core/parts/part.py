@@ -41,16 +41,20 @@ class Part(NucleotideSequence):
         """A PrimerPair which can be used to extract this Part from its template source."""
         self.extraction_primers = extraction_primers
 
+    def get_extraction_primers(self) -> PrimerPair:
+        """Return primers that will allow the extraction of this part from its template source."""
+        return self.extraction_primers
+
     def get_sequence(self):
-        ref, x = self.start.get_absolute_position_in_reference()
-        ref_2, y = self.end.get_absolute_position_in_reference()
+        ref, start_pos = self.start.get_absolute_position_in_reference()
+        ref_2, end_pos = self.end.get_absolute_position_in_reference()
 
         if ref != ref_2:
             raise Exception("Reference sequences do not match.")
 
         description = self.description or ''
         return SeqRecord(
-            ref[x:y],
+            ref[start_pos:end_pos],
             name=self.identifier,
             description=description)
 

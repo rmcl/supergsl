@@ -1,13 +1,41 @@
-from supergsl.core.assembly import AssemblerBase
-from supergsl.core.types import PrimerPair
 from Bio.SeqUtils import MeltingTemp as _mt
 from pydna.design import assembly_fragments
 from pydna.design import primer_design
-from pydna.assembly import Assembly
 from pydna.dseqrecord import Dseqrecord
 
+from supergsl.core.types import PrimerPair
 
-class PartPrimerDesignMixin(object):
+
+class ExtractionPrimerBuilder(object):
+    """Use pydna to generate extraction primers for parts."""
+
+    def build_primers_for_part(self, part):
+        """Build extraction primers and assign them into the part."""
+        part_seq_record = part.get_sequence()
+
+        forward_primer = part.extraction_primers.forward_primer if part.has_primers else None
+        reverse_primer = part.extraction_primers.reverse_primer if part.has_primers else None
+
+        amplicon = primer_design(
+            Dseqrecord(part_seq_record),
+            fp=forward_primer,
+            rp=reverse_primer,
+            tm=self._perform_tm_func,
+            limit=13)
+
+        if not part.has_primers:
+            part.set_extraction_primers(
+                PrimerPair.from_sequences(
+                    amplicon.forward_primer.seq,
+                    amplicon.reverse_primer.seq
+                ))
+
+        return amplicon, part_seq_record
+
+    def _perform_tm_func(self, seq):
+        """Call the tm_func on a sequence with the config specified arguments."""
+        tm_func, tm_kwargs = self._tm_func_parameters()
+        return tm_func(seq, **kwargs)
 
     def _tm_func_parameters(self):
         """Override the BioPython tm calculation method.
@@ -63,67 +91,3 @@ class PartPrimerDesignMixin(object):
                 tm_kwargs[key] = self.options[key]
 
         return tm_func, tm_kwargs
-
-    def _perform_tm_func(self, seq):
-        """Call the tm_func on a sequence with the config specified arguments."""
-        tm_func, tm_kwargs = self._tm_func_parameters()
-        return tm_func(seq, **kwargs)
-
-    def design_primer_for_part(self, part):
-        part_seq_record = part.get_sequence()
-
-        amplicon = primer_design(
-            Dseqrecord(part_seq_record),
-            fp=part.extractopm_primers.forward_primer,
-            rp=part.extractopm_primers.reverse_primer,
-            tm=self._perform_tm_func,
-            limit=13)
-
-        if not part.has_primers:
-            part.set_extraction_primers(
-                PrimerPair.from_sequences(
-                    amplicon.forward_primer.seq,
-                    amplicon.reverse_primer.seq
-                ))
-
-        return amplicon, part_seq_record
-
-class SeamlessLigationAssembler(PartPrimerDesignMixin, AssemblerBase):
-    """Create assemblies utilizing the primer algorithm implemented by fGSL."""
-
-    import_path = 'seamless'
-    name = 'seamless-ligation'
-
-    def assemble(self, assemblies):
-        for assembly in assemblies:
-            part_records = []
-            part_amplicons = []
-            for part_node in assembly.parts:
-                part = part_node.part
-
-                part_amplicon, part_seq_record = self.design_primer_for_part(part)
-
-                part_records.append(part_seq_record)
-                part_amplicons.append(part_amplicon)
-
-            fragments = assembly_fragments(part_amplicons)
-            for idx in range(len(fragments)):
-                fragments[idx].locus = part_records[idx].name
-
-            #print(fragments)
-
-            assemblyobj = Assembly(
-                fragments,
-                limit=20)
-
-            linear_contigs = assemblyobj.assemble_linear()
-            if len(linear_contigs) != 1:
-                raise Exception(
-                    '%s resulted in %d contigs. We were hoping for just one.' % (
-                        len(linear_contigs)
-                    ))
-
-            assembly.contig = linear_contigs[0]
-            #print(assembly.contig.figure())
-
-        return assemblies

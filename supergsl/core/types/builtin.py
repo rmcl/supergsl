@@ -1,3 +1,4 @@
+from Bio.Seq import Seq
 from typing import List
 
 
@@ -24,7 +25,12 @@ class AminoAcidSequence(SuperGSLType):
 
 class Primer(NucleotideSequence):
     """Represent a short nucleotide sequence that provides a starting point for replication"""
-    pass
+    def __init__(self, primer_seq : Seq):
+        self._sequence = primer_seq
+
+    def get_sequence(self) -> Seq:
+        """Return the amino acid sequence as a `Bio.Seq`."""
+        return self._sequence
 
 
 class PrimerPair(SuperGSLType):
