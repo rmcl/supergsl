@@ -1,3 +1,5 @@
+"""Generate Extraction Primers using the excellent pydna wrapper around BioPython."""
+
 from Bio.SeqUtils import MeltingTemp as _mt
 from pydna.design import assembly_fragments
 from pydna.design import primer_design
@@ -64,26 +66,26 @@ class ExtractionPrimerBuilder(object):
             raise Exception('Need to implement swapping out default Tm_NN function.')
 
         tm_kwargs = {
-            check: True,
-            strict: True,
-            c_seq: None,
-            shift: 0,
+            'check': True,
+            'strict': True,
+            'c_seq': None,
+            'shift': 0,
 
             # DNA_NN4: values from SantaLucia & Hicks (2004) is the default used by pydna
             # however DNA_NN3 is effectively the value used by the fGSL primer designer.
-            nn_table: _mt.DNA_NN3,
-            tmm_table: None,
-            imm_table: None,
-            de_table: None,
-            dnac1: 500 / 2,  # Assume 500 µM of each primer in the PCR mix
-            dnac2: 500 / 2,  # This is what MELTING and Primer3Plus do
-            selfcomp: False,
-            Na: 40,
-            K: 0,
-            Tris: 75.0,  # We use the 10X Taq Buffer with (NH4)2SO4 (above)
-            Mg: 1.5,  # 1.5 mM Mg2+ is often seen in modern protocols
-            dNTPs: 0.8,  # Assume 200 µM of each dNTP
-            saltcorr: 7,  # Tm = 81.5 + 0.41(%GC) - 600/N + 16.6 x log[Na+]
+            'nn_table': _mt.DNA_NN3,
+            'tmm_table': None,
+            'imm_table': None,
+            'de_table': None,
+            'dnac1': 500 / 2,  # Assume 500 µM of each primer in the PCR mix
+            'dnac2': 500 / 2,  # This is what MELTING and Primer3Plus do
+            'selfcomp': False,
+            'Na': 40,
+            'K': 0,
+            'Tris': 75.0,  # We use the 10X Taq Buffer with (NH4)2SO4 (above)
+            'Mg': 1.5,  # 1.5 mM Mg2+ is often seen in modern protocols
+            'dNTPs': 0.8,  # Assume 200 µM of each dNTP
+            'saltcorr': 7,  # Tm = 81.5 + 0.41(%GC) - 600/N + 16.6 x log[Na+]
         }
 
         for key in tm_kwargs.keys():
