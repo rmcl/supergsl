@@ -3,6 +3,10 @@ from typing import cast, Dict, List, Optional, Any, Union
 
 from supergsl.core.parts.part import Part as CorePart
 
+
+# rply has it's own style which does not conform to pylint's expectations.
+# pylint: disable=E1136
+
 class Node(object):
     def child_nodes(self) -> List['Node']:
         return []

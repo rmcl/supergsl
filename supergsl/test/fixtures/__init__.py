@@ -1,3 +1,4 @@
+from typing import List
 from Bio.Seq import Seq
 from supergsl.core.ast import Assembly, Part as AstPart
 from supergsl.core.constants import THREE_PRIME
@@ -12,7 +13,7 @@ class SuperGSLIntegrationFixtures(object):
         extra_plugins (list): a list of paths to plugins to include in the settings.
         """
 
-        settings = {
+        settings : dict = {
             "part_providers": [
                 {
                     "name": "truncated.S288C",
@@ -25,7 +26,6 @@ class SuperGSLIntegrationFixtures(object):
                 "supergsl.core.output.ASTPrintOutputProvider"
             ]
         }
-
         settings['plugins'] = [
             "supergsl.core.parts.provider",
             "supergsl.plugins.chopchop.plugin"

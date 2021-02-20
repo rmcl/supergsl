@@ -102,10 +102,17 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
             cur_node, cur_node_parent = node_visit_queue.pop(0)
 
             self.visit(cur_node, cur_node_parent)
-            node_visit_queue += [
-                (child, cur_node)
-                for child in cur_node.child_nodes()
-            ]
+
+            try:
+                node_visit_queue += [
+                    (child, cur_node)
+                    for child in cur_node.child_nodes()
+                ]
+            except TypeError as error:
+                raise BackendException(
+                    'Error executing pass "%s". While visiting node "%s", '
+                    'occurred: %s' % (self, cur_node, error)
+                ) from error
 
         ast = self.call_handler_and_check_result(self.after_pass, ast)
         return ast

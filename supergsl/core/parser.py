@@ -45,6 +45,10 @@ class ParserBuilder(object):
 
     def build_parser(self):
         """Define the parser rules."""
+
+        # rply has it's own style which does not conform to pylint's expectations.
+        # pylint: disable=W0613,C0103,W0612,C0301
+
         @self.pg.production('program : import_list definition_list')
         @self.pg.production('program : definition_list')
         def program(state, p):
@@ -64,8 +68,8 @@ class ParserBuilder(object):
             if len(p) == 2:
                 p[0].append(p[1])
                 return p[0]
-            else:
-                return [p[0]]
+
+            return [p[0]]
 
         @self.pg.production('import : FROM import_module IMPORT import_identifiers')
         def program_import(state, p):
@@ -76,8 +80,8 @@ class ParserBuilder(object):
         def program_import_module(state, p):
             if len(p) == 3:
                 return p[0] + [p[2].value]
-            else:
-                return [p[0].value]
+
+            return [p[0].value]
 
         @self.pg.production('import_identifiers : import_identifiers COMMA import_identifier')
         @self.pg.production('import_identifiers : import_identifier')
@@ -85,8 +89,8 @@ class ParserBuilder(object):
             if len(p) == 3:
                 p[0].append(p[2])
                 return p[0]
-            else:
-                return [p[0]]
+
+            return [p[0]]
 
         @self.pg.production('import_identifier : IDENTIFIER AS IDENTIFIER')
         @self.pg.production('import_identifier : IDENTIFIER')
@@ -119,24 +123,25 @@ class ParserBuilder(object):
             if len(p) == 3:
                 # return Name and label
                 return p[2].value, p[0].value
-            else:
-                return p[0].value, None
+
+            return p[0].value, None
 
         @self.pg.production('function_invoke : function_name_and_label function_parameter_block')
         @self.pg.production('function_invoke : function_name_and_label OPEN_CURLY_BRACKET definition_list CLOSE_CURLY_BRACKET')
         def function_invoke(state, p):
             if len(p) == 2:
                 return ast.FunctionInvocation(p[0][0], None, p[1], p[0][1])
-            elif len(p) == 4:
-                return ast.FunctionInvocation(p[0][0], p[2], None, p[0][1])
+
+            return ast.FunctionInvocation(p[0][0], p[2], None, p[0][1])
+
 
         @self.pg.production('function_parameter_block : OPEN_PAREN function_parameters CLOSE_PAREN')
         @self.pg.production('function_parameter_block : OPEN_PAREN CLOSE_PAREN')
         def function_param_block(state, p):
             if len(p) == 2:
                 return None
-            else:
-                return p[1]
+
+            return p[1]
 
         @self.pg.production('function_parameters : IDENTIFIER')
         @self.pg.production('function_parameters : IDENTIFIER COMMA function_parameters')
@@ -165,7 +170,6 @@ class ParserBuilder(object):
                 p[0].append(p[2])
                 return p[0]
 
-            assert('Cant reach this point.')
 
         @self.pg.production('nucleotide_constant : FORWARD_SLASH IDENTIFIER FORWARD_SLASH')
         def nucleotide_constant(state, p):
@@ -175,11 +179,11 @@ class ParserBuilder(object):
         @self.pg.production('part : part_identifier')
         def part(state, p):
             identifier, invert = p[0]
-            slice = None
+            part_slice = None
             if len(p) == 4:
-                slice = p[2]
+                part_slice = p[2]
 
-            return ast.Part(identifier, slice, invert)
+            return ast.Part(identifier, part_slice, invert)
 
 
         @self.pg.production('part_identifier : EXCLAMATION IDENTIFIER')
