@@ -1,4 +1,5 @@
 import csv
+import pprint
 from typing import Optional
 from supergsl.core.ast import Node
 from supergsl.core.backend import BreadthFirstNodeFilteredPass
@@ -29,12 +30,13 @@ class OutputProvider(BreadthFirstNodeFilteredPass):
 class ASTPrintOutputProvider(OutputProvider):
     """Generate a pretty print output of the AST and write it to stdout."""
     name = 'print'
+    stream = None
 
     def before_pass(self, ast):
         """Initialize the SBOL Document."""
 
-        import pprint
-        pprint.pprint(ast.eval())
+        printer = pprint.PrettyPrinter(stream=self.stream)
+        printer.pprint(ast.eval())
 
 
 class PrimerOutputProvider(OutputProvider):
