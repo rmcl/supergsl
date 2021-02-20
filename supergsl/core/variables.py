@@ -20,6 +20,21 @@ class ResolveSymbolMixin(object):
 class SuperGSLVariable(object):
     def __init__(self, identifier):
         self.identifier = identifier
+        self.type = None
+        self.value = None
+
+    def set_type(self, supergsl_type):
+        """Set the type of the variable."""
+        if not self.type:
+            raise Exception('The type of a SuperGSL Variable can only be set once.')
+        self.type = supergsl_type
+
+    def set_value(self, value):
+        """Set the value of the variable."""
+        if not self.value:
+            raise Exception('The value of a SuperGSL Variable can only be set once.')
+
+        self.value = value
 
         # self.type = ?????
 

@@ -17,6 +17,6 @@ class TypeCheckPass(DepthFirstNodeFilteredPass):
     def visit_function_invoke_node(self, node):
         """Visit FunctionInvocation node and determine the expected return type."""
 
-        raise NotImplementedError()
+        node.expected_type = node.function.get_return_type()
 
         return node
