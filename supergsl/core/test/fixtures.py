@@ -9,11 +9,11 @@ class SuperGSLCoreFixtures(object):
 
     def get_assembly_ast(self):
         parts = [
-            AstPart('uHO'),
-            AstPart('pADH1'),
-            AstPart('gERG10'),
-            AstPart('tADH1'),
-            AstPart('dHO'),
+            AstPart('uHO', None, False),
+            AstPart('pADH1', None, False),
+            AstPart('gERG10', None, False),
+            AstPart('tADH1', None, False),
+            AstPart('dHO', None, False),
         ]
         assembly = Assembly(parts)
 
