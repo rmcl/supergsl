@@ -1,4 +1,10 @@
+"""Define a parser of the SuperGSL language."""
 from rply import ParserGenerator
+from supergsl.core.constants import (
+    UNAMBIGUOUS_DNA_SEQUENCE,
+    UNAMBIGUOUS_PROTEIN_SEQUENCE
+)
+
 from . import ast
 from .exception import ParsingError
 
@@ -37,6 +43,7 @@ class ParserBuilder(object):
         'IDENTIFIER',
         'TILDE',
         'EXCLAMATION',
+        'DOLLAR_SIGN',
     )
 
     def __init__(self):
