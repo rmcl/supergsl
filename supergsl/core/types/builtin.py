@@ -46,11 +46,11 @@ class PrimerPair(SuperGSLType):
         self._reverse_primer : Primer = reverse_primer
 
     @property
-    def forward_primer(self) -> Primer:
+    def forward(self) -> Primer:
         """Return the forward primer of the pair"""
         return self._forward_primer
 
     @property
-    def reverse_primer(self) -> Primer:
+    def reverse(self) -> Primer:
         """Return the reverse primer of the pair"""
         return self._reverse_primer

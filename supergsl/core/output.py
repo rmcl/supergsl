@@ -52,8 +52,8 @@ class PrimerOutputProvider(OutputProvider):
         part = node.part
         self.primers[part.identifier] = {
             'Part Identifier': part.identifier,
-            'Forward Primer': str(part.extraction_primers.forward_primer.get_sequence()),
-            'Reverse Primer': str(part.extraction_primers.reverse_primer.get_sequence())
+            'Forward Primer': str(part.extraction_primers.forward.get_sequence()),
+            'Reverse Primer': str(part.extraction_primers.reverse.get_sequence())
         }
 
     def before_pass(self, ast):
