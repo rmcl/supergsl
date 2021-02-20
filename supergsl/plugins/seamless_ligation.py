@@ -1,5 +1,5 @@
 from supergsl.core.assembly import AssemblerBase
-
+from supergsl.core.types import PrimerPair
 from Bio.SeqUtils import MeltingTemp as _mt
 from pydna.design import assembly_fragments
 from pydna.design import primer_design
@@ -74,15 +74,17 @@ class PartPrimerDesignMixin(object):
 
         amplicon = primer_design(
             Dseqrecord(part_seq_record),
-            fp=part.forward_primer,
-            rp=part.reverse_primer,
+            fp=part.extractopm_primers.forward_primer,
+            rp=part.extractopm_primers.reverse_primer,
             tm=self._perform_tm_func,
             limit=13)
 
         if not part.has_primers:
-            part.set_primers(
-                amplicon.forward_primer.seq,
-                amplicon.reverse_primer.seq)
+            part.set_extraction_primers(
+                PrimerPair.from_sequences(
+                    amplicon.forward_primer.seq,
+                    amplicon.reverse_primer.seq
+                ))
 
         return amplicon, part_seq_record
 
@@ -116,7 +118,10 @@ class SeamlessLigationAssembler(PartPrimerDesignMixin, AssemblerBase):
 
             linear_contigs = assemblyobj.assemble_linear()
             if len(linear_contigs) != 1:
-                raise Exception('%s resulted in %d contigs. We were hoping for just one.' % len(linear_contigs))
+                raise Exception(
+                    '%s resulted in %d contigs. We were hoping for just one.' % (
+                        len(linear_contigs)
+                    ))
 
             assembly.contig = linear_contigs[0]
             #print(assembly.contig.figure())
