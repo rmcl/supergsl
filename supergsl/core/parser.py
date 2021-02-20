@@ -175,6 +175,9 @@ class ParserBuilder(object):
         def nucleotide_constant(state, p):
             return ast.SequenceConstant(p[1].value, UNAMBIGUOUS_DNA_SEQUENCE)
 
+        @self.pg.production('amino_acid_constant : FORWARD_SLASH DOLLAR_SIGN IDENTIFIER FORWARD_SLASH')
+        def protein_constant(state, p):
+            return ast.SequenceConstant(p[1].value, UNAMBIGUOUS_PROTEIN_SEQUENCE)
 
         @self.pg.production('part : part_identifier OPEN_BRACKET slice_index CLOSE_BRACKET')
         @self.pg.production('part : part_identifier')
