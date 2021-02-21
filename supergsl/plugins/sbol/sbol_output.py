@@ -34,20 +34,20 @@ class SBOLOutputPass(OutputProvider):
         self.sbol_doc.write('output_sbol.xml')
 
     def sanitize_identifier(self, identifier):
-        """SBOL is really particular about part names."""
+        """Sanitize SuperGSL Identifiers to conform to identifiers in the SBOL spec."""
         bad_chars = '[]~:'
         for c in bad_chars:
             identifier = identifier.replace(c, '_')
         return identifier
 
     def visit_assembly_node(self, node):
+        """Add each assembly to the SBOL Document."""
         self.assembly_count += 1
 
         label = node.label
         if not label:
             label = 'Assembly%05d' % self.assembly_count
 
-        #assembly = Component(label, SBO_DNA)
         assembly = ComponentDefinition(label)
         self.sbol_doc.addComponentDefinition(assembly)
 
