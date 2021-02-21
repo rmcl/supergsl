@@ -1,3 +1,4 @@
+from typing import List, Optional
 from Bio.SeqRecord import SeqRecord
 from supergsl.core.types import NucleotideSequence, PrimerPair
 
@@ -14,8 +15,15 @@ class Part(NucleotideSequence):
         parent_part=None,
         extraction_primers=None,
         description=None,
-        alternative_names=None
+        alternative_names=None,
+        roles : Optional[List[str]] = None
     ):
+        """Initialize a Part
+
+        roles (optional): List of roles from standard ontology terms define the
+            function of this part. Nice list of roles here:
+                https://github.com/SynBioDex/pySBOL3/blob/master/sbol3/constants.py
+        """
         self.identifier = identifier
 
         self.start = start_position
@@ -31,6 +39,9 @@ class Part(NucleotideSequence):
 
         self.description = description
         self.alternative_names = alternative_names
+        self._roles : Optional[List[str]] = roles
+        if not roles:
+            self._roles = []
 
     @property
     def has_primers(self):
@@ -57,6 +68,16 @@ class Part(NucleotideSequence):
             ref[start_pos:end_pos],
             name=self.identifier,
             description=description)
+
+    @property
+    def roles(self):
+        """Return a list of ontology terms for this part."""
+        return self._roles
+
+    def add_roles(self, roles : List[str]):
+        """Add additional ontology terms to this part."""
+        self._roles.extend(roles)
+        self._roles = list(set(self._roles))
 
     def get_child_part_by_slice(self, identifier, start, end):
         return self.provider.get_child_part_by_slice(

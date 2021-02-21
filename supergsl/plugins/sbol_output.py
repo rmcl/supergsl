@@ -1,16 +1,11 @@
 from supergsl.core.output import OutputProvider
-from sbol import (
-    setHomespace,
+from sbol2 import (
+    ComponentDefinition,
     Config,
     Document,
-    ComponentDefinition,
     Sequence,
+    setHomespace,
 
-    SO_GENE,
-    SO_PROMOTER,
-    SO_TERMINATOR,
-    SO_MISC,
-    SO_CDS,
 )
 
 
@@ -27,39 +22,44 @@ class SBOLOutputPass(OutputProvider):
     def before_pass(self, ast):
         """Initialize the SBOL Document."""
 
-        self.part_type_role_map = {
-            'gene': [SO_GENE],
-            'promoter': [SO_PROMOTER],
-            'terminator': [SO_TERMINATOR],
-            'upstream': [SO_MISC],
-            'downstream': [SO_MISC],
-            'orf': ['0000236'], # SO_ORF seems not to be defined in libsbol. but SO is 0000236 http://www.sequenceontology.org/browser/current_release/term/SO:0000236
-            'fusible_orf': [SO_CDS],
-            'mRNA': [],
-        }
-
-        setHomespace('http://sbols.org/SUPERGSL_Example/')
+        setHomespace('http://sbols.org/SuperGSL_Example/')
         Config.setOption('sbol_compliant_uris', True)
         Config.setOption('sbol_typed_uris', True)
 
         self.sbol_doc = Document()
+        self.assembly_count = 0
 
-        return ast
 
     def after_pass(self, ast):
         self.sbol_doc.write('output_sbol.xml')
-        return ast
+
+    def sanitize_identifier(self, identifier):
+        """SBOL is really particular about part names."""
+        bad_chars = '[]~:'
+        for c in bad_chars:
+            identifier = identifier.replace(c, '_')
+        return identifier
 
     def visit_assembly_node(self, node):
+        self.assembly_count += 1
 
-        assembly = ComponentDefinition('Assembly')
+        label = node.label
+        if not label:
+            label = 'Assembly%05d' % self.assembly_count
+
+        #assembly = Component(label, SBO_DNA)
+        assembly = ComponentDefinition(label)
         self.sbol_doc.addComponentDefinition(assembly)
 
         part_components = []
-        for part in node.parts:
-            part_component = ComponentDefinition(part.identifier)
-            part_component.roles = self.part_type_role_map[part.get_part_type()]
-            part_component.sequence = Sequence(part.identifier, str(part.source_part.sequence.seq))
+        for part_node in node.parts:
+            part = part_node.part
+
+            sanitized_ident = self.sanitize_identifier(part.identifier)
+
+            part_component = ComponentDefinition(sanitized_ident)
+            part_component.roles = part.roles
+            part_component.sequence = Sequence(sanitized_ident, str(part.get_sequence().seq))
 
             part_components.append(part_component)
 
