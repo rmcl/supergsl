@@ -16,7 +16,7 @@ class Part(NucleotideSequence):
         extraction_primers=None,
         description=None,
         alternative_names=None,
-        roles : Optional[List[str]] = None
+        roles = None
     ):
         """Initialize a Part
 
@@ -39,9 +39,11 @@ class Part(NucleotideSequence):
 
         self.description = description
         self.alternative_names = alternative_names
-        self._roles : Optional[List[str]] = roles
-        if not roles:
-            self._roles = []
+
+        self._roles = []
+        if roles:
+            self._roles = roles
+
 
     @property
     def has_primers(self):
