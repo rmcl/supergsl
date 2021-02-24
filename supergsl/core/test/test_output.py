@@ -1,3 +1,4 @@
+"""Tests for the output core module."""
 import unittest
 from io import StringIO
 from .fixtures import SuperGSLCoreFixtures
@@ -22,7 +23,7 @@ class OutputTestCase(unittest.TestCase):
         output_provider.perform(self.example_ast)
         result = output_provider.stream.getvalue()
 
-        self.assertEquals(
+        self.assertEqual(
             result.replace(' ','').replace('\n', ''),
             str(self.example_ast_1).replace(' ', '').replace('\n', ''))
 
