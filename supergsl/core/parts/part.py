@@ -14,8 +14,15 @@ class Part(object):
         forward_primer=None,
         reverse_primer=None,
         description=None,
-        alternative_names=None
+        alternative_names=None,
+        roles = None
     ):
+        """Initialize a Part
+
+        roles (optional): List of roles from standard ontology terms define the
+            function of this part. Nice list of roles here:
+                https://github.com/SynBioDex/pySBOL3/blob/master/sbol3/constants.py
+        """
         self.identifier = identifier
 
         self.start = start_position
@@ -33,6 +40,11 @@ class Part(object):
         self.description = description
         self.alternative_names = alternative_names
 
+        self._roles = []
+        if roles:
+            self._roles = roles
+
+
     @property
     def has_primers(self):
         return self.forward_primer and self.reverse_primer
@@ -42,17 +54,27 @@ class Part(object):
         self.reverse_primer = reverse_primer
 
     def get_sequence(self):
-        ref, x = self.start.get_absolute_position_in_reference()
-        ref_2, y = self.end.get_absolute_position_in_reference()
+        ref, start_pos = self.start.get_absolute_position_in_reference()
+        ref_2, end_pos = self.end.get_absolute_position_in_reference()
 
         if ref != ref_2:
             raise Exception("Reference sequences do not match.")
 
         description = self.description or ''
         return SeqRecord(
-            ref[x:y],
+            ref[start_pos:end_pos],
             name=self.identifier,
             description=description)
+
+    @property
+    def roles(self):
+        """Return a list of ontology terms for this part."""
+        return self._roles
+
+    def add_roles(self, roles : List[str]):
+        """Add additional ontology terms to this part."""
+        self._roles.extend(roles)
+        self._roles = list(set(self._roles))
 
     def get_child_part_by_slice(self, identifier, start, end):
         return self.provider.get_child_part_by_slice(
