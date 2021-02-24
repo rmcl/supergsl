@@ -1,3 +1,4 @@
+from typing import Dict
 from Bio.Seq import Seq
 from sbol2 import Document, PartShop
 from supergsl.core.exception import (
@@ -36,7 +37,7 @@ class SynBioHubPartProvider(PartProvider):
 
     def __init__(self, name : str, settings : dict):
         self.name = name
-        self._cached_parts = {}
+        self._cached_parts: Dict[str, Part] = {}
         self.repository_url = settings.get('repository_url', None)
         if not self.repository_url:
             ConfigurationException('"%s" requires that repository_url be set.')
