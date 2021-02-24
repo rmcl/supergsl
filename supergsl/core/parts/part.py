@@ -1,3 +1,4 @@
+from typing import List, Optional
 from Bio.SeqRecord import SeqRecord
 
 
