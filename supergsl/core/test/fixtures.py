@@ -8,14 +8,14 @@ from supergsl.core.parts import Part, SeqPosition
 class SuperGSLCoreFixtures(object):
 
     def get_assembly_ast(self):
-        parts = [
+        ast_part_nodes = [
             AstPart('uHO', None, False),
             AstPart('pADH1', None, False),
             AstPart('gERG10', None, False),
             AstPart('tADH1', None, False),
             AstPart('dHO', None, False),
         ]
-        assembly = Assembly(parts)
+        assembly = Assembly(ast_part_nodes)
 
         return assembly
 

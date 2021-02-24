@@ -27,6 +27,7 @@ setuptools.setup(
         'coverage',
         'biopython',
         'pydna',
+        'sbol2',
         'mock',
         'mypy',
         'mypy-extensions',
@@ -35,7 +36,6 @@ setuptools.setup(
         "plugins": [
             'docker',
             'dnachisel',
-            'sbol3',
             'graphviz',
         ]
     },
