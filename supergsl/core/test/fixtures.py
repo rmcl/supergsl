@@ -40,7 +40,7 @@ class SuperGSLCoreFixtures(object):
             complement_sequence[-20:]
         )
 
-    def mk_part(self, identifier, part_seq_len, mk_primers=True):
+    def mk_part(self, identifier, part_seq_len, mk_primers=True, roles=None):
         """Create a mock Part.
 
         Part is derived from a reference sequence three times longer than the part
@@ -61,7 +61,8 @@ class SuperGSLCoreFixtures(object):
             identifier,
             start,
             end,
-            provider=mock.Mock()
+            provider=mock.Mock(),
+            roles=roles
         )
 
         if mk_primers:
