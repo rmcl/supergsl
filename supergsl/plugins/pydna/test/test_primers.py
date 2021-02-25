@@ -12,7 +12,7 @@ class ExtractionPrimerBuilderTestCase(unittest.TestCase):
         self.primer_builder = ExtractionPrimerBuilder()
 
     def test_build_primers_for_part(self):
-        """Test that PrimerPair type can be initialized from a pair of sequences."""
+        """Test that primers are created for a part."""
 
         _, part = self.fixtures.mk_part('AwesomePart', 200, False)
 
