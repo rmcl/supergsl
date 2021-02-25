@@ -3,6 +3,10 @@ from typing import cast, Dict, List, Optional, Any, Union
 
 from supergsl.core.parts.part import Part as CorePart
 
+
+# rply has it's own style which does not conform to pylint's expectations.
+# pylint: disable=E1136
+
 class Node(object):
     def child_nodes(self) -> List['Node']:
         return []
@@ -203,13 +207,15 @@ class FunctionInvocation(Node):
             return []
 
 
-class NucleotideConstant(Node):
-    def __init__(self, sequence : str):
+class SequenceConstant(Node):
+    def __init__(self, sequence : str, sequence_type : str):
         self.sequence = sequence
+        self.sequence_type = sequence_type
 
     def eval(self) -> dict:
         return {
-            'node': 'NucleotideConstant',
+            'node': 'SequenceConstant',
+            'type': self.sequence_type,
             'sequence': self.sequence
         }
 

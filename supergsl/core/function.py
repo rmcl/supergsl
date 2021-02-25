@@ -1,15 +1,19 @@
-from typing import Optional, Tuple, Callable
+"""Define the mechanism of SuperGSLFunction and an AST pass to invoke those functions."""
+
 import re
+from typing import Optional, List
+from inspect import getdoc
 from re import Pattern, Match
-from supergsl.core.symbol_table import SymbolTable
-from supergsl.core.parts import Part
 from supergsl.core.backend import DepthFirstNodeFilteredPass
 from supergsl.core.exception import FunctionInvokeError
+
 
 class SuperGSLFunction(object):
     """Add a callable function to SuperGSL."""
 
     name: Optional[str] = None
+    arguments : List[str] = []
+    return_type : Optional[str] = None
 
     def resolve_import(self, identifier: str, alias: str) -> Pattern:
         """Resolve the import of a function from this provider.
@@ -29,18 +33,18 @@ class SuperGSLFunction(object):
         raise NotImplementedError('sGSL function definitions must specify a "name" in "%s".' % cls)
 
     @classmethod
-    def get_help(cls):
-        return cls.execute.__docstr__
+    def get_help(cls) -> Optional[str]:
+        return getdoc(cls)
 
     @classmethod
     def get_arguments(cls):
         """Return a list of expected arguments."""
-        return []
+        return cls.arguments
 
     @classmethod
     def get_return_type(cls):
         """Return the expected return value of the function."""
-        return None
+        return cls.return_type
 
     def execute(self, sgsl_args, child_nodes=None):
         """Called when the function is invoke in SuperGSL."""
@@ -48,6 +52,7 @@ class SuperGSLFunction(object):
 
 
 class InvokeFunctionPass(DepthFirstNodeFilteredPass):
+    """Traverse the AST and execute encountered SuperGSLFunctions."""
 
     def get_node_handlers(self):
         return {
