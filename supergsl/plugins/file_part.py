@@ -10,7 +10,7 @@ from supergsl.core.parts.position import SeqPosition
 from supergsl.core.exception import PartLocatorException, PartNotFoundException
 from supergsl.core.parts import PartProvider, Part
 from supergsl.core.parts.prefix_part import PrefixedSlicePartProviderMixin
-
+from supergsl.plugins.pydna.primers import ExtractionPrimerBuilder
 
 class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProvider):
     """Access parts provided by fGSL reference genome files.
@@ -29,6 +29,7 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
         self.fasta_file_path : str = settings['fasta_file_path']
         self.feature_file_path : str = settings['feature_file_path']
         self._cached_parts : Dict[str, Part] = {}
+        self.primer_builder = ExtractionPrimerBuilder()
 
     def load(self) -> None:
         encoding = guess_type(self.feature_file_path)[1]
@@ -144,6 +145,9 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
             provider=self,
             description=feature['Notes'],
             alternative_names=alternative_names)
+
+        # Build primers for this part.
+        self.primer_builder.build_primers_for_part(part)
 
         self._cached_parts[identifier] = part
         return part
