@@ -1,6 +1,6 @@
 from typing import List, Optional
 from Bio.SeqRecord import SeqRecord
-from supergsl.core.types import NucleotideSequence
+from supergsl.core.types import NucleotideSequence, PrimerPair
 
 
 class Part(NucleotideSequence):
@@ -13,8 +13,7 @@ class Part(NucleotideSequence):
         end_position,
         provider,
         parent_part=None,
-        forward_primer=None,
-        reverse_primer=None,
+        extraction_primers=None,
         description=None,
         alternative_names=None,
         roles = None
@@ -36,8 +35,7 @@ class Part(NucleotideSequence):
 
         self.parent_part = parent_part
 
-        self.forward_primer = forward_primer
-        self.reverse_primer = reverse_primer
+        self.extraction_primers = extraction_primers
 
         self.description = description
         self.alternative_names = alternative_names
@@ -49,11 +47,16 @@ class Part(NucleotideSequence):
 
     @property
     def has_primers(self):
-        return self.forward_primer and self.reverse_primer
+        """Returns true if this part has extraction primers defined."""
+        return self.extraction_primers is not None
 
-    def set_primers(self, forward_primer, reverse_primer):
-        self.forward_primer = forward_primer
-        self.reverse_primer = reverse_primer
+    def set_extraction_primers(self, extraction_primers : PrimerPair):
+        """A PrimerPair which can be used to extract this Part from its template source."""
+        self.extraction_primers = extraction_primers
+
+    def get_extraction_primers(self) -> PrimerPair:
+        """Return primers that will allow the extraction of this part from its template source."""
+        return self.extraction_primers
 
     def get_sequence(self):
         ref, start_pos = self.start.get_absolute_position_in_reference()

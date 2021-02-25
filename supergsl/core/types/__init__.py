@@ -2,12 +2,12 @@
 from .builtin import (
     SuperGSLType,
     SuperGSLEnum,
-
     NucleotideSequence,
     AminoAcidSequence,
-
     CodonFrequencyTable,
-    CodonTranslationTable
+    CodonTranslationTable,
+    Primer,
+    PrimerPair,
 )
 
 TYPES = [
@@ -16,7 +16,11 @@ TYPES = [
     NucleotideSequence,
     AminoAcidSequence,
     CodonFrequencyTable,
-    CodonTranslationTable
+    CodonTranslationTable,
+    NucleotideSequence,
+    AminoAcidSequence,
+    Primer,
+    PrimerPair,
 ]
 
 def resolve_type(type_name):
