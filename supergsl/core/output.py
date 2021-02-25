@@ -121,6 +121,7 @@ class OutputPipeline(object):
 
     def __init__(self, compiler_settings):
         self.settings = compiler_settings
+        self.available_outputers = []
         self.resolve_providers()
 
     def validate_args(self, args):
@@ -133,6 +134,10 @@ class OutputPipeline(object):
 
             output_inst = outputer_class(None, allow_modification=False)
             self.desired_output_providers.append(output_inst)
+
+    def get_available_outputers(self):
+        """Return a list of outputers available for use."""
+        return self.available_outputers
 
     def resolve_providers(self):
         """Resolve the output providers from the supergsl-config settings."""
