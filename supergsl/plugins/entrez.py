@@ -1,12 +1,12 @@
 import os
+import gzip
 from Bio import Entrez, SeqIO
 from supergsl.core.parts import PartProvider
-from supergsl.core.log import get_logger
-from .genbank_file import GenbankFilePartProvider
-import gzip
+from supergsl.utils import get_logger
 
 
 class GenbankFilePartProvider(PartProvider):
+    """Load Parts from a Genbank formatted file."""
 
     def __init__(self, name, settings):
         self.name = name
@@ -16,12 +16,14 @@ class GenbankFilePartProvider(PartProvider):
         ]))
 
     def open_gb_file(self, path):
+        """Open a genbank file whether gunziped or uncompressed."""
         if path[-2:] == 'gz':
             return gzip.open(path, "rt")
         else:
             return open(path, "rt")
 
     def load(self):
+        """Open and load features from a genbank file."""
         with self.open_gb_file(self.genbank_file_path) as handle:
             records = SeqIO.parse(
                 handle,
