@@ -1,5 +1,6 @@
 """Generate Extraction Primers using the excellent pydna wrapper around BioPython."""
 
+from typing import Callable, Tuple
 from Bio.SeqUtils import MeltingTemp as _mt
 from pydna.design import assembly_fragments
 from pydna.design import primer_design
@@ -10,6 +11,9 @@ from supergsl.core.types import PrimerPair
 
 class ExtractionPrimerBuilder(object):
     """Use pydna to generate extraction primers for parts."""
+
+    def __init__(self, options = None):
+        self.options = options or {}
 
     def build_primers_for_part(self, part):
         """Build extraction primers and assign them into the part."""
@@ -22,7 +26,7 @@ class ExtractionPrimerBuilder(object):
             Dseqrecord(part_seq_record),
             fp=forward_primer,
             rp=reverse_primer,
-            tm=self._perform_tm_func,
+            tm_func=self._perform_tm_func,
             limit=13)
 
         if not part.has_primers:
@@ -32,14 +36,14 @@ class ExtractionPrimerBuilder(object):
                     amplicon.reverse_primer.seq
                 ))
 
-        return amplicon, part_seq_record
+        return amplicon
 
     def _perform_tm_func(self, seq):
         """Call the tm_func on a sequence with the config specified arguments."""
         tm_func, tm_kwargs = self._tm_func_parameters()
-        return tm_func(seq, **kwargs)
+        return tm_func(seq, **tm_kwargs)
 
-    def _tm_func_parameters(self):
+    def _tm_func_parameters(self) -> Tuple[Callable, dict]:
         """Override the BioPython tm calculation method.
 
         These defaults have largely been pulled from pyDNA, however here we
@@ -61,7 +65,7 @@ class ExtractionPrimerBuilder(object):
 
         if 'tm_func' not in self.options:
             # Used by Primer3Plus to calculate the product Tm.
-            tm_func = _mt.Tm_NN,
+            tm_func = _mt.Tm_NN
         else:
             raise Exception('Need to implement swapping out default Tm_NN function.')
 
@@ -92,4 +96,4 @@ class ExtractionPrimerBuilder(object):
             if key in self.options:
                 tm_kwargs[key] = self.options[key]
 
-        return tm_func, tm_kwargs
+        return (tm_func, tm_kwargs)
