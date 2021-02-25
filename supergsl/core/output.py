@@ -1,31 +1,43 @@
 import csv
+import pprint
 from typing import Optional
+from supergsl.core.ast import Node
 from supergsl.core.backend import BreadthFirstNodeFilteredPass
 from supergsl.core.exception import ConfigurationException
-from supergsl.core.config import settings
 from supergsl.utils import import_class
 
 
 class OutputProvider(BreadthFirstNodeFilteredPass):
-    name : Optional[str] = None
+    """OutputProviders perform an AST pass to generate a usable output.
+    This is a base class."""
+
+    name: Optional[str] = None
 
     @classmethod
     def get_output_name(cls):
+        """Get the Output Provider's name."""
         if cls.name is None:
             raise ConfigurationException('%s does not specify its output name.')
 
         return cls.name
 
+    def before_pass(self, ast : Node) -> Node:
+        pass
+
+    def after_pass(self, ast : Node) -> Node:
+        pass
+
 class ASTPrintOutputProvider(OutputProvider):
+    """Generate a pretty print output of the AST and write it to stdout."""
     name = 'print'
+    stream = None
 
     def before_pass(self, ast):
         """Initialize the SBOL Document."""
 
-        import pprint
-        pprint.pprint(ast.eval())
+        printer = pprint.PrettyPrinter(stream=self.stream)
+        printer.pprint(ast.eval())
 
-        return ast
 
 class PrimerOutputProvider(OutputProvider):
     name = 'primers'
@@ -36,21 +48,26 @@ class PrimerOutputProvider(OutputProvider):
         }
 
     def visit_part_node(self, node):
+        """Visit each part node and record the part's extraction primers."""
         part = node.part
         self.primers[part.identifier] = {
-            'Forward Primer': part.forward_primer,
-            'Reverse Primer': part.reverse_primer
+            'Part Identifier': part.identifier,
+            'Forward Primer': str(part.extraction_primers.forward.get_sequence()),
+            'Reverse Primer': str(part.extraction_primers.reverse.get_sequence())
         }
 
     def before_pass(self, ast):
         """Initialize the SBOL Document."""
         self.primers = {}
-        return ast
+
+    def _open_primer_file(self):
+        return open('primers.txt', 'w+')
 
     def after_pass(self, ast):
         """Save a TSV of part primers."""
 
-        with open('primers.txt', 'w+') as fp:
+        print(self.primers)
+        with self._open_primer_file() as fp:
             writer = csv.DictWriter(fp, (
                 'Part Identifier',
                 'Forward Primer',
@@ -59,13 +76,10 @@ class PrimerOutputProvider(OutputProvider):
 
             writer.writeheader()
 
-            for part_identifier, details in self.primers.items():
+            for _, details in self.primers.items():
                 output = details.copy()
-                output['Part Identifier'] = part_identifier
-
                 writer.writerow(output)
 
-        return ast
 
 
 class TestOutputProvider(OutputProvider):
@@ -82,7 +96,6 @@ class TestOutputProvider(OutputProvider):
         """Initialize the SBOL Document."""
         self.parts = []
         self.assemblies = []
-        return ast
 
     def visit_part_node(self, node):
         self.parts.append(node.part)
@@ -110,7 +123,9 @@ class TestOutputProvider(OutputProvider):
 class OutputPipeline(object):
     """Store the results of the compilation in user specified output formats."""
 
-    def __init__(self):
+    def __init__(self, compiler_settings):
+        self.settings = compiler_settings
+        self.available_outputers = []
         self.resolve_providers()
 
     def validate_args(self, args):
@@ -121,14 +136,18 @@ class OutputPipeline(object):
             except KeyError:
                 raise Exception('Unknown output format "%s".' % output_format_name)
 
-            output_inst = outputer_class()
+            output_inst = outputer_class(None, allow_modification=False)
             self.desired_output_providers.append(output_inst)
+
+    def get_available_outputers(self):
+        """Return a list of outputers available for use."""
+        return self.available_outputers
 
     def resolve_providers(self):
         """Resolve the output providers from the supergsl-config settings."""
 
         self.available_outputers = {}
-        for provider_class_path in settings['output_providers']:
+        for provider_class_path in self.settings['output_providers']:
             provider_class = import_class(provider_class_path)
 
             if not issubclass(provider_class, OutputProvider):

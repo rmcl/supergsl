@@ -1,0 +1,11 @@
+--- build.fsx	2020-12-27 10:22:20.000000000 -0800
++++ build.fsx.good	2020-12-27 10:22:15.000000000 -0800
+@@ -89,7 +89,7 @@
+           Attribute.Version release.AssemblyVersion
+           Attribute.FileVersion release.AssemblyVersion ]
+ 
+-    let getProjectDetails projectPath =
++    let getProjectDetails (projectPath:string) =
+         let projectName = System.IO.Path.GetFileNameWithoutExtension(projectPath)
+         ( projectPath,
+           projectName,

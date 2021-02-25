@@ -3,7 +3,9 @@ import os
 import json
 from pathlib import Path
 import argparse
-from supergsl.core.parts.provider import PartSymbolTable
+from supergsl.core.config import load_settings
+from supergsl.core.symbol_table import SymbolTable
+from supergsl.core.parts.provider import PartProviderPlugin
 
 
 
@@ -31,10 +33,13 @@ def handle_setup_config_files(args):
         fp.write('\n')
 
 def handle_part_command(args):
-    part_table = PartSymbolTable()
+    settings = load_settings()
+    symbol_table = SymbolTable()
+    part_provider = PartProviderPlugin(settings)
+    part_provider.register(symbol_table)
 
     if args.action == 'list':
-        part_provider = part_table.resolve_provider(args.part_provider)
+        part_provider = symbol_table.get_plugin_provider(args.part_provider)
         parts = part_provider.list_parts()
 
         print('\t'.join([

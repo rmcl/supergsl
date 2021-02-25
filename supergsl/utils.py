@@ -1,5 +1,6 @@
 import importlib
 import logging
+import textwrap
 
 
 def import_class(class_path_str):
@@ -17,3 +18,21 @@ def get_logger(class_inst):
     ])
 
     return logging.getLogger(full_path)
+
+def logo():
+    """Return the SuperGSL ASCII logo.
+
+    >>> from supergsl.utils import logo
+    >>> print(logo())
+
+    """
+    return textwrap.dedent(
+        """
+          ____                         ____ ____  _
+         / ___| _   _ _ __   ___ _ __ / ___/ ___|| |
+         \___ \| | | | '_ \ / _ \ '__| |  _\___ \| |
+          ___) | |_| | |_) |  __/ |  | |_| |___) | |___
+         |____/ \__,_| .__/ \___|_|   \____|____/|_____|
+                     |_|
+
+        """)

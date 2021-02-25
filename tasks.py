@@ -2,7 +2,7 @@ from invoke import task
 
 @task
 def sgsl(c):
-    c.run('python sgsl')
+    c.run('python supergsl/sgsl')
 
 @task
 def typecheck(c):
@@ -10,7 +10,11 @@ def typecheck(c):
 
 @task(typecheck)
 def test(c):
-    c.run('nosetests supergsl', pty=True)
+    c.run('nosetests supergsl --with-coverage --cover-package=supergsl --cover-xml', pty=True)
+
+@task(typecheck)
+def lint(c):
+    c.run('pylint `ls -R|grep .py$|xargs`', pty=True)
 
 @task
 def bash(c):
