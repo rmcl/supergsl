@@ -1,8 +1,9 @@
 from typing import List, Optional
 from Bio.SeqRecord import SeqRecord
+from supergsl.core.types import NucleotideSequence
 
 
-class Part(object):
+class Part(NucleotideSequence):
     """Represent a genomic piece of DNA."""
 
     def __init__(

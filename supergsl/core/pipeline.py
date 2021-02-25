@@ -5,6 +5,7 @@ from supergsl.core.plugin import PluginProvider
 from supergsl.core.imports import ResolveImportsPass
 from supergsl.core.backend import BackendPipelinePass
 from supergsl.core.parts.slice import ResolvePartSlicePass
+from supergsl.core.types.check import TypeCheckPass
 
 from .lexer import Lexer
 from .parser import ParserBuilder
@@ -23,6 +24,7 @@ class CompilerPipeline(object):
         return cast(List[BackendPipelinePass], [
             ResolveImportsPass,
             ResolvePartSlicePass,
+            TypeCheckPass,
             InvokeFunctionPass,
         ])
 
