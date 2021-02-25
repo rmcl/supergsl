@@ -24,8 +24,10 @@ setuptools.setup(
         'llvmlite',
         'rply',
         'nose',
+        'coverage',
         'biopython',
         'pydna',
+        'sbol2',
         'mock',
         'mypy',
         'mypy-extensions',
@@ -34,7 +36,6 @@ setuptools.setup(
         "plugins": [
             'docker',
             'dnachisel',
-            'sbol3',
             'graphviz',
         ]
     },

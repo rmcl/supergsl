@@ -2,8 +2,17 @@ import typing
 import re
 from typing import Tuple, Callable
 from re import Pattern, Match
-from supergsl.core.constants import FIVE_PRIME
 from supergsl.core.exception import PartSliceError
+from supergsl.core.constants import (
+    FIVE_PRIME,
+    SO_GENE,
+    SO_PROMOTER,
+    SO_TERMINATOR,
+    SO_HOMOLOGOUS_REGION,
+    SO_CDS,
+    SO_CDS_FRAGMENT,
+    SO_MRNA
+)
 
 from .part import Part
 from .provider import PartProvider
@@ -90,11 +99,14 @@ class PrefixedSlicePartProviderMixin(_Base):
             ))
 
         start_pos, end_pos = self.build_part_type_slice_pos(parent_part, part_type)
-        return self.get_child_part_by_slice(
+        roles = self.get_roles_by_part_type(part_type)
+        part = self.get_child_part_by_slice(
             parent_part=parent_part,
             identifier=full_identifier,
             start=start_pos,
             end=end_pos)
+        part.add_roles(roles)
+        return part
 
     def get_prefix_pattern(self, identifier):
         allowed_prefixes = ''.join(self.PART_TYPES.keys())
@@ -102,6 +114,21 @@ class PrefixedSlicePartProviderMixin(_Base):
             allowed_prefixes,
             identifier
         ))
+
+    def get_roles_by_part_type(self, part_type):
+        """Return a list of roles based on part type."""
+        part_type_role_map = {
+            'gene': [SO_GENE],
+            'promoter': [SO_PROMOTER],
+            'terminator': [SO_TERMINATOR],
+            'upstream': [SO_HOMOLOGOUS_REGION],
+            'downstream': [SO_HOMOLOGOUS_REGION],
+            'orf': [SO_CDS],
+            'fusible_orf': [SO_CDS_FRAGMENT],
+            'mRNA': [SO_MRNA],
+        }
+
+        return part_type_role_map[part_type]
 
     def build_part_type_slice_pos(self, parent_part, part_slice_type):
         """Build the slice of a part based on the requested part type.
@@ -144,4 +171,4 @@ class PrefixedSlicePartProviderMixin(_Base):
 
             return parent_part.end, new_end
 
-        raise PartSliceError('"%s" prefix is not implemented yet.' % part_type)
+        raise PartSliceError('"%s" prefix is not implemented yet.' % part_slice_type)

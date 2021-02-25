@@ -207,7 +207,7 @@ class ParserTestCase(unittest.TestCase):
             'node': 'Program'
         })
 
-    def test_build_ast_nucleotide_constant(self):
+    def test_build_ast_sequence_constant(self):
         tokens = iter((
             Token('FORWARD_SLASH', '/'),
             Token('IDENTIFIER', 'ATGG'),
@@ -224,8 +224,9 @@ class ParserTestCase(unittest.TestCase):
                     'label': None,
                     'node': 'Assembly',
                     'parts': [{
-                        'node': 'NucleotideConstant',
-                        'sequence': 'ATGG'
+                        'node': 'SequenceConstant',
+                        'sequence': 'ATGG',
+                        'type': 'DNA'
                     }]
                 }],
             },
