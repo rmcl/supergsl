@@ -1,3 +1,4 @@
+"""Define a hierarchy of types that can be used by SuperGSL and its plugins."""
 from .builtin import (
     SuperGSLType,
     SuperGSLEnum,
@@ -19,6 +20,7 @@ TYPES = [
 ]
 
 def resolve_type(type_name):
+    """Look up a SuperGSL type by name."""
     for type in TYPES:
         if type.__class__ == type_name:
             return type
