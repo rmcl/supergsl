@@ -30,8 +30,8 @@ class PartProvider(object):
         """
         return re.compile(alias or identifier)
 
-    def get_symbol(self, match : Match):
-        raise NotImplementedError('Subclass to implement.')
+    def get_symbol(self, identifier_match : Match):
+        return self.get_part(identifier_match.string)
 
     def get_part(self, identifier : str) -> Part:
         """Retrieve a part from the provider.
