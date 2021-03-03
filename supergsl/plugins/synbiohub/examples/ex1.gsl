@@ -1,4 +1,4 @@
-/* An example GSL program utilizing a SynBioHub backed part provider.
+/* An example SuperGSL program utilizing a SynBioHub backed part provider.
 
 Make sure the following configuration is in your `supergsl-config.yml` file:
 ```
@@ -17,6 +17,6 @@ Make sure the following configuration is in your `supergsl-config.yml` file:
 
 */
 
-from igem import BBa_E0040 # ALIASES DONT WORK AT THE MOMENT! as oGFP
+from igem import BBa_E0040
 
 BBa_E0040
