@@ -16,8 +16,7 @@ class SyntheticOligoAssembler(AssemblerBase):
     import_path = 'basic'
     name = 'synthetic-oligos'
 
-    def __init__(self, name, config_options):
-        self.name = name
+    def __init__(self, config_options):
         self.max_oligo_len = config_options.get('max_oligo_len', DEFAULT_MAX_OLIGO_LEN)
         self.min_overlap = config_options.get('max_oligo_len', DEFAULT_MIN_OVERLAP)
         self.max_num_oligos = config_options.get('max_num_oligos', DEFAULT_NUM_OLIGOS)
@@ -30,7 +29,7 @@ class SyntheticOligoAssembler(AssemblerBase):
             part_sequences = []
             for part_node in assembly.parts:
                 part = part_node.part
-                part_sequences.append(part.get_sequence())
+                part_sequences.append(part.get_sequence().seq)
 
             assembly_sequence = Seq(''.join(part_sequences))
 

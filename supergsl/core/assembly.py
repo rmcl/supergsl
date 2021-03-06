@@ -42,7 +42,7 @@ class AssemblerBase(SuperGSLFunction):
         """
         return self.assemble(child_nodes)
 
-    def assemble(self):
+    def assemble(self, assemblies):
         raise Exception('Not implemented. Subclass to implement.')
 
 

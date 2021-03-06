@@ -25,10 +25,10 @@ Make sure the following configuration is in your `supergsl-config.yml` file:
 
 */
 
-from biobrick import assemble_3a
+from biobrick import bb-assemble-3a
 from igem import BBa_J23112 # promoter part
 from igem import BBa_E0040 # RFP
 
-biobrick-3a {
+bb-assemble-3a {
     BBa_J23112 ; BBa_E0040
 }

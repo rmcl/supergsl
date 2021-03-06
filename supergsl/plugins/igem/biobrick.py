@@ -1,7 +1,7 @@
 from typing import Dict, Tuple
 from Bio import SeqIO
 from Bio.Seq import Seq
-from Bio import Restriction, RestrictionBatch
+from Bio.Restriction import Restriction, RestrictionBatch
 
 from pydna.assembly import Assembly
 from pydna.dseqrecord import Dseqrecord
@@ -34,7 +34,7 @@ def load_biobrick_constant_sequences():
     }
 
 
-def check_is_valid_bio_brick(sequence):
+def check_is_valid_biobrick(sequence):
     """A valid biobrick part does not have any disallowed restriction sites except in
     the prefix and suffix.
 
@@ -60,10 +60,9 @@ class BioBrick3AAssembler(AssemblerBase):
         http://parts.igem.org/Help:Protocols/3A_Assembly
     """
     import_path = 'biobrick'
-    name = 'assemble_3a'
+    name = 'assemble-3a'
 
-    def __init__(self, name, config_options):
-        self.name = name
+    def __init__(self, config_options):
         self.plasmid_backbone_name = config_options.get('plasmid_backbone', 'pSB1C3')
 
         self.constant_sequences = load_biobrick_constant_sequences()
@@ -117,7 +116,7 @@ class BioBrick3AAssembler(AssemblerBase):
 
         return left_digested_part_sequence, right_digested_part_sequence
 
-    def cut_and_validate_fragments(restriction_enzyme, sequence, expected_fragments = 2):
+    def cut_and_validate_fragments(self, restriction_enzyme, sequence, expected_fragments = 2):
         """Cut a sequence with a particular restriction enzyme."""
         restriction_fragments = restriction_enzyme.catalyze(sequence)
         if len(restriction_fragments) != expected_fragments:
@@ -151,8 +150,8 @@ class BioBrick3AAssembler(AssemblerBase):
 
         """
         left_digested_part_sequence, right_digested_part_sequence = self.digest_part_sequence(
-            left_part.get_sequence(),
-            right_part.get_sequence())
+            left_part.get_sequence().seq,
+            right_part.get_sequence().seq)
         digested_backbone_sequence = self.digest_backbone(self.plasmid_backbone_name)
 
         fragments = [
@@ -187,13 +186,17 @@ class BioBrick3AAssembler(AssemblerBase):
 
         """
 
-        for assembly in assemblies:
+        for assembly_node in assemblies.definitions:
 
-            parts = assembly.parts
-            p1 = parts[0]
-            p2 = parts[2]
+            parts = assembly_node.parts
+            p1 = parts[0].part
+            p2 = parts[1].part
 
-            print('ASSEMBLE', p1.identifier, p2.identifier)
+            print('ASSEMBLE', type(p1), p1.identifier, p2.identifier)
+
+            # TODO: NEED TO CONFIRM PART ARE VALID BIO BRICKS -
+            # ie have prefix and suffix and no bad cut sites
+            #check_is_valid_biobrick(p1.get_sequence().seq)
 
             self.assemble_part_tuple(p1, p2)
             # validate that each part has the appropriate biobrick prefix/suffix
