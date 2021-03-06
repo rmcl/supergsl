@@ -1,0 +1,38 @@
+/* An example SuperGSL program to generate BioBrick parts that can be synthesized as oligos.
+
+This is useful for short parts such as promoters or RBS.
+
+
+Make sure the following configuration is in your `supergsl-config.yml` file:
+```
+{
+    "part_providers": [
+        ...
+        {
+            "name": "igem",
+            "provider_class": "supergsl.plugins.synbiohub.SynBioHubPartProvider",
+            "repository_url": "https://synbiohub.org/public/igem",
+        }
+    ],
+    ...
+    "assemblers": [
+        ...
+        {
+            "name": "biobrick-3a",
+            "assembler_class": "supergsl.plugins.igem.biobrick.BioBrick3AAssembler",
+            "assembler_options": {}
+        }
+    ]
+}
+```
+
+*/
+
+from biobrick import synthetic-oligos, prefix, suffix
+from igem import BBa_J23112 # promoter part
+from igem import BBa_E0040 # Red Fluorescent Protein
+
+let bricked_parts = synthetic-oligos {
+    prefix ; BBa_J23112 ; suffix
+    prefix ; BBa_E0040 ; suffix
+}
