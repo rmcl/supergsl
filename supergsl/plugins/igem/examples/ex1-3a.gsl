@@ -1,0 +1,34 @@
+/* An example SuperGSL program utilizing the biobrick 3A Assembler
+
+Make sure the following configuration is in your `supergsl-config.yml` file:
+```
+{
+    "part_providers": [
+        ...
+        {
+            "name": "igem",
+            "provider_class": "supergsl.plugins.synbiohub.SynBioHubPartProvider",
+            "repository_url": "https://synbiohub.org/public/igem",
+        }
+    ],
+    ...
+    "assemblers": [
+        ...
+        {
+            "name": "biobrick-3a",
+            "assembler_class": "supergsl.plugins.igem.biobrick.BioBrick3AAssembler",
+            "assembler_options": {}
+        }
+    ]
+}
+```
+
+*/
+
+from biobrick import assemble_3a
+from igem import BBa_J23112 # promoter part
+from igem import BBa_E0040 # RFP
+
+biobrick-3a {
+    BBa_J23112 ; BBa_E0040
+}

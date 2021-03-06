@@ -1,3 +1,4 @@
+"""Define SuperGSL builtin types that can be used by plugins."""
 from Bio.Seq import Seq
 from typing import List
 
@@ -10,7 +11,7 @@ class SuperGSLType(object):
 class NucleotideSequence(SuperGSLType):
     """A type representing a nucleotide sequence."""
 
-    def get_sequence(self):
+    def get_sequence(self) -> Seq:
         """Return the nucleotide sequence as a `Bio.Seq`."""
         raise NotImplementedError('Subclass to implement.')
 
@@ -18,7 +19,7 @@ class NucleotideSequence(SuperGSLType):
 class AminoAcidSequence(SuperGSLType):
     """A type representing arbitrary an amino acid sequence."""
 
-    def get_sequence(self):
+    def get_sequence(self) -> Seq:
         """Return the amino acid sequence as a `Bio.Seq`."""
         raise NotImplementedError('Subclass to implement.')
 
