@@ -18,13 +18,7 @@ class InvalidBioBrickError(Exception):
 # From the docs, "BioBrick RFC[10] it must not contain the following
 # restriction sites, as these are unique to the prefix and suffix"
 # Taken from http://parts.igem.org/Help:Standards/Assembly/RFC10
-BIOBRICK_ILLEGAL_RESTRICTION_SITES = [
-    ('GAATTC', 'Illegal', 'EcoRI'),
-    ('TCTAGA', 'Illegal', 'XbaI'),
-    ('ACTAGT', 'Illegal', 'SpeI'),
-    ('CTGCAG', 'Illegal', 'PstI'),
-    ('GCGGCCGC', 'Avoid', 'NotI'),
-]
+BIOBRICK_ILLEGAL_RESTRICTION_SITES = ['EcoRI', 'XbaI', 'SpeI', 'PstI', 'NotI']
 
 BIOBRICK_PREFIX_CODING_SEQUENCE = Seq('GAATTCGCGGCCGCTTCTAG')
 BIOBRICK_PREFIX_SEQUENCE = Seq('GAATTCGCGGCCGCTTCTAGAG')
