@@ -1,10 +1,26 @@
 """Support for SuperGSL's plugin infrastructure."""
 
 import inspect
+from re import Pattern, Match
 import importlib
 from typing import Dict
 from supergsl.core.exception import ConfigurationError
 from supergsl.core.symbol_table import SymbolTable
+
+class SuperGSLProvider(object):
+
+    def resolve_import(self, identifier : str, alias : str) -> Pattern:
+        """Resolve an identifier to be imported from this provider.
+
+        Return a tuple with:
+            * A regular expression to match symbols against
+            * A callback method that given the actual identifier will return the `Part`.
+        """
+        raise NotImplementedError('Subclass to implement')
+
+    def get_symbol(self, identifier_match : Match):
+        raise NotImplementedError('Subclass to implement')
+
 
 class SuperGSLPlugin(object):
     """Base class for defining a SuperGSL Plugin.
