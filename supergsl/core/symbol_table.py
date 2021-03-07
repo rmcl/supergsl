@@ -1,5 +1,5 @@
 from re import Pattern
-from typing import Optional, Tuple, List, Dict, Type
+from typing import Optional, Tuple, List, Dict
 from collections import OrderedDict
 from supergsl.core.exception import SymbolNotFoundError, ProviderNotFoundError, NotFoundError
 from supergsl.core.provider import SuperGSLProvider
@@ -8,18 +8,18 @@ from supergsl.core.provider import SuperGSLProvider
 class SymbolTable(object):
 
     def __init__(self):
-        self._import_path_to_providers : Dict[str, List[Type[SuperGSLProvider]]] = {}
+        self._import_path_to_providers : Dict[str, List[SuperGSLProvider]] = {}
         self._symbols_providers: List[Tuple[Pattern, SuperGSLProvider]] = []
         self._symbols = {}
 
-    def register(self, provider_import_path: str, provider_class: Type[SuperGSLProvider]) -> None:
+    def register(self, provider_import_path: str, provider_class: SuperGSLProvider) -> None:
         """Register a provider to be available for import a given import path."""
         try:
             self._import_path_to_providers[provider_import_path].append(provider_class)
         except KeyError:
             self._import_path_to_providers[provider_import_path] = [provider_class]
 
-    def get_providers_for_path(self, provider_import_path) -> List[Type[SuperGSLProvider]]:
+    def get_providers_for_path(self, provider_import_path) -> List[SuperGSLProvider]:
         """Return all providers associated with an import path."""
         providers = self._import_path_to_providers.get(provider_import_path, None)
         if not providers:
@@ -45,14 +45,14 @@ class SymbolTable(object):
         else:
             raise Exception('Alias "%s" imported twice.' % active_alias)
 
-        provider_classes = self.get_providers_for_path(import_path)
-        for provider_class in provider_classes:
+        providers = self.get_providers_for_path(import_path)
+        for provider in providers:
             try:
-                alias_pattern = provider_class.resolve_import(import_name, active_alias)
+                alias_pattern = provider.resolve_import(import_name, active_alias)
             except NotFoundError:
                 continue
 
-            self._symbols_providers.append((alias_pattern, provider_class))
+            self._symbols_providers.append((alias_pattern, provider))
             return self.get_symbol(active_alias)
 
         raise NotFoundError('Symbol "{}" could not be resolved in path "{}"'.format(
