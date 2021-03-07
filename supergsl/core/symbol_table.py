@@ -1,8 +1,8 @@
 from re import Pattern
 from typing import Optional, Tuple, List
 from collections import OrderedDict
-from supergsl.core.exception import SymbolNotFoundException
-from supergsl.core.exception import ProviderNotFoundException
+from supergsl.core.exception import SymbolNotFoundError
+from supergsl.core.exception import ProviderNotFoundError
 
 class SymbolTable(object):
 
@@ -18,7 +18,7 @@ class SymbolTable(object):
     def get_plugin_provider(self, plugin_import_path):
         provider = self._path_to_plugins.get(plugin_import_path, None)
         if not provider:
-            raise ProviderNotFoundException('Provider for %s not found.' % plugin_import_path)
+            raise ProviderNotFoundError('Provider for %s not found.' % plugin_import_path)
 
         return provider
 
@@ -35,7 +35,7 @@ class SymbolTable(object):
         active_alias = alias or import_name
         try:
             self.get_symbol(active_alias)
-        except SymbolNotFoundException:
+        except SymbolNotFoundError:
             pass
         else:
             raise Exception('Alias "%s" imported twice.' % active_alias)
@@ -60,4 +60,4 @@ class SymbolTable(object):
                 self._symbols[identifier] = symbol_handler.get_symbol(match)
                 return self._symbols[identifier]
 
-        raise SymbolNotFoundException('"%s" is not defined.' % identifier)
+        raise SymbolNotFoundError('"%s" is not defined.' % identifier)

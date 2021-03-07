@@ -2,7 +2,7 @@ import re
 from re import Pattern, Match
 from typing import Optional
 from supergsl.utils import import_class
-from supergsl.core.exception import ConfigurationException
+from supergsl.core.exception import ConfigurationError
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.parts import Part, SeqPosition
 
@@ -72,6 +72,6 @@ class PartProviderPlugin(SuperGSLPlugin):
 
             provider_name = provider_inst.get_provider_name()
             if not provider_name:
-                raise ConfigurationException('Provider "%s" does not specify a name.' % provider_class)
+                raise ConfigurationError('Provider "%s" does not specify a name.' % provider_class)
 
             symbol_table.register(provider_name, provider_inst)

@@ -3,7 +3,7 @@
 import inspect
 import importlib
 from typing import Dict
-from supergsl.core.exception import ConfigurationException
+from supergsl.core.exception import ConfigurationError
 from supergsl.core.symbol_table import SymbolTable
 
 class SuperGSLPlugin(object):
@@ -53,7 +53,7 @@ class PluginProvider(object):
         self._compiler_settings = compiler_settings
 
         if 'plugins' not in compiler_settings:
-            raise ConfigurationException(
+            raise ConfigurationError(
                 'No plugins have been defined. Check your supergGSL settings.')
 
         for plugin_path in compiler_settings['plugins']:

@@ -7,7 +7,7 @@ from Bio.Seq import Seq
 
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.parts.position import SeqPosition
-from supergsl.core.exception import PartLocatorException, PartNotFoundException
+from supergsl.core.exception import PartNotFoundError
 from supergsl.core.parts import PartProvider, Part
 from supergsl.core.parts.prefix_part import PrefixedSlicePartProviderMixin
 from supergsl.plugins.pydna.primers import ExtractionPrimerBuilder
@@ -75,7 +75,7 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
         try:
             reference_feature = self._genes[gene_name]
         except KeyError:
-            raise PartNotFoundException('Part not found "%s" in %s.' % (
+            raise PartNotFoundError('Part not found "%s" in %s.' % (
                 gene_name, self.get_provider_name()))
 
         # Make a copy of the reference feature and modify it to conform
