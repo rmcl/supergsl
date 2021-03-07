@@ -21,7 +21,7 @@ class FunctionNotFoundError(NotFoundError):
     pass
 
 
-class PartNotFoundError(Exception):
+class PartNotFoundError(NotFoundError):
     pass
 
 

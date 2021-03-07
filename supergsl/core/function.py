@@ -4,7 +4,7 @@ import re
 from typing import Optional, List
 from inspect import getdoc
 from re import Pattern, Match
-from supergsl.core.plugin import SuperGSLProvider
+from supergsl.core.provider import SuperGSLProvider
 from supergsl.core.backend import DepthFirstNodeFilteredPass
 from supergsl.core.exception import FunctionInvokeError, FunctionNotFoundError
 

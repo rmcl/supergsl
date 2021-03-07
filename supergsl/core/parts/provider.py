@@ -3,7 +3,8 @@ from re import Pattern, Match
 from typing import Optional
 from supergsl.utils import import_class
 from supergsl.core.exception import ConfigurationError
-from supergsl.core.plugin import SuperGSLPlugin, SuperGSLProvider
+from supergsl.core.plugin import SuperGSLPlugin
+from supergsl.core.provider import SuperGSLProvider
 from supergsl.core.parts import Part, SeqPosition
 
 
@@ -64,7 +65,8 @@ class PartProviderPlugin(SuperGSLPlugin):
         self._providers = {}
 
         if 'part_providers' not in self.settings:
-            raise ConfigurationError('No part providers have been defined. Check your supergGSL settings.')
+            raise ConfigurationError(
+                'No part providers have been defined. Check your supergGSL settings.')
 
         for provider_config in self.settings['part_providers']:
             print('Initializing "%s"' % provider_config['name'])
