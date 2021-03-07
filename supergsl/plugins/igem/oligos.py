@@ -25,10 +25,12 @@ class SyntheticOligoAssembler(AssemblerBase):
     def assemble(self, assemblies):
         """Assemble for synthesis using synthetic oligos."""
         oligos = set()
-        for assembly in assemblies:
+        for assembly_node in assemblies.definitions:
             part_sequences = []
-            for part_node in assembly.parts:
+            for part_node in assembly_node.parts:
                 part = part_node.part
+
+                print('PART', part)
                 part_sequences.append(part.get_sequence().seq)
 
             assembly_sequence = Seq(''.join(part_sequences))
