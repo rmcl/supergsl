@@ -59,7 +59,7 @@ examples = [
         ('IDENTIFIER', 'S288C'),
         ('IMPORT', 'import'),
         ('IDENTIFIER', 'ADHA'),
-        ('AS', 'as'),
+        ('AS', 'as '),
         ('IDENTIFIER', 'ADHA_is_great'),
         ('COMMA', ','),
         ('IDENTIFIER', 'ERG10'),
