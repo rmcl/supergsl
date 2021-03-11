@@ -5,8 +5,23 @@ from docker.errors import ImageNotFound
 from supergsl.core.function import SuperGSLFunction
 
 
-class DockerPlugin(SuperGSLFunction):
+class DockerFunction(SuperGSLFunction):
     image_tag = None
+
+    def execute(self, sgsl_args, child_nodes=None):
+        """Invoke the function using docker."""
+
+        # Setup gRPC????
+        # Invoke the docker container
+
+        print('CUT IT UP!')
+
+
+        self.invoke()
+
+        return None
+
+
 
     @property
     def docker_client(self):
