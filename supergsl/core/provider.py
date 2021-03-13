@@ -1,8 +1,9 @@
-"""Support for SuperGSL's plugin infrastructure."""
+"""Support SuperGSL's symbol provider mechanism."""
 from re import Pattern, Match
 from supergsl.core.types import SuperGSLType
 
 class SuperGSLProvider(object):
+    """Base class to define objects that can provide symbols."""
 
     def resolve_import(self, identifier : str, alias : str) -> Pattern:
         """Resolve an identifier to be imported from this provider.

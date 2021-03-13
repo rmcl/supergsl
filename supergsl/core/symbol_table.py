@@ -12,12 +12,12 @@ class SymbolTable(object):
         self._symbols_providers: List[Tuple[Pattern, SuperGSLProvider]] = []
         self._symbols = {}
 
-    def register(self, provider_import_path: str, provider_class: SuperGSLProvider) -> None:
+    def register(self, provider_import_path: str, provider_inst: SuperGSLProvider) -> None:
         """Register a provider to be available for import a given import path."""
         try:
-            self._import_path_to_providers[provider_import_path].append(provider_class)
+            self._import_path_to_providers[provider_import_path].append(provider_inst)
         except KeyError:
-            self._import_path_to_providers[provider_import_path] = [provider_class]
+            self._import_path_to_providers[provider_import_path] = [provider_inst]
 
     def get_providers_for_path(self, provider_import_path) -> List[SuperGSLProvider]:
         """Return all providers associated with an import path."""
