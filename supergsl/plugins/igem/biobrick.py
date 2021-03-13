@@ -6,7 +6,7 @@ from Bio.Restriction import Restriction, RestrictionBatch
 from pydna.assembly import Assembly
 from pydna.dseqrecord import Dseqrecord
 
-from supergsl.core.exception import PartNotFoundException
+from supergsl.core.exception import PartNotFoundError
 from supergsl.core.assembly import AssemblerBase
 from supergsl.core.constants import THREE_PRIME, SO_HOMOLOGOUS_REGION
 from supergsl.core.parts import SeqPosition
@@ -246,7 +246,7 @@ class BioBrickPartProvider(PartProvider):
             reference_sequence = BIOBRICK_SUFFIX_SEQUENCE
             description = 'Biobrick RFC[10] suffix'
         else:
-            raise PartNotFoundException('Part %s not found.' % identifier)
+            raise PartNotFoundError('Part %s not found.' % identifier)
 
         start = SeqPosition.from_reference(
             x=0,
