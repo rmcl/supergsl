@@ -2,7 +2,7 @@ from typing import List
 from Bio.Seq import Seq
 from supergsl.core.backend import BreadthFirstNodeFilteredPass
 from supergsl.core.function import SuperGSLFunction
-from supergsl.core.exception import ConfigurationException
+from supergsl.core.exception import ConfigurationError
 from supergsl.utils import import_class
 
 
