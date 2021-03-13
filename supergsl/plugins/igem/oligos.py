@@ -24,7 +24,7 @@ class SyntheticOligoAssembler(AssemblerBase):
 
     def assemble(self, assemblies):
         """Assemble for synthesis using synthetic oligos."""
-        oligos = set()
+        oligos = []
         for assembly_node in assemblies.definitions:
             part_sequences = []
             for part_node in assembly_node.parts:
@@ -33,7 +33,8 @@ class SyntheticOligoAssembler(AssemblerBase):
                 print('PART', part)
                 part_sequences.append(part.get_sequence().seq)
 
-            assembly_sequence = Seq(''.join(part_sequences))
+            # Todo: Find a better way to concatenate Bio.Seq objects.
+            assembly_sequence = Seq(''.join(str(part_sequences)))
 
             oligo_idx = 0
             seq_pos = 0
@@ -52,7 +53,7 @@ class SyntheticOligoAssembler(AssemblerBase):
                 if remaining_seq_len < self.max_oligo_len:
                     seq_pos = min(0, seq_pos - (self.max_oligo_len - remaining_seq_len))
 
-                oligos.add(assembly_sequence[seq_pos:self.max_oligo_len])
+                oligos.append(assembly_sequence[seq_pos:self.max_oligo_len])
                 seq_pos += self.max_oligo_len
                 if seq_pos >= sequence_length:
                     break

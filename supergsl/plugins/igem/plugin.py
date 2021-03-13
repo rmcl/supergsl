@@ -10,7 +10,4 @@ class BioBrickPlugin(SuperGSLPlugin):
 
         symbol_table.register('synthesis', SyntheticOligoAssembler(compiler_settings))
         symbol_table.register('biobrick', BioBrick3AAssembler(compiler_settings))
-        #symbol_table.register('biobrick', [
-        #    BioBrickPartProvider('biobrick', compiler_settings),
-        #    BioBrick3AAssembler(compiler_settings)
-        #])
+        symbol_table.register('biobrick', BioBrickPartProvider('biobrick', compiler_settings))
