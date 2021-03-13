@@ -1,6 +1,6 @@
+"""Implement the symbol table of the SuperGSL Compiler."""
 from re import Pattern
 from typing import Optional, Tuple, List, Dict
-from collections import OrderedDict
 from supergsl.core.exception import SymbolNotFoundError, ProviderNotFoundError, NotFoundError
 from supergsl.core.provider import SuperGSLProvider
 
