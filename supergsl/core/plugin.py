@@ -1,10 +1,12 @@
 """Support for SuperGSL's plugin infrastructure."""
 
 import inspect
+from re import Pattern, Match
 import importlib
 from typing import Dict
 from supergsl.core.exception import ConfigurationError
 from supergsl.core.symbol_table import SymbolTable
+
 
 class SuperGSLPlugin(object):
     """Base class for defining a SuperGSL Plugin.
