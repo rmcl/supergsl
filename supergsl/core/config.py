@@ -23,5 +23,4 @@ def load_settings():
     """Load typical SuperGSL Config files."""
     settings = load_config_file('supergsl-config-default.json', optional=True) or {}
     settings.update(load_config_file('supergsl-config.json', optional=False))
-
     return settings

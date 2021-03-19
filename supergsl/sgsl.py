@@ -3,7 +3,8 @@ import argparse
 from supergsl.core.config import load_settings
 from supergsl.core.pipeline import CompilerPipeline
 from supergsl.core.output import OutputPipeline
-import pprint
+from supergsl.repl import SuperGSLShell
+
 
 
 def main():
@@ -15,7 +16,9 @@ def main():
     parser.add_argument(
         "input_file",
         help="The input source code file to process",
-        type=str)
+        type=str,
+        default=None,
+        nargs='?')
 
     parser.add_argument(
         "-f",
@@ -23,20 +26,24 @@ def main():
         action='append',
         help="Specify compiler output formats",
         type=str,
-        required=True)
+        required=False)
 
     args = parser.parse_args()
 
-    output_pipeline.validate_args(args)
+    print(args.input_file)
+    if not args.input_file:
+        SuperGSLShell().start()
+    else:
+        output_pipeline.validate_args(args)
 
-    print('Compiling "%s".' % args.input_file)
+        print('Compiling "%s".' % args.input_file)
 
-    with open(args.input_file, 'r') as input_file_fp:
-        result = compiler_pipeline.compile(input_file_fp.read())
+        with open(args.input_file, 'r') as input_file_fp:
+            result = compiler_pipeline.compile(input_file_fp.read())
 
-    print('Compiling Complete. Storing Output.')
+        print('Compiling Complete. Storing Output.')
 
-    output_pipeline.run(result, args)
+        output_pipeline.run(result, args)
 
 
 if __name__ == "__main__":

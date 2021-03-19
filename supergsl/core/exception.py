@@ -1,36 +1,39 @@
-class ConfigurationError(Exception):
+class SuperGSLError(Exception):
+    pass
+
+class ConfigurationError(SuperGSLError):
     pass
 
 
-class ParsingError(Exception):
+class ParsingError(SuperGSLError):
     pass
 
 
-class PartLocatorError(Exception):
+class PartLocatorError(SuperGSLError):
     pass
 
 
-class NotFoundError(Exception):
+class NotFoundError(SuperGSLError):
     pass
 
-class ProviderNotFoundError(NotFoundError):
-    pass
-
-
-class FunctionNotFoundError(NotFoundError):
+class ProviderNotFoundError(SuperGSLError):
     pass
 
 
-class PartNotFoundError(NotFoundError):
+class FunctionNotFoundError(SuperGSLError):
     pass
 
 
-class FunctionInvokeError(Exception):
+class PartNotFoundError(SuperGSLError):
     pass
 
 
-class PartSliceError(Exception):
+class FunctionInvokeError(SuperGSLError):
     pass
 
-class SymbolNotFoundError(NotFoundError):
+
+class PartSliceError(SuperGSLError):
+    pass
+
+class SymbolNotFoundError(SuperGSLError):
     pass

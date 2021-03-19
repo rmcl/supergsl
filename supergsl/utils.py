@@ -19,7 +19,7 @@ def get_logger(class_inst):
 
     return logging.getLogger(full_path)
 
-def logo():
+def get_logo():
     """Return the SuperGSL ASCII logo.
 
     >>> from supergsl.utils import logo
