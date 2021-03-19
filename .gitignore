@@ -1,3 +1,4 @@
+__pycache__
 *.py[cod]
 .DS_Store
 # C extensions
@@ -23,6 +24,7 @@ pip-selfcheck.json
 
 # Unit test / coverage reports
 .coverage
+coverage.xml
 .tox
 nosetests.xml
 htmlcov

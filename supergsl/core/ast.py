@@ -1,9 +1,14 @@
 from __future__ import annotations
 from typing import cast, Dict, List, Optional, Any, Union
 
+from supergsl.core.parts.part import Part as CorePart
+
+
+# rply has it's own style which does not conform to pylint's expectations.
+# pylint: disable=E1136
 
 class Node(object):
-    def child_nodes(self) -> List[Node]:
+    def child_nodes(self) -> List['Node']:
         return []
 
     def eval(self) -> Dict[str, Any]:
@@ -14,24 +19,6 @@ class Node(object):
 
     def get_node_label(self):
         return str(self.__class__.__name__)
-
-class SymbolRepository(object):
-
-    def __init__(self):
-        self._symbols = {}
-
-    def register(self, name : str, table_obj):
-        if name in self._symbols:
-            raise Exception('Symbol table collision. Table %s is already present in global symbol table.' % name)
-
-        self._symbols[name] = table_obj
-
-    def get_table(self, name : str):
-        try:
-            return self._symbols[name]
-        except KeyError:
-            raise Exception('Unknown symbol table "%s".' % name)
-
 
 class SlicePosition(Node):
     def __init__(self, index: int, postfix : str, approximate : bool):
@@ -47,6 +34,13 @@ class SlicePosition(Node):
             'approximate': self.approximate
         }
 
+    def get_slice_pos_str(self):
+        return '%s%d%s' % (
+            '~' if self.approximate else '',
+            self.index,
+            self.postfix if self.postfix else ''
+        )
+
 class Slice(Node):
     def __init__(self, start : SlicePosition, end : SlicePosition):
         self.start = start
@@ -59,12 +53,21 @@ class Slice(Node):
             'end': self.end.eval()
         }
 
+    def get_slice_str(self):
+        return '%s:%s' % (
+            self.start.get_slice_pos_str(),
+            self.end.get_slice_pos_str()
+        )
+
 
 class Part(Node):
     def __init__(self, identifier : str, slice : Optional[Slice], invert : bool):
         self.identifier = identifier
         self.slice = slice
         self.invert = invert
+
+        self.part : Optional[CorePart] = None
+        self.parent_parts : List[CorePart] = []
 
     def eval(self) -> Dict[str, Any]:
         return {
@@ -204,13 +207,15 @@ class FunctionInvocation(Node):
             return []
 
 
-class NucleotideConstant(Node):
-    def __init__(self, sequence : str):
+class SequenceConstant(Node):
+    def __init__(self, sequence : str, sequence_type : str):
         self.sequence = sequence
+        self.sequence_type = sequence_type
 
     def eval(self) -> dict:
         return {
-            'node': 'NucleotideConstant',
+            'node': 'SequenceConstant',
+            'type': self.sequence_type,
             'sequence': self.sequence
         }
 

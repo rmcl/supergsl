@@ -1,12 +1,34 @@
-from typing import Optional
-from supergsl.core.backend import DepthFirstNodeFilteredPass
-from supergsl.core.exception import FunctionNotFoundException, FunctionInvokeError
+"""Define the mechanism of SuperGSLFunction and an AST pass to invoke those functions."""
 
-class SuperGSLFunction(object):
+import re
+from typing import Optional, List
+from inspect import getdoc
+from re import Pattern, Match
+from supergsl.core.provider import SuperGSLProvider
+from supergsl.core.backend import DepthFirstNodeFilteredPass
+from supergsl.core.exception import FunctionInvokeError, FunctionNotFoundError
+
+
+class SuperGSLFunction(SuperGSLProvider):
     """Add a callable function to SuperGSL."""
 
-    import_path : Optional[str] = None
-    name : Optional[str] = None
+    name: Optional[str] = None
+    arguments : List[str] = []
+    return_type : Optional[str] = None
+
+    def resolve_import(self, identifier: str, alias: str) -> Pattern:
+        """Resolve the import of a function from this provider.
+
+        Return: a regular expression to match symbols against
+        """
+        if identifier != self.name:
+            raise FunctionNotFoundError('Function {} not provided by {}'.format(
+                identifier, self))
+
+        return re.compile(identifier or alias)
+
+    def get_symbol(self, identifier_match: Match):
+        return self
 
     @classmethod
     def get_name(cls):
@@ -16,78 +38,26 @@ class SuperGSLFunction(object):
         raise NotImplementedError('sGSL function definitions must specify a "name" in "%s".' % cls)
 
     @classmethod
-    def get_import_path(cls):
-        if cls.import_path:
-            return cls.import_path
-
-        raise NotImplementedError('sGSL function definitions must specify a "import_path" in "%s".' % cls)
-
-
-    @classmethod
-    def get_help(cls):
-        return cls.execute.__docstr__
+    def get_help(cls) -> Optional[str]:
+        return getdoc(cls)
 
     @classmethod
     def get_arguments(cls):
         """Return a list of expected arguments."""
-        return []
+        return cls.arguments
 
     @classmethod
     def get_return_type(cls):
         """Return the expected return value of the function."""
-        return None
+        return cls.return_type
 
     def execute(self, sgsl_args, child_nodes=None):
         """Called when the function is invoke in SuperGSL."""
         pass
 
 
-class FunctionSymbolTable(object):
-
-    def __init__(self):
-        self._registered_functions = {}
-        self._functions = {}
-
-    def register_function(self, function_class):
-        """Register a function as available for use."""
-        key = (
-            function_class.get_import_path(),
-            function_class.get_name()
-        )
-        self._registered_functions[key] = function_class
-
-    def resolve_function(self, provider_path, function_name, alias=None):
-        """Resolve a function from an import statement of a superGSL program."""
-
-        print('Attempting to resolve function: %s, %s, %s' % (provider_path, function_name, alias))
-
-        try:
-            function_class = self._registered_functions[(provider_path, function_name)]
-        except KeyError:
-            raise FunctionNotFoundException('"%s" does not define a function "%s".' % (
-                provider_path,
-                function_name
-            ))
-
-        active_alias = alias or function_name
-
-        if active_alias in self._functions:
-            raise Exception(
-                'Name conflict!! Function "%s" has already been imported.' % active_alias)
-
-        function_inst = function_class()
-        self._functions[active_alias] = function_inst
-
-    def get_function(self, identifier):
-        """Retrieve an imported function."""
-
-        try:
-            return self._functions[identifier]
-        except KeyError:
-            raise FunctionNotFoundException('Function "%s" not defined.' % identifier)
-
-
 class InvokeFunctionPass(DepthFirstNodeFilteredPass):
+    """Traverse the AST and execute encountered SuperGSLFunctions."""
 
     def get_node_handlers(self):
         return {
@@ -95,7 +65,7 @@ class InvokeFunctionPass(DepthFirstNodeFilteredPass):
         }
 
     def visit_function_invoke_node(self, node):
-        print('INVOKE', node.params)
+        print('INVOKE', node.params, node.identifier)
 
         if node.params is not None:
             print('WARNING!!! PASSING PARAMS NOT IMPLEMENTED YET!!!!!!!')

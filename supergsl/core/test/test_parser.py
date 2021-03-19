@@ -1,3 +1,4 @@
+"""Unit tests for the SuperGSL parser."""
 import unittest
 import mock
 from rply import Token
@@ -14,15 +15,15 @@ class ParserTestCase(unittest.TestCase):
         self.parser = ParserBuilder()
 
     def test_one_assembly_must_be_defined(self):
-        """Test that an error is raised if the parser does not receive tokens for at least one assembly."""
+        """An error should be raised if the parser does not receive tokens for at least one assembly."""
         tokens = iter(())
         error_message = None
         try:
-            ast = self.parser.parse(tokens)
+            self.parser.parse(tokens)
         except ParsingError as error:
             error_message = str(error)
 
-        self.assertEquals(
+        self.assertEqual(
             error_message,
             'At least one assembly must be defined.')
 
@@ -48,7 +49,7 @@ class ParserTestCase(unittest.TestCase):
         ast = self.parser.parse(tokens)
 
         self.assertEquals(type(ast), Program)
-        self.assertEquals(ast.eval(), {
+        self.assertEqual(ast.eval(), {
             'definitions': {
                 'items': [{
                     'label': None,
@@ -82,8 +83,8 @@ class ParserTestCase(unittest.TestCase):
         ))
         ast = self.parser.parse(tokens)
 
-        self.assertEquals(type(ast), Program)
-        self.assertEquals(ast.eval(), {
+        self.assertEqual(type(ast), Program)
+        self.assertEqual(ast.eval(), {
             'definitions': {
                 'node': 'DefinitionList',
                 'items': [{
@@ -115,8 +116,8 @@ class ParserTestCase(unittest.TestCase):
         ))
         ast = self.parser.parse(tokens)
 
-        self.assertEquals(type(ast), Program)
-        self.assertEquals(ast.eval(), {
+        self.assertEqual(type(ast), Program)
+        self.assertEqual(ast.eval(), {
             'definitions': {
                 'node': 'DefinitionList',
                 'items': [{
@@ -144,6 +145,7 @@ class ParserTestCase(unittest.TestCase):
         })
 
     def test_build_ast_function_call_with_empty_params(self):
+        """Parse a AST containing a function with a nested body into an AST."""
         tokens = iter((
             Token('IDENTIFIER', 'functest'),
             Token('OPEN_CURLY_BRACKET', '{'),
@@ -152,8 +154,8 @@ class ParserTestCase(unittest.TestCase):
         ))
         ast = self.parser.parse(tokens)
 
-        self.assertEquals(type(ast), Program)
-        self.assertEquals(ast.eval(), {
+        self.assertEqual(type(ast), Program)
+        self.assertEqual(ast.eval(), {
             'definitions': {
                 'node': 'DefinitionList',
                 'items': [{
@@ -181,6 +183,7 @@ class ParserTestCase(unittest.TestCase):
         })
 
     def test_build_ast_function_call_with_params(self):
+        """Parse a function call into a AST."""
         tokens = iter((
             Token('IDENTIFIER', 'functest'),
             Token('OPEN_PAREN', '('),
@@ -189,8 +192,8 @@ class ParserTestCase(unittest.TestCase):
         ))
         ast = self.parser.parse(tokens)
 
-        self.assertEquals(type(ast), Program)
-        self.assertEquals(ast.eval(), {
+        self.assertEqual(type(ast), Program)
+        self.assertEqual(ast.eval(), {
             'definitions': {
                 'node': 'DefinitionList',
                 'items': [{
@@ -207,7 +210,8 @@ class ParserTestCase(unittest.TestCase):
             'node': 'Program'
         })
 
-    def test_build_ast_nucleotide_constant(self):
+    def test_build_ast_sequence_constant(self):
+        """Parse to an AST for a constant nucleotide sequence."""
         tokens = iter((
             Token('FORWARD_SLASH', '/'),
             Token('IDENTIFIER', 'ATGG'),
@@ -216,16 +220,17 @@ class ParserTestCase(unittest.TestCase):
         ))
         ast = self.parser.parse(tokens)
 
-        self.assertEquals(type(ast), Program)
-        self.assertEquals(ast.eval(), {
+        self.assertEqual(type(ast), Program)
+        self.assertEqual(ast.eval(), {
             'definitions': {
                 'node': 'DefinitionList',
                 'items': [{
                     'label': None,
                     'node': 'Assembly',
                     'parts': [{
-                        'node': 'NucleotideConstant',
-                        'sequence': 'ATGG'
+                        'node': 'SequenceConstant',
+                        'sequence': 'ATGG',
+                        'type': 'DNA'
                     }]
                 }],
             },

@@ -1,4 +1,4 @@
-class ConfigurationException(Exception):
+class ConfigurationError(Exception):
     pass
 
 
@@ -6,22 +6,22 @@ class ParsingError(Exception):
     pass
 
 
-class PartLocatorException(Exception):
+class PartLocatorError(Exception):
     pass
 
 
-class ProviderNotFoundException(Exception):
+class NotFoundError(Exception):
+    pass
+
+class ProviderNotFoundError(NotFoundError):
     pass
 
 
-class GSLImportError(Exception):
-    pass
-
-class FunctionNotFoundException(Exception):
+class FunctionNotFoundError(NotFoundError):
     pass
 
 
-class PartNotFoundException(Exception):
+class PartNotFoundError(NotFoundError):
     pass
 
 
@@ -30,4 +30,7 @@ class FunctionInvokeError(Exception):
 
 
 class PartSliceError(Exception):
+    pass
+
+class SymbolNotFoundError(NotFoundError):
     pass

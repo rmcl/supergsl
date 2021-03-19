@@ -1,5 +1,7 @@
-from supergsl.plugins.docker import DockerPlugin
-from supergsl.core.ast import Assembly, NucleotideConstant
+from supergsl.core.function import SuperGSLFunction
+from supergsl.core.plugin import SuperGSLPlugin
+from supergsl.core.ast import Assembly
+
 
 class ChopChopFunction(DockerPlugin):
     """Run the ChopChop CLI tool.
@@ -8,8 +10,6 @@ class ChopChopFunction(DockerPlugin):
     https://bitbucket.org/valenlab/chopchop
     """
 
-    image_tag = 'chopchop'
-    import_path = 'chopchop'
     name = 'cut'
 
     def get_help(self):
@@ -37,8 +37,12 @@ class ChopChopFunction(DockerPlugin):
         self.invoke()
 
         print('CUT IT UP!')
-        return NucleotideConstant('TTA')
+        return None
 
-if __name__ == '__main__':
-    p = ChopChopFunction()
-    p.build()
+
+
+class ChopChopPlugin(SuperGSLPlugin):
+
+    def register(self, symbol_table, compiler_settings):
+        """Register functions provide by chopchop."""
+        symbol_table.register('chopchop', ChopChopFunction())
