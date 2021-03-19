@@ -22,8 +22,8 @@ def get_logger(class_inst):
 def get_logo():
     """Return the SuperGSL ASCII logo.
 
-    >>> from supergsl.utils import logo
-    >>> print(logo())
+    >>> from supergsl.utils import get_logo
+    >>> print(get_logo())
 
     """
     return textwrap.dedent(
