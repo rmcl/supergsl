@@ -1,9 +1,9 @@
 from supergsl.core.plugin import SuperGSLPlugin
-from supergsl.plugins.docker import DockerFunction
+from supergsl.core.function import SuperGSLFunction
 from supergsl.core.ast import Assembly
 
 
-class ChopChopFunction(SuperGSLPlugin):
+class ChopChopFunction(SuperGSLFunction):
     """Run the ChopChop CLI tool.
 
     http://chopchop.cbu.uib.no/
