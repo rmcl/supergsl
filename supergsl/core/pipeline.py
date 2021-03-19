@@ -23,7 +23,6 @@ class CompilerPipeline(object):
         return cast(List[BackendPipelinePass], [
             ResolveImportsPass,
             ResolvePartSlicePass,
-            ASTGraphPass,
             InvokeFunctionPass,
         ])
 

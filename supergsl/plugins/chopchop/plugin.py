@@ -3,7 +3,7 @@ from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.ast import Assembly
 
 
-class ChopChopFunction(DockerPlugin):
+class ChopChopFunction(SuperGSLPlugin):
     """Run the ChopChop CLI tool.
 
     http://chopchop.cbu.uib.no/
