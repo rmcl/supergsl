@@ -8,6 +8,7 @@ class ExampleDockerFunction(DockerFunction):
     python script executed in a docker container.
     """
 
+    image_tag = 'example_docker:latest'
     name = 'random_sequence'
 
     def get_arguments(self):
@@ -23,4 +24,4 @@ class ExampleDockerPlugin(SuperGSLPlugin):
 
     def register(self, symbol_table, compiler_settings):
         """Register functions provide by chopchop."""
-        symbol_table.register('examples', ExampleDockerPlugin())
+        symbol_table.register('examples', ExampleDockerFunction())

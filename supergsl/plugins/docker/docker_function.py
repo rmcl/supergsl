@@ -55,7 +55,7 @@ class DockerFunction(SuperGSLFunction):
         PLUGIN_BASE_DIR = os.path.dirname(
             os.path.abspath(inspect.getfile(self.__class__)))
 
-        print(PLUGIN_BASE_DIR)
+        print(PLUGIN_BASE_DIR, 'tag', self.get_image_tag())
 
         build_log_gen = self.docker_client.api.build(
             path=PLUGIN_BASE_DIR,
