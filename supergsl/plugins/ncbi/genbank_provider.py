@@ -1,5 +1,6 @@
 import os
 import gzip
+from typing import List
 from Bio import Entrez, SeqIO
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.exception import PartLocatorError
@@ -39,7 +40,7 @@ class GenBankFilePartProvider(PartProvider):
         else:
             return open(path, "rt")
 
-    def get_identifier_for_feature(self, feature) -> str:
+    def get_identifier_for_feature(self, feature) -> List[str]:
         """Retrieve part details from a genbank feature.
 
         This method makes some assumptions about the structure and type of features
@@ -83,9 +84,7 @@ class GenBankFilePartProvider(PartProvider):
         """Open and load features from a genbank file."""
         self.loaded = True
         with self.open_gb_file(self.genbank_file_path) as handle:
-            records = SeqIO.parse(
-                handle,
-                'genbank')
+            records = SeqIO.parse(handle, 'genbank')
 
             for record in records:
                 for feature in record.features:
@@ -93,7 +92,7 @@ class GenBankFilePartProvider(PartProvider):
                     for identifier in identifiers:
                         self.features_by_identifier[identifier] = (feature, record)
 
-    def list_parts(self):
+    def list_parts(self) -> List[Part]:
         if not self.loaded:
             self.load()
 
@@ -102,7 +101,7 @@ class GenBankFilePartProvider(PartProvider):
             for identifier in self.features_by_identifier.keys()
         ]
 
-    def get_part(self, identifier):
+    def get_part(self, identifier) -> Part:
         """Retrieve a part by identifier.
 
         Arguments:
