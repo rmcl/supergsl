@@ -44,7 +44,6 @@ class Part(NucleotideSequence):
         if roles:
             self._roles = roles
 
-
     @property
     def has_primers(self):
         """Returns true if this part has extraction primers defined."""
