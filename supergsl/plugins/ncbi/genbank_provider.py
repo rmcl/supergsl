@@ -2,12 +2,29 @@ import os
 import gzip
 from Bio import Entrez, SeqIO
 from supergsl.core.constants import THREE_PRIME
+from supergsl.core.exception import PartLocatorError
 from supergsl.core.parts import PartProvider, Part, SeqPosition
 
 
-
 class GenBankFilePartProvider(PartProvider):
-    """Load Parts from a Genbank formatted file."""
+    """Load Parts from a Genbank formatted file.
+
+    Provider Arguments for `supergsl-config.json`:
+    `name`: The name of the provider. This is used in your superGSL import statement.
+    `provider_class`: For this provider, should be: "supergsl.plugins.ncbi.GenBankFilePartProvider".
+    `sequence_file_path`: The path on the local filesystem to the genbank file.
+
+    Example of retrieving Adeno-associated virus 4, complete genome (U89790.1)
+    {
+        "name": "entrez.AAV4",
+        "provider_class": "supergsl.plugins.ncbi.GenBankFilePartProvider",
+        "sequence_file_path": "/mnt/genomes/nucleotide-U89790.gb.gz"
+    }
+
+    If you don't like the features that this provider pulls out of your GenBank
+    file then you shoould consider subclassing and overriding
+    `get_identifier_for_feature`. See method docstring for more information.
+    """
 
     def __init__(self, name, settings):
         self.name = name
@@ -23,6 +40,13 @@ class GenBankFilePartProvider(PartProvider):
             return open(path, "rt")
 
     def get_identifier_for_feature(self, feature) -> str:
+        """Retrieve part details from a genbank feature.
+
+        This method makes some assumptions about the structure and type of features
+        that should be treated as parts and their metadata. You may consider,
+        subclassing and overriding this method to handle a your desired genbank
+        file.
+        """
         identifiers = []
         if feature.type in ['gene', 'CDS']:
             desired_qualifiers = ['gene', 'locus_tag', 'product']
@@ -92,8 +116,8 @@ class GenBankFilePartProvider(PartProvider):
         try:
             feature, parent_record = self.features_by_identifier[identifier]
         except KeyError:
-            raise PartLocatorException('Part not found "%s" in %s.' % (identifier, self.get_provider_name()))
-
+            raise PartLocatorError('Part not found "%s" in %s.' % (
+                identifier, self.get_provider_name()))
 
         part = self.get_part_from_feature(
             identifier,
