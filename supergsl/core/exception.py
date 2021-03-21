@@ -16,6 +16,10 @@ class NotFoundError(SuperGSLError):
     """Base class representing class of errors that occur when a SuperGSL object cannot be found."""
 
 
+class SymbolNotFoundError(NotFoundError):
+    """A symbol cannot be found in the symbol table."""
+
+
 class ProviderNotFoundError(NotFoundError):
     """The specific provider cannot be found.
 

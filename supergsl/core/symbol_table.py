@@ -1,7 +1,11 @@
 """Implement the symbol table of the SuperGSL Compiler."""
 from re import Pattern
 from typing import Optional, Tuple, List, Dict
-from supergsl.core.exception import ProviderNotFoundError, NotFoundError
+from supergsl.core.exception import (
+    ProviderNotFoundError,
+    NotFoundError,
+    SymbolNotFoundError
+)
 from supergsl.core.provider import SuperGSLProvider
 
 
@@ -55,7 +59,7 @@ class SymbolTable(object):
             self._symbols_providers.append((alias_pattern, provider))
             return self.get_symbol(active_alias)
 
-        raise NotFoundError('Symbol "{}" could not be resolved in path "{}"'.format(
+        raise SymbolNotFoundError('Symbol "{}" could not be resolved in path "{}"'.format(
             import_name,
             import_path
         ))
