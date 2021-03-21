@@ -1,4 +1,4 @@
-"""Entrypoint for the `sgsl` command used to invoke the superGSL compiler."""
+"""Provide an interactive shell for SuperGSL."""
 from types import SimpleNamespace
 import textwrap
 from prompt_toolkit import PromptSession
