@@ -1,7 +1,7 @@
 """Implement the symbol table of the SuperGSL Compiler."""
 from re import Pattern
 from typing import Optional, Tuple, List, Dict
-from supergsl.core.exception import SymbolNotFoundError, ProviderNotFoundError, NotFoundError
+from supergsl.core.exception import ProviderNotFoundError, NotFoundError
 from supergsl.core.provider import SuperGSLProvider
 
 
@@ -40,7 +40,7 @@ class SymbolTable(object):
         active_alias = alias or import_name
         try:
             self.get_symbol(active_alias)
-        except SymbolNotFoundError:
+        except NotFoundError:
             pass
         else:
             raise Exception('Alias "%s" imported twice.' % active_alias)

@@ -114,7 +114,7 @@ class GenBankFilePartProvider(PartProvider):
         try:
             feature, parent_record = self.features_by_identifier[identifier]
         except KeyError:
-            raise PartLocatorError('Part not found "%s" in %s.' % (
+            raise PartNotFoundError('Part not found "%s" in %s.' % (
                 identifier, self.get_provider_name()))
 
         return self.get_part_from_feature(
