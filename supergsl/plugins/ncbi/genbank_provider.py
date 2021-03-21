@@ -2,7 +2,6 @@ import gzip
 from typing import List
 from Bio import SeqIO
 from supergsl.core.constants import THREE_PRIME
-from supergsl.core.exception import PartLocatorError
 from supergsl.core.parts import PartProvider, Part, SeqPosition
 
 
