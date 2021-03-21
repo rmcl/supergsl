@@ -1,7 +1,6 @@
-import os
 import gzip
 from typing import List
-from Bio import Entrez, SeqIO
+from Bio import SeqIO
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.exception import PartLocatorError
 from supergsl.core.parts import PartProvider, Part, SeqPosition
@@ -17,7 +16,7 @@ class GenBankFilePartProvider(PartProvider):
 
     Example of retrieving Adeno-associated virus 4, complete genome (U89790.1)
     {
-        "name": "entrez.AAV4",
+        "name": "genbank.AAV4",
         "provider_class": "supergsl.plugins.ncbi.GenBankFilePartProvider",
         "sequence_file_path": "/mnt/genomes/nucleotide-U89790.gb.gz"
     }
@@ -118,8 +117,7 @@ class GenBankFilePartProvider(PartProvider):
             raise PartLocatorError('Part not found "%s" in %s.' % (
                 identifier, self.get_provider_name()))
 
-        part = self.get_part_from_feature(
+        return self.get_part_from_feature(
             identifier,
             feature,
             parent_record)
-        return part

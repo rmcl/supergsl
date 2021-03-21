@@ -6,6 +6,7 @@ from supergsl.plugins.ncbi.genbank_provider import GenBankFilePartProvider
 
 class GenBankFilePartProviderTestCase(TestCase):
     """Test case for the file part provider."""
+
     def setUp(self):
         self.provider = GenBankFilePartProvider('test', {
             'sequence_file_path': self.EXAMPLE_GB_FILE_PATH,
