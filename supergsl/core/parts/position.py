@@ -1,9 +1,11 @@
+"""Implement SeqPosition class for storing relative positions in a sequence."""
 from typing import Tuple
 from Bio.Seq import Seq
-from supergsl.core.constants import THREE_PRIME, FIVE_PRIME
+from supergsl.core.constants import FIVE_PRIME
 from supergsl.core.exception import PartSliceError
 
-class SeqPosition(object):
+
+class SeqPosition:
     """Store relative positions in a reference sequence.
 
     "Hierarchical parts" are subsequences of parent parts or reference genomes.
@@ -12,7 +14,9 @@ class SeqPosition(object):
     """
 
     @classmethod
-    def from_reference(cls, x : int, rel_to : str, approximate : bool, reference : Seq):
+    def from_reference(
+        cls, x : int, rel_to : str, approximate : bool, reference : Seq
+    ) -> 'SeqPosition':
         """Create a SeqPosition object from a reference sequence."""
 
         # If the rel_to FIVE PRIME then reverse coordinates to make it
