@@ -1,7 +1,11 @@
-from supergsl.core.constants import THREE_PRIME, FIVE_PRIME
+"""Implement SeqPosition class for storing relative positions in a sequence."""
+from typing import Tuple
+from Bio.Seq import Seq
+from supergsl.core.constants import FIVE_PRIME
 from supergsl.core.exception import PartSliceError
 
-class SeqPosition(object):
+
+class SeqPosition:
     """Store relative positions in a reference sequence.
 
     "Hierarchical parts" are subsequences of parent parts or reference genomes.
@@ -10,7 +14,9 @@ class SeqPosition(object):
     """
 
     @classmethod
-    def from_reference(cls, x, rel_to, approximate, reference):
+    def from_reference(
+        cls, x : int, rel_to : str, approximate : bool, reference : Seq
+    ) -> 'SeqPosition':
         """Create a SeqPosition object from a reference sequence."""
 
         # If the rel_to FIVE PRIME then reverse coordinates to make it
@@ -24,7 +30,7 @@ class SeqPosition(object):
             reference=reference)
 
 
-    def get_relative_position(self, x, approximate=False):
+    def get_relative_position(self, x : int, approximate : bool = False) -> 'SeqPosition':
         """Retrieve a new `SeqPosition` relative to the current position.
 
         By using the `get_relative_position` method one can instantiate a new `SeqPosition`
@@ -58,14 +64,13 @@ class SeqPosition(object):
         self.parent = parent
 
     def __str__(self):
-
         return '3\'%+dbp Approx:%s (Abs Pos: %s)' % (
             self.x,
             self.approximate,
             self.get_absolute_position_in_reference()[1]
         )
 
-    def get_absolute_position_in_reference(self):
+    def get_absolute_position_in_reference(self) -> Tuple[Seq, int]:
         """Return the absolute position in the reference sequence."""
         if self.parent:
             reference, ref_relative_x = self.parent.get_absolute_position_in_reference()
@@ -86,20 +91,11 @@ class SeqPosition(object):
         elif self.reference:
             return self.reference, self.x
 
-            # Thinking that if the position is on the reverse strand of the reference
-            # then rather than reverse complementing here we should just pass the
-            # reversed complement sequence to the SeqPosition object.
-            #if self.strand == 'C':
-            #    ref = ref.reverse_complement()
+        raise Exception('SeqPosition does not have a parent or a reference')
 
-            # Actually lets store everything relative to THREE_PRIME
-            #if self.rel_to == THREE_PRIME:
-            #    return ref, self.x
-            #else:
-            #    return ref, len(ref) - self.x
 
     def check_position_compatibility(self, p2):
-        """Compare to another `SeqPosition` and determine if they share the same reference sequence and strand."""
+        """Compare to another `SeqPosition` to determine if they share the same reference sequence and strand."""
 
         ref1, _ = self.get_absolute_position_in_reference()
         ref2, _ = p2.get_absolute_position_in_reference()
