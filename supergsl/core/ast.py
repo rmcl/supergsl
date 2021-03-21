@@ -221,7 +221,7 @@ class SequenceConstant(Node):
 
 
 class Program(Node):
-    def __init__(self, imports : List[Import], definitions : DefinitionList):
+    def __init__(self, imports : List[Import], definitions : Optional[DefinitionList]):
         self.definitions : DefinitionList = definitions
         self.imports : List[Import] = imports
 
@@ -232,10 +232,11 @@ class Program(Node):
                 impor.eval()
                 for impor in self.imports
             ],
-            'definitions': self.definitions.eval()
+            'definitions': self.definitions.eval() if self.definitions else None
         }
 
     def child_nodes(self) -> List[Node]:
         children : List[Node] = cast(List[Node], self.imports.copy())
-        children.append(cast(Node, self.definitions))
+        if self.definitions:
+            children.append(cast(Node, self.definitions))
         return children

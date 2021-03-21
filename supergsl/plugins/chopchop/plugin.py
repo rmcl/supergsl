@@ -1,5 +1,5 @@
-from supergsl.core.function import SuperGSLFunction
 from supergsl.core.plugin import SuperGSLPlugin
+from supergsl.core.function import SuperGSLFunction
 from supergsl.core.ast import Assembly
 
 
@@ -11,9 +11,6 @@ class ChopChopFunction(SuperGSLFunction):
     """
 
     name = 'cut'
-
-    def get_help(self):
-        return self.execute.__docstr__
 
     def get_arguments(self):
         return [
@@ -34,8 +31,13 @@ class ChopChopFunction(SuperGSLFunction):
             from example import cut
             cut(HO, CAS9, S288C, results=5)
         """
+        self.invoke()
+
         print('CUT IT UP!')
         return None
+
+    def get_help(self):
+        return self.execute.__docstr__
 
 
 

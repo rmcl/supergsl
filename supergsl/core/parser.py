@@ -57,15 +57,20 @@ class ParserBuilder(object):
         # pylint: disable=W0613,C0103,W0612,C0301
 
         @self.pg.production('program : import_list definition_list')
+        @self.pg.production('program : import_list')
         @self.pg.production('program : definition_list')
         def program(state, p):
             imports = []
+            definition_list = None
             if len(p) == 2:
                 # we have at least one import
                 imports = p[0]
                 definition_list = p[1]
             else:
-                definition_list = p[0]
+                if type(p[0]) == ast.DefinitionList:
+                    definition_list = p[0]
+                else:
+                    imports = p[0]
 
             return ast.Program(imports, definition_list)
 
@@ -242,7 +247,8 @@ class ParserBuilder(object):
             reached_end_of_file = lookahead.value == '$end'
             if reached_end_of_file:
                 if not state.one_assembly_defined:
-                    raise ParsingError('At least one assembly must be defined.')
+                    pass
+                    #raise ParsingError('At least one assembly must be defined.')
 
             raise ParsingError(
                 'An error occurred parsing source document at %s' % lookahead.source_pos)
