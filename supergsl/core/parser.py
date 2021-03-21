@@ -67,7 +67,7 @@ class ParserBuilder(object):
                 imports = p[0]
                 definition_list = p[1]
             else:
-                if type(p[0]) == ast.DefinitionList:
+                if isinstance(p[0], ast.DefinitionList):
                     definition_list = p[0]
                 else:
                     imports = p[0]
