@@ -35,8 +35,8 @@ def handle_setup_config_files(args):
 def handle_part_command(args):
     settings = load_settings()
     symbol_table = SymbolTable()
-    part_provider = PartProviderPlugin(settings)
-    part_provider.register(symbol_table)
+    part_provider = PartProviderPlugin()
+    part_provider.register(symbol_table, settings)
 
     if args.action == 'list':
         part_provider = symbol_table.get_plugin_provider(args.part_provider)
