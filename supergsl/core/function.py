@@ -6,6 +6,7 @@ from inspect import getdoc
 from re import Pattern, Match
 
 from supergsl.core.types import SuperGSLType
+from supergsl.core.provider import SuperGSLProvider
 from supergsl.core.backend import DepthFirstNodeFilteredPass
 from supergsl.core.exception import FunctionInvokeError, FunctionNotFoundError
 
