@@ -4,12 +4,13 @@ import re
 from typing import Optional, List
 from inspect import getdoc
 from re import Pattern, Match
+
 from supergsl.core.types import SuperGSLType
 from supergsl.core.backend import DepthFirstNodeFilteredPass
-from supergsl.core.exception import FunctionInvokeError
+from supergsl.core.exception import FunctionInvokeError, FunctionNotFoundError
 
 
-class SuperGSLFunction(object):
+class SuperGSLFunction(SuperGSLProvider):
     """Add a callable function to SuperGSL."""
 
     name: Optional[str] = None
@@ -21,6 +22,10 @@ class SuperGSLFunction(object):
 
         Return: a regular expression to match symbols against
         """
+        if identifier != self.name:
+            raise FunctionNotFoundError('Function {} not provided by {}'.format(
+                identifier, self))
+
         return re.compile(identifier or alias)
 
     def get_symbol(self, identifier_match: Match):
@@ -61,7 +66,7 @@ class InvokeFunctionPass(DepthFirstNodeFilteredPass):
         }
 
     def visit_function_invoke_node(self, node):
-        print('INVOKE', node.params)
+        print('INVOKE', node.params, node.identifier)
 
         if node.params is not None:
             print('WARNING!!! PASSING PARAMS NOT IMPLEMENTED YET!!!!!!!')

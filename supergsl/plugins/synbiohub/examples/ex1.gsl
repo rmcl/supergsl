@@ -1,0 +1,22 @@
+/* An example SuperGSL program utilizing a SynBioHub backed part provider.
+
+Make sure the following configuration is in your `supergsl-config.yml` file:
+```
+{
+    "part_providers": [
+        ...
+        {
+            "name": "igem",
+            "provider_class": "supergsl.plugins.synbiohub.SynBioHubPartProvider",
+            "repository_url": "https://synbiohub.org/public/igem",
+        }
+    ],
+    ...
+}
+```
+
+*/
+
+from igem import BBa_E0040
+
+BBa_E0040

@@ -3,7 +3,7 @@ import pprint
 from typing import Optional
 from supergsl.core.ast import Node
 from supergsl.core.backend import BreadthFirstNodeFilteredPass
-from supergsl.core.exception import ConfigurationException
+from supergsl.core.exception import ConfigurationError
 from supergsl.utils import import_class
 
 
@@ -17,7 +17,7 @@ class OutputProvider(BreadthFirstNodeFilteredPass):
     def get_output_name(cls):
         """Get the Output Provider's name."""
         if cls.name is None:
-            raise ConfigurationException('%s does not specify its output name.')
+            raise ConfigurationError('%s does not specify its output name.')
 
         return cls.name
 
@@ -151,7 +151,7 @@ class OutputPipeline(object):
             provider_class = import_class(provider_class_path)
 
             if not issubclass(provider_class, OutputProvider):
-                raise ConfigurationException(
+                raise ConfigurationError(
                     '"%s" is not an instance of OutputProvider' % provider_class_path)
 
             self.available_outputers[provider_class.get_output_name()] = provider_class

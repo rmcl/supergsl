@@ -1,12 +1,4 @@
 from supergsl.core.backend import BreadthFirstNodeFilteredPass
-from supergsl.core.exception import (
-    ProviderNotFoundException,
-    FunctionNotFoundException,
-    GSLImportError
-)
-from supergsl.core.types import resolve_type
-
-from supergsl.core.variables import VARIABLE_MODULE_PATH
 
 
 class ResolveImportsPass(BreadthFirstNodeFilteredPass):
@@ -27,7 +19,8 @@ class ResolveImportsPass(BreadthFirstNodeFilteredPass):
             module_path = '.'.join(node.module)
             node.symbol = self.symbol_table.resolve_symbol(
                 module_path,
-                program_import.identifier)
+                program_import.identifier,
+                program_import.alias)
 
         return node
 
