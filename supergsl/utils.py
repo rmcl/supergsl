@@ -1,6 +1,9 @@
+import os
+import json
 import importlib
 import logging
 import textwrap
+from pathlib import Path
 
 
 def import_class(class_path_str):
@@ -36,3 +39,27 @@ def get_logo():
                      |_|
 
         """)
+
+def setup_supergsl_config_files():
+    conf_dir = Path('~/.supergsl')
+    conf_dir = conf_dir.expanduser()
+    lib_dir = conf_dir.joinpath('sgsl-lib/')
+    conf_file_path = conf_dir.joinpath('config.json')
+    example_config_file = Path(__file__).parent.joinpath('../supergsl-config.json.example')
+
+    try:
+        Path.mkdir(conf_dir)
+    except FileExistsError:
+        print(
+            'Cannot setup config files at "%s" because that directory '
+            'already exists.' % conf_dir)
+        return
+
+    Path.mkdir(lib_dir, exist_ok=True)
+
+    json_config = json.load(open(example_config_file))
+    json_config['lib_dir'] = lib_dir.as_posix()
+
+    with open(conf_file_path, 'w+') as conf_file_fp:
+        json.dump(json_config, conf_file_fp, indent=4)
+        conf_file_fp.write('\n')
