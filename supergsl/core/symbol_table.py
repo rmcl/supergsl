@@ -23,6 +23,9 @@ class SymbolTable(object):
         except KeyError:
             self._import_path_to_providers[provider_import_path] = [provider_inst]
 
+    def get_providers(self):
+        return self._import_path_to_providers.values()
+
     def get_providers_for_path(self, provider_import_path) -> List[SuperGSLProvider]:
         """Return all providers associated with an import path."""
         providers = self._import_path_to_providers.get(provider_import_path, None)
