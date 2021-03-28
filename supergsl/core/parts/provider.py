@@ -5,6 +5,8 @@ from supergsl.utils import import_class
 from supergsl.core.exception import ConfigurationError
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.provider import SuperGSLProvider
+from supergsl.core.types import SuperGSLType
+from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.parts import Part, SeqPosition
 
 
@@ -23,14 +25,17 @@ class PartProvider(SuperGSLProvider):
             'List parts is not supported by "%s" part provider.' % self.name
         )
 
-    def resolve_import(self, identifier : str, alias : str) -> Pattern:
-        """Resolve the import of a part from this provider.
+    def resolve_import(
+        self,
+        symbol_table : SymbolTable,
+        identifier : str,
+        alias : str
+    ) -> None:
+        """Resolve the import of a part from this provider and register it in the
+        provided symbol table.
 
-        Return a tuple with:
-            * A regular expression to match symbols against
-            * A callback method that given the actual identifier will return the `Part`.
         """
-        return re.compile(alias or identifier)
+        raise NotImplementedError('Subclass to implement')
 
     def get_symbol(self, identifier_match : Match):
         return self.get_part(identifier_match.string)
@@ -54,6 +59,7 @@ class PartProvider(SuperGSLProvider):
         """Return a new part which is the child of the supplied parent."""
         raise NotImplementedError('Subclass to implement')
 
+
 class PartProviderPlugin(SuperGSLPlugin):
     name = 'part_provider'
 
@@ -68,6 +74,8 @@ class PartProviderPlugin(SuperGSLPlugin):
             raise ConfigurationError(
                 'No part providers have been defined. Check your supergGSL settings.')
 
+        part_provider_table = symbol_table.nested_scope('imports')
+
         for provider_config in self.settings['part_providers']:
             print('Initializing "%s"' % provider_config['name'])
             provider_class = import_class(provider_config['provider_class'])
@@ -77,4 +85,4 @@ class PartProviderPlugin(SuperGSLPlugin):
             if not provider_name:
                 raise ConfigurationError('Provider "%s" does not specify a name.' % provider_class)
 
-            symbol_table.register(provider_name, provider_inst)
+            part_provider_table.insert(provider_name, provider_inst)

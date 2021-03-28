@@ -2,6 +2,7 @@ import typing
 import re
 from typing import Tuple, Callable
 from re import Pattern, Match
+from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.exception import PartSliceError
 from supergsl.core.constants import (
     FIVE_PRIME,
@@ -14,9 +15,8 @@ from supergsl.core.constants import (
     SO_MRNA
 )
 
-from .part import Part
+from .part import Part, LazyLoadedPart
 from .provider import PartProvider
-from .position import SeqPosition
 
 
 class UnknownPartPrefixError(Exception):
@@ -49,6 +49,21 @@ if typing.TYPE_CHECKING:
 else:
     _Base = object
 
+
+class PrefixedSliceLazyLoadedPart(LazyLoadedPart):
+    def __init__(self, identifier, parent_part, prefix):
+        self.identifier = identifier
+        self.parent_part = parent_part
+        self.part_prefix = prefix
+
+    def instantiate(self):
+        return self.parent_part.get_prefixed_part(
+            self.identifier,
+            self.part_prefix)
+
+    def __str__(self):
+        'LazyPrefixPart: {} {}'.format(self.identifier, self.parent_part)
+
 class PrefixedSlicePartProviderMixin(_Base):
     """A Part Mixin which enables support for fGSL prefixed-parts.
 
@@ -77,43 +92,49 @@ class PrefixedSlicePartProviderMixin(_Base):
         'm': 'mRNA'
     }
 
-    def resolve_import(self, identifier : str, alias : str) -> Pattern:
+    def resolve_import(
+        self,
+        scoped_symbol_table : SymbolTable,
+        identifier : str,
+        alias : str
+    ) -> None:
         """Resolve the import of a part from this provider."""
-        return self.get_prefix_pattern(alias or identifier)
 
-    def get_symbol(self, identifier_match : Match):
-        full_identifier = identifier_match.string
-        matched_identifier = identifier_match.group('identifier')
-        matched_prefix = identifier_match.group('prefix')
+        part_identifier = alias or identifier
+        for part_prefix in self.PART_TYPES.keys():
+            part_name = '{}{}'.format(part_prefix, part_identifier)
+            lazy_part = PrefixedSliceLazyLoadedPart(
+                identifier,
+                self,
+                part_prefix)
 
-        parent_part = self.get_part(matched_identifier)
-        if matched_prefix == '':
+            scoped_symbol_table.insert(part_name, lazy_part)
+
+
+    def get_prefixed_part(self, identifier : str, prefix : str):
+        parent_part = self.get_part(identifier)
+        if prefix == '':
             return parent_part
 
         try:
-            part_type = self.PART_TYPES[matched_prefix]
+            part_type = self.PART_TYPES[prefix]
         except KeyError:
-            raise UnknownPartPrefixError('Invalid part prefix "%s" in "%s".' % (
-                matched_prefix,
-                full_identifier
+            raise UnknownPartPrefixError('Invalid part prefix "{}" for "{}".'.format(
+                prefix,
+                identifier,
+
             ))
 
         start_pos, end_pos = self.build_part_type_slice_pos(parent_part, part_type)
         roles = self.get_roles_by_part_type(part_type)
         part = self.get_child_part_by_slice(
             parent_part=parent_part,
-            identifier=full_identifier,
+            identifier='{}{}'.format(prefix, identifier),
             start=start_pos,
             end=end_pos)
         part.add_roles(roles)
         return part
 
-    def get_prefix_pattern(self, identifier):
-        allowed_prefixes = ''.join(self.PART_TYPES.keys())
-        return re.compile('(?P<prefix>[%s]?)(?P<identifier>%s)' % (
-            allowed_prefixes,
-            identifier
-        ))
 
     def get_roles_by_part_type(self, part_type):
         """Return a list of roles based on part type."""

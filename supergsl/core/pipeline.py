@@ -5,7 +5,6 @@ from supergsl.core.plugin import PluginProvider
 from supergsl.core.imports import ResolveImportsPass
 from supergsl.core.backend import BackendPipelinePass
 from supergsl.core.parts.slice import ResolvePartSlicePass
-from supergsl.core.types.check import TypeCheckPass
 
 from .lexer import Lexer
 from .parser import ParserBuilder
@@ -15,16 +14,18 @@ class CompilerPipeline(object):
     """Orchestrate the conversion of superGSL source code to compiled sequences."""
 
     def __init__(self, settings):
-        self._symbol_table = SymbolTable()
+        self._root_symbol_table = SymbolTable('global', None)
         self._settings = settings
-        self.plugins = PluginProvider(self._symbol_table, self._settings)
+        self.plugins = PluginProvider(self._root_symbol_table, self._settings)
+
+        self._root_symbol_table.display()
+
 
     def get_backend_passes(self) -> List[BackendPipelinePass]:
         """Return an ordered list of compiler backend passes to be executed."""
         return cast(List[BackendPipelinePass], [
             ResolveImportsPass,
             ResolvePartSlicePass,
-            TypeCheckPass,
             InvokeFunctionPass,
         ])
 
@@ -47,10 +48,11 @@ class CompilerPipeline(object):
         pass_classes = self.get_backend_passes()
 
         for backend_pass_class in pass_classes:
-            backend_pass_inst = backend_pass_class(self._symbol_table)
+            backend_pass_inst = backend_pass_class(self._root_symbol_table)
 
             print('performing pass... %s' % backend_pass_inst.get_pass_name())
             ast = backend_pass_inst.perform(ast)
+            self._root_symbol_table.display()
 
         return ast
 
