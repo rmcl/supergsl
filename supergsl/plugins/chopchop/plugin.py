@@ -44,4 +44,5 @@ class ChopChopPlugin(SuperGSLPlugin):
 
     def register(self, symbol_table, compiler_settings):
         """Register functions provide by chopchop."""
-        symbol_table.register('chopchop', ChopChopFunction())
+        provider_table = symbol_table.nested_scope('imports')
+        provider_table.insert('chopchop', ChopChopFunction())
