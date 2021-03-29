@@ -2,7 +2,7 @@ import gzip
 from typing import List
 from Bio import SeqIO
 from supergsl.core.constants import THREE_PRIME
-from supergsl.core.exception import PartLocatorError
+from supergsl.core.exception import PartNotFoundError
 from supergsl.core.parts import PartProvider, Part, SeqPosition
 
 
@@ -114,7 +114,7 @@ class GenBankFilePartProvider(PartProvider):
         try:
             feature, parent_record = self.features_by_identifier[identifier]
         except KeyError:
-            raise PartLocatorError('Part not found "%s" in %s.' % (
+            raise PartNotFoundError('Part not found "%s" in %s.' % (
                 identifier, self.get_provider_name()))
 
         return self.get_part_from_feature(

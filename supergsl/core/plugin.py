@@ -1,7 +1,6 @@
 """Support for SuperGSL's plugin infrastructure."""
 
 import inspect
-from re import Pattern, Match
 import importlib
 from typing import Dict
 from supergsl.core.exception import ConfigurationError

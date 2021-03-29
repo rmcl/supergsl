@@ -222,7 +222,7 @@ class SequenceConstant(Node):
 
 class Program(Node):
     def __init__(self, imports : List[Import], definitions : Optional[DefinitionList]):
-        self.definitions : DefinitionList = definitions
+        self.definitions : Optional[DefinitionList] = definitions
         self.imports : List[Import] = imports
 
     def eval(self) -> dict:

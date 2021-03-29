@@ -14,9 +14,10 @@ class CompilerPipeline(object):
     """Orchestrate the conversion of superGSL source code to compiled sequences."""
 
     def __init__(self, settings):
-        self._symbol_table = SymbolTable()
+        self._global_symbol_table = SymbolTable('global', None)
         self._settings = settings
-        self.plugins = PluginProvider(self._symbol_table, self._settings)
+        self.plugins = PluginProvider(self._global_symbol_table, self._settings)
+
 
     def get_backend_passes(self) -> List[BackendPipelinePass]:
         """Return an ordered list of compiler backend passes to be executed."""
@@ -61,7 +62,7 @@ class CompilerPipeline(object):
         pass_classes = self.get_backend_passes()
 
         for backend_pass_class in pass_classes:
-            backend_pass_inst = backend_pass_class(self._symbol_table)
+            backend_pass_inst = backend_pass_class(self._global_symbol_table)
 
             print('performing pass... %s' % backend_pass_inst.get_pass_name())
             ast = backend_pass_inst.perform(ast)

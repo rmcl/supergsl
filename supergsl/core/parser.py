@@ -12,11 +12,6 @@ class ParserState(object):
     def __init__(self, filename=None):
         self.filename = filename
 
-        # Flag set to True when at least one assembly has been
-        # defined. If we reach the end of compiler input and this
-        # is false then we should raise an error.
-        self.one_assembly_defined = False
-
 
 class ParserBuilder(object):
     # A list of all token names accepted by the parser.
@@ -67,7 +62,7 @@ class ParserBuilder(object):
                 imports = p[0]
                 definition_list = p[1]
             else:
-                if type(p[0]) == ast.DefinitionList:
+                if isinstance(p[0], ast.DefinitionList):
                     definition_list = p[0]
                 else:
                     imports = p[0]
@@ -244,12 +239,6 @@ class ParserBuilder(object):
 
         @self.pg.error
         def error_handle(state, lookahead):
-            reached_end_of_file = lookahead.value == '$end'
-            if reached_end_of_file:
-                if not state.one_assembly_defined:
-                    pass
-                    #raise ParsingError('At least one assembly must be defined.')
-
             raise ParsingError(
                 'An error occurred parsing source document at %s' % lookahead.source_pos)
 

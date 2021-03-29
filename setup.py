@@ -31,6 +31,7 @@ setuptools.setup(
         'mock',
         'mypy',
         'mypy-extensions',
+        'prompt_toolkit',
     ],
     extras_require={
         "plugins": [

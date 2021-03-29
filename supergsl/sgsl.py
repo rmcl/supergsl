@@ -6,7 +6,6 @@ from supergsl.core.output import OutputPipeline
 from supergsl.repl import SuperGSLShell
 
 
-
 def main():
     settings = load_settings()
     compiler_pipeline = CompilerPipeline(settings)

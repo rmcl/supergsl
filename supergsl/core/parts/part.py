@@ -1,6 +1,10 @@
 from typing import List, Optional
 from Bio.SeqRecord import SeqRecord
-from supergsl.core.types import NucleotideSequence, PrimerPair
+from supergsl.core.types import (
+    SuperGSLType,
+    NucleotideSequence,
+    PrimerPair
+)
 
 
 class Part(NucleotideSequence):
@@ -87,3 +91,8 @@ class Part(NucleotideSequence):
             start,
             end
         )
+
+
+class LazyLoadedPart(SuperGSLType):
+    def instantiate(self) -> Part:
+        raise NotImplementedError('Subclass to implement.')
