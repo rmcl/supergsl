@@ -1,6 +1,4 @@
 """Define the mechanism of SuperGSLFunction and an AST pass to invoke those functions."""
-
-import re
 from typing import Optional, List
 from inspect import getdoc
 
@@ -10,6 +8,7 @@ from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.backend import DepthFirstNodeFilteredPass
 from supergsl.core.exception import FunctionInvokeError, FunctionNotFoundError
 
+#pylint: disable=E1136
 
 class SuperGSLFunction(SuperGSLProvider, SuperGSLType):
     """Add a callable function to SuperGSL."""

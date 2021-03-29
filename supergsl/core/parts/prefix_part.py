@@ -94,11 +94,15 @@ class PrefixedSlicePartProviderMixin(_Base):
 
     def resolve_import(
         self,
-        scoped_symbol_table : SymbolTable,
+        symbol_table : SymbolTable,
         identifier : str,
         alias : str
     ) -> None:
-        """Resolve the import of a part from this provider."""
+        """Resolve the import of a part from this provider.
+
+        Override the default functionality and instead register a part for each
+        of the part prefixes available to the user.
+        """
 
         part_identifier = alias or identifier
         for part_prefix in self.PART_TYPES.keys():
@@ -108,7 +112,7 @@ class PrefixedSlicePartProviderMixin(_Base):
                 self,
                 part_prefix)
 
-            scoped_symbol_table.insert(part_name, lazy_part)
+            symbol_table.insert(part_name, lazy_part)
 
 
     def get_prefixed_part(self, identifier : str, prefix : str):

@@ -1,5 +1,4 @@
 """Support SuperGSL's symbol provider mechanism."""
-from supergsl.core.types import SuperGSLType
 from supergsl.core.symbol_table import SymbolTable
 
 class SuperGSLProvider(object):
