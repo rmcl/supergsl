@@ -1,81 +1,53 @@
 """Implement the symbol table of the SuperGSL Compiler."""
-from re import Pattern
-from typing import Optional, Tuple, List, Dict
-from supergsl.core.exception import (
-    ProviderNotFoundError,
-    NotFoundError,
-    SymbolNotFoundError
-)
-from supergsl.core.provider import SuperGSLProvider
+from typing import Optional, List, Dict
+from supergsl.core.exception import SymbolNotFoundError
+from supergsl.core.types import SuperGSLType
 
+# pylint: disable=E1136
 
-class SymbolTable(object):
+class SymbolTable:
+    """Store symbols in nested scopes."""
 
-    def __init__(self):
-        self._import_path_to_providers : Dict[str, List[SuperGSLProvider]] = {}
-        self._symbols_providers: List[Tuple[Pattern, SuperGSLProvider]] = []
-        self._symbols = {}
+    def __init__(self, name : str, parent : Optional['SymbolTable']):
+        self.name = name
+        self._parent = parent
+        self._symbols : Dict[str, SuperGSLType] = {}
+        self._nested_scopes : Dict[str, SymbolTable] = {}
 
-    def register(self, provider_import_path: str, provider_inst: SuperGSLProvider) -> None:
-        """Register a provider to be available for import a given import path."""
+    def parent_scope(self) -> Optional['SymbolTable']:
+        """Return the SymbolTable for the parent scope."""
+        return self._parent
+
+    def nested_scope(self, name : str) -> 'SymbolTable':
+        """Get or Create a nested scope within the current table."""
         try:
-            self._import_path_to_providers[provider_import_path].append(provider_inst)
+            return self._nested_scopes[name]
         except KeyError:
-            self._import_path_to_providers[provider_import_path] = [provider_inst]
+            self._nested_scopes[name] = SymbolTable(name, self)
+            return self._nested_scopes[name]
 
-    def get_providers_for_path(self, provider_import_path) -> List[SuperGSLProvider]:
-        """Return all providers associated with an import path."""
-        providers = self._import_path_to_providers.get(provider_import_path, None)
-        if not providers:
-            raise ProviderNotFoundError('Provider for %s not found.' % provider_import_path)
-
-        return providers
-
-    def resolve_symbol(
-        self,
-        import_path: str,
-        import_name: str,
-        alias: Optional[str] = None
-    ):
-        """Resolve a symbol from an import statement of a superGSL program."""
-
-        print('Attempting to resolve symbol: %s, %s, %s' % (import_path, import_name, alias))
-
-        active_alias = alias or import_name
-        try:
-            self.get_symbol(active_alias)
-        except NotFoundError:
-            pass
-        else:
-            raise Exception('Alias "%s" imported twice.' % active_alias)
-
-        providers = self.get_providers_for_path(import_path)
-        for provider in providers:
-            try:
-                alias_pattern = provider.resolve_import(import_name, active_alias)
-            except NotFoundError:
-                continue
-
-            self._symbols_providers.append((alias_pattern, provider))
-            return self.get_symbol(active_alias)
-
-        raise SymbolNotFoundError('Symbol "{}" could not be resolved in path "{}"'.format(
-            import_name,
-            import_path
-        ))
-
-    def get_symbol(self, identifier):
-        """Retrieve an imported symbol."""
-
+    def lookup(self, identifier: str) -> SuperGSLType:
+        """Lookup a symbol in the table."""
         try:
             return self._symbols[identifier]
         except KeyError:
-            pass
+            raise SymbolNotFoundError('Symbol "{}" does not exist.'.format(identifier))
 
-        for symbol_pattern, symbol_handler in self._symbols_providers:
-            match = symbol_pattern.fullmatch(identifier)
-            if match:
-                self._symbols[identifier] = symbol_handler.get_symbol(match)
-                return self._symbols[identifier]
+    def insert(self, identifier : str, value : SuperGSLType) -> None:
+        """Set a symbol to a value in the current scope."""
+        self._symbols[identifier] = value
 
-        raise SymbolNotFoundError('"%s" is not defined.' % identifier)
+    def display(self, depth=0):
+        """Recursively display the table and all of its nested scopes."""
+        indent = ' ' * (depth*4)
+        print(indent + 'Table: {} ----'.format(self.name))
+        for key, val in self._symbols.items():
+            print(indent + '  Key: {}, Type: {}'.format(
+                key,
+                type(val)
+            ))
+
+        for nested_scope in self._nested_scopes.values():
+            nested_scope.display(depth+1)
+
+        print(indent + '--- End Table: %s ----')
