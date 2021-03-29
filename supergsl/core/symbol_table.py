@@ -36,18 +36,3 @@ class SymbolTable:
     def insert(self, identifier : str, value : SuperGSLType) -> None:
         """Set a symbol to a value in the current scope."""
         self._symbols[identifier] = value
-
-    def display(self, depth=0):
-        """Recursively display the table and all of its nested scopes."""
-        indent = ' ' * (depth*4)
-        print(indent + 'Table: {} ----'.format(self.name))
-        for key, val in self._symbols.items():
-            print(indent + '  Key: {}, Type: {}'.format(
-                key,
-                type(val)
-            ))
-
-        for nested_scope in self._nested_scopes.values():
-            nested_scope.display(depth+1)
-
-        print(indent + '--- End Table: %s ----')
