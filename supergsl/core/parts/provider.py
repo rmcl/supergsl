@@ -28,7 +28,7 @@ class PartProvider(SuperGSLProvider):
         identifier : str,
         alias : str
     ) -> None:
-        """Resolve the import of a part from this provider."""
+        """Resolve a part from the provider and register it in the symbol table."""
         part_identifier = alias or identifier
         symbol_table.insert(part_identifier, self.get_part(identifier))
 
@@ -37,7 +37,6 @@ class PartProvider(SuperGSLProvider):
 
         Arguments:
             identifier  A identifier to select a part from this provider
-        Return: `Part`
         """
         raise NotImplementedError('Subclass to implement.')
 
