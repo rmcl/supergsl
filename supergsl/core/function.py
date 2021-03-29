@@ -1,34 +1,35 @@
 """Define the mechanism of SuperGSLFunction and an AST pass to invoke those functions."""
-
-import re
 from typing import Optional, List
 from inspect import getdoc
-from re import Pattern, Match
+
+from supergsl.core.types import SuperGSLType
 from supergsl.core.provider import SuperGSLProvider
+from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.backend import DepthFirstNodeFilteredPass
 from supergsl.core.exception import FunctionInvokeError, FunctionNotFoundError
 
+#pylint: disable=E1136
 
-class SuperGSLFunction(SuperGSLProvider):
+class SuperGSLFunction(SuperGSLProvider, SuperGSLType):
     """Add a callable function to SuperGSL."""
 
     name: Optional[str] = None
-    arguments : List[str] = []
-    return_type : Optional[str] = None
+    arguments : List[SuperGSLType] = []
+    return_type : Optional[SuperGSLType] = None
 
-    def resolve_import(self, identifier: str, alias: str) -> Pattern:
+    def resolve_import(self,
+        symbol_table : SymbolTable,
+        identifier : str,
+        alias : str
+    ) -> None:
         """Resolve the import of a function from this provider.
 
-        Return: a regular expression to match symbols against
         """
         if identifier != self.name:
             raise FunctionNotFoundError('Function {} not provided by {}'.format(
                 identifier, self))
 
-        return re.compile(identifier or alias)
-
-    def get_symbol(self, identifier_match: Match):
-        return self
+        symbol_table.insert(identifier or alias, self)
 
     @classmethod
     def get_name(cls):

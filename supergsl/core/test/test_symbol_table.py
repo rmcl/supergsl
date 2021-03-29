@@ -2,29 +2,34 @@
 import unittest
 from mock import Mock
 from supergsl.core.symbol_table import SymbolTable
-from supergsl.core.provider import SuperGSLProvider
+from supergsl.core.exception import SymbolNotFoundError
 
 class SymbolTableTestCase(unittest.TestCase):
+    """Testcases to evaluate the SymbolTable class."""
 
-    def setUp(self):
-        self.table = SymbolTable()
-
-    def test_register_and_get_providers(self):
+    def test_create_insert_lookup_symbol_table(self):
         """Register providers for a specific path and then retrieve it."""
 
-        class MockProvider(SuperGSLProvider):
-            pass
+        mock_symbol_1 = Mock()
+        table = SymbolTable('STName', None)
+        table.insert('HELLO', mock_symbol_1)
 
-        provider1 = MockProvider()
-        provider2 = MockProvider()
+        result = table.lookup('HELLO')
+        self.assertEqual(result, mock_symbol_1)
 
-        self.table.register('impor.this.path', provider1)
-        self.table.register('impor.this.path', provider2)
+    def test_create_nested_scopes(self):
+        """Test that we create a nested scope and it can store same values as parent."""
+        mock_symbol_1 = Mock()
+        mock_symbol_2 = Mock()
 
-        providers = self.table.get_providers_for_path('impor.this.path')
+        table = SymbolTable('root', None)
+        table.insert('HELLO', mock_symbol_1)
 
-        self.assertEquals(providers, [
-            provider1,
-            provider2
-        ])
+        child_table = table.nested_scope('child_scope')
 
+        self.assertRaises(SymbolNotFoundError, child_table.lookup, 'HELLO')
+
+        child_table.insert('HELLO', mock_symbol_2)
+
+        self.assertEqual(table.lookup('HELLO'), mock_symbol_1)
+        self.assertEqual(child_table.lookup('HELLO'), mock_symbol_2)

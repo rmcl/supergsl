@@ -48,3 +48,7 @@ class FunctionInvokeError(SuperGSLError):
 
 class PartSliceError(SuperGSLError):
     """An error occured during the slicing of a part."""
+
+
+class SuperGSLTypeError(SuperGSLError):
+    """A base class for all errors related to SuperGSL's type system."""
