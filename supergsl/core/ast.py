@@ -162,6 +162,52 @@ class DefinitionList(Node):
             for node in self.definitions
         ]
 
+class TypeDeclaration(Node):
+    def __init__(self, identifier: str):
+        self.identifier : str = identifier
+
+    def eval(self) -> dict:
+        return {
+            'node': 'TypeDeclaration',
+            'identifier': self.identifier
+        }
+
+class VariableDeclaration(Node):
+    def __init__(self, identifier: str, type_declaration : Optional[TypeDeclaration], value : ListDeclaration):
+        self.identifier : str = identifier
+        self.type_declaration : Optional[TypeDeclaration] = type_declaration
+        self.value : ListDeclaration = value
+
+    def eval(self) -> dict:
+        return {
+            'node': 'VariableDeclaration',
+            'identifier': self.identifier,
+            'value': self.value.eval(),
+            'type_declaration': (
+                self.type_declaration.eval() if self.type_declaration else None
+            )
+        }
+
+    def child_nodes(self) -> List[Node]:
+        return [cast(Node, self.value)]
+
+
+class ListDeclaration(Node):
+    def __init__(self, items : List[Part]):
+        self.items = items
+
+    def eval(self) -> dict:
+        return {
+            'node': 'ListDeclaration',
+            'items': [
+                part.eval()
+                for part in self.items
+            ]
+        }
+
+    def child_nodes(self) -> List[Node]:
+        return cast(List[Node], self.items)
+
 class Assembly(Node):
     def __init__(self, parts : List[Part], label : Optional[str] = None):
         self.parts : List[Part] = parts

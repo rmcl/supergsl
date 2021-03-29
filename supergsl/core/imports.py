@@ -12,6 +12,7 @@ class ResolveImportsPass(BreadthFirstNodeFilteredPass):
             'Import': self.visit_import_node,
             'Part': self.visit_part_node,
             'FunctionInvocation': self.visit_function_invoke_node,
+            'VariableDeclaration': self.visit_variable_declaration_node,
         }
 
     def before_pass(self, ast):
@@ -30,6 +31,25 @@ class ResolveImportsPass(BreadthFirstNodeFilteredPass):
                 program_import.identifier,
                 program_import.alias)
 
+        return node
+
+    def visit_variable_declaration_node(self, node):
+        """
+
+        node.variable = self.symbol_table.resolve_symbol(
+            VARIABLE_MODULE_PATH,
+            node.identifier)
+
+        supergsl_type = resolve_type(node.type_declaration_node.identifier)
+
+        if node.type_declaration:
+            node.variable.set_type(supergsl_type)
+
+        if node.type_declaration:
+            node.variable.set_value(node.value)
+
+
+        """
         return node
 
     def visit_function_invoke_node(self, node):
