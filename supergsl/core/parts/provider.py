@@ -1,11 +1,8 @@
-import re
-from re import Pattern, Match
 from typing import Optional
 from supergsl.utils import import_class
 from supergsl.core.exception import ConfigurationError
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.provider import SuperGSLProvider
-from supergsl.core.types import SuperGSLType
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.parts import Part, SeqPosition
 
