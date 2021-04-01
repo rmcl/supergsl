@@ -29,7 +29,7 @@ class SuperGSLFunction(SuperGSLProvider, SuperGSLType):
             raise FunctionNotFoundError('Function {} not provided by {}'.format(
                 identifier, self))
 
-        symbol_table.insert(identifier or alias, self)
+        symbol_table.insert(alias or identifier, self)
 
     @classmethod
     def get_name(cls):
