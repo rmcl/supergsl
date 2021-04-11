@@ -112,7 +112,7 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
                     for child in cur_node.child_nodes()
                 ]
             except TypeError as error:
-                raise BackendException(
+                raise BackendError(
                     'Error executing pass "%s". While visiting node "%s", '
                     'occurred: %s' % (self, cur_node, error)
                 ) from error
@@ -128,7 +128,7 @@ class DepthFirstNodeFilteredPass(BreadthFirstNodeFilteredPass):
         ast = self.before_pass(ast)
 
         if not ast:
-            raise BackendException('before_pass of "%s" did not return an AST node object.' % self)
+            raise BackendError('before_pass of "%s" did not return an AST node object.' % self)
 
         node_stack : List[Tuple[Node, Optional[Node]]] = [(ast, None)]
         discovered = set()
@@ -148,6 +148,6 @@ class DepthFirstNodeFilteredPass(BreadthFirstNodeFilteredPass):
 
         ast = self.after_pass(ast)
         if not ast:
-            raise BackendException('after_pass of "%s" did not return an AST node object.' % self)
+            raise BackendError('after_pass of "%s" did not return an AST node object.' % self)
 
         return ast
