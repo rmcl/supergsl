@@ -11,7 +11,7 @@ class Node(object):
     def child_nodes(self) -> List['Node']:
         return []
 
-    def eval(self) -> Dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return {}
 
     def replace_child_node(self, cur_node, new_node):
@@ -26,7 +26,7 @@ class SlicePosition(Node):
         self.postfix = postfix
         self.approximate = approximate
 
-    def eval(self) -> Dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'node': 'SlicePosition',
             'index': self.index,
@@ -46,11 +46,11 @@ class Slice(Node):
         self.start = start
         self.end = end
 
-    def eval(self) -> Dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'node': 'Slice',
-            'start': self.start.eval(),
-            'end': self.end.eval()
+            'start': self.start.to_dict(),
+            'end': self.end.to_dict()
         }
 
     def get_slice_str(self):
@@ -69,12 +69,12 @@ class Part(Node):
         self.part : Optional[CorePart] = None
         self.parent_parts : List[CorePart] = []
 
-    def eval(self) -> Dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'node': 'Part',
             'identifier': self.identifier,
             'invert': self.invert,
-            'slice': self.slice.eval() if self.slice else None
+            'slice': self.slice.to_dict() if self.slice else None
         }
 
     def child_nodes(self) -> List[Node]:
@@ -94,7 +94,7 @@ class ImportIdentifier(Node):
         self.identifier : str = identifier
         self.alias : Optional[str] = alias
 
-    def eval(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'identifier': self.identifier,
             'alias': self.alias
@@ -114,12 +114,12 @@ class Import(Node):
         self.module = module_path
         self.imports = import_identifiers
 
-    def eval(self):
+    def to_dict(self):
         return {
             'node': 'Import',
             'module': self.module,
             'imports': [
-                progam_import.eval()
+                progam_import.to_dict()
                 for progam_import in self.imports
             ]
         }
@@ -143,11 +143,11 @@ class DefinitionList(Node):
     def add_definition(self, definition : Definition):
         self.definitions.append(definition)
 
-    def eval(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'node': 'DefinitionList',
             'items': [
-                definition.eval()
+                definition.to_dict()
                 for definition in self.definitions
             ]
         }
@@ -167,11 +167,11 @@ class Assembly(Node):
         self.parts : List[Part] = parts
         self.label : Optional[str] = label
 
-    def eval(self) -> Dict:
+    def to_dict(self) -> Dict:
         return {
             'node': 'Assembly',
             'parts': [
-                part.eval()
+                part.to_dict()
                 for part in self.parts
             ],
             'label': self.label
@@ -188,11 +188,11 @@ class FunctionInvocation(Node):
         self.params = params
         self.label = label
 
-    def eval(self) -> Dict:
+    def to_dict(self) -> Dict:
         return {
             'node': 'FunctionInvocation',
             'identifier': self.identifier,
-            'children': self.children.eval() if self.children else None,
+            'children': self.children.to_dict() if self.children else None,
             'params': self.params,
             'label': self.label
         }
@@ -212,7 +212,7 @@ class SequenceConstant(Node):
         self.sequence = sequence
         self.sequence_type = sequence_type
 
-    def eval(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'node': 'SequenceConstant',
             'type': self.sequence_type,
@@ -225,14 +225,14 @@ class Program(Node):
         self.definitions : DefinitionList = definitions
         self.imports : List[Import] = imports
 
-    def eval(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'node': 'Program',
             'imports': [
-                impor.eval()
+                impor.to_dict()
                 for impor in self.imports
             ],
-            'definitions': self.definitions.eval()
+            'definitions': self.definitions.to_dict()
         }
 
     def child_nodes(self) -> List[Node]:
