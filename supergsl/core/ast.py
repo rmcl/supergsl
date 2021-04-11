@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import cast, Dict, List, Optional, Any, Union
 
 from supergsl.core.parts.part import Part as CorePart
-from supergsl.core.types import SuperGSLType, Collection
+
 
 # rply has it's own style which does not conform to pylint's expectations.
 # pylint: disable=E1136
@@ -68,9 +68,6 @@ class Part(Node):
 
         self.part : Optional[CorePart] = None
         self.parent_parts : List[CorePart] = []
-
-    def eval(self) -> SuperGSLType:
-        return self.part
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -164,64 +161,6 @@ class DefinitionList(Node):
             new_node if node is old_node else node
             for node in self.definitions
         ]
-
-class TypeDeclaration(Node):
-    def __init__(self, identifier: str):
-        self.identifier : str = identifier
-
-    def to_dict(self) -> dict:
-        return {
-            'node': 'TypeDeclaration',
-            'identifier': self.identifier
-        }
-
-class VariableDeclaration(Node):
-    def __init__(self, identifier: str, type_declaration : Optional[TypeDeclaration], value : ListDeclaration):
-        self.identifier : str = identifier
-        self.type_declaration : Optional[TypeDeclaration] = type_declaration
-        self.value : ListDeclaration = value
-
-    def eval(self):
-        return AssignmentOp(self.identifier, self.value.eval())
-
-    def to_dict(self) -> dict:
-        return {
-            'node': 'VariableDeclaration',
-            'identifier': self.identifier,
-            'value': self.value.to_dict(),
-            'type_declaration': (
-                self.type_declaration.to_dict() if self.type_declaration else None
-            )
-        }
-
-    def child_nodes(self) -> List[Node]:
-        return [cast(Node, self.value)]
-
-
-class ListDeclaration(Node):
-    def __init__(self, items : List[Part]):
-        self.items = items
-
-    def eval(self) -> SuperGSLType:
-        if len(self.items) == 0:
-            raise Exception('Empty list not supported.')
-
-        return Collection([
-            item.eval()
-            for item in self.items
-        ])
-
-    def to_dict(self) -> dict:
-        return {
-            'node': 'ListDeclaration',
-            'items': [
-                part.to_dict()
-                for part in self.items
-            ]
-        }
-
-    def child_nodes(self) -> List[Node]:
-        return cast(List[Node], self.items)
 
 class Assembly(Node):
     def __init__(self, parts : List[Part], label : Optional[str] = None):

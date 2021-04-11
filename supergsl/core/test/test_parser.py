@@ -49,7 +49,7 @@ class ParserTestCase(unittest.TestCase):
         ast = self.parser.parse(tokens)
 
         self.assertEquals(type(ast), Program)
-        self.assertEqual(ast.eval(), {
+        self.assertEqual(ast.to_dict(), {
             'definitions': {
                 'items': [{
                     'label': None,
@@ -84,7 +84,7 @@ class ParserTestCase(unittest.TestCase):
         ast = self.parser.parse(tokens)
 
         self.assertEqual(type(ast), Program)
-        self.assertEqual(ast.eval(), {
+        self.assertEqual(ast.to_dict(), {
             'definitions': {
                 'node': 'DefinitionList',
                 'items': [{
@@ -117,7 +117,7 @@ class ParserTestCase(unittest.TestCase):
         ast = self.parser.parse(tokens)
 
         self.assertEqual(type(ast), Program)
-        self.assertEqual(ast.eval(), {
+        self.assertEqual(ast.to_dict(), {
             'definitions': {
                 'node': 'DefinitionList',
                 'items': [{
@@ -155,7 +155,7 @@ class ParserTestCase(unittest.TestCase):
         ast = self.parser.parse(tokens)
 
         self.assertEqual(type(ast), Program)
-        self.assertEqual(ast.eval(), {
+        self.assertEqual(ast.to_dict(), {
             'definitions': {
                 'node': 'DefinitionList',
                 'items': [{
@@ -193,7 +193,7 @@ class ParserTestCase(unittest.TestCase):
         ast = self.parser.parse(tokens)
 
         self.assertEqual(type(ast), Program)
-        self.assertEqual(ast.eval(), {
+        self.assertEqual(ast.to_dict(), {
             'definitions': {
                 'node': 'DefinitionList',
                 'items': [{
@@ -221,7 +221,7 @@ class ParserTestCase(unittest.TestCase):
         ast = self.parser.parse(tokens)
 
         self.assertEqual(type(ast), Program)
-        self.assertEqual(ast.eval(), {
+        self.assertEqual(ast.to_dict(), {
             'definitions': {
                 'node': 'DefinitionList',
                 'items': [{
