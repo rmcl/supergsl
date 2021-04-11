@@ -19,11 +19,11 @@ def get_logger(class_inst):
 
     return logging.getLogger(full_path)
 
-def logo():
+def get_logo():
     """Return the SuperGSL ASCII logo.
 
-    >>> from supergsl.utils import logo
-    >>> print(logo())
+    >>> from supergsl.utils import get_logo
+    >>> print(get_logo())
 
     """
     return textwrap.dedent(
@@ -36,3 +36,20 @@ def logo():
                      |_|
 
         """)
+
+
+def display_symbol_table(symbol_table, depth=0):
+    """Recursively display the table and all of its nested scopes."""
+    indent = ' ' * (depth*4)
+    print()
+    print(indent + 'Table: {} ----'.format(symbol_table.name))
+    for key, val in symbol_table._symbols.items():
+        print(indent + '    Key: {}, Type: {}'.format(
+            key,
+            type(val)
+        ))
+
+    for nested_scope in symbol_table._nested_scopes.values():
+        display_symbol_table(nested_scope, depth+1)
+
+    print(indent + '--- End Table: %s ----' % symbol_table.name)

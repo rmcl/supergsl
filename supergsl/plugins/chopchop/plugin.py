@@ -1,6 +1,8 @@
 from supergsl.core.function import SuperGSLFunction
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.ast import Assembly
+from supergsl.core.types import NucleotideSequence
+
 
 
 class ChopChopFunction(SuperGSLPlugin):
@@ -37,12 +39,12 @@ class ChopChopFunction(SuperGSLPlugin):
         self.invoke()
 
         print('CUT IT UP!')
-        return None
-
+        return NucleotideSequence('TTA')
 
 
 class ChopChopPlugin(SuperGSLPlugin):
 
     def register(self, symbol_table, compiler_settings):
         """Register functions provide by chopchop."""
-        symbol_table.register('chopchop', ChopChopFunction())
+        provider_table = symbol_table.nested_scope('imports')
+        provider_table.insert('chopchop', ChopChopFunction())
