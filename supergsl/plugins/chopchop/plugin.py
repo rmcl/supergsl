@@ -5,7 +5,7 @@ from supergsl.core.types import NucleotideSequence
 
 
 
-class ChopChopFunction(SuperGSLFunction):
+class ChopChopFunction(SuperGSLPlugin):
     """Run the ChopChop CLI tool.
 
     http://chopchop.cbu.uib.no/
@@ -36,6 +36,8 @@ class ChopChopFunction(SuperGSLFunction):
             from example import cut
             cut(HO, CAS9, S288C, results=5)
         """
+        self.invoke()
+
         print('CUT IT UP!')
         return NucleotideSequence('TTA')
 

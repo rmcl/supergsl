@@ -76,10 +76,11 @@ class InvokeFunctionPass(DepthFirstNodeFilteredPass):
         result_node = node.function.execute(args, node.get_definition_list())
         expected_return_type = node.function.get_return_type()
         if not isinstance(result_node, expected_return_type):
-            raise FunctionInvokeError('"%s" Return type does not match expectation. Expected: "%s", Actual: "%s"' % (
-                node.function,
-                expected_return_type,
-                type(result_node[0])
-            ))
+            raise FunctionInvokeError(
+                '"%s" Return type does not match expectation. Expected: "%s", Actual: "%s"' % (
+                    node.function,
+                    expected_return_type,
+                    type(result_node[0])
+                ))
 
         return result_node

@@ -2,13 +2,12 @@ from typing import List, Tuple, Optional, Dict, Callable
 from .ast import Node
 
 from supergsl.core.symbol_table import SymbolTable
+from supergsl.core.exception import BackendError
 
+#pylint: disable=E1136
 
 # Define a mypy type alias for node handler methods.
 ASTNodeHandlerMethod = Callable[[Node], Node]
-
-class BackendException(Exception):
-    pass
 
 
 class BackendPipelinePass(object):
@@ -18,6 +17,9 @@ class BackendPipelinePass(object):
     def __init__(self, symbol_table, allow_modification : bool = True):
         self.symbol_table = symbol_table
         self.allow_modification = allow_modification
+
+    def get_symbol_table(self):
+        return self.symbol_table
 
     def get_pass_name(self):
         if not self.name:
@@ -34,13 +36,13 @@ class BackendPipelinePass(object):
 
         if not self.allow_modification:
             if new_ast_node:
-                raise BackendException(
+                raise BackendError(
                     'Handler of "%s" should not modify the AST. Your node handlers should return `None`.' % (
                         handler
                     ))
         else:
             if not new_ast_node:
-                raise BackendException(
+                raise BackendError(
                     'Handler "%s" pass did not return an AST node object.' % handler)
 
         return new_ast_node or ast_node
@@ -77,7 +79,8 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
             result_node = self.call_handler_and_check_result(handler_method, node)
             if result_node != node:
                 if not parent_node:
-                    raise Exception('You cannot update the root Program AST node. Tried to update "%s"' % node)
+                    raise BackendError(
+                        'You cannot update the root Program AST node. Tried to update "%s"' % node)
 
                 parent_node.replace_child_node(node, result_node)
 
