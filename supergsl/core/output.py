@@ -36,7 +36,7 @@ class ASTPrintOutputProvider(OutputProvider):
         """Initialize the SBOL Document."""
 
         printer = pprint.PrettyPrinter(stream=self.stream)
-        printer.pprint(ast.eval())
+        printer.pprint(ast.to_dict())
 
 
 class PrimerOutputProvider(OutputProvider):
