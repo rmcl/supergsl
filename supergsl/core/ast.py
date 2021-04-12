@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import cast, Dict, List, Optional, Any, Union
 
 from supergsl.core.parts.part import Part as CorePart
+from supergsl.core.types import SuperGSLType
 
 
 # rply has it's own style which does not conform to pylint's expectations.
@@ -68,6 +69,9 @@ class SymbolReference(Node):
 
         self.part : Optional[CorePart] = None
         self.parent_parts : List[CorePart] = []
+
+    def eval(self) -> SuperGSLType:
+        return self.part
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -166,7 +170,7 @@ class TypeDeclaration(Node):
     def __init__(self, identifier: str):
         self.identifier : str = identifier
 
-    def eval(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'node': 'TypeDeclaration',
             'identifier': self.identifier
@@ -178,13 +182,13 @@ class VariableDeclaration(Node):
         self.type_declaration : Optional[TypeDeclaration] = type_declaration
         self.value : ListDeclaration = value
 
-    def eval(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'node': 'VariableDeclaration',
             'identifier': self.identifier,
-            'value': self.value.eval(),
+            'value': self.value.to_dict(),
             'type_declaration': (
-                self.type_declaration.eval() if self.type_declaration else None
+                self.type_declaration.to_dict() if self.type_declaration else None
             )
         }
 
@@ -196,11 +200,11 @@ class ListDeclaration(Node):
     def __init__(self, items : List[Part]):
         self.items = items
 
-    def eval(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'node': 'ListDeclaration',
             'items': [
-                part.eval()
+                part.to_dict()
                 for part in self.items
             ]
         }

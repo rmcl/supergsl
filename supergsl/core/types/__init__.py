@@ -8,6 +8,7 @@ from .builtin import (
     CodonTranslationTable,
     Primer,
     PrimerPair,
+    Collection,
 )
 
 TYPES = [
@@ -21,6 +22,7 @@ TYPES = [
     AminoAcidSequence,
     Primer,
     PrimerPair,
+    Collection,
 ]
 
 def resolve_type(type_name):

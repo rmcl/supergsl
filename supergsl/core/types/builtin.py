@@ -1,5 +1,6 @@
 from Bio.Seq import Seq
-from typing import List
+from typing import List, Type
+from collections import OrderedDict
 
 
 class SuperGSLType(object):
@@ -75,3 +76,29 @@ class PrimerPair(SuperGSLType):
     def reverse(self) -> Primer:
         """Return the reverse primer of the pair"""
         return self._reverse_primer
+
+
+class Collection(SuperGSLType):
+
+    def __init__(self, collection_type : Type[SuperGSLType]):
+        self._collection_type = collection_type
+        self._items = OrderedDict()
+
+    def add(self, item : SuperGSLType):
+        if not isinstance(item, self._collection_type):
+            raise Exception(
+                'Cannot add item "{}" to collection of type "{}"'.format(
+                    item.identifier,
+                    self._collection_type
+                ))
+
+        self._items[item.identifier] = item
+
+    def count(self):
+        return len(self._items)
+
+    def get_by_label(self, idx):
+        pass
+
+    def get_by_index(self, idx):
+        pass
