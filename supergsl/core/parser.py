@@ -199,25 +199,27 @@ class ParserBuilder(object):
                 x.extend(p[2])
             return x
 
-        @self.pg.production('assembly : part_list')
-        @self.pg.production('assembly : IDENTIFIER COLON part_list')
+        @self.pg.production('assembly : assembly_list')
+        @self.pg.production('assembly : IDENTIFIER COLON assembly_list')
         def assembly(state, p):
             if len(p) == 1:
                 return ast.Assembly(p[0])
             elif len(p) == 3:
                 return ast.Assembly(p[2], label=p[0].value)
 
-        @self.pg.production('part_list : part_list SEMICOLON part')
-        @self.pg.production('part_list : part')
-        @self.pg.production('part_list : part_list SEMICOLON nucleotide_constant')
-        @self.pg.production('part_list : nucleotide_constant')
-        def part_list(state, p):
+        @self.pg.production('assembly_list : assembly_list SEMICOLON assembly_list_item')
+        @self.pg.production('assembly_list : assembly_list_item')
+        def assembly_list(state, p):
             if len(p) == 1:
                 return [p[0]]
             elif len(p) == 3:
                 p[0].append(p[2])
                 return p[0]
 
+        @self.pg.production('assembly_list_item : symbol_reference')
+        @self.pg.production('assembly_list_item : nucleotide_constant')
+        def assembly_list_item(state, p):
+            return p[0]
 
         @self.pg.production('nucleotide_constant : FORWARD_SLASH IDENTIFIER FORWARD_SLASH')
         def nucleotide_constant(state, p):
@@ -227,20 +229,19 @@ class ParserBuilder(object):
         def protein_constant(state, p):
             return ast.SequenceConstant(p[1].value, UNAMBIGUOUS_PROTEIN_SEQUENCE)
 
-        @self.pg.production('part : part_identifier OPEN_BRACKET slice_index CLOSE_BRACKET')
-        @self.pg.production('part : part_identifier')
-        def part(state, p):
+        @self.pg.production('symbol_reference : symbol_identifier OPEN_BRACKET slice_index CLOSE_BRACKET')
+        @self.pg.production('symbol_reference : symbol_identifier')
+        def symbol_reference(state, p):
             identifier, invert = p[0]
             part_slice = None
             if len(p) == 4:
                 part_slice = p[2]
 
-            return ast.Part(identifier, part_slice, invert)
+            return ast.SymbolReference(identifier, part_slice, invert)
 
-
-        @self.pg.production('part_identifier : EXCLAMATION IDENTIFIER')
-        @self.pg.production('part_identifier : IDENTIFIER')
-        def part_identifier(state, p):
+        @self.pg.production('symbol_identifier : EXCLAMATION IDENTIFIER')
+        @self.pg.production('symbol_identifier : IDENTIFIER')
+        def symbol_identifier(state, p):
             if len(p) == 2:
                 invert = True
                 identifier = p[1].value

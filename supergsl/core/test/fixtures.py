@@ -1,7 +1,7 @@
 import mock
 import random
 from Bio.Seq import Seq
-from supergsl.core.ast import Assembly, Part as AstPart
+from supergsl.core.ast import Assembly, SymbolReference
 from supergsl.core.types import PrimerPair
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.parts import Part, SeqPosition
@@ -10,11 +10,11 @@ class SuperGSLCoreFixtures(object):
 
     def get_assembly_ast(self):
         ast_part_nodes = [
-            AstPart('uHO', None, False),
-            AstPart('pADH1', None, False),
-            AstPart('gERG10', None, False),
-            AstPart('tADH1', None, False),
-            AstPart('dHO', None, False),
+            SymbolReference('uHO', None, False),
+            SymbolReference('pADH1', None, False),
+            SymbolReference('gERG10', None, False),
+            SymbolReference('tADH1', None, False),
+            SymbolReference('dHO', None, False),
         ]
         assembly = Assembly(ast_part_nodes)
 

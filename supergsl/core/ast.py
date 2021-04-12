@@ -60,7 +60,7 @@ class Slice(Node):
         )
 
 
-class Part(Node):
+class SymbolReference(Node):
     def __init__(self, identifier : str, slice : Optional[Slice], invert : bool):
         self.identifier = identifier
         self.slice = slice
@@ -71,7 +71,7 @@ class Part(Node):
 
     def to_dict(self) -> Dict[str, Any]:
         return {
-            'node': 'Part',
+            'node': 'SymbolReference',
             'identifier': self.identifier,
             'invert': self.invert,
             'slice': self.slice.to_dict() if self.slice else None
@@ -209,8 +209,8 @@ class ListDeclaration(Node):
         return cast(List[Node], self.items)
 
 class Assembly(Node):
-    def __init__(self, parts : List[Part], label : Optional[str] = None):
-        self.parts : List[Part] = parts
+    def __init__(self, parts : List[SymbolReference], label : Optional[str] = None):
+        self.parts : List[SymbolReference] = parts
         self.label : Optional[str] = label
 
     def to_dict(self) -> Dict:
