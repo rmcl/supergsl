@@ -55,7 +55,7 @@ class ParserTestCase(unittest.TestCase):
                     'label': None,
                     'node': 'Assembly',
                     'parts': [{
-                        'node': 'Part',
+                        'node': 'SymbolReference',
                         'identifier': 'uHO',
                         'invert': False,
                         'slice': None
@@ -91,12 +91,12 @@ class ParserTestCase(unittest.TestCase):
                     'label': None,
                     'node': 'Assembly',
                     'parts': [{
-                        'node': 'Part',
+                        'node': 'SymbolReference',
                         'identifier': 'uHO',
                         'invert': False,
                         'slice': None
                     }, {
-                        'node': 'Part',
+                        'node': 'SymbolReference',
                         'identifier': 'pADH1',
                         'invert': False,
                         'slice': None
@@ -129,7 +129,7 @@ class ParserTestCase(unittest.TestCase):
                             'label': None,
                             'node': 'Assembly',
                             'parts': [{
-                                'node': 'Part',
+                                'node': 'SymbolReference',
                                 'identifier': 'uHO',
                                 'invert': False,
                                 'slice': None
@@ -167,7 +167,7 @@ class ParserTestCase(unittest.TestCase):
                             'label': None,
                             'node': 'Assembly',
                             'parts': [{
-                                'node': 'Part',
+                                'node': 'SymbolReference',
                                 'identifier': 'uHO',
                                 'invert': False,
                                 'slice': None
