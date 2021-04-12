@@ -163,8 +163,8 @@ class DefinitionList(Node):
         ]
 
 class Assembly(Node):
-    def __init__(self, parts : List[Part], label : Optional[str] = None):
-        self.parts : List[Part] = parts
+    def __init__(self, parts : List[SymbolReference], label : Optional[str] = None):
+        self.parts : List[SymbolReference] = parts
         self.label : Optional[str] = label
 
     def to_dict(self) -> Dict:
