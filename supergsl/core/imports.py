@@ -10,7 +10,7 @@ class ResolveImportsPass(BreadthFirstNodeFilteredPass):
     def get_node_handlers(self):
         return {
             'Import': self.visit_import_node,
-            'Part': self.visit_part_node,
+            'SymbolReference': self.visit_symbol_reference_node,
             'FunctionInvocation': self.visit_function_invoke_node,
         }
 
@@ -44,7 +44,7 @@ class ResolveImportsPass(BreadthFirstNodeFilteredPass):
         #node.expected_type = node.function.get_return_type()
         return node
 
-    def visit_part_node(self, node):
+    def visit_symbol_reference_node(self, node):
 
         part_symbol = self.symbol_table.lookup(node.identifier)
         if isinstance(part_symbol, LazyLoadedPart):

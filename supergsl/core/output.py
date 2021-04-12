@@ -89,7 +89,7 @@ class TestOutputProvider(OutputProvider):
     def get_node_handlers(self):
         return {
             'Assembly': self.visit_assembly_node,
-            'Part': self.visit_part_node,
+            'SymbolReference': self.visit_symbol_reference_node,
         }
 
     def before_pass(self, ast):
@@ -97,7 +97,9 @@ class TestOutputProvider(OutputProvider):
         self.parts = []
         self.assemblies = []
 
-    def visit_part_node(self, node):
+    def visit_symbol_reference_node(self, node):
+        # Todo(rmcl): make this more generic to handle symbol references other
+        # than parts.
         self.parts.append(node.part)
 
     def visit_assembly_node(self, node):

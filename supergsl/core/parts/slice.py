@@ -3,7 +3,7 @@ from supergsl.core.constants import (
     PART_SLICE_POSTFIX_START,
     PART_SLICE_POSTFIX_END
 )
-from supergsl.core.ast import SlicePosition, Part as AstPartNode
+from supergsl.core.ast import SlicePosition, SymbolReference
 from supergsl.core.parts import Part
 
 
@@ -11,7 +11,7 @@ class ResolvePartSlicePass(BreadthFirstNodeFilteredPass):
 
     def get_node_handlers(self):
         return {
-            'Part': self.visit_part_node,
+            'SymbolReference': self.visit_part_node,
         }
 
     def convert_slice_position_to_seq_position(
@@ -43,8 +43,8 @@ class ResolvePartSlicePass(BreadthFirstNodeFilteredPass):
         raise Exception('Unknown slice postfix: "%s"' % slice_position.postfix)
 
 
-    def visit_part_node(self, node: AstPartNode):
-        """Visit each `ast.Part` node and perform part slicing if neccessary."""
+    def visit_part_node(self, node: SymbolReference):
+        """Visit each `ast.SymbolReference` node and perform part slicing if neccessary."""
 
         if not node.slice:
             # This node does not require slicing. no slice has been specified.

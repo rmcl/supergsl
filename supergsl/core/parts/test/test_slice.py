@@ -4,7 +4,7 @@ from Bio.Seq import Seq
 from supergsl.core.ast import (
     Slice as AstSlice,
     SlicePosition as AstSlicePosition,
-    Part as AstPart
+    SymbolReference as AstSymbolReference
 )
 from supergsl.core.parts import Part, SeqPosition
 
@@ -65,7 +65,7 @@ class ResolvePartSlicePassTestCase(unittest.TestCase):
         end = AstSlicePosition(0, PART_SLICE_POSTFIX_END, True)
         slice = AstSlice(start, end)
 
-        part_node = AstPart('TEST', slice, False)
+        part_node = AstSymbolReference('TEST', slice, False)
         part_node.part = pre_slice_part
 
         rps = ResolvePartSlicePass(None)
