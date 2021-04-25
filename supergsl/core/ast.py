@@ -1,9 +1,9 @@
 from __future__ import annotations
-from typing import cast, Dict, List, Optional, Any, Union
+from typing import cast, Dict, List, Optional, Any, Union, Type, Tuple
 
-from supergsl.core.parts.part import Part as CorePart
-from supergsl.core.types import SuperGSLType
-
+from supergsl.core.types import SuperGSLType, Collection
+from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
+from supergsl.core.parts import Part
 
 # rply has it's own style which does not conform to pylint's expectations.
 # pylint: disable=E1136
@@ -20,6 +20,7 @@ class Node(object):
 
     def get_node_label(self):
         return str(self.__class__.__name__)
+
 
 class SlicePosition(Node):
     def __init__(self, index: int, postfix : str, approximate : bool):
@@ -67,11 +68,14 @@ class SymbolReference(Node):
         self.slice = slice
         self.invert = invert
 
-        self.part : Optional[CorePart] = None
-        self.parent_parts : List[CorePart] = []
+        self.referenced_object : Optional[SuperGSLType] = None
+
+    def set_referenced_object(self, ref_object : SuperGSLType):
+        """Set the SuperGSL object that has been associated with this symbol."""
+        self.referenced_object = ref_object
 
     def eval(self) -> SuperGSLType:
-        return self.part
+        self.referenced_object
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -137,7 +141,9 @@ class Import(Node):
 
 Definition = Union[
     'Assembly',
-    'FunctionInvocation'
+    'VariableDeclaration',
+    # Todo: Maybe re-enable FunctionInvoke as a definition here
+    # 'FunctionInvocation'
 ]
 
 class DefinitionList(Node):
@@ -182,6 +188,15 @@ class VariableDeclaration(Node):
         self.type_declaration : Optional[TypeDeclaration] = type_declaration
         self.value : ListDeclaration = value
 
+    def eval(self) -> Tuple[str, SuperGSLType]:
+        result = self.value.eval()
+
+        if self.type_declaration:
+            # Todo: Implement type declaration check
+            pass
+
+        return self.identifier, result
+
     def to_dict(self) -> dict:
         return {
             'node': 'VariableDeclaration',
@@ -200,6 +215,12 @@ class ListDeclaration(Node):
     def __init__(self, items : List[Part]):
         self.items = items
 
+    def eval(self) -> Collection:
+        return Collection([
+            part.eval()
+            for part in self.items
+        ])
+
     def to_dict(self) -> dict:
         return {
             'node': 'ListDeclaration',
@@ -216,6 +237,12 @@ class Assembly(Node):
     def __init__(self, parts : List[SymbolReference], label : Optional[str] = None):
         self.parts : List[SymbolReference] = parts
         self.label : Optional[str] = label
+
+    def eval(self) -> List[Part]:
+        return [
+            part.eval()
+            for part in self.parts
+        ]
 
     def to_dict(self) -> Dict:
         return {
@@ -237,6 +264,23 @@ class FunctionInvocation(Node):
         self.children = children
         self.params = params
         self.label = label
+
+        self.function_declaration : Optional[SuperGSLFunctionDeclaration] = None
+
+    def set_function_declaration(self, function_def : SuperGSLFunctionDeclaration):
+        self.function_declaration = function_def
+
+    def eval(self) -> SuperGSLFunction:
+        if not self.function_declaration:
+            raise Exception('Function has not been defined.')
+
+        return self.function_declaration.instantiate_function(
+            function_params=self.params,
+            children_nodes=[
+                child.eval()
+                for child in self.children.definitions
+            ]
+        )
 
     def to_dict(self) -> Dict:
         return {

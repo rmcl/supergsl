@@ -25,8 +25,7 @@ class CompilerPipeline(object):
         return cast(List[BackendPipelinePass], [
             ResolveImportsPass,
             ResolvePartSlicePass,
-            EvaluatePass,
-            #InvokeFunctionPass,
+            EvaluatePass
         ])
 
     def perform_frontend_compile(self, source_code):

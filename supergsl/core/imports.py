@@ -1,7 +1,8 @@
 from supergsl.core.backend import BreadthFirstNodeFilteredPass
 from supergsl.core.parts import Part, LazyLoadedPart
-from supergsl.core.function import SuperGSLFunction
+from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.exception import SuperGSLTypeError
+from supergsl.core.types import resolve_type
 
 
 class ResolveImportsPass(BreadthFirstNodeFilteredPass):
@@ -53,19 +54,20 @@ class ResolveImportsPass(BreadthFirstNodeFilteredPass):
         return node
 
     def visit_function_invoke_node(self, node):
-        node.function = self.symbol_table.lookup(node.identifier)
-        if not isinstance(node.function, SuperGSLFunction):
+        function_declaration = self.symbol_table.lookup(node.identifier)
+        if not isinstance(function_declaration, SuperGSLFunctionDeclaration):
             raise SuperGSLTypeError('{} is not of type Function. It is a "{}"'.format(
                 node.identifier,
-                type(node.function)
+                type(function_declaration)
             ))
+
+        node.set_function_declaration(function_declaration)
 
         ## TODO: DO TYPE CHECKING TO ASSERT THIS SYMBOL IS A FUNCTION
         #node.expected_type = node.function.get_return_type()
         return node
 
     def visit_symbol_reference_node(self, node):
-
         part_symbol = self.symbol_table.lookup(node.identifier)
         if isinstance(part_symbol, LazyLoadedPart):
             part_symbol = part_symbol.instantiate()
@@ -76,5 +78,5 @@ class ResolveImportsPass(BreadthFirstNodeFilteredPass):
                 type(part_symbol)
             ))
 
-        node.part = part_symbol
+        node.set_referenced_object(part_symbol)
         return node

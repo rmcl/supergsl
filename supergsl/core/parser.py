@@ -159,7 +159,7 @@ class ParserBuilder(object):
                 new_list.extend(p[2])
             return new_list
 
-        @self.pg.production('list_item : part')
+        @self.pg.production('list_item : symbol_reference')
         @self.pg.production('list_item : nucleotide_constant')
         @self.pg.production('list_item : amino_acid_constant')
         def list_item(state, p):

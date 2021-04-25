@@ -1,35 +1,21 @@
 """Define the mechanism of SuperGSLFunction and an AST pass to invoke those functions."""
-from typing import Optional, List
+from typing import Optional, List, Type
 from inspect import getdoc
 
 from supergsl.core.types import SuperGSLType
 from supergsl.core.provider import SuperGSLProvider
-from supergsl.core.symbol_table import SymbolTable
-from supergsl.core.backend import DepthFirstNodeFilteredPass
-from supergsl.core.exception import FunctionInvokeError, FunctionNotFoundError
+#from supergsl.core.symbol_table import SymbolTable
+#from supergsl.core.exception import FunctionInvokeError, FunctionNotFoundError
 
 #pylint: disable=E1136
 
-class SuperGSLFunction(SuperGSLProvider, SuperGSLType):
+
+class SuperGSLFunction(SuperGSLType):
     """Add a callable function to SuperGSL."""
 
     name: Optional[str] = None
     arguments : List[SuperGSLType] = []
     return_type : Optional[SuperGSLType] = None
-
-    def resolve_import(self,
-        symbol_table : SymbolTable,
-        identifier : str,
-        alias : str
-    ) -> None:
-        """Resolve the import of a function from this provider.
-
-        """
-        if identifier != self.name:
-            raise FunctionNotFoundError('Function {} not provided by {}'.format(
-                identifier, self))
-
-        symbol_table.insert(alias or identifier, self)
 
     @classmethod
     def get_name(cls):
@@ -57,6 +43,31 @@ class SuperGSLFunction(SuperGSLProvider, SuperGSLType):
         pass
 
 
+class SuperGSLFunctionDeclaration(SuperGSLProvider):
+    def __init__(self, function_class : Type[SuperGSLFunction], compiler_settings : dict):
+        self.function_class = function_class
+        self.compiler_settings = compiler_settings
+
+    def instantiate_function(self, function_params, children_nodes):
+        return self.function_class(self.compiler_settings, function_params, children_nodes)
+
+    '''
+    def resolve_import(self,
+        symbol_table : SymbolTable,
+        identifier : str,
+        alias : str
+    ) -> None:
+        """Resolve the import of a function from this provider.
+
+        """
+        if identifier != self.function_class.name:
+            raise FunctionNotFoundError('Function {} not provided by {}'.format(
+                identifier, self))
+
+        symbol_table.insert(alias or identifier, self)
+    '''
+
+'''
 class InvokeFunctionPass(DepthFirstNodeFilteredPass):
     """Traverse the AST and execute encountered SuperGSLFunctions."""
 
@@ -84,3 +95,4 @@ class InvokeFunctionPass(DepthFirstNodeFilteredPass):
                 ))
 
         return result_node
+'''
