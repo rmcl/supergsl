@@ -4,7 +4,6 @@ from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.plugin import PluginProvider
 from supergsl.core.imports import ResolveImportsPass
 from supergsl.core.backend import BackendPipelinePass
-from supergsl.core.parts.slice import ResolvePartSlicePass
 from supergsl.core.eval import EvaluatePass
 
 from .lexer import Lexer
@@ -24,7 +23,6 @@ class CompilerPipeline(object):
         """Return an ordered list of compiler backend passes to be executed."""
         return cast(List[BackendPipelinePass], [
             ResolveImportsPass,
-            ResolvePartSlicePass,
             EvaluatePass
         ])
 

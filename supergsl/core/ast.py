@@ -3,7 +3,6 @@ from typing import cast, Dict, List, Optional, Any, Union, Type, Tuple
 
 from supergsl.core.types import SuperGSLType, Collection
 from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
-from supergsl.core.parts import Part
 
 # rply has it's own style which does not conform to pylint's expectations.
 # pylint: disable=E1136
@@ -75,7 +74,7 @@ class SymbolReference(Node):
         self.referenced_object = ref_object
 
     def eval(self) -> SuperGSLType:
-        self.referenced_object
+        return self.referenced_object.eval(self)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -212,7 +211,7 @@ class VariableDeclaration(Node):
 
 
 class ListDeclaration(Node):
-    def __init__(self, items : List[Part]):
+    def __init__(self, items : List[SuperGSLType]):
         self.items = items
 
     def eval(self) -> Collection:
