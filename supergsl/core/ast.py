@@ -237,7 +237,7 @@ class Assembly(Node):
         self.parts : List[SymbolReference] = parts
         self.label : Optional[str] = label
 
-    def eval(self) -> List[Part]:
+    def eval(self) -> List[SymbolReference]:
         return [
             part.eval()
             for part in self.parts
@@ -258,7 +258,12 @@ class Assembly(Node):
 
 
 class FunctionInvocation(Node):
-    def __init__(self, identifier : str, children : DefinitionList, params : Optional[List[str]] = None, label : str = None):
+    def __init__(
+        self, identifier : str,
+        children : DefinitionList,
+        params : Optional[List[str]] = None,
+        label : str = None
+    ):
         self.identifier = identifier
         self.children = children
         self.params = params
@@ -273,13 +278,8 @@ class FunctionInvocation(Node):
         if not self.function_declaration:
             raise Exception('Function has not been defined.')
 
-        return self.function_declaration.instantiate_function(
-            function_params=self.params,
-            children_nodes=[
-                child.eval()
-                for child in self.children.definitions
-            ]
-        )
+        function_inst = self.function_declaration.eval(self)
+        return function_inst.execute()
 
     def to_dict(self) -> Dict:
         return {

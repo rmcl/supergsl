@@ -4,7 +4,6 @@ from inspect import getdoc
 
 from supergsl.core.types import SuperGSLType
 from supergsl.core.provider import SuperGSLProvider
-#from supergsl.core.symbol_table import SymbolTable
 #from supergsl.core.exception import FunctionInvokeError, FunctionNotFoundError
 
 #pylint: disable=E1136
@@ -14,8 +13,20 @@ class SuperGSLFunction(SuperGSLType):
     """Add a callable function to SuperGSL."""
 
     name: Optional[str] = None
-    arguments : List[SuperGSLType] = []
+    compiler_settings : dict = None
+    arguments : dict = []
+    children : List[SuperGSLType] = []
     return_type : Optional[SuperGSLType] = None
+
+    def __init__(
+        self,
+        compiler_settings : dict,
+        function_arguments : dict,
+        children : List[SuperGSLType]
+    ):
+        self.settings = compiler_settings
+        self.arguments = function_arguments
+        self.children = children
 
     @classmethod
     def get_name(cls):
@@ -38,9 +49,9 @@ class SuperGSLFunction(SuperGSLType):
         """Return the expected return value of the function."""
         return cls.return_type
 
-    def execute(self, sgsl_args, child_nodes=None):
+    def execute(self):
         """Called when the function is invoke in SuperGSL."""
-        pass
+        raise NotImplementedError('Subclass to implement.')
 
 
 class SuperGSLFunctionDeclaration(SuperGSLProvider):
@@ -48,24 +59,15 @@ class SuperGSLFunctionDeclaration(SuperGSLProvider):
         self.function_class = function_class
         self.compiler_settings = compiler_settings
 
-    def instantiate_function(self, function_params, children_nodes):
-        return self.function_class(self.compiler_settings, function_params, children_nodes)
-
-    '''
-    def resolve_import(self,
-        symbol_table : SymbolTable,
-        identifier : str,
-        alias : str
-    ) -> None:
-        """Resolve the import of a function from this provider.
-
-        """
-        if identifier != self.function_class.name:
-            raise FunctionNotFoundError('Function {} not provided by {}'.format(
-                identifier, self))
-
-        symbol_table.insert(alias or identifier, self)
-    '''
+    def eval(self, ast_node) -> SuperGSLFunction:
+        children : List[SuperGSLType] = [
+            child.eval()
+            for child in ast_node.children.definitions
+        ]
+        return self.function_class(
+            self.compiler_settings,
+            ast_node.params,
+            children)
 
 '''
 class InvokeFunctionPass(DepthFirstNodeFilteredPass):

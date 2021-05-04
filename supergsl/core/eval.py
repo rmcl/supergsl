@@ -22,10 +22,13 @@ class EvaluatePass(DepthFirstNodeFilteredPass):
 
     def before_pass(self, ast):
         #display_symbol_table(self.symbol_table)
+
+        self.unassigned_assembly_counter : int = 0
+        self.unassigned_symbol_counter : int = 0
         return ast
 
     def after_pass(self, ast):
-        #display_symbol_table(self.symbol_table)
+        display_symbol_table(self.symbol_table)
         return ast
 
     def visit_program_node(self, program_node : AstProgram):
@@ -40,8 +43,17 @@ class EvaluatePass(DepthFirstNodeFilteredPass):
             if node_type == 'VariableDeclaration':
                 identifier, value = definition_node.eval()
                 symbol_table.insert(identifier, value)
-            else:
-                print(definition_node.eval())
+            elif node_type == 'Assembly':
+                self.unassigned_symbol_counter += 1
+                result = definition_node.eval()
 
+                temp_identifer = 'assembly_%03d' % self.unassigned_symbol_counter
+                symbol_table.insert(temp_identifer, result)
+
+            elif node_type == 'FunctionInvocation':
+                self.unassigned_symbol_counter += 1
+                temp_identifer = 'func_%03d' % self.unassigned_symbol_counter
+                result = definition_node.eval()
+                symbol_table.insert(temp_identifer, result)
 
         return program_node

@@ -1,16 +1,7 @@
 from Bio.Seq import Seq
 from typing import List, Type
 from collections import OrderedDict
-
-
-class SuperGSLType(object):
-    """Base class defining types available in SuperGSL."""
-
-    def eval(self, ast_node : 'Node') -> 'SuperGSLType':
-        """Evaluate a object when it is used in a SuperGSL program."""
-        return self
-
-
+from .base import SuperGSLType
 
 class SuperGSLEnum(SuperGSLType):
     """Define a list of choices."""
