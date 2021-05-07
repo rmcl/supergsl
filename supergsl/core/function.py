@@ -60,10 +60,13 @@ class SuperGSLFunctionDeclaration(SuperGSLProvider):
         self.compiler_settings = compiler_settings
 
     def eval(self, ast_node) -> SuperGSLFunction:
-        children : List[SuperGSLType] = [
-            child.eval()
-            for child in ast_node.children.definitions
-        ]
+        children : List[SuperGSLType] = []
+        if ast_node.children:
+            children = [
+                child.eval()
+                for child in ast_node.children.definitions
+            ]
+
         return self.function_class(
             self.compiler_settings,
             ast_node.params,
