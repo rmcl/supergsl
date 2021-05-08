@@ -192,10 +192,10 @@ class ParserBuilder(object):
 
             return p[1]
 
-        @self.pg.production('function_parameters : IDENTIFIER')
-        @self.pg.production('function_parameters : IDENTIFIER COMMA function_parameters')
-        def params(state, p):
-            x = [p[0].value]
+        @self.pg.production('function_parameters : symbol_reference')
+        @self.pg.production('function_parameters : symbol_reference COMMA function_parameters')
+        def function_parameters(state, p):
+            x = [p[0]]
             if len(p) == 3:
                 x.extend(p[2])
             return x

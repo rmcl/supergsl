@@ -14,19 +14,11 @@ class SuperGSLFunction(SuperGSLType):
 
     name: Optional[str] = None
     compiler_settings : dict = None
-    arguments : dict = []
-    children : List[SuperGSLType] = []
+
     return_type : Optional[SuperGSLType] = None
 
-    def __init__(
-        self,
-        compiler_settings : dict,
-        function_arguments : dict,
-        children : List[SuperGSLType]
-    ):
+    def __init__(self, compiler_settings : dict):
         self.settings = compiler_settings
-        self.arguments = function_arguments
-        self.children = children
 
     @classmethod
     def get_name(cls):
@@ -49,7 +41,7 @@ class SuperGSLFunction(SuperGSLType):
         """Return the expected return value of the function."""
         return cls.return_type
 
-    def execute(self):
+    def execute(self, params : dict):
         """Called when the function is invoke in SuperGSL."""
         raise NotImplementedError('Subclass to implement.')
 
@@ -60,17 +52,7 @@ class SuperGSLFunctionDeclaration(SuperGSLProvider):
         self.compiler_settings = compiler_settings
 
     def eval(self, ast_node) -> SuperGSLFunction:
-        children : List[SuperGSLType] = []
-        if ast_node.children:
-            children = [
-                child.eval()
-                for child in ast_node.children.definitions
-            ]
-
-        return self.function_class(
-            self.compiler_settings,
-            ast_node.params,
-            children)
+        return self.function_class(self.compiler_settings)
 
 '''
 class InvokeFunctionPass(DepthFirstNodeFilteredPass):

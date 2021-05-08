@@ -69,12 +69,14 @@ class SymbolReference(Node):
 
         self.referenced_object : Optional[SuperGSLType] = None
 
-    def set_referenced_object(self, ref_object : SuperGSLType):
+    def set_table_reference(self, symbol_table, identifier):
         """Set the SuperGSL object that has been associated with this symbol."""
-        self.referenced_object = ref_object
+        self.symbol_table = symbol_table
+        self.symbol_table_identifier = identifier
 
     def eval(self) -> SuperGSLType:
-        return self.referenced_object.eval(self)
+        symbol = self.symbol_table.lookup(self.symbol_table_identifier)
+        return symbol.eval(self)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -279,26 +281,61 @@ class FunctionInvocation(Node):
             raise Exception('Function has not been defined.')
 
         function_inst = self.function_declaration.eval(self)
-        return function_inst.execute()
+
+        expected_return_type = function_inst.get_return_type()
+        print('expected', expected_return_type)
+
+        eval_params = {
+            'children': []
+        }
+
+        if self.params:
+            ## TODO: THIS IS NOT RIGHT YET!
+            print('params', self.params)
+            for idx in range(len(self.params)):
+                print(self.params[idx])
+                eval_params[idx] = self.params[idx].eval()
+
+        if self.children:
+            eval_params['children'] = [
+                child.eval()
+                for child in self.children.definitions
+            ]
+
+        function_result = function_inst.execute(eval_params)
+
+        if not isinstance(function_result, expected_return_type):
+            raise Exception('Unexpected function return type. Expected: %s, Actual: %s' % (
+                type(function_result),
+                expected_return_type))
+
+        return function_result
 
     def to_dict(self) -> Dict:
-        return {
+        results = {
             'node': 'FunctionInvocation',
             'identifier': self.identifier,
             'children': self.children.to_dict() if self.children else None,
-            'params': self.params,
             'label': self.label
         }
+
+        if self.params:
+            results['params'] = [
+                param.to_dict()
+                for param in self.params
+            ]
+        return results
 
     def get_definition_list(self):
         return self.children
 
     def child_nodes(self):
+        all_child_nodes = []
         if self.children:
-            return [self.children]
-        else:
-            return []
-
+            all_child_nodes.append(self.children)
+        if self.params:
+            all_child_nodes.extend(self.params)
+        return all_child_nodes
 
 class SequenceConstant(Node):
     def __init__(self, sequence : str, sequence_type : str):

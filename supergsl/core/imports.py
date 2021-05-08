@@ -10,6 +10,7 @@ class ResolveImportsPass(BreadthFirstNodeFilteredPass):
     def get_node_handlers(self):
         return {
             'Import': self.visit_import_node,
+            'VariableDeclaration': self.visit_variable_declaration_node,
             'SymbolReference': self.visit_symbol_reference_node,
             'FunctionInvocation': self.visit_function_invoke_node,
         }
@@ -49,8 +50,16 @@ class ResolveImportsPass(BreadthFirstNodeFilteredPass):
 
         return node
 
+    def visit_variable_declaration_node(self, node):
+        """Visit each variable declaration and define the variable."""
+        self.symbol_table.insert(node.identifier, None)
+        return node
+
     def visit_symbol_reference_node(self, node):
         """Visit an AST SymbolReference node and lookup the corresponding symbol."""
-        symbol = self.symbol_table.lookup(node.identifier)
-        node.set_referenced_object(symbol)
+
+        # Lookup the symbol to see if it has been defined.
+        self.symbol_table.lookup(node.identifier)
+
+        node.set_table_reference(self.symbol_table, node.identifier)
         return node

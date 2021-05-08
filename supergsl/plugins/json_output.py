@@ -1,7 +1,10 @@
-from supergsl.core.output import OutputProvider
+"""Implement a SuperGSL function to output Assemblies as JSON."""
 
+from supergsl.core.plugin import SuperGSLPlugin
+from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
+from supergsl.core.assembly import AssemblyList
 
-class JSONOutputPass(OutputProvider):
+class JSONOutput(SuperGSLFunction):
     """Generate JSON document containing a list of parts and assemblies.
 
     Expected contents of JSON document:
@@ -11,56 +14,62 @@ class JSONOutputPass(OutputProvider):
 
     """
 
-    name = 'json'
+    def get_arguments(self):
+        return [
+            ('filename', str),
+            ('assemblies', list)
+        ]
 
-    def get_node_handlers(self):
-        return {
-            'Assembly': self.visit_assembly_node,
-            'Part': self.visit_part_node,
-        }
+    def get_return_type(self):
+        return type(None)
 
-    def before_pass(self, ast):
-        """Initialize the SBOL Document."""
-        self.parts = set()
-        self.json_output = {
+    def execute(self, params : dict):
+        parts = set()
+        json_output = {
             'parts': [],
             'assemblies': []
         }
-        return ast
 
-    def after_pass(self, ast):
+        assembly_list : AssemblyList = params[0]
+        for assembly_idx, assembly in enumerate(assembly_list):
+            assembly_sequence = assembly.get_sequence()
+            assembly_parts = [
+                part.identifier
+                for part in assembly.get_required_parts()
+            ]
+
+            json_output['assemblies'].append({
+                'identifier': assembly_idx,
+                'parts': assembly_parts,
+                'sequence': str(assembly_sequence)
+            })
+
+            for part in assembly.get_required_parts():
+                parts.add(part)
+
+        for part in parts:
+            part_details = {
+                'name': part.identifier,
+                'sequence': str(part.get_sequence().seq),
+            }
+
+            if part.has_primers:
+                primers = part.get_extraction_primers()
+                primers.forward.get_sequence()
+                part_details['forward_primer'] = primers.forward.get_sequence()
+                part_details['reverse_primer'] = primers.reverse.get_sequence()
+
+            json_output['parts'].append(part_details)
+
         import pprint
-        pprint.pprint(self.json_output)
-        return ast
+        pprint.pprint(json_output)
 
-    def visit_part_node(self, node):
-        part = node.part
-        if part in self.parts:
-            return
 
-        self.parts.add(part)
-        self.json_output['parts'].append({
-            'name': part.name,
-            'slice_of_parent': str(part.slice_of_parent[0]),
-            'forward_primer': str(part.forward_primer.seq),
-            'reverse_primer': str(part.reverse_primer.seq),
-            'sequence': str(part.sequence.seq),
-        })
 
-    def visit_assembly_node(self, node):
-        assembly_parts = [
-            part.identifier
-            for part in node.parts
-        ]
+class JSONOutputPlugin(SuperGSLPlugin):
+    """Plugin stub to help register basic Assemblers."""
 
-        assembly_sequence = ''.join([
-            str(part.sequence.seq)
-            for part in node.parts
-        ])
-
-        assembly_idx = len(self.json_output['assemblies'])
-        self.json_output['assemblies'].append({
-            'identifier': assembly_idx,
-            'parts': assembly_parts,
-            'sequence': assembly_sequence
-        })
+    def register(self, symbol_table, compiler_settings):
+        """Register built in assemblers."""
+        symbol_table.insert('output_json',
+            SuperGSLFunctionDeclaration(JSONOutput, compiler_settings))
