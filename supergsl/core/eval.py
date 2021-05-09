@@ -41,8 +41,7 @@ class EvaluatePass(DepthFirstNodeFilteredPass):
             node_type = type(definition_node).__name__
 
             if node_type == 'VariableDeclaration':
-                identifier, value = definition_node.eval()
-                symbol_table.insert(identifier, value)
+                definition_node.eval()
             elif node_type == 'Assembly':
                 self.unassigned_symbol_counter += 1
                 result = definition_node.eval()

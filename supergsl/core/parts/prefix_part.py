@@ -15,7 +15,7 @@ from supergsl.core.constants import (
     SO_MRNA
 )
 
-from .part import Part, LazyLoadedPart
+from supergsl.core.types.part import Part, LazyLoadedPart
 from .provider import PartProvider
 
 

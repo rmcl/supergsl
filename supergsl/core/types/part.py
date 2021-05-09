@@ -4,10 +4,10 @@ from supergsl.core.constants import (
     PART_SLICE_POSTFIX_START,
     PART_SLICE_POSTFIX_END
 )
-from supergsl.core.types import (
-    SuperGSLType,
+from supergsl.core.types import SuperGSLType
+from supergsl.core.types.builtin import (
     NucleotideSequence,
-    PrimerPair
+    PrimerPair,
 )
 from supergsl.core.ast import SlicePosition
 

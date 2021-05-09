@@ -78,6 +78,9 @@ class Collection(SuperGSLType):
     def __init__(self, items : List[SuperGSLType]):
         self._items = items
 
+    def __iter__(self):
+        return iter(self._items)
+
     def count(self):
         return len(self._items)
 

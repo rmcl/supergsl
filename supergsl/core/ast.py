@@ -1,8 +1,19 @@
 from __future__ import annotations
-from typing import cast, Dict, List, Optional, Any, Union, Type, Tuple
+from typing import (
+    Dict,
+    List,
+    Optional,
+    Any,
+    Union,
+    Type,
+    Tuple,
+    cast,
+)
 
-from supergsl.core.types import SuperGSLType, Collection
+from supergsl.core.types import SuperGSLType
+from supergsl.core.types.builtin import Collection
 from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
+from supergsl.core.exception import FunctionInvokeError
 
 # rply has it's own style which does not conform to pylint's expectations.
 # pylint: disable=E1136
@@ -13,6 +24,9 @@ class Node(object):
 
     def to_dict(self) -> Dict[str, Any]:
         return {}
+
+    def eval(self) -> SuperGSLType:
+        raise NotImplementedError('%s does not implement its eval method.' % self)
 
     def replace_child_node(self, cur_node, new_node):
         raise NotImplementedError('"%s" does not implement `replace_child_node`.' % self)
@@ -189,14 +203,21 @@ class VariableDeclaration(Node):
         self.type_declaration : Optional[TypeDeclaration] = type_declaration
         self.value : ListDeclaration = value
 
-    def eval(self) -> Tuple[str, SuperGSLType]:
+    def set_table_reference(self, symbol_table, identifier):
+        self.symbol_table = symbol_table
+        self.symbol_table_identifier = identifier
+
+    def eval(self) -> SuperGSLType:
+        """Evaluate the declaration and inject the result into the symbol table."""
         result = self.value.eval()
 
         if self.type_declaration:
-            # Todo: Implement type declaration check
-            pass
+            raise NotImplementedError(
+                'Variable explicit type declarations are not currently supported.')
 
-        return self.identifier, result
+        self.symbol_table.insert(self.symbol_table_identifier, result)
+
+        return result
 
     def to_dict(self) -> dict:
         return {
@@ -213,21 +234,21 @@ class VariableDeclaration(Node):
 
 
 class ListDeclaration(Node):
-    def __init__(self, items : List[SuperGSLType]):
-        self.items = items
+    def __init__(self, items : List[Node]):
+        self.item_nodes : List[Node] = items
 
     def eval(self) -> Collection:
         return Collection([
-            part.eval()
-            for part in self.items
+            item_node.eval()
+            for item_node in self.item_nodes
         ])
 
     def to_dict(self) -> dict:
         return {
             'node': 'ListDeclaration',
             'items': [
-                part.to_dict()
-                for part in self.items
+                item_node.to_dict()
+                for item_node in self.item_nodes
             ]
         }
 
@@ -236,34 +257,35 @@ class ListDeclaration(Node):
 
 class Assembly(Node):
     def __init__(self, parts : List[SymbolReference], label : Optional[str] = None):
-        self.parts : List[SymbolReference] = parts
+        self.symbol_references : List[SymbolReference] = parts
         self.label : Optional[str] = label
 
-    def eval(self) -> List[SymbolReference]:
+    def eval(self) -> List[SuperGSLType]:
+        """Evaluate the Assembly node by traversing eval'ing all the child symbol references."""
         return [
-            part.eval()
-            for part in self.parts
+            symbol_reference.eval()
+            for symbol_reference in self.symbol_references
         ]
 
     def to_dict(self) -> Dict:
         return {
             'node': 'Assembly',
             'parts': [
-                part.to_dict()
-                for part in self.parts
+                symbol_reference.to_dict()
+                for symbol_reference in self.symbol_references
             ],
             'label': self.label
         }
 
     def child_nodes(self) -> List[Node]:
-        return cast(List[Node], self.parts)
+        return cast(List[Node], self.symbol_references)
 
 
 class FunctionInvocation(Node):
     def __init__(
         self, identifier : str,
         children : DefinitionList,
-        params : Optional[List[str]] = None,
+        params : Optional[List[Any]] = None,
         label : str = None
     ):
         self.identifier = identifier
@@ -274,9 +296,11 @@ class FunctionInvocation(Node):
         self.function_declaration : Optional[SuperGSLFunctionDeclaration] = None
 
     def set_function_declaration(self, function_def : SuperGSLFunctionDeclaration):
+        """Define the function that should be executed."""
         self.function_declaration = function_def
 
     def eval(self) -> SuperGSLFunction:
+        """Evaluate this node by initializing and executing a SuperGSLFunction."""
         if not self.function_declaration:
             raise Exception('Function has not been defined.')
 
@@ -285,13 +309,13 @@ class FunctionInvocation(Node):
         expected_return_type = function_inst.get_return_type()
         print('expected', expected_return_type)
 
-        eval_params = {
+        eval_params : Dict[str, Any] = {
             'children': []
         }
 
         if self.params:
-            ## TODO: THIS IS NOT RIGHT YET!
-            print('params', self.params)
+            # TODO: Right now we are using positional indexes for arguments in a
+            # rather inelegant way. Reflect on this and attempt to improve.
             for idx in range(len(self.params)):
                 print(self.params[idx])
                 eval_params[idx] = self.params[idx].eval()
@@ -303,11 +327,13 @@ class FunctionInvocation(Node):
             ]
 
         function_result = function_inst.execute(eval_params)
-
         if not isinstance(function_result, expected_return_type):
-            raise Exception('Unexpected function return type. Expected: %s, Actual: %s' % (
-                type(function_result),
-                expected_return_type))
+            raise FunctionInvokeError(
+                '"%s" Return type does not match expectation. Expected: "%s", Actual: "%s"' % (
+                    self.function_inst,
+                    expected_return_type,
+                    type(function_result)
+                ))
 
         return function_result
 
@@ -325,9 +351,6 @@ class FunctionInvocation(Node):
                 for param in self.params
             ]
         return results
-
-    def get_definition_list(self):
-        return self.children
 
     def child_nodes(self):
         all_child_nodes = []

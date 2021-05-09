@@ -3,7 +3,10 @@ from typing import List
 from Bio import SeqIO
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.exception import PartNotFoundError
-from supergsl.core.parts import PartProvider, Part, SeqPosition
+from supergsl.core.parts import PartProvider
+from supergsl.core.types.part import Part
+from supergsl.core.types.position import SeqPosition
+
 
 
 class GenBankFilePartProvider(PartProvider):

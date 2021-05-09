@@ -1,5 +1,5 @@
 """Define the mechanism of SuperGSLFunction and an AST pass to invoke those functions."""
-from typing import Optional, List, Type
+from typing import Optional, List, Type, Dict
 from inspect import getdoc
 
 from supergsl.core.types import SuperGSLType
@@ -13,7 +13,7 @@ class SuperGSLFunction(SuperGSLType):
     """Add a callable function to SuperGSL."""
 
     name: Optional[str] = None
-    compiler_settings : dict = None
+    compiler_settings : Optional[Dict] = None
 
     return_type : Optional[SuperGSLType] = None
 

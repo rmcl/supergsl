@@ -1,5 +1,4 @@
 from supergsl.core.backend import BreadthFirstNodeFilteredPass
-from supergsl.core.parts import Part, LazyLoadedPart
 from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.exception import SuperGSLTypeError
 
@@ -52,6 +51,9 @@ class ResolveImportsPass(BreadthFirstNodeFilteredPass):
 
     def visit_variable_declaration_node(self, node):
         """Visit each variable declaration and define the variable."""
+        node.set_table_reference(self.symbol_table, node.identifier)
+
+        # Set a value to the symbol table so we know the variable is declared.
         self.symbol_table.insert(node.identifier, None)
         return node
 
