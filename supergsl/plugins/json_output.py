@@ -1,5 +1,7 @@
 """Implement a SuperGSL function to output Assemblies as JSON."""
-
+from typing import Dict, List, Tuple, Type, Any
+from pprint import pprint
+from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
 from supergsl.core.assembly import AssemblyList
@@ -14,18 +16,18 @@ class JSONOutput(SuperGSLFunction):
 
     """
 
-    def get_arguments(self):
+    return_type = None
+
+    @classmethod
+    def get_arguments(cls) -> List[Tuple[str, Type]]:
         return [
             ('filename', str),
             ('assemblies', list)
         ]
 
-    def get_return_type(self):
-        return type(None)
-
     def execute(self, params : dict):
         parts = set()
-        json_output = {
+        json_output : Dict[str, Any] = {
             'parts': [],
             'assemblies': []
         }
@@ -61,15 +63,16 @@ class JSONOutput(SuperGSLFunction):
 
             json_output['parts'].append(part_details)
 
-        import pprint
-        pprint.pprint(json_output)
+        pprint(json_output)
 
 
 
 class JSONOutputPlugin(SuperGSLPlugin):
     """Plugin stub to help register basic Assemblers."""
 
-    def register(self, symbol_table, compiler_settings):
+    def register(self, compiler_settings : dict):
         """Register built in assemblers."""
-        symbol_table.insert('output_json',
+        self.register_function(
+            'json',
+            'output_json',
             SuperGSLFunctionDeclaration(JSONOutput, compiler_settings))

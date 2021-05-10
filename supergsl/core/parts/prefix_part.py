@@ -15,6 +15,7 @@ from supergsl.core.constants import (
     SO_MRNA
 )
 
+from supergsl.core.ast import SymbolReference
 from supergsl.core.types.part import Part, LazyLoadedPart
 from .provider import PartProvider
 
@@ -56,7 +57,7 @@ class PrefixedSliceLazyLoadedPart(LazyLoadedPart):
         self.parent_part = parent_part
         self.part_prefix = prefix
 
-    def eval(self, ast_node: 'SymbolReference') -> Part:
+    def eval(self, ast_node: SymbolReference) -> Part:
         return self.parent_part.get_prefixed_part(
             self.identifier,
             self.part_prefix)

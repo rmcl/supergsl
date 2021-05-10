@@ -27,27 +27,6 @@ class BackendPipelinePass(object):
 
         return self.name
 
-    def call_handler_and_check_result(self, handler, ast_node):
-        """Call handler method on an AST node and check to if the node was modified.
-
-        Apply rules based on the initialization of the pipeline.
-        """
-        new_ast_node = handler(ast_node)
-
-        if not self.allow_modification:
-            if new_ast_node:
-                raise BackendError(
-                    'Handler of "%s" should not modify the AST. Your node handlers should return `None`.' % (
-                        handler
-                    ))
-        else:
-            if not new_ast_node:
-                raise BackendError(
-                    'Handler "%s" pass did not return an AST node object.' % handler)
-
-        return new_ast_node or ast_node
-
-
     def perform(self, ast : Node) -> Node:
         raise NotImplementedError('Must subclass and implement perform')
 
@@ -97,6 +76,26 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
     def after_pass(self, ast : Node) -> Node:
         return ast
 
+    def call_handler_and_check_result(self, handler, ast_node):
+        """Call handler method on an AST node and check to if the node was modified.
+
+        Apply rules based on the initialization of the pipeline.
+        """
+        new_ast_node = handler(ast_node)
+
+        if not self.allow_modification:
+            if new_ast_node:
+                raise BackendError(
+                    'Handler of "%s" should not modify the AST. Your node handlers should return `None`.' % (
+                        handler
+                    ))
+        else:
+            if not new_ast_node:
+                raise BackendError(
+                    'Handler "%s" pass did not return an AST node object.' % handler)
+
+        return new_ast_node or ast_node
+
     def perform(self, ast : Node) -> Node:
         ast = self.call_handler_and_check_result(self.before_pass, ast)
 
@@ -106,6 +105,7 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
 
             self.visit(cur_node, cur_node_parent)
 
+            print('VISIT', cur_node, type(cur_node))
             try:
                 node_visit_queue += [
                     (child, cur_node)

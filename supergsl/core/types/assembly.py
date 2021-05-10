@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from Bio.Seq import Seq
 
 from supergsl.core.types import SuperGSLType
@@ -11,6 +11,9 @@ class AssemblyDeclaration(SuperGSLType):
     def __init__(self, label : Optional[str], parts : List[Part]):
         self.label : Optional[str] = label
         self.parts : List[Part] = parts
+
+    def get_parts(self):
+        return self.parts
 
 class Assembly(SuperGSLType):
     """Store an assembled construct."""
@@ -38,7 +41,7 @@ class Assembly(SuperGSLType):
 
 class AssemblyList(SuperGSLType):
     """A collection of Assemblies."""
-    def __init__(self, assemblies : Assembly):
+    def __init__(self, assemblies : List[Assembly]):
         self.assemblies = assemblies
 
     def __iter__(self):

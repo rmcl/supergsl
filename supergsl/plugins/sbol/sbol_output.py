@@ -1,4 +1,7 @@
-from supergsl.core.output import OutputProvider
+from supergsl.core.plugin import SuperGSLPlugin
+from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
+from supergsl.core.assembly import AssemblyList
+
 from sbol2 import (
     ComponentDefinition,
     Config,
@@ -9,29 +12,19 @@ from sbol2 import (
 )
 
 
-class SBOLOutputPass(OutputProvider):
+class SBOLOutput(SuperGSLFunction):
     """Generate SBOL document containing the assemblies."""
 
     name = 'sbol'
 
-    def get_node_handlers(self):
-        return {
-            'Assembly': self.visit_assembly_node,
-        }
+    def get_arguments(self):
+        return [
+            ('filename', str),
+            ('assemblies', list)
+        ]
 
-    def before_pass(self, ast):
-        """Initialize the SBOL Document."""
-
-        setHomespace('http://sbols.org/SuperGSL_Example/')
-        Config.setOption('sbol_compliant_uris', True)
-        Config.setOption('sbol_typed_uris', True)
-
-        self.sbol_doc = Document()
-        self.assembly_count = 0
-
-
-    def after_pass(self, ast):
-        self.sbol_doc.write('output_sbol.xml')
+    def get_return_type(self):
+        return type(None)
 
     def sanitize_identifier(self, identifier):
         """Sanitize SuperGSL Identifiers to conform to identifiers in the SBOL spec."""
@@ -40,7 +33,7 @@ class SBOLOutputPass(OutputProvider):
             identifier = identifier.replace(c, '_')
         return identifier
 
-    def visit_assembly_node(self, node):
+    def handle_assembly(self, assembly):
         """Add each assembly to the SBOL Document."""
         self.assembly_count += 1
 
@@ -65,3 +58,28 @@ class SBOLOutputPass(OutputProvider):
 
         assembly.assemblePrimaryStructure(part_components)
         assembly.compile()
+
+    def execute(self, params : dict):
+        """Initialize the SBOL Document."""
+
+        setHomespace('http://sbols.org/SuperGSL_Example/')
+        Config.setOption('sbol_compliant_uris', True)
+        Config.setOption('sbol_typed_uris', True)
+
+        self.sbol_doc = Document()
+        self.assembly_count = 0
+
+        assembly_list : AssemblyList = params[0]
+        for assembly in assembly_list:
+            self.handle_assembly(assembly)
+
+        self.sbol_doc.write('output_sbol.xml')
+
+
+class SBOLPlugin(SuperGSLPlugin):
+    """Plugin stub to register SBOL related functions."""
+
+    def register(self, symbol_table, compiler_settings):
+        """Register SBOL functions."""
+        symbol_table.insert('save_sbol',
+            SuperGSLFunctionDeclaration(SBOLOutput, compiler_settings))

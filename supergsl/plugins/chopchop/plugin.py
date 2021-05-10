@@ -1,7 +1,7 @@
 from supergsl.core.function import SuperGSLFunction
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.ast import Assembly
-from supergsl.core.types import NucleotideSequence
+from supergsl.core.types.builtin import NucleotideSequence
 
 
 

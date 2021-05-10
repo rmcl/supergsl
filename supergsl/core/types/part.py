@@ -9,7 +9,7 @@ from supergsl.core.types.builtin import (
     NucleotideSequence,
     PrimerPair,
 )
-from supergsl.core.ast import SlicePosition
+from supergsl.core.ast import SlicePosition, SymbolReference
 
 
 class Part(NucleotideSequence):
@@ -127,7 +127,7 @@ class Part(NucleotideSequence):
         raise Exception('Unknown slice postfix: "%s"' % slice_position.postfix)
 
 
-    def eval(self, ast_node: 'SymbolReference'):
+    def eval(self, ast_node: SymbolReference):
         """Evaluate this part in the context of `ast.SymbolReference` node
         which is part of a SuperGSL Program"""
 
@@ -135,25 +135,20 @@ class Part(NucleotideSequence):
             # This node does not require slicing. no slice has been specified.
             return self
 
-        if not ast_node.part:
-            raise Exception('Node part not defined. Previous import pass failed.')
-
-        parent_part = ast_node.part
-
-        start = self.convert_slice_position_to_seq_position(parent_part, ast_node.slice.start)
-        end = self.convert_slice_position_to_seq_position(parent_part, ast_node.slice.end)
+        start = self.convert_slice_position_to_seq_position(self, ast_node.slice.start)
+        end = self.convert_slice_position_to_seq_position(self, ast_node.slice.end)
 
         child_identifier = '%s[%s]' % (
             ast_node.identifier,
             ast_node.slice.get_slice_str()
         )
-        ast_node.part = parent_part.get_child_part_by_slice(
+        new_part = self.get_child_part_by_slice(
             child_identifier, start, end)
 
         if ast_node.invert:
             raise NotImplementedError('Inverted parts not implemented yet!')
 
-        return ast_node.part
+        return new_part
 
 
 class LazyLoadedPart(SuperGSLType):

@@ -5,15 +5,8 @@ from typing import (
     Optional,
     Any,
     Union,
-    Type,
-    Tuple,
     cast,
 )
-
-from supergsl.core.types import SuperGSLType
-from supergsl.core.types.builtin import Collection
-from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
-from supergsl.core.exception import FunctionInvokeError
 
 # rply has it's own style which does not conform to pylint's expectations.
 # pylint: disable=E1136
@@ -24,9 +17,6 @@ class Node(object):
 
     def to_dict(self) -> Dict[str, Any]:
         return {}
-
-    def eval(self) -> SuperGSLType:
-        raise NotImplementedError('%s does not implement its eval method.' % self)
 
     def replace_child_node(self, cur_node, new_node):
         raise NotImplementedError('"%s" does not implement `replace_child_node`.' % self)
@@ -80,17 +70,6 @@ class SymbolReference(Node):
         self.identifier = identifier
         self.slice = slice
         self.invert = invert
-
-        self.referenced_object : Optional[SuperGSLType] = None
-
-    def set_table_reference(self, symbol_table, identifier):
-        """Set the SuperGSL object that has been associated with this symbol."""
-        self.symbol_table = symbol_table
-        self.symbol_table_identifier = identifier
-
-    def eval(self) -> SuperGSLType:
-        symbol = self.symbol_table.lookup(self.symbol_table_identifier)
-        return symbol.eval(self)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -198,26 +177,15 @@ class TypeDeclaration(Node):
         }
 
 class VariableDeclaration(Node):
-    def __init__(self, identifier: str, type_declaration : Optional[TypeDeclaration], value : ListDeclaration):
+    def __init__(
+        self,
+        identifier: str,
+        type_declaration : Optional[TypeDeclaration],
+        value : ListDeclaration
+    ):
         self.identifier : str = identifier
         self.type_declaration : Optional[TypeDeclaration] = type_declaration
         self.value : ListDeclaration = value
-
-    def set_table_reference(self, symbol_table, identifier):
-        self.symbol_table = symbol_table
-        self.symbol_table_identifier = identifier
-
-    def eval(self) -> SuperGSLType:
-        """Evaluate the declaration and inject the result into the symbol table."""
-        result = self.value.eval()
-
-        if self.type_declaration:
-            raise NotImplementedError(
-                'Variable explicit type declarations are not currently supported.')
-
-        self.symbol_table.insert(self.symbol_table_identifier, result)
-
-        return result
 
     def to_dict(self) -> dict:
         return {
@@ -237,12 +205,6 @@ class ListDeclaration(Node):
     def __init__(self, items : List[Node]):
         self.item_nodes : List[Node] = items
 
-    def eval(self) -> Collection:
-        return Collection([
-            item_node.eval()
-            for item_node in self.item_nodes
-        ])
-
     def to_dict(self) -> dict:
         return {
             'node': 'ListDeclaration',
@@ -253,19 +215,13 @@ class ListDeclaration(Node):
         }
 
     def child_nodes(self) -> List[Node]:
-        return cast(List[Node], self.items)
+        return self.item_nodes
+
 
 class Assembly(Node):
     def __init__(self, parts : List[SymbolReference], label : Optional[str] = None):
         self.symbol_references : List[SymbolReference] = parts
         self.label : Optional[str] = label
-
-    def eval(self) -> List[SuperGSLType]:
-        """Evaluate the Assembly node by traversing eval'ing all the child symbol references."""
-        return [
-            symbol_reference.eval()
-            for symbol_reference in self.symbol_references
-        ]
 
     def to_dict(self) -> Dict:
         return {
@@ -293,55 +249,12 @@ class FunctionInvocation(Node):
         self.params = params
         self.label = label
 
-        self.function_declaration : Optional[SuperGSLFunctionDeclaration] = None
-
-    def set_function_declaration(self, function_def : SuperGSLFunctionDeclaration):
-        """Define the function that should be executed."""
-        self.function_declaration = function_def
-
-    def eval(self) -> SuperGSLFunction:
-        """Evaluate this node by initializing and executing a SuperGSLFunction."""
-        if not self.function_declaration:
-            raise Exception('Function has not been defined.')
-
-        function_inst = self.function_declaration.eval(self)
-
-        expected_return_type = function_inst.get_return_type()
-        print('expected', expected_return_type)
-
-        eval_params : Dict[str, Any] = {
-            'children': []
-        }
-
-        if self.params:
-            # TODO: Right now we are using positional indexes for arguments in a
-            # rather inelegant way. Reflect on this and attempt to improve.
-            for idx in range(len(self.params)):
-                print(self.params[idx])
-                eval_params[idx] = self.params[idx].eval()
-
-        if self.children:
-            eval_params['children'] = [
-                child.eval()
-                for child in self.children.definitions
-            ]
-
-        function_result = function_inst.execute(eval_params)
-        if not isinstance(function_result, expected_return_type):
-            raise FunctionInvokeError(
-                '"%s" Return type does not match expectation. Expected: "%s", Actual: "%s"' % (
-                    self.function_inst,
-                    expected_return_type,
-                    type(function_result)
-                ))
-
-        return function_result
-
     def to_dict(self) -> Dict:
-        results = {
+        results : Dict[str, Any] = {
             'node': 'FunctionInvocation',
             'identifier': self.identifier,
             'children': self.children.to_dict() if self.children else None,
+            'params': None,
             'label': self.label
         }
 

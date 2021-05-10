@@ -2,7 +2,6 @@ from typing import List, cast
 from supergsl.core.symbol_table import SymbolTable
 #from supergsl.core.function import InvokeFunctionPass
 from supergsl.core.plugin import PluginProvider
-from supergsl.core.imports import ResolveImportsPass
 from supergsl.core.backend import BackendPipelinePass
 from supergsl.core.eval import EvaluatePass
 
@@ -22,7 +21,6 @@ class CompilerPipeline(object):
     def get_backend_passes(self) -> List[BackendPipelinePass]:
         """Return an ordered list of compiler backend passes to be executed."""
         return cast(List[BackendPipelinePass], [
-            ResolveImportsPass,
             EvaluatePass
         ])
 

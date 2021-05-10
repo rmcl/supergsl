@@ -1,8 +1,8 @@
 from unittest import TestCase
 from Bio import SeqIO
 from supergsl.core.pipeline import CompilerPipeline
-from supergsl.core.output import TestOutputProvider
 from supergsl.test.fixtures import SuperGSLIntegrationFixtures
+from supergsl.test.fixtures.utils import TestOutputAstPass
 
 class SuperGSLIntegrationTestCases(TestCase):
 
@@ -18,7 +18,7 @@ class SuperGSLIntegrationTestCases(TestCase):
         pipeline = CompilerPipeline(self.compiler_settings)
         ast = pipeline.compile(source_code)
 
-        output = TestOutputProvider(None, False)
+        output = TestOutputAstPass(None, False)
         output.perform(ast)
 
         return output
