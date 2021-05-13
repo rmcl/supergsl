@@ -4,6 +4,7 @@ import inspect
 import importlib
 from typing import Dict
 from supergsl.core.exception import ConfigurationError
+from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.symbol_table import SymbolTable
 
 
@@ -39,7 +40,7 @@ class SuperGSLPlugin(object):
 
     def __init__(self, symbol_table : SymbolTable, compiler_settings : dict):
         self.symbol_table = symbol_table
-        self.functions = {}
+        self.functions : Dict[str, SuperGSLFunctionDeclaration] = {}
         self.register(compiler_settings)
 
     def resolve_import(
@@ -52,14 +53,19 @@ class SuperGSLPlugin(object):
         symbol_table.insert(alias or identifier, self.functions[identifier])
 
 
-    def register_function(self, import_path, function_name, function_declaration):
+    def register_function(
+        self,
+        import_path : str,
+        function_name : str,
+        function_declaration : SuperGSLFunctionDeclaration
+    ):
+        """Register a function making it available for import in SuperGSL."""
         nested_symbol_table = self.symbol_table.nested_scope('imports')
         self.functions[function_name] = function_declaration
         nested_symbol_table.insert(import_path, self)
 
 
-
-    def register(self, compiler_settings):
+    def register(self, compiler_settings : dict):
         """Register Functions, enums, etc that the plugin provides.
 
         Example: symbol_table.register(import_path, mod_class)

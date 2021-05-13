@@ -47,6 +47,9 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
         handlers : Dict[Optional[str], ASTNodeHandlerMethod] = self.get_node_handlers()
         handler_method : Optional[ASTNodeHandlerMethod] = None
 
+        if not node:
+            raise BackendError('Past "{}" was passed a null AST.'.format(self.get_pass_name()))
+
         node_type : str = type(node).__name__
         handler_method = handlers.get(node_type, None)
         if not handler_method:
@@ -105,17 +108,10 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
 
             self.visit(cur_node, cur_node_parent)
 
-            print('VISIT', cur_node, type(cur_node))
-            try:
-                node_visit_queue += [
-                    (child, cur_node)
-                    for child in cur_node.child_nodes()
-                ]
-            except TypeError as error:
-                raise BackendError(
-                    'Error executing pass "%s". While visiting node "%s", '
-                    'occurred: %s' % (self, cur_node, error)
-                ) from error
+            child_nodes = cur_node.child_nodes()
+            if child_nodes:
+                for child in cur_node.child_nodes():
+                    node_visit_queue.append((child, cur_node))
 
         ast = self.call_handler_and_check_result(self.after_pass, ast)
         return ast

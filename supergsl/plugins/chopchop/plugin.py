@@ -1,11 +1,11 @@
-from supergsl.core.function import SuperGSLFunction
+from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.ast import Assembly
 from supergsl.core.types.builtin import NucleotideSequence
 
 
 
-class ChopChopFunction(SuperGSLPlugin):
+class ChopChopFunction(SuperGSLFunction):
     """Run the ChopChop CLI tool.
 
     http://chopchop.cbu.uib.no/
@@ -44,7 +44,9 @@ class ChopChopFunction(SuperGSLPlugin):
 
 class ChopChopPlugin(SuperGSLPlugin):
 
-    def register(self, symbol_table, compiler_settings):
+    def register(self, compiler_settings : dict):
         """Register functions provide by chopchop."""
-        provider_table = symbol_table.nested_scope('imports')
-        provider_table.insert('chopchop', ChopChopFunction())
+        self.register_function(
+            'chopchop',
+            'chopchop',
+            SuperGSLFunctionDeclaration(ChopChopFunction, compiler_settings))

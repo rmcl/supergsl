@@ -49,5 +49,5 @@ class SuperGSLFunctionDeclaration(SuperGSLType):
         self.function_class = function_class
         self.compiler_settings = compiler_settings
 
-    def eval(self, ast_node) -> SuperGSLFunction:
+    def eval(self) -> SuperGSLFunction:
         return self.function_class(self.compiler_settings)

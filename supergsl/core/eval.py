@@ -4,9 +4,10 @@ from typing import Any, Dict, Optional, Callable
 from supergsl.core.types import SuperGSLType
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.backend import BackendPipelinePass
+from supergsl.core.types.part import Part
+from supergsl.core.parts.slice import convert_slice_position_to_seq_position
 from supergsl.core.types.builtin import Collection
 from supergsl.core.types.assembly import AssemblyDeclaration
-from supergsl.utils import display_symbol_table
 from supergsl.core.ast import (
     Node,
     Program,
@@ -15,7 +16,9 @@ from supergsl.core.ast import (
     SymbolReference,
     VariableDeclaration,
     ListDeclaration,
-    FunctionInvocation
+    FunctionInvocation,
+    Slice,
+    SlicePosition,
 )
 
 from supergsl.core.function import SuperGSLFunctionDeclaration
@@ -40,13 +43,16 @@ class EvaluatePass(BackendPipelinePass):
             'FunctionInvocation': self.visit_function_invocation,
             'Assembly': self.visit_assembly,
             'SymbolReference': self.visit_symbol_reference,
+            'Slice': self.visit_slice,
+            'SlicePosition': self.visit_slice_position,
         }
 
     def perform(self, ast_node : Node):
         """Initiate a traversal of the AST."""
         self.visit(ast_node)
+        return ast_node
 
-    def visit(self, node):
+    def visit(self, node, *args, **kwargs):
         """Perform dyanmic dispatch to determine the handler for a node."""
         handlers : Dict[Optional[str], Callable] = self.get_node_handlers()
         node_type : str = type(node).__name__
@@ -54,8 +60,7 @@ class EvaluatePass(BackendPipelinePass):
         if not handler_method:
             raise Exception('Handler for node %s not specified.' % node_type)
 
-        print('VISIT', node)
-        return handler_method(node)
+        return handler_method(node, *args, **kwargs)
 
     def visit_program(self, program_node : Program):
         for import_node in program_node.imports:
@@ -83,15 +88,16 @@ class EvaluatePass(BackendPipelinePass):
 
         parts = []
         for symbol_reference in assembly.symbol_references:
-            parts.append(self.visit(symbol_reference))
+            part = self.visit(symbol_reference)
 
-        # Todo: We need to do type checking here. Figure out how to move this
-        # logic out of AST!!!
-        #for part in parts:
-        #    if not isinstance(part, Part):
-        #        raise Exception(
-        #            'Type error. Assembly declaration expected a set of parts. '
-        #            'Got a "%s"' % part)
+            # Todo: We need to do type checking here.
+            #for part in parts:
+            #    if not isinstance(part, Part):
+            #        raise Exception(
+            #            'Type error. Assembly declaration expected a set of parts. '
+            #            'Got a "%s"' % part)
+
+            parts.append(part)
 
         return AssemblyDeclaration(assembly.label, parts)
 
@@ -110,7 +116,37 @@ class EvaluatePass(BackendPipelinePass):
 
     def visit_symbol_reference(self, symbol_reference : SymbolReference) -> SuperGSLType:
         symbol = self.symbol_table.lookup(symbol_reference.identifier)
-        return symbol.eval(self)
+        symbol = symbol.eval()
+
+        if symbol_reference.slice:
+            symbol = self.visit(symbol_reference.slice, symbol)
+
+        if symbol_reference.invert:
+            #    inverter = self.visit(symbol_reference.invert)
+            #    symbol = inverter.eval(symbol)
+            raise NotImplementedError('Inverted parts not implemented yet!')
+
+        return symbol
+
+    def visit_slice(self, slice_node : Slice, parent_part : Part):
+        start_position = self.visit(slice_node.start, parent_part)
+        end_position = self.visit(slice_node.end, parent_part)
+
+        child_identifier = '%s[%s]' % (
+            parent_part.identifier,
+            slice_node.get_slice_str()
+        )
+        new_part = parent_part.get_child_part_by_slice(
+            child_identifier, start_position, end_position)
+
+        return new_part
+
+
+    def visit_slice_position(self, slice_position : SlicePosition, parent_part : Part):
+        return convert_slice_position_to_seq_position(
+            parent_part,
+            slice_position)
+
 
     def visit_list_declaration(self, list_declaration : ListDeclaration) -> Collection:
         return Collection([
@@ -120,7 +156,6 @@ class EvaluatePass(BackendPipelinePass):
 
     def visit_function_invocation(self, function_invoke_node : FunctionInvocation) -> SuperGSLType:
         """Evaluate this node by initializing and executing a SuperGSLFunction."""
-
         function_declaration = self.symbol_table.lookup(function_invoke_node.identifier)
         if not isinstance(function_declaration, SuperGSLFunctionDeclaration):
             raise SuperGSLTypeError('{} is not of type Function. It is a "{}"'.format(
@@ -128,11 +163,9 @@ class EvaluatePass(BackendPipelinePass):
                 type(function_declaration)
             ))
 
-        function_inst = function_declaration.eval(self)
+        function_inst = function_declaration.eval()
 
         expected_return_type = function_inst.get_return_type()
-        print('expected', expected_return_type)
-
         eval_params : Dict[Any, Any] = {
             'children': []
         }

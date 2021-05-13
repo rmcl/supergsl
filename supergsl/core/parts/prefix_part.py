@@ -57,7 +57,7 @@ class PrefixedSliceLazyLoadedPart(LazyLoadedPart):
         self.parent_part = parent_part
         self.part_prefix = prefix
 
-    def eval(self, ast_node: SymbolReference) -> Part:
+    def eval(self) -> Part:
         return self.parent_part.get_prefixed_part(
             self.identifier,
             self.part_prefix)
