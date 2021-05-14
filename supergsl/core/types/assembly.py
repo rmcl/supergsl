@@ -26,7 +26,7 @@ class Assembly(SuperGSLType):
     def get_identifier(self):
         return self.identifier
 
-    def get_sequence(self):
+    def get_sequence(self) -> Seq:
         """Return the complete sequence of the construct."""
         return self.sequence
 
