@@ -15,18 +15,15 @@ class SuperGSLIntegrationTestCases(TestCase):
 
     def run_supergsl(self, source_code):
         pipeline = CompilerPipeline(self.compiler_settings)
-        ast = pipeline.compile(source_code)
+        pipeline.compile(source_code)
 
-        output = TestOutputAstPass(None, False)
-        output.perform(ast)
-
-        return output
+        return pipeline
 
     def test_part_prefix_slice_locus(self):
 
         gsl_template = '''
             from truncated.S288C import HO
-            %s'''
+            let test_part = %s'''
 
         # Currently ommitting dHO and tHO. I think that the primer designer may
         # shifting these in fGSL to make better parts so will revisit once we get
@@ -40,9 +37,9 @@ class SuperGSLIntegrationTestCases(TestCase):
         for part_name in things_to_test:
             result = self.run_supergsl(gsl_template % part_name)
 
-            parts = result.get_parts()
-            self.assertEquals(len(parts), 1)
-            self.assertEquals(
-                parts[0].get_sequence().seq,
+            symbol_table = result.get_symbol_table()
+            part = symbol_table.lookup('test_part')
+            self.assertEqual(
+                part.get_sequence().seq,
                 self.expected_sequences.get(part_name).seq,
                 '%s sequence does not match expection' % part_name)

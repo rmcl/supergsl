@@ -130,6 +130,7 @@ class ParserBuilder(object):
         def definition(state, p):
             return p[0]
 
+        @self.pg.production('variable_definition : LET IDENTIFIER EQUAL symbol_reference')
         @self.pg.production('variable_definition : LET IDENTIFIER EQUAL function_invoke')
         @self.pg.production('variable_definition : LET IDENTIFIER EQUAL list_declaration')
         @self.pg.production('variable_definition : LET IDENTIFIER type_declaration EQUAL list_declaration')

@@ -17,6 +17,8 @@ class CompilerPipeline(object):
         self._settings = settings
         self.plugins = PluginProvider(self._global_symbol_table, self._settings)
 
+    def get_symbol_table(self) -> SymbolTable:
+        return self._global_symbol_table
 
     def get_backend_passes(self) -> List[BackendPipelinePass]:
         """Return an ordered list of compiler backend passes to be executed."""

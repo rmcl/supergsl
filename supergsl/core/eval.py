@@ -73,10 +73,10 @@ class EvaluatePass(BackendPipelinePass):
     def visit_import(self, import_node : Import):
         import_table = self.symbol_table.nested_scope('imports')
 
-        for program_import in import_node.imports:
-            module_path = '.'.join(import_node.module)
+        module_path = '.'.join(import_node.module_path)
+        provider = import_table.lookup(module_path)
 
-            provider = import_table.lookup(module_path)
+        for program_import in import_node.imports:
             provider.resolve_import(
                 self.symbol_table,
                 program_import.identifier,
@@ -176,7 +176,6 @@ class EvaluatePass(BackendPipelinePass):
             # TODO: Right now we are using positional indexes for arguments in a
             # rather inelegant way. Reflect on this and attempt to improve.
             for idx in range(len(params)):
-                print(params[idx])
                 eval_params[idx] = self.visit(params[idx])
 
         if children:

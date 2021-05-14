@@ -79,7 +79,9 @@ class SBOLOutput(SuperGSLFunction):
 class SBOLPlugin(SuperGSLPlugin):
     """Plugin stub to register SBOL related functions."""
 
-    def register(self, symbol_table, compiler_settings):
+    def register(self, compiler_settings):
         """Register SBOL functions."""
-        symbol_table.insert('save_sbol',
+        self.register_function(
+            'sbol',
+            'save_sbol',
             SuperGSLFunctionDeclaration(SBOLOutput, compiler_settings))

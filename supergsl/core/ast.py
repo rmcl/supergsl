@@ -112,14 +112,14 @@ class ImportIdentifier(Node):
         return label
 
 class Import(Node):
-    def __init__(self, module_path : str, import_identifiers : List[ImportIdentifier]):
-        self.module = module_path
+    def __init__(self, module_path : List[str], import_identifiers : List[ImportIdentifier]):
+        self.module_path = module_path
         self.imports = import_identifiers
 
     def to_dict(self):
         return {
             'node': 'Import',
-            'module': self.module,
+            'module': self.module_path,
             'imports': [
                 progam_import.to_dict()
                 for progam_import in self.imports
@@ -130,7 +130,7 @@ class Import(Node):
         return cast(List[Node], self.imports)
 
     def get_node_label(self):
-        return '%s:%s' % (self.__class__.__name__, '.'.join(self.module))
+        return '%s:%s' % (self.__class__.__name__, '.'.join(self.module_path))
 
 
 Definition = Union[

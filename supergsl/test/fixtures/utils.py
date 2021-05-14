@@ -15,28 +15,10 @@ class TestOutputAstPass(BreadthFirstNodeFilteredPass):
 
     def before_pass(self, ast):
         """Initialize the SBOL Document."""
-        self.parts = []
-        self.assemblies = []
+        pass
 
     def visit_symbol_reference_node(self, node):
-        # Todo(rmcl): make this more generic to handle symbol references other
-        # than parts.
-        self.parts.append(node.part)
+        pass
 
     def visit_assembly_node(self, node):
-        assembly_parts = [
-            part.identifier
-            for part in node.parts
-        ]
-
-        assembly_idx = len(self.assemblies)
-        self.assemblies.append({
-            'identifier': assembly_idx,
-            'parts': assembly_parts
-        })
-
-    def get_assemblies(self):
-        return self.assemblies
-
-    def get_parts(self):
-        return self.parts
+        pass

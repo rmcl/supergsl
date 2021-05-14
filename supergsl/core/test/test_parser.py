@@ -117,7 +117,6 @@ class ParserTestCase(unittest.TestCase):
         ast = self.parser.parse(tokens)
 
         self.assertEqual(type(ast), Program)
-        print(ast.to_dict())
         self.assertEqual(ast.to_dict(), {
             'definitions': {
                 'node': 'DefinitionList',
