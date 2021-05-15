@@ -4,7 +4,8 @@ from supergsl.core.exception import ConfigurationError
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.provider import SuperGSLProvider
 from supergsl.core.symbol_table import SymbolTable
-from supergsl.core.parts import Part, SeqPosition
+from supergsl.core.types.part import Part
+from supergsl.core.types.position import SeqPosition
 
 
 class PartProvider(SuperGSLProvider):
@@ -54,14 +55,14 @@ class PartProvider(SuperGSLProvider):
 class PartProviderPlugin(SuperGSLPlugin):
     name = 'part_provider'
 
-    def register(self, symbol_table, compiler_settings):
+    def register(self, compiler_settings):
         """Instantiate and register each part_providers defined in settings."""
 
         if 'part_providers' not in compiler_settings:
             raise ConfigurationError(
                 'No part providers have been defined. Check your supergGSL settings.')
 
-        import_symbol_table = symbol_table.nested_scope('imports')
+        import_symbol_table = self.symbol_table.nested_scope('imports')
 
         for provider_config in compiler_settings['part_providers']:
             print('Initializing "%s"' % provider_config['name'])

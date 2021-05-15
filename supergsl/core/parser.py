@@ -8,6 +8,9 @@ from supergsl.core.constants import (
 from . import ast
 from .exception import ParsingError
 
+
+
+
 class ParserState(object):
     def __init__(self, filename=None):
         self.filename = filename
@@ -19,6 +22,7 @@ class ParserBuilder(object):
         'FROM',
         'IMPORT',
         'AS',
+        'LET',
 
         'OPEN_CURLY_BRACKET',
         'CLOSE_CURLY_BRACKET',
@@ -36,6 +40,7 @@ class ParserBuilder(object):
         'PERIOD',
         'NUMBER',
         'IDENTIFIER',
+        'EQUAL',
         'TILDE',
         'EXCLAMATION',
         'DOLLAR_SIGN',
@@ -116,12 +121,50 @@ class ParserBuilder(object):
             if len(p) == 2:
                 p[0].add_definition(p[1])
                 return p[0]
-            else:
-                return ast.DefinitionList([p[0]])
 
+            return ast.DefinitionList([p[0]])
+
+        @self.pg.production('definition : variable_definition')
         @self.pg.production('definition : function_invoke')
         @self.pg.production('definition : assembly')
         def definition(state, p):
+            return p[0]
+
+        @self.pg.production('variable_definition : LET IDENTIFIER EQUAL symbol_reference')
+        @self.pg.production('variable_definition : LET IDENTIFIER EQUAL function_invoke')
+        @self.pg.production('variable_definition : LET IDENTIFIER EQUAL list_declaration')
+        @self.pg.production('variable_definition : LET IDENTIFIER type_declaration EQUAL list_declaration')
+        def variable_definition(state, p):
+            variable_identifier = p[1].value
+            if len(p) == 4:
+                variable_type = None
+                definition = p[3]
+            elif len(p) == 5:
+                variable_type = p[2]
+                definition = p[4]
+
+            return ast.VariableDeclaration(variable_identifier, variable_type, definition)
+
+        @self.pg.production('type_declaration : OPEN_BRACKET IDENTIFIER CLOSE_BRACKET')
+        def type_declaration(state, p):
+            return ast.TypeDeclaration(p[1].value)
+
+        @self.pg.production('list_declaration : OPEN_BRACKET list_items CLOSE_BRACKET')
+        def list_declaration(state, p):
+            return ast.ListDeclaration(p[1])
+
+        @self.pg.production('list_items : list_item')
+        @self.pg.production('list_items : list_item COMMA list_items')
+        def list_items(state, p):
+            new_list = [p[0]]
+            if len(p) == 3:
+                new_list.extend(p[2])
+            return new_list
+
+        @self.pg.production('list_item : symbol_reference')
+        @self.pg.production('list_item : nucleotide_constant')
+        @self.pg.production('list_item : amino_acid_constant')
+        def list_item(state, p):
             return p[0]
 
         @self.pg.production('function_name_and_label : IDENTIFIER')
@@ -150,33 +193,35 @@ class ParserBuilder(object):
 
             return p[1]
 
-        @self.pg.production('function_parameters : IDENTIFIER')
-        @self.pg.production('function_parameters : IDENTIFIER COMMA function_parameters')
-        def params(state, p):
-            x = [p[0].value]
+        @self.pg.production('function_parameters : symbol_reference')
+        @self.pg.production('function_parameters : symbol_reference COMMA function_parameters')
+        def function_parameters(state, p):
+            x = [p[0]]
             if len(p) == 3:
                 x.extend(p[2])
             return x
 
-        @self.pg.production('assembly : part_list')
-        @self.pg.production('assembly : IDENTIFIER COLON part_list')
+        @self.pg.production('assembly : assembly_list')
+        @self.pg.production('assembly : IDENTIFIER COLON assembly_list')
         def assembly(state, p):
             if len(p) == 1:
                 return ast.Assembly(p[0])
             elif len(p) == 3:
                 return ast.Assembly(p[2], label=p[0].value)
 
-        @self.pg.production('part_list : part_list SEMICOLON part')
-        @self.pg.production('part_list : part')
-        @self.pg.production('part_list : part_list SEMICOLON nucleotide_constant')
-        @self.pg.production('part_list : nucleotide_constant')
-        def part_list(state, p):
+        @self.pg.production('assembly_list : assembly_list SEMICOLON assembly_list_item')
+        @self.pg.production('assembly_list : assembly_list_item')
+        def assembly_list(state, p):
             if len(p) == 1:
                 return [p[0]]
             elif len(p) == 3:
                 p[0].append(p[2])
                 return p[0]
 
+        @self.pg.production('assembly_list_item : symbol_reference')
+        @self.pg.production('assembly_list_item : nucleotide_constant')
+        def assembly_list_item(state, p):
+            return p[0]
 
         @self.pg.production('nucleotide_constant : FORWARD_SLASH IDENTIFIER FORWARD_SLASH')
         def nucleotide_constant(state, p):
@@ -186,20 +231,19 @@ class ParserBuilder(object):
         def protein_constant(state, p):
             return ast.SequenceConstant(p[1].value, UNAMBIGUOUS_PROTEIN_SEQUENCE)
 
-        @self.pg.production('part : part_identifier OPEN_BRACKET slice_index CLOSE_BRACKET')
-        @self.pg.production('part : part_identifier')
-        def part(state, p):
+        @self.pg.production('symbol_reference : symbol_identifier OPEN_BRACKET slice_index CLOSE_BRACKET')
+        @self.pg.production('symbol_reference : symbol_identifier')
+        def symbol_reference(state, p):
             identifier, invert = p[0]
             part_slice = None
             if len(p) == 4:
                 part_slice = p[2]
 
-            return ast.Part(identifier, part_slice, invert)
+            return ast.SymbolReference(identifier, part_slice, invert)
 
-
-        @self.pg.production('part_identifier : EXCLAMATION IDENTIFIER')
-        @self.pg.production('part_identifier : IDENTIFIER')
-        def part_identifier(state, p):
+        @self.pg.production('symbol_identifier : EXCLAMATION IDENTIFIER')
+        @self.pg.production('symbol_identifier : IDENTIFIER')
+        def symbol_identifier(state, p):
             if len(p) == 2:
                 invert = True
                 identifier = p[1].value

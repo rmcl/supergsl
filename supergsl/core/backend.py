@@ -2,13 +2,12 @@ from typing import List, Tuple, Optional, Dict, Callable
 from .ast import Node
 
 from supergsl.core.symbol_table import SymbolTable
+from supergsl.core.exception import BackendError
 
+#pylint: disable=E1136
 
 # Define a mypy type alias for node handler methods.
 ASTNodeHandlerMethod = Callable[[Node], Node]
-
-class BackendException(Exception):
-    pass
 
 
 class BackendPipelinePass(object):
@@ -19,32 +18,14 @@ class BackendPipelinePass(object):
         self.symbol_table = symbol_table
         self.allow_modification = allow_modification
 
+    def get_symbol_table(self):
+        return self.symbol_table
+
     def get_pass_name(self):
         if not self.name:
             return type(self).__name__
 
         return self.name
-
-    def call_handler_and_check_result(self, handler, ast_node):
-        """Call handler method on an AST node and check to if the node was modified.
-
-        Apply rules based on the initialization of the pipeline.
-        """
-        new_ast_node = handler(ast_node)
-
-        if not self.allow_modification:
-            if new_ast_node:
-                raise BackendException(
-                    'Handler of "%s" should not modify the AST. Your node handlers should return `None`.' % (
-                        handler
-                    ))
-        else:
-            if not new_ast_node:
-                raise BackendException(
-                    'Handler "%s" pass did not return an AST node object.' % handler)
-
-        return new_ast_node or ast_node
-
 
     def perform(self, ast : Node) -> Node:
         raise NotImplementedError('Must subclass and implement perform')
@@ -66,6 +47,9 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
         handlers : Dict[Optional[str], ASTNodeHandlerMethod] = self.get_node_handlers()
         handler_method : Optional[ASTNodeHandlerMethod] = None
 
+        if not node:
+            raise BackendError('Past "{}" was passed a null AST.'.format(self.get_pass_name()))
+
         node_type : str = type(node).__name__
         handler_method = handlers.get(node_type, None)
         if not handler_method:
@@ -77,7 +61,8 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
             result_node = self.call_handler_and_check_result(handler_method, node)
             if result_node != node:
                 if not parent_node:
-                    raise Exception('You cannot update the root Program AST node. Tried to update "%s"' % node)
+                    raise BackendError(
+                        'You cannot update the root Program AST node. Tried to update "%s"' % node)
 
                 parent_node.replace_child_node(node, result_node)
 
@@ -94,6 +79,26 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
     def after_pass(self, ast : Node) -> Node:
         return ast
 
+    def call_handler_and_check_result(self, handler, ast_node):
+        """Call handler method on an AST node and check to if the node was modified.
+
+        Apply rules based on the initialization of the pipeline.
+        """
+        new_ast_node = handler(ast_node)
+
+        if not self.allow_modification:
+            if new_ast_node:
+                raise BackendError(
+                    'Handler of "%s" should not modify the AST. Your node handlers should return `None`.' % (
+                        handler
+                    ))
+        else:
+            if not new_ast_node:
+                raise BackendError(
+                    'Handler "%s" pass did not return an AST node object.' % handler)
+
+        return new_ast_node or ast_node
+
     def perform(self, ast : Node) -> Node:
         ast = self.call_handler_and_check_result(self.before_pass, ast)
 
@@ -103,16 +108,10 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
 
             self.visit(cur_node, cur_node_parent)
 
-            try:
-                node_visit_queue += [
-                    (child, cur_node)
-                    for child in cur_node.child_nodes()
-                ]
-            except TypeError as error:
-                raise BackendException(
-                    'Error executing pass "%s". While visiting node "%s", '
-                    'occurred: %s' % (self, cur_node, error)
-                ) from error
+            child_nodes = cur_node.child_nodes()
+            if child_nodes:
+                for child in cur_node.child_nodes():
+                    node_visit_queue.append((child, cur_node))
 
         ast = self.call_handler_and_check_result(self.after_pass, ast)
         return ast
@@ -125,7 +124,7 @@ class DepthFirstNodeFilteredPass(BreadthFirstNodeFilteredPass):
         ast = self.before_pass(ast)
 
         if not ast:
-            raise BackendException('before_pass of "%s" did not return an AST node object.' % self)
+            raise BackendError('before_pass of "%s" did not return an AST node object.' % self)
 
         node_stack : List[Tuple[Node, Optional[Node]]] = [(ast, None)]
         discovered = set()
@@ -145,6 +144,6 @@ class DepthFirstNodeFilteredPass(BreadthFirstNodeFilteredPass):
 
         ast = self.after_pass(ast)
         if not ast:
-            raise BackendException('after_pass of "%s" did not return an AST node object.' % self)
+            raise BackendError('after_pass of "%s" did not return an AST node object.' % self)
 
         return ast

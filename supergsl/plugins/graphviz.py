@@ -1,10 +1,17 @@
-from graphviz import Digraph
+"""A plugin for displaying SuperGSL programs using GraphViz."""
+try:
+    from graphviz import Digraph
+    GRAPHVIZ_NOT_INSTALLED = False
+except ImportError:
+    print('Loading GraphViz plugin failed; graphviz is not installed.')
+    GRAPHVIZ_NOT_INSTALLED = True
 
+from supergsl.core.plugin import SuperGSLPlugin
+from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
 from supergsl.core.backend import BreadthFirstNodeFilteredPass
-from supergsl.core.output import OutputProvider
 
 
-class PartSliceTreeOutputProvider(OutputProvider):
+class PartSliceTreeOutput(SuperGSLFunction):
     name = 'part-slice-graph'
 
     def get_node_handlers(self):
@@ -58,11 +65,12 @@ class PartSliceTreeOutputProvider(OutputProvider):
 
             self.graph.subgraph(part_graph)
 
+
 class ASTGraphPass(BreadthFirstNodeFilteredPass):
     name = 'ASTDotGraph'
     allow_modification = False
 
-    def get_node_name(self, node):
+    def get_node_name(self, node : str) -> str:
         try:
             return self.node_names[node]
         except KeyError:
@@ -88,3 +96,14 @@ class ASTGraphPass(BreadthFirstNodeFilteredPass):
     def after_pass(self, ast):
         print(self.ast_graph.source)
         return ast
+
+
+class GraphVizPlugin(SuperGSLPlugin):
+    """Register the Graphviz plugin."""
+
+    def register(self, compiler_settings : dict):
+        """Register built in assemblers."""
+        self.register_function(
+            'graphviz',
+            'part_slice_tree',
+            SuperGSLFunctionDeclaration(PartSliceTreeOutput, compiler_settings))

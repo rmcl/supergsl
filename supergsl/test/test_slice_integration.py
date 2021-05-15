@@ -1,8 +1,10 @@
 from unittest import TestCase
 from Bio import SeqIO
 from supergsl.core.pipeline import CompilerPipeline
-from supergsl.core.output import TestOutputProvider
 from supergsl.test.fixtures import SuperGSLIntegrationFixtures
+from supergsl.test.fixtures.utils import TestOutputAstPass
+
+from supergsl.utils import display_symbol_table
 
 class SuperGSLIntegrationTestCases(TestCase):
 
@@ -18,16 +20,13 @@ class SuperGSLIntegrationTestCases(TestCase):
         pipeline = CompilerPipeline(self.compiler_settings)
         ast = pipeline.compile(source_code)
 
-        output = TestOutputProvider(None, False)
-        output.perform(ast)
-
-        return output
+        return pipeline
 
     def test_part_slice_notation(self):
 
         gsl_template = '''
             from truncated.S288C import HMG1
-            %s'''
+            let test_part = %s'''
 
         things_to_test = [
             'gHMG1[0:100S]',
@@ -39,13 +38,15 @@ class SuperGSLIntegrationTestCases(TestCase):
         for part_name in things_to_test:
             result = self.run_supergsl(gsl_template % part_name)
 
-            parts = result.get_parts()
-            self.assertEquals(len(parts), 1, 'more than one part for %s' % part_name)
+            symbol_table = result.get_symbol_table()
 
+            display_symbol_table(symbol_table)
+
+            part = symbol_table.lookup('test_part')
             expected = self.expected_sequences.get(part_name, None)
             assert expected is not None, 'Could not find sequence %s' % (part_name)
 
             self.assertEqual(
-                parts[0].get_sequence().seq,
+                part.get_sequence().seq,
                 self.expected_sequences.get(part_name).seq,
                 '%s sequence does not match expection' % part_name)

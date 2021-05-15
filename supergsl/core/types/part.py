@@ -1,10 +1,15 @@
 from typing import List, Optional
 from Bio.SeqRecord import SeqRecord
-from supergsl.core.types import (
-    SuperGSLType,
-    NucleotideSequence,
-    PrimerPair
+from supergsl.core.constants import (
+    PART_SLICE_POSTFIX_START,
+    PART_SLICE_POSTFIX_END
 )
+from supergsl.core.types import SuperGSLType
+from supergsl.core.types.builtin import (
+    NucleotideSequence,
+    PrimerPair,
+)
+from supergsl.core.ast import SlicePosition, SymbolReference
 
 
 class Part(NucleotideSequence):
@@ -84,7 +89,7 @@ class Part(NucleotideSequence):
         self._roles.extend(roles)
         self._roles = list(set(self._roles))
 
-    def get_child_part_by_slice(self, identifier, start, end):
+    def get_child_part_by_slice(self, identifier, start, end) -> 'Part':
         return self.provider.get_child_part_by_slice(
             self,
             identifier,
@@ -93,6 +98,11 @@ class Part(NucleotideSequence):
         )
 
 
+    def eval(self):
+        """Evaluate this part."""
+        return self
+
+
 class LazyLoadedPart(SuperGSLType):
-    def instantiate(self) -> Part:
+    def eval(self) -> SuperGSLType:
         raise NotImplementedError('Subclass to implement.')

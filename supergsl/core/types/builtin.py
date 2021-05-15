@@ -1,11 +1,7 @@
 from Bio.Seq import Seq
-from typing import List
-
-
-class SuperGSLType(object):
-    """Base class defining types available in SuperGSL."""
-    pass
-
+from typing import List, Type
+from collections import OrderedDict
+from .base import SuperGSLType
 
 class SuperGSLEnum(SuperGSLType):
     """Define a list of choices."""
@@ -75,3 +71,21 @@ class PrimerPair(SuperGSLType):
     def reverse(self) -> Primer:
         """Return the reverse primer of the pair"""
         return self._reverse_primer
+
+
+class Collection(SuperGSLType):
+
+    def __init__(self, items : List[SuperGSLType]):
+        self._items = items
+
+    def __iter__(self):
+        return iter(self._items)
+
+    def count(self):
+        return len(self._items)
+
+    def get_by_label(self, idx):
+        pass
+
+    def get_by_index(self, idx):
+        pass

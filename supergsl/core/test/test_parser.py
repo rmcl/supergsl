@@ -36,13 +36,13 @@ class ParserTestCase(unittest.TestCase):
         ast = self.parser.parse(tokens)
 
         self.assertEquals(type(ast), Program)
-        self.assertEqual(ast.eval(), {
+        self.assertEqual(ast.to_dict(), {
             'definitions': {
                 'items': [{
                     'label': None,
                     'node': 'Assembly',
                     'parts': [{
-                        'node': 'Part',
+                        'node': 'SymbolReference',
                         'identifier': 'uHO',
                         'invert': False,
                         'slice': None
@@ -71,19 +71,19 @@ class ParserTestCase(unittest.TestCase):
         ast = self.parser.parse(tokens)
 
         self.assertEqual(type(ast), Program)
-        self.assertEqual(ast.eval(), {
+        self.assertEqual(ast.to_dict(), {
             'definitions': {
                 'node': 'DefinitionList',
                 'items': [{
                     'label': None,
                     'node': 'Assembly',
                     'parts': [{
-                        'node': 'Part',
+                        'node': 'SymbolReference',
                         'identifier': 'uHO',
                         'invert': False,
                         'slice': None
                     }, {
-                        'node': 'Part',
+                        'node': 'SymbolReference',
                         'identifier': 'pADH1',
                         'invert': False,
                         'slice': None
@@ -104,7 +104,7 @@ class ParserTestCase(unittest.TestCase):
         ast = self.parser.parse(tokens)
 
         self.assertEqual(type(ast), Program)
-        self.assertEqual(ast.eval(), {
+        self.assertEqual(ast.to_dict(), {
             'definitions': {
                 'node': 'DefinitionList',
                 'items': [{
@@ -116,7 +116,7 @@ class ParserTestCase(unittest.TestCase):
                             'label': None,
                             'node': 'Assembly',
                             'parts': [{
-                                'node': 'Part',
+                                'node': 'SymbolReference',
                                 'identifier': 'uHO',
                                 'invert': False,
                                 'slice': None
@@ -142,7 +142,7 @@ class ParserTestCase(unittest.TestCase):
         ast = self.parser.parse(tokens)
 
         self.assertEqual(type(ast), Program)
-        self.assertEqual(ast.eval(), {
+        self.assertEqual(ast.to_dict(), {
             'definitions': {
                 'node': 'DefinitionList',
                 'items': [{
@@ -154,7 +154,7 @@ class ParserTestCase(unittest.TestCase):
                             'label': None,
                             'node': 'Assembly',
                             'parts': [{
-                                'node': 'Part',
+                                'node': 'SymbolReference',
                                 'identifier': 'uHO',
                                 'invert': False,
                                 'slice': None
@@ -180,16 +180,19 @@ class ParserTestCase(unittest.TestCase):
         ast = self.parser.parse(tokens)
 
         self.assertEqual(type(ast), Program)
-        self.assertEqual(ast.eval(), {
+        self.assertEqual(ast.to_dict(), {
             'definitions': {
                 'node': 'DefinitionList',
                 'items': [{
                     'identifier': 'functest',
                     'node': 'FunctionInvocation',
                     'children': None,
-                    'params': [
-                        'CHEESE'
-                    ],
+                    'params': [{
+                        'identifier': 'CHEESE',
+                        'invert': False,
+                        'node': 'SymbolReference',
+                        'slice': None
+                    }],
                     'label': None
                 }]
             },
@@ -208,7 +211,7 @@ class ParserTestCase(unittest.TestCase):
         ast = self.parser.parse(tokens)
 
         self.assertEqual(type(ast), Program)
-        self.assertEqual(ast.eval(), {
+        self.assertEqual(ast.to_dict(), {
             'definitions': {
                 'node': 'DefinitionList',
                 'items': [{
