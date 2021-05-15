@@ -5,7 +5,9 @@ from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.eval import EvaluatePass
 from supergsl.core.constants import (
     STRING_CONSTANT,
-    NUMBER_CONSTANT
+    NUMBER_CONSTANT,
+    UNAMBIGUOUS_DNA_SEQUENCE,
+    UNAMBIGUOUS_PROTEIN_SEQUENCE
 )
 from supergsl.core.ast import (
     Program,
@@ -15,8 +17,18 @@ from supergsl.core.ast import (
     VariableDeclaration,
     SymbolReference,
     Slice,
-    Constant
+    Constant,
+    ListDeclaration,
+    SequenceConstant
 )
+
+from supergsl.core.types.builtin import (
+    Collection,
+    NucleotideSequence,
+    AminoAcidSequence
+)
+
+from supergsl.core.exception import SuperGSLTypeError
 
 class EvaluatePassTestCase(unittest.TestCase):
     """Testcases to evaluate the EvaluatePass class."""
@@ -153,7 +165,22 @@ class EvaluatePassTestCase(unittest.TestCase):
             convert_patch.assert_called_once_with(parent_part, slice_position)
             self.assertEqual(result, 'HELLOOO')
 
-    # TODO: visit_list_declaration
+    def test_visit_list_declaration(self):
+        """Create a collection with result of visiting each item node in declaration."""
+        item_nodes = [
+            Mock(),
+            Mock(),
+            Mock(),
+        ]
+        list_declare_node = ListDeclaration(item_nodes)
+
+        result = self.eval_pass.visit_list_declaration(list_declare_node)
+
+        self.assertEqual(type(result), Collection)
+        self.eval_pass.visit.assert_has_calls([
+            call(item_node)
+            for item_node in item_nodes
+        ])
 
     def test_visit_constant_number(self):
         """Visit a constant node resolves to a number."""
@@ -169,4 +196,28 @@ class EvaluatePassTestCase(unittest.TestCase):
         result = self.eval_pass.visit_constant(constant_node)
         self.assertEqual(result, 'party')
 
-    # TODO: visit_sequence_constant
+    def test_visit_dna_sequence_constant(self):
+        """Create a GSL Sequence Type object based on the declared sequence constant."""
+        constant_dna_node = SequenceConstant(
+            'ATGC', UNAMBIGUOUS_DNA_SEQUENCE)
+
+        result = self.eval_pass.visit_sequence_constant(constant_dna_node)
+        self.assertEqual(type(result), NucleotideSequence)
+        self.assertEqual(result.get_sequence(), 'ATGC')
+
+    def test_visit_protein_sequence_constant(self):
+        constant_protein_node = SequenceConstant(
+            'MATTTGAC*', UNAMBIGUOUS_PROTEIN_SEQUENCE)
+
+        result = self.eval_pass.visit_sequence_constant(constant_protein_node)
+        self.assertEqual(type(result), AminoAcidSequence)
+        self.assertEqual(result.get_sequence(), 'MATTTGAC*')
+
+    def test_visit_sequence_constant_weird_type(self):
+        constant_protein_node = SequenceConstant(
+            'MATTTGAC*', 'PARTY_TYPE')
+
+        self.assertRaises(
+            SuperGSLTypeError,
+            self.eval_pass.visit_sequence_constant,
+            constant_protein_node)

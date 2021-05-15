@@ -36,7 +36,10 @@ from supergsl.core.ast import (
 )
 
 from supergsl.core.function import SuperGSLFunctionDeclaration
-from supergsl.core.exception import FunctionInvokeError, SuperGSLTypeError
+from supergsl.core.exception import (
+    FunctionInvokeError,
+    SuperGSLTypeError
+)
 
 #pylint: disable=E1136
 
@@ -162,24 +165,28 @@ class EvaluatePass(BackendPipelinePass):
 
 
     def visit_slice_position(self, slice_position : SlicePosition, parent_part : Part):
+        """Convert a SlicePosition node into a SeqPosition for the given Part."""
         return convert_slice_position_to_seq_position(
             parent_part,
             slice_position)
 
 
     def visit_list_declaration(self, list_declaration : ListDeclaration) -> Collection:
+        """Instantiate a Collection based on details of list declaration."""
         return Collection([
             self.visit(item_node)
             for item_node in list_declaration.item_nodes
         ])
 
     def visit_constant(self, constant_node : Constant):
+        """Create the appropriate constant object based on `Constant` type."""
         if constant_node.constant_type == NUMBER_CONSTANT:
             return int(constant_node.value)
-        elif constant_node.constant_type is STRING_CONSTANT:
+
+        if constant_node.constant_type == STRING_CONSTANT:
             return constant_node.value
-        else:
-            raise Exception('Unknown constant type.')
+
+        raise SuperGSLTypeError('Unknown constant type.')
 
 
     def visit_sequence_constant(
@@ -191,10 +198,11 @@ class EvaluatePass(BackendPipelinePass):
         sequence_type = sequence_constant.sequence_type
         if sequence_type == UNAMBIGUOUS_PROTEIN_SEQUENCE:
             return AminoAcidSequence(sequence_constant.sequence)
-        elif sequence_type == UNAMBIGUOUS_DNA_SEQUENCE:
+
+        if sequence_type == UNAMBIGUOUS_DNA_SEQUENCE:
             return NucleotideSequence(sequence_constant.sequence)
-        else:
-            raise Exception('Unhandled sequence type "%s"' % sequence_type)
+
+        raise SuperGSLTypeError('Unhandled sequence type "%s"' % sequence_type)
 
     def visit_function_invocation(self, function_invoke_node : FunctionInvocation) -> SuperGSLType:
         """Evaluate this node by initializing and executing a SuperGSLFunction."""
