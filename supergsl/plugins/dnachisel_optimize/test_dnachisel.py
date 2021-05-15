@@ -1,55 +1,62 @@
 from unittest import TestCase
+from mock import Mock
 from Bio import SeqIO
-from supergsl.core.pipeline import CompilerPipeline
-from supergsl.core.output import TestOutputProvider
-from supergsl.test.fixtures import SuperGSLIntegrationFixtures
+from Bio.Seq import Seq
+from supergsl.core.types.builtin import AminoAcidSequence
+from supergsl.plugins.dnachisel_optimize import DNAChiselOptimizeFunction
+
+from dnachisel import reverse_translate
 
 class DnaChiselTestCases(TestCase):
 
     def setUp(self):
         self.maxDiff = None
+
+        settings = {}
+        self.optimize = DNAChiselOptimizeFunction(settings)
+
+        """
         self.expected_sequences = SeqIO.index(
             'supergsl/test/expected_sequences.fasta', 'fasta')
 
         self.fixtures = SuperGSLIntegrationFixtures()
         self.compiler_settings = self.fixtures.get_supergsl_settings(
             extra_plugins=[
-                'supergsl.plugins.dnachisel'
+                'supergsl.plugins.dnachisel_optimize'
             ]
         )
+        """
 
-    def run_supergsl(self, source_code):
-        pipeline = CompilerPipeline(self.compiler_settings)
-        ast = pipeline.compile(source_code)
+    def test_execute(self):
+        """Call dnachisel execute function."""
+        params = {
+            'aa_sequence': AminoAcidSequence(Seq('MAAATCAGAGAAAAC')),
+            'num_results': 2
+        }
+        self.optimize.create_new_sequence = Mock(
+            return_value=Seq('ATGAAAC'))
+        results = self.optimize.execute(params)
 
-        output = TestOutputProvider(None, False)
-        output.perform(ast)
-
-        return output
-
-    def test_part_slice_notation(self):
-
-        gsl_template = '''
-            from truncated.S288C import HMG1
-            %s'''
-
-        things_to_test = [
-            'gHMG1[0:100S]',
-            'gHMG1[-500E:100E]',
-            'gHMG1[2087S:200E]',
-            'gHMG1[1586:200E]'
+        result_sequences = [
+            item.get_sequence()
+            for item in results
         ]
 
-        for part_name in things_to_test:
-            result = self.run_supergsl(gsl_template % part_name)
+        self.assertEqual(result_sequences, [
+            Seq('ATGAAAC'),
+            Seq('ATGAAAC')
+        ])
 
-            parts = result.get_parts()
-            self.assertEquals(len(parts), 1, 'more than one part for %s' % part_name)
+    def test_create_new_sequence(self):
+        """Run the dnachisel optimizer and get a new DNA sequence."""
+        target_protein = 'MAAATCAGAGAAAAC'
+        naive_target_sequence = reverse_translate(target_protein)
+        result = self.optimize.create_new_sequence(
+            naive_target_sequence,
+            None,
+            []
+        )
 
-            expected = self.expected_sequences.get(part_name, None)
-            assert expected is not None, 'Could not find sequence %s' % (part_name)
-
-            self.assertEquals(
-                parts[0].get_sequence().seq,
-                self.expected_sequences.get(part_name).seq,
-                '%s sequence does not match expection' % part_name)
+        self.assertEqual(
+            Seq(result).translate(),
+            target_protein)

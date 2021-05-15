@@ -48,13 +48,10 @@ class DNAChiselOptimizeFunction(SuperGSLFunction):
 
     def execute(self, params : dict):
         """Invoke dnachissel to return matching codon optimized DNA sequence."""
-        print(params)
         protein_sequence = params['aa_sequence'].get_sequence()
 
         codon_usage_table = None
         num_results = params['num_results']
-
-        print(protein_sequence, num_results)
 
         naive_target_sequence = reverse_translate(protein_sequence)
         proposed_sequences : List[str] = []
