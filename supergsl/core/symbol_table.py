@@ -1,5 +1,5 @@
 """Implement the symbol table of the SuperGSL Compiler."""
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
 from supergsl.core.exception import SymbolNotFoundError
 from supergsl.core.types import SuperGSLType
 
@@ -11,7 +11,11 @@ class SymbolTable:
     def __init__(self, name : str, parent : Optional['SymbolTable']):
         self.name = name
         self._parent = parent
-        self._symbols : Dict[str, SuperGSLType] = {}
+
+        # Todo: We want to restrict the type of the values of the symbol table.
+        # Ideally, this would be Union[SuperGSLType, SuperGSLPlugin]. Need to resolve
+        # a circular dependency first.
+        self._symbols : Dict[str, Any] = {}
         self._nested_scopes : Dict[str, SymbolTable] = {}
 
     def parent_scope(self) -> Optional['SymbolTable']:
@@ -33,6 +37,6 @@ class SymbolTable:
         except KeyError:
             raise SymbolNotFoundError('Symbol "{}" does not exist.'.format(identifier))
 
-    def insert(self, identifier : str, value : SuperGSLType) -> None:
+    def insert(self, identifier : str, value : Any) -> None:
         """Set a symbol to a value in the current scope."""
         self._symbols[identifier] = value

@@ -200,9 +200,12 @@ class ParserTestCase(unittest.TestCase):
                     'identifier': 'functest',
                     'node': 'FunctionInvocation',
                     'children': None,
-                    'params': [
-                        'CHEESE'
-                    ],
+                    'params': [{
+                        'identifier': 'CHEESE',
+                        'invert': False,
+                        'node': 'SymbolReference',
+                        'slice': None
+                    }],
                     'label': None
                 }]
             },
