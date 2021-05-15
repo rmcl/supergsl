@@ -16,7 +16,8 @@ from supergsl.core.types.assembly import AssemblyDeclaration
 from supergsl.core.constants import (
     UNAMBIGUOUS_DNA_SEQUENCE,
     UNAMBIGUOUS_PROTEIN_SEQUENCE,
-    NUMBER_CONSTANT
+    NUMBER_CONSTANT,
+    STRING_CONSTANT
 )
 
 from supergsl.core.ast import (
@@ -175,7 +176,7 @@ class EvaluatePass(BackendPipelinePass):
     def visit_constant(self, constant_node : Constant):
         if constant_node.constant_type == NUMBER_CONSTANT:
             return int(constant_node.value)
-        elif constant_node.constant_type is str:
+        elif constant_node.constant_type is STRING_CONSTANT:
             return constant_node.value
         else:
             raise Exception('Unknown constant type.')

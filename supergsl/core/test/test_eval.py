@@ -3,6 +3,10 @@ import unittest
 from mock import Mock, call, patch
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.eval import EvaluatePass
+from supergsl.core.constants import (
+    STRING_CONSTANT,
+    NUMBER_CONSTANT
+)
 from supergsl.core.ast import (
     Program,
     Import,
@@ -10,7 +14,8 @@ from supergsl.core.ast import (
     Assembly,
     VariableDeclaration,
     SymbolReference,
-    Slice
+    Slice,
+    Constant
 )
 
 class EvaluatePassTestCase(unittest.TestCase):
@@ -147,3 +152,21 @@ class EvaluatePassTestCase(unittest.TestCase):
 
             convert_patch.assert_called_once_with(parent_part, slice_position)
             self.assertEqual(result, 'HELLOOO')
+
+    # TODO: visit_list_declaration
+
+    def test_visit_constant_number(self):
+        """Visit a constant node resolves to a number."""
+        constant_node = Constant(55, NUMBER_CONSTANT)
+
+        result = self.eval_pass.visit_constant(constant_node)
+        self.assertEqual(result, 55)
+
+    def test_visit_constant_string(self):
+        """Visit a constant node resolves to a string."""
+        constant_node = Constant('party', STRING_CONSTANT)
+
+        result = self.eval_pass.visit_constant(constant_node)
+        self.assertEqual(result, 'party')
+
+    # TODO: visit_sequence_constant
