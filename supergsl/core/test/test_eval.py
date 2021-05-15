@@ -206,6 +206,7 @@ class EvaluatePassTestCase(unittest.TestCase):
         self.assertEqual(result.get_sequence(), 'ATGC')
 
     def test_visit_protein_sequence_constant(self):
+        """Create the right type for a protein sequence constant."""
         constant_protein_node = SequenceConstant(
             'MATTTGAC*', UNAMBIGUOUS_PROTEIN_SEQUENCE)
 
@@ -214,6 +215,7 @@ class EvaluatePassTestCase(unittest.TestCase):
         self.assertEqual(result.get_sequence(), 'MATTTGAC*')
 
     def test_visit_sequence_constant_weird_type(self):
+        """Raise exception for a unknown type of constant."""
         constant_protein_node = SequenceConstant(
             'MATTTGAC*', 'PARTY_TYPE')
 
