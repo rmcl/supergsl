@@ -1,5 +1,10 @@
 from supergsl.core.function import SuperGSLFunction
-from supergsl.core.types.builtin import NucleotideSequence, AminoAcidSequence, CodonFrequencyTable
+from supergsl.core.types.builtin import (
+    Collection,
+    NucleotideSequence,
+    AminoAcidSequence,
+    CodonFrequencyTable
+)
 
 from dnachisel import (
     DnaOptimizationProblem,
@@ -40,19 +45,19 @@ class DNAChiselOptimizeFunction(SuperGSLFunction):
         #('codon_frequency_table', CodonFrequencyTable),
         ('num_results', int)
     ]
-    return_type = NucleotideSequence
+    return_type = Collection
 
     def execute(self, params : dict):
         """Invoke dnachissel to return matching codon optimized DNA sequence."""
-
-        protein = params['aa_sequence']
+        print(params)
+        protein_sequence = params['aa_sequence'].get_sequence()
 
         codon_usage_table = None
         num_results = params['num_results']
 
-        print(protein, num_results)
+        print(protein_sequence, num_results)
 
-        naive_target_sequence = reverse_translate(protein)
+        naive_target_sequence = reverse_translate(protein_sequence)
         proposed_sequences = []
         for i in range(num_results):
             print('Optimization run %s of %s' % (i, num_results))
@@ -62,10 +67,10 @@ class DNAChiselOptimizeFunction(SuperGSLFunction):
                 existing_sequences=proposed_sequences)
             proposed_sequences.append(new_sequence)
 
-        return [
+        return Collection([
             NucleotideSequence(sequence)
             for sequence in proposed_sequences
-        ]
+        ])
 
     def create_new_sequence(
         self,
