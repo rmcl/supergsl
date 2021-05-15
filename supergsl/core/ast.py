@@ -241,10 +241,11 @@ class Assembly(Node):
 class FunctionInvocation(Node):
     """AST node representing function calls."""
     def __init__(
-        self, identifier : str,
+        self,
+        identifier : str,
         children : DefinitionList,
         params : List[Any],
-        label : str = None
+        label : Optional[str]
     ):
         self.identifier = identifier
         self.children = children

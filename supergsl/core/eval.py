@@ -38,7 +38,9 @@ from supergsl.core.ast import (
 from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.exception import (
     FunctionInvokeError,
-    SuperGSLTypeError
+    SuperGSLTypeError,
+    SymbolNotFoundError,
+    FunctionNotFoundError
 )
 
 #pylint: disable=E1136
@@ -206,62 +208,35 @@ class EvaluatePass(BackendPipelinePass):
 
     def visit_function_invocation(self, function_invoke_node : FunctionInvocation) -> SuperGSLType:
         """Evaluate this node by initializing and executing a SuperGSLFunction."""
-        function_declaration = self.symbol_table.lookup(function_invoke_node.identifier)
+
+        try:
+            function_declaration = self.symbol_table.lookup(function_invoke_node.identifier)
+        except SymbolNotFoundError as error:
+            raise FunctionNotFoundError(
+                'Function %s has not been imported.' % (
+                    function_invoke_node.identifier)) from error
+
         if not isinstance(function_declaration, SuperGSLFunctionDeclaration):
-            raise SuperGSLTypeError('{} is not of type Function. It is a "{}"'.format(
-                function_invoke_node.identifier,
-                type(function_declaration)
-            ))
+            raise SuperGSLTypeError(
+                '{} is not of type FunctionDeclaration. It is a "{}"'.format(
+                    function_invoke_node.identifier,
+                    type(function_declaration)))
 
         function_inst = function_declaration.eval()
 
-        expected_return_type = function_inst.get_return_type()
-        if not expected_return_type:
-            expected_return_type = type(None)
-
-        eval_params : Dict[Any, Any] = {
-            'children': []
-        }
-
-        params = function_invoke_node.params
+        child_arguments = []
         children = function_invoke_node.children
-
-        expected_arguments = function_inst.get_arguments()
-
-        if len(params) != len(expected_arguments):
-            raise Exception(
-                'Number of arguments does not match function definition. '
-                'Expected %d, but received %d' % (len(expected_arguments), len(params))
-            )
-
-        if len(expected_arguments) > 0:
-            for arg_idx, argument_details in enumerate(expected_arguments):
-                key, expected_argument_type = argument_details
-                arg_value = self.visit(params[arg_idx])
-
-                if not isinstance(arg_value, expected_argument_type):
-                    raise Exception(
-                        'Provided type does not match expectation. '
-                        'Expected %s, but received %s' % (
-                            expected_argument_type,
-                            type(arg_value))
-                    )
-
-                eval_params[key] = arg_value
-
         if children:
-            eval_params['children'] = [
+            child_arguments = [
                 self.visit(child)
                 for child in children.definitions
             ]
 
-        function_result = function_inst.execute(eval_params)
-        if not isinstance(function_result, expected_return_type):
-            raise FunctionInvokeError(
-                '"%s" Return type does not match expectation. Expected: "%s", Actual: "%s"' % (
-                    function_inst,
-                    expected_return_type,
-                    type(function_result)
-                ))
+        params = function_invoke_node.params
+        positional_arguments = []
+        for param_value in params:
+            positional_arguments.append(self.visit(param_value))
 
-        return function_result
+        return function_inst.evaluate_arguments_and_execute(
+            positional_arguments,
+            child_arguments)

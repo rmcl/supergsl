@@ -19,7 +19,8 @@ from supergsl.core.ast import (
     Slice,
     Constant,
     ListDeclaration,
-    SequenceConstant
+    SequenceConstant,
+    FunctionInvocation
 )
 
 from supergsl.core.types.builtin import (
@@ -28,7 +29,10 @@ from supergsl.core.types.builtin import (
     AminoAcidSequence
 )
 
-from supergsl.core.exception import SuperGSLTypeError
+from supergsl.core.exception import (
+    SuperGSLTypeError,
+    FunctionNotFoundError
+)
 
 class EvaluatePassTestCase(unittest.TestCase):
     """Testcases to evaluate the EvaluatePass class."""
@@ -223,3 +227,30 @@ class EvaluatePassTestCase(unittest.TestCase):
             SuperGSLTypeError,
             self.eval_pass.visit_sequence_constant,
             constant_protein_node)
+
+    def test_visit_function_invocation_function_not_defined(self):
+        """Raise exception if the desired function is not in the symbol table."""
+        function_invoke_node = FunctionInvocation(
+            'great_function',
+            Mock(),
+            [],
+            None)
+
+        self.assertRaises(
+            FunctionNotFoundError,
+            self.eval_pass.visit_function_invocation,
+            function_invoke_node)
+
+    def test_visit_function_invocation_not_function_declaration(self):
+        """Raise exception if symbol in symbol table is not a function declare."""
+        self.symbol_table.insert('great_function', AminoAcidSequence('MAA*'))
+        function_invoke_node = FunctionInvocation(
+            'great_function',
+            Mock(),
+            [],
+            None)
+
+        self.assertRaises(
+            SuperGSLTypeError,
+            self.eval_pass.visit_function_invocation,
+            function_invoke_node)
