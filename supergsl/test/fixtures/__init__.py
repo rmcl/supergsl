@@ -1,13 +1,10 @@
 from typing import List
-from Bio.Seq import Seq
-from supergsl.core.ast import Assembly, Part as AstPart
-from supergsl.core.constants import THREE_PRIME
-from supergsl.core.parts import Part, SeqPosition
+
 
 class SuperGSLIntegrationFixtures(object):
     """Fixtures to assist in execution of integration tests."""
 
-    def get_supergsl_settings(self, extra_plugins: list = None) -> dict:
+    def get_supergsl_settings(self, extra_plugins: List = None) -> dict:
         """Return a basic nested dictionary of settings.
 
         extra_plugins (list): a list of paths to plugins to include in the settings.

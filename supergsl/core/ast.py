@@ -1,8 +1,12 @@
 from __future__ import annotations
-from typing import cast, Dict, List, Optional, Any, Union
-
-from supergsl.core.parts.part import Part as CorePart
-
+from typing import (
+    Dict,
+    List,
+    Optional,
+    Any,
+    Union,
+    cast,
+)
 
 # rply has it's own style which does not conform to pylint's expectations.
 # pylint: disable=E1136
@@ -11,7 +15,7 @@ class Node(object):
     def child_nodes(self) -> List['Node']:
         return []
 
-    def eval(self) -> Dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return {}
 
     def replace_child_node(self, cur_node, new_node):
@@ -20,13 +24,14 @@ class Node(object):
     def get_node_label(self):
         return str(self.__class__.__name__)
 
+
 class SlicePosition(Node):
     def __init__(self, index: int, postfix : str, approximate : bool):
         self.index = index
         self.postfix = postfix
         self.approximate = approximate
 
-    def eval(self) -> Dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'node': 'SlicePosition',
             'index': self.index,
@@ -46,11 +51,11 @@ class Slice(Node):
         self.start = start
         self.end = end
 
-    def eval(self) -> Dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'node': 'Slice',
-            'start': self.start.eval(),
-            'end': self.end.eval()
+            'start': self.start.to_dict(),
+            'end': self.end.to_dict()
         }
 
     def get_slice_str(self):
@@ -60,21 +65,18 @@ class Slice(Node):
         )
 
 
-class Part(Node):
+class SymbolReference(Node):
     def __init__(self, identifier : str, slice : Optional[Slice], invert : bool):
         self.identifier = identifier
         self.slice = slice
         self.invert = invert
 
-        self.part : Optional[CorePart] = None
-        self.parent_parts : List[CorePart] = []
-
-    def eval(self) -> Dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return {
-            'node': 'Part',
+            'node': 'SymbolReference',
             'identifier': self.identifier,
             'invert': self.invert,
-            'slice': self.slice.eval() if self.slice else None
+            'slice': self.slice.to_dict() if self.slice else None
         }
 
     def child_nodes(self) -> List[Node]:
@@ -94,7 +96,7 @@ class ImportIdentifier(Node):
         self.identifier : str = identifier
         self.alias : Optional[str] = alias
 
-    def eval(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'identifier': self.identifier,
             'alias': self.alias
@@ -110,16 +112,16 @@ class ImportIdentifier(Node):
         return label
 
 class Import(Node):
-    def __init__(self, module_path : str, import_identifiers : List[ImportIdentifier]):
-        self.module = module_path
+    def __init__(self, module_path : List[str], import_identifiers : List[ImportIdentifier]):
+        self.module_path = module_path
         self.imports = import_identifiers
 
-    def eval(self):
+    def to_dict(self):
         return {
             'node': 'Import',
-            'module': self.module,
+            'module': self.module_path,
             'imports': [
-                progam_import.eval()
+                progam_import.to_dict()
                 for progam_import in self.imports
             ]
         }
@@ -128,12 +130,14 @@ class Import(Node):
         return cast(List[Node], self.imports)
 
     def get_node_label(self):
-        return '%s:%s' % (self.__class__.__name__, '.'.join(self.module))
+        return '%s:%s' % (self.__class__.__name__, '.'.join(self.module_path))
 
 
 Definition = Union[
     'Assembly',
-    'FunctionInvocation'
+    'VariableDeclaration',
+    # Todo: Maybe re-enable FunctionInvoke as a definition here
+    # 'FunctionInvocation'
 ]
 
 class DefinitionList(Node):
@@ -143,11 +147,11 @@ class DefinitionList(Node):
     def add_definition(self, definition : Definition):
         self.definitions.append(definition)
 
-    def eval(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'node': 'DefinitionList',
             'items': [
-                definition.eval()
+                definition.to_dict()
                 for definition in self.definitions
             ]
         }
@@ -162,57 +166,119 @@ class DefinitionList(Node):
             for node in self.definitions
         ]
 
+class TypeDeclaration(Node):
+    def __init__(self, identifier: str):
+        self.identifier : str = identifier
+
+    def to_dict(self) -> dict:
+        return {
+            'node': 'TypeDeclaration',
+            'identifier': self.identifier
+        }
+
+class VariableDeclaration(Node):
+    def __init__(
+        self,
+        identifier: str,
+        type_declaration : Optional[TypeDeclaration],
+        value : ListDeclaration
+    ):
+        self.identifier : str = identifier
+        self.type_declaration : Optional[TypeDeclaration] = type_declaration
+        self.value : ListDeclaration = value
+
+    def to_dict(self) -> dict:
+        return {
+            'node': 'VariableDeclaration',
+            'identifier': self.identifier,
+            'value': self.value.to_dict(),
+            'type_declaration': (
+                self.type_declaration.to_dict() if self.type_declaration else None
+            )
+        }
+
+    def child_nodes(self) -> List[Node]:
+        return [cast(Node, self.value)]
+
+
+class ListDeclaration(Node):
+    def __init__(self, items : List[Node]):
+        self.item_nodes : List[Node] = items
+
+    def to_dict(self) -> dict:
+        return {
+            'node': 'ListDeclaration',
+            'items': [
+                item_node.to_dict()
+                for item_node in self.item_nodes
+            ]
+        }
+
+    def child_nodes(self) -> List[Node]:
+        return self.item_nodes
+
+
 class Assembly(Node):
-    def __init__(self, parts : List[Part], label : Optional[str] = None):
-        self.parts : List[Part] = parts
+    def __init__(self, parts : List[SymbolReference], label : Optional[str] = None):
+        self.symbol_references : List[SymbolReference] = parts
         self.label : Optional[str] = label
 
-    def eval(self) -> Dict:
+    def to_dict(self) -> Dict:
         return {
             'node': 'Assembly',
             'parts': [
-                part.eval()
-                for part in self.parts
+                symbol_reference.to_dict()
+                for symbol_reference in self.symbol_references
             ],
             'label': self.label
         }
 
     def child_nodes(self) -> List[Node]:
-        return cast(List[Node], self.parts)
+        return cast(List[Node], self.symbol_references)
 
 
 class FunctionInvocation(Node):
-    def __init__(self, identifier : str, children : DefinitionList, params : Optional[List[str]] = None, label : str = None):
+    def __init__(
+        self, identifier : str,
+        children : DefinitionList,
+        params : Optional[List[Any]] = None,
+        label : str = None
+    ):
         self.identifier = identifier
         self.children = children
         self.params = params
         self.label = label
 
-    def eval(self) -> Dict:
-        return {
+    def to_dict(self) -> Dict:
+        results : Dict[str, Any] = {
             'node': 'FunctionInvocation',
             'identifier': self.identifier,
-            'children': self.children.eval() if self.children else None,
-            'params': self.params,
+            'children': self.children.to_dict() if self.children else None,
+            'params': None,
             'label': self.label
         }
 
-    def get_definition_list(self):
-        return self.children
+        if self.params:
+            results['params'] = [
+                param.to_dict()
+                for param in self.params
+            ]
+        return results
 
     def child_nodes(self):
+        all_child_nodes = []
         if self.children:
-            return [self.children]
-        else:
-            return []
-
+            all_child_nodes.append(self.children)
+        if self.params:
+            all_child_nodes.extend(self.params)
+        return all_child_nodes
 
 class SequenceConstant(Node):
     def __init__(self, sequence : str, sequence_type : str):
         self.sequence = sequence
         self.sequence_type = sequence_type
 
-    def eval(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'node': 'SequenceConstant',
             'type': self.sequence_type,
@@ -221,21 +287,22 @@ class SequenceConstant(Node):
 
 
 class Program(Node):
-    def __init__(self, imports : List[Import], definitions : DefinitionList):
-        self.definitions : DefinitionList = definitions
+    def __init__(self, imports : List[Import], definitions : Optional[DefinitionList]):
+        self.definitions : Optional[DefinitionList] = definitions
         self.imports : List[Import] = imports
 
-    def eval(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'node': 'Program',
             'imports': [
-                impor.eval()
+                impor.to_dict()
                 for impor in self.imports
             ],
-            'definitions': self.definitions.eval()
+            'definitions': self.definitions.to_dict() if self.definitions else None
         }
 
     def child_nodes(self) -> List[Node]:
         children : List[Node] = cast(List[Node], self.imports.copy())
-        children.append(cast(Node, self.definitions))
+        if self.definitions:
+            children.append(cast(Node, self.definitions))
         return children

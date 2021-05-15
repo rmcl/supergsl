@@ -1,5 +1,3 @@
-"""Define custom exceptions for SuperGSL."""
-
 class SuperGSLError(Exception):
     """Base exception for all custom SuperGSL errors."""
 
@@ -12,8 +10,16 @@ class ParsingError(SuperGSLError):
     """Raised when an error is encountered parsing the SuperGSL language."""
 
 
+class BackendError(SuperGSLError):
+    pass
+
+
 class NotFoundError(SuperGSLError):
     """Base class representing class of errors that occur when a SuperGSL object cannot be found."""
+
+
+class ConfigFileNotFound(NotFoundError):
+    """Attempted to load a configuration file, but it could not be found."""
 
 
 class SymbolNotFoundError(NotFoundError):
