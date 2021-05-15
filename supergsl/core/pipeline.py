@@ -47,7 +47,6 @@ class CompilerPipeline(object):
         for backend_pass_class in pass_classes:
             backend_pass_inst = backend_pass_class(self._global_symbol_table)
 
-            print('performing pass... %s' % backend_pass_inst.get_pass_name())
             ast = backend_pass_inst.perform(ast)
 
         return ast
