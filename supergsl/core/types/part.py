@@ -4,12 +4,13 @@ from supergsl.core.constants import (
     PART_SLICE_POSTFIX_START,
     PART_SLICE_POSTFIX_END
 )
+
 from supergsl.core.types import SuperGSLType
 from supergsl.core.types.builtin import (
     NucleotideSequence,
     PrimerPair,
 )
-from supergsl.core.ast import SlicePosition, SymbolReference
+from .position import SeqPosition
 
 
 class Part(NucleotideSequence):
@@ -17,15 +18,15 @@ class Part(NucleotideSequence):
 
     def __init__(
         self,
-        identifier,
-        start_position,
-        end_position,
+        identifier : str,
+        start_position : SeqPosition,
+        end_position : SeqPosition,
         provider,
-        parent_part=None,
-        extraction_primers=None,
-        description=None,
-        alternative_names=None,
-        roles = None
+        parent_part : Optional['Part'] = None,
+        extraction_primers : Optional[PrimerPair] = None,
+        description : Optional[str] = None,
+        alternative_names : Optional[List[str]] = None,
+        roles : Optional[List[str]]= None
     ):
         """Initialize a Part
 
