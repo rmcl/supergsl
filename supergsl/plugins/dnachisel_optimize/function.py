@@ -1,6 +1,5 @@
-from supergsl.core.types import SuperGSLEnum
 from supergsl.core.function import SuperGSLFunction
-from supergsl.core.types import NucleotideSequence, AminoAcidSequence, CodonFrequencyTable
+from supergsl.core.types.builtin import NucleotideSequence, AminoAcidSequence, CodonFrequencyTable
 
 from dnachisel import (
     DnaOptimizationProblem,
@@ -12,7 +11,7 @@ from dnachisel import (
 )
 
 
-class DNAChiselFunction(SuperGSLFunction):
+class DNAChiselOptimizeFunction(SuperGSLFunction):
     """Run the DNA Chisel Codon Optimization.
 
     This implementation presently uses a loop where codon-optimized sequences
@@ -38,19 +37,22 @@ class DNAChiselFunction(SuperGSLFunction):
     name = 'codon_optimize'
     arguments = [
         ('aa_sequence', AminoAcidSequence),
-        ('codon_frequency_table', CodonFrequencyTable),
+        #('codon_frequency_table', CodonFrequencyTable),
         ('num_results', int)
     ]
     return_type = NucleotideSequence
 
-    def execute(self, sgsl_args, child_nodes=None):
+    def execute(self, params : dict):
         """Invoke dnachissel to return matching codon optimized DNA sequence."""
 
-        protein = sgsl_args['aa_sequence']
-        naive_target_sequence = reverse_translate(protein)
-        codon_usage_table = None
-        num_results = sgsl_args.num_results
+        protein = params['aa_sequence']
 
+        codon_usage_table = None
+        num_results = params['num_results']
+
+        print(protein, num_results)
+
+        naive_target_sequence = reverse_translate(protein)
         proposed_sequences = []
         for i in range(num_results):
             print('Optimization run %s of %s' % (i, num_results))
