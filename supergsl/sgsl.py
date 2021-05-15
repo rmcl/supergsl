@@ -24,12 +24,10 @@ def main():
     if not args.input_file:
         SuperGSLShell().start()
     else:
-        output_pipeline.validate_args(args)
-
         print('Compiling "%s".' % args.input_file)
 
         with open(args.input_file, 'r') as input_file_fp:
-            result = compiler_pipeline.compile(input_file_fp.read())
+            compiler_pipeline.compile(input_file_fp.read())
 
     print('Compiling Complete.')
 

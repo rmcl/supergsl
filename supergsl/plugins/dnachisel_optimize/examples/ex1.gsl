@@ -1,0 +1,11 @@
+from builtin import print
+from dnachisel import codon_optimize
+
+# TRP-Cage, a protein with only 20 amino acids derived from the saliva of Gila monsters.
+# http://www.pdb.org/pdb/explore/explore.do?structureId=1L2Y
+let protein = /$MAAATCAGAGAAAAC/
+
+
+let result = codon_optimize(protein, 2)
+
+print(result)

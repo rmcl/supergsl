@@ -1,3 +1,4 @@
+from typing import List, Optional
 from supergsl.core.function import SuperGSLFunction
 from supergsl.core.types.builtin import (
     Collection,
@@ -37,8 +38,6 @@ class DNAChiselOptimizeFunction(SuperGSLFunction):
         * https://github.com/Edinburgh-Genome-Foundry/codon-usage-tables/tree/master/codon_usage_data/tables
         * https://github.com/Edinburgh-Genome-Foundry/DnaChisel/issues/39
     """
-
-    import_path = 'dnachisel'
     name = 'codon_optimize'
     arguments = [
         ('aa_sequence', AminoAcidSequence),
@@ -58,7 +57,7 @@ class DNAChiselOptimizeFunction(SuperGSLFunction):
         print(protein_sequence, num_results)
 
         naive_target_sequence = reverse_translate(protein_sequence)
-        proposed_sequences = []
+        proposed_sequences : List[str] = []
         for i in range(num_results):
             print('Optimization run %s of %s' % (i, num_results))
             new_sequence = self.create_new_sequence(
@@ -74,10 +73,10 @@ class DNAChiselOptimizeFunction(SuperGSLFunction):
 
     def create_new_sequence(
         self,
-        naive_target_sequence,
-        codon_usage_table,
-        existing_sequences
-    ):
+        naive_target_sequence : str,
+        codon_usage_table : Optional[str],
+        existing_sequences : List[str]
+    ) -> str:
         """Run DNAChisel to create a new codon optimized DNA sequence
 
         """

@@ -10,6 +10,7 @@ from supergsl.core.types.builtin import (
     NucleotideSequence,
     PrimerPair,
 )
+from supergsl.core.exception import PartError
 from .position import SeqPosition
 
 
@@ -65,6 +66,9 @@ class Part(NucleotideSequence):
 
     def get_extraction_primers(self) -> PrimerPair:
         """Return primers that will allow the extraction of this part from its template source."""
+        if not self.extraction_primers:
+            raise PartError('Extraction Primers for part have not been defined.')
+
         return self.extraction_primers
 
     def get_sequence(self):
