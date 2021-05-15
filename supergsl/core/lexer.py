@@ -32,6 +32,7 @@ class Lexer():
         self.lexer.add('TILDE', r'~')
         self.lexer.add('EXCLAMATION', r'!')
         self.lexer.add('NUMBER', r'-?\d+')
+        self.lexer.add('AMINO_ACID_SEQUENCE', r'\$[ACDEFGHIKLMNPQRSTVWY\*]+')
         self.lexer.add('IDENTIFIER', r'\w[\w\d\_\-]*')
 
         # Ignore spaces

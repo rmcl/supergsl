@@ -22,7 +22,6 @@ class LexerTestCase(unittest.TestCase):
                 for token in self.lexer.lex(inp)
             ]
 
-            print(tokens)
             self.assertEqual(
                 tokens,
                 expected_tokens,
@@ -88,5 +87,10 @@ examples = [
         ('IDENTIFIER', 'uHO'),
         ('SEMICOLON', ';'),
         ('IDENTIFIER', 'pADH1')
+    ), (
+        "/$MAAADR*/",
+        ('FORWARD_SLASH', '/'),
+        ('AMINO_ACID_SEQUENCE', '$MAAADR*'),
+        ('FORWARD_SLASH', '/'),
     )
 ]
