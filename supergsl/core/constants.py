@@ -1,5 +1,7 @@
 """A module of useful constants."""
 
+NUMBER_CONSTANT = 'NUMBER'
+
 THREE_PRIME = 'ThreePrime'
 FIVE_PRIME = 'FivePrime'
 

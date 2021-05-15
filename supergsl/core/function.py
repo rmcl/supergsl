@@ -13,6 +13,7 @@ class SuperGSLFunction(SuperGSLType):
     name: Optional[str] = None
     compiler_settings : Optional[Dict] = None
 
+    arguments : List[Tuple[str, Type]] = []
     return_type : Optional[Type[SuperGSLType]] = None
 
     def __init__(self, compiler_settings : dict):
@@ -32,7 +33,7 @@ class SuperGSLFunction(SuperGSLType):
     @classmethod
     def get_arguments(cls) -> List[Tuple[str, Type]]:
         """Return a list of expected arguments."""
-        return []
+        return cls.arguments
 
     @classmethod
     def get_return_type(cls) -> Union[Type[SuperGSLType], Type[None]]:

@@ -273,6 +273,18 @@ class FunctionInvocation(Node):
             all_child_nodes.extend(self.params)
         return all_child_nodes
 
+class Constant(Node):
+    def __init__(self, value : str, constant_type : Type):
+        self.value = value
+        self.constant_type = constant_type
+
+    def to_dict(self) -> dict:
+        return {
+            'node': 'Constant',
+            'type': self.constant_type,
+            'value': self.value
+        }
+
 class SequenceConstant(Node):
     def __init__(self, sequence : str, sequence_type : str):
         self.sequence = sequence

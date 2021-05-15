@@ -2,7 +2,8 @@
 from rply import ParserGenerator
 from supergsl.core.constants import (
     UNAMBIGUOUS_DNA_SEQUENCE,
-    UNAMBIGUOUS_PROTEIN_SEQUENCE
+    UNAMBIGUOUS_PROTEIN_SEQUENCE,
+    NUMBER_CONSTANT
 )
 
 from . import ast
@@ -44,7 +45,6 @@ class ParserBuilder(object):
         'EQUAL',
         'TILDE',
         'EXCLAMATION',
-        'DOLLAR_SIGN',
     )
 
     def __init__(self):
@@ -165,6 +165,7 @@ class ParserBuilder(object):
         @self.pg.production('definition_item : symbol_reference')
         @self.pg.production('definition_item : nucleotide_constant')
         @self.pg.production('definition_item : amino_acid_constant')
+        @self.pg.production('definition_item : number_constant')
         def definition_item(state, p):
             return p[0]
 
@@ -194,8 +195,8 @@ class ParserBuilder(object):
 
             return p[1]
 
-        @self.pg.production('function_parameters : symbol_reference')
-        @self.pg.production('function_parameters : symbol_reference COMMA function_parameters')
+        @self.pg.production('function_parameters : definition_item')
+        @self.pg.production('function_parameters : definition_item COMMA function_parameters')
         def function_parameters(state, p):
             x = [p[0]]
             if len(p) == 3:
@@ -218,6 +219,10 @@ class ParserBuilder(object):
             elif len(p) == 3:
                 p[0].append(p[2])
                 return p[0]
+
+        @self.pg.production('number_constant : NUMBER')
+        def number_constant(state, p):
+            return ast.Constant(p[0].value, NUMBER_CONSTANT)
 
         @self.pg.production('nucleotide_constant : FORWARD_SLASH IDENTIFIER FORWARD_SLASH')
         def nucleotide_constant(state, p):
