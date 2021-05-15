@@ -7,9 +7,8 @@ from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 
 from supergsl.core.config import load_settings
 from supergsl.core.pipeline import CompilerPipeline
-from supergsl.core.output import OutputPipeline
 from supergsl.core.exception import SuperGSLError
-from supergsl.utils import get_logo
+from supergsl.utils import get_logo, display_symbol_table
 
 
 class SuperGSLShell:
@@ -22,8 +21,6 @@ class SuperGSLShell:
     def start(self):
         settings = load_settings()
         self.compiler_pipeline = CompilerPipeline(settings)
-        self.output_pipeline = OutputPipeline(settings)
-        self.last_ast = None
 
         self.prompt_session = PromptSession(
             auto_suggest=AutoSuggestFromHistory(),
@@ -41,19 +38,20 @@ class SuperGSLShell:
         return self.compiler_pipeline.compile(source_code)
 
     def run_help(self):
+        """Display a help message."""
         print(textwrap.dedent(
             """
             SuperGSL Help!
 
-            Output Providers
-                .<provider-name>
+            Commands:
+            .symbols: Display a the symbol table containing all loaded objects.
 
             To-Exit the shell: "Ctrl-D"
 
             """))
 
     def loop(self):
-
+        """Loop awaiting user input."""
         while True:
             try:
                 inp = self.prompt_for_input()
@@ -65,16 +63,11 @@ class SuperGSLShell:
             print('PRINT COMMAND', inp)
             if inp[0] == '?':
                 self.run_help()
-            elif inp[0] == '.':
-                args = SimpleNamespace()
-                args.output_format = [inp[1:]]
-
-                self.output_pipeline.validate_args(args)
-                self.output_pipeline.run(self.last_ast, args)
-
+            elif inp == '.symbols':
+                display_symbol_table(self.compiler_pipeline.get_symbol_table())
             else:
                 try:
-                    self.last_ast = self.run_compiler(inp)
+                    self.run_compiler(inp)
                 except SuperGSLError as error:
                     print('ERROR', error)
 

@@ -3,7 +3,7 @@
 import inspect
 import importlib
 from typing import Dict
-from supergsl.core.exception import ConfigurationError
+from supergsl.core.exception import ConfigurationError, NotFoundError
 from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.symbol_table import SymbolTable
 
@@ -50,6 +50,9 @@ class SuperGSLPlugin(object):
         alias : str
     ) -> None:
         """Import a identifier and register it in the symbol table."""
+        if identifier not in self.functions:
+            raise NotFoundError('%s not found in module.' % identifier)
+
         symbol_table.insert(alias or identifier, self.functions[identifier])
 
 

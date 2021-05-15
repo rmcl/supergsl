@@ -66,8 +66,9 @@ class EvaluatePass(BackendPipelinePass):
         for import_node in program_node.imports:
             self.visit(import_node)
 
-        for definition_node in program_node.definitions.definitions:
-            self.visit(definition_node)
+        if program_node.definitions:
+            for definition_node in program_node.definitions.definitions:
+                self.visit(definition_node)
 
 
     def visit_import(self, import_node : Import):
