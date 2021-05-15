@@ -73,7 +73,6 @@ venv/
 *.c
 
 # supergsl specific
-#examples
 notebooks
 
 #docs

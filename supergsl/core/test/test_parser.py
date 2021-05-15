@@ -14,19 +14,6 @@ class ParserTestCase(unittest.TestCase):
     def setUp(self):
         self.parser = ParserBuilder()
 
-    def test_one_assembly_must_be_defined(self):
-        """An error should be raised if the parser does not receive tokens for at least one assembly."""
-        tokens = iter(())
-        error_message = None
-        try:
-            self.parser.parse(tokens)
-        except ParsingError as error:
-            error_message = str(error)
-
-        self.assertEqual(
-            error_message,
-            'At least one assembly must be defined.')
-
     def test_build_ast_import(self):
         """Test building an AST from the parsed tokens of "from S288C import ADHA, ERG10, HO"."""
 

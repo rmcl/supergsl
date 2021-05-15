@@ -1,5 +1,6 @@
 from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
 from supergsl.core.plugin import SuperGSLPlugin
+from supergsl.core.function import SuperGSLFunction
 from supergsl.core.ast import Assembly
 from supergsl.core.types.builtin import NucleotideSequence
 
@@ -13,9 +14,6 @@ class ChopChopFunction(SuperGSLFunction):
     """
 
     name = 'cut'
-
-    def get_help(self):
-        return self.execute.__docstr__
 
     def get_arguments(self):
         return [
