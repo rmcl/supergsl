@@ -12,6 +12,9 @@ class AssemblyDeclaration(SuperGSLType):
         self.label : Optional[str] = label
         self.parts : List[Part] = parts
 
+    def get_label(self) -> Optional[str]:
+        return self.label
+
     def get_parts(self) -> List[Part]:
         return self.parts
 
