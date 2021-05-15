@@ -1,6 +1,6 @@
 """Tests for the eval module."""
 import unittest
-from mock import Mock, call
+from mock import Mock, call, patch
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.eval import EvaluatePass
 from supergsl.core.ast import (
@@ -9,7 +9,8 @@ from supergsl.core.ast import (
     ImportIdentifier,
     Assembly,
     VariableDeclaration,
-    SymbolReference
+    SymbolReference,
+    Slice
 )
 
 class EvaluatePassTestCase(unittest.TestCase):
@@ -94,7 +95,7 @@ class EvaluatePassTestCase(unittest.TestCase):
         self.assertEqual('RESULT', actual_result)
 
     def test_visit_symbol_reference(self):
-        """Retrieve a symbol from the symbol table."""
+        """Symbol Reference visit should retrieve a symbol from the symbol table."""
         supergsl_type = Mock()
         supergsl_type.eval.return_value = 'YES!'
 
@@ -104,3 +105,45 @@ class EvaluatePassTestCase(unittest.TestCase):
         result = self.eval_pass.visit_symbol_reference(symbol_ref)
 
         self.assertEqual(result, 'YES!')
+
+    def test_visit_slice(self):
+        """Visit Slice should visit start and end positions and create a child part."""
+        start = Mock()
+        end = Mock()
+        parent_part = Mock(identifier='HIII')
+        expected_child_part = Mock()
+        parent_part.get_child_part_by_slice.return_value = expected_child_part
+        self.eval_pass.visit.return_value = 'VISIT-RETURN-VAL'
+
+        slice_node = Slice(start, end)
+        slice_node.get_slice_str = Mock(return_value='poop')
+
+        new_part = self.eval_pass.visit_slice(slice_node, parent_part)
+
+        self.assertEqual(new_part, expected_child_part)
+        self.eval_pass.visit.assert_has_calls([
+            call(start, parent_part),
+            call(end, parent_part)
+        ])
+
+        parent_part.get_child_part_by_slice.assert_called_once_with(
+            'HIII[poop]',
+            'VISIT-RETURN-VAL',
+            'VISIT-RETURN-VAL'
+        )
+
+    def test_visit_slice_position(self):
+        """Visit slice position should convert a slice position to a SeqPosition"""
+
+        parent_part = Mock()
+        slice_position = Mock()
+
+        convert_util_path = 'supergsl.core.eval.convert_slice_position_to_seq_position'
+        with patch(convert_util_path) as convert_patch:
+            convert_patch.return_value = 'HELLOOO'
+
+            result = self.eval_pass.visit_slice_position(
+                slice_position, parent_part)
+
+            convert_patch.assert_called_once_with(parent_part, slice_position)
+            self.assertEqual(result, 'HELLOOO')

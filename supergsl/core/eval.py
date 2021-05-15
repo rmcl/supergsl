@@ -130,6 +130,7 @@ class EvaluatePass(BackendPipelinePass):
             variable_declaration.identifier,
             expression_result)
 
+
     def visit_symbol_reference(self, symbol_reference : SymbolReference) -> SuperGSLType:
         symbol = self.symbol_table.lookup(symbol_reference.identifier)
         symbol = symbol.eval()
@@ -143,6 +144,7 @@ class EvaluatePass(BackendPipelinePass):
             raise NotImplementedError('Inverted parts not implemented yet!')
 
         return symbol
+
 
     def visit_slice(self, slice_node : Slice, parent_part : Part):
         start_position = self.visit(slice_node.start, parent_part)
