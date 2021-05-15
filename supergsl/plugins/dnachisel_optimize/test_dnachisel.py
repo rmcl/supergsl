@@ -28,7 +28,7 @@ class DnaChiselTestCases(TestCase):
         """
 
     def test_execute(self):
-        """Call dnachisel execute function."""
+        """Call dnachisel codon_optimize execute function."""
         params = {
             'aa_sequence': AminoAcidSequence(Seq('MAAATCAGAGAAAAC')),
             'num_results': 2
