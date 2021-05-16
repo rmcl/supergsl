@@ -1,6 +1,6 @@
 import unittest
 from supergsl.core.test.fixtures import SuperGSLCoreFixtures
-from supergsl.core.parts import Part
+from supergsl.core.types.part import Part
 from supergsl.core.constants import SO_PROMOTER
 
 class PartTestCase(unittest.TestCase):

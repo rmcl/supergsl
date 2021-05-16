@@ -1,17 +1,58 @@
 """Support for SuperGSL's plugin infrastructure."""
 
 import inspect
-from re import Pattern, Match
 import importlib
 from typing import Dict
-from supergsl.core.exception import ConfigurationError
+from supergsl.core.exception import ConfigurationError, NotFoundError
+from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.symbol_table import SymbolTable
 
 
 class SuperGSLPlugin(object):
-    """Base class for defining a SuperGSL Plugin."""
+    """Base class for defining a SuperGSL Plugin.
 
-    def register(self, symbol_table, compiler_settings):
+    An example of writing a function for SuperGSL:
+
+    class ExamplePlugin(SuperGSLPlugin):
+
+        def register(self, compiler_settings):
+            self.register_function(
+                'import_path',
+                'functionname',
+                SuperGSLFunctionDeclaration(FunctionClass, settings))
+    """
+
+    def __init__(self, symbol_table : SymbolTable, compiler_settings : dict):
+        self.symbol_table = symbol_table
+        self.functions : Dict[str, SuperGSLFunctionDeclaration] = {}
+        self.register(compiler_settings)
+
+    def resolve_import(
+        self,
+        symbol_table : SymbolTable,
+        identifier : str,
+        alias : str
+    ) -> None:
+        """Import a identifier and register it in the symbol table."""
+        if identifier not in self.functions:
+            raise NotFoundError('%s not found in module.' % identifier)
+
+        symbol_table.insert(alias or identifier, self.functions[identifier])
+
+
+    def register_function(
+        self,
+        import_path : str,
+        function_name : str,
+        function_declaration : SuperGSLFunctionDeclaration
+    ):
+        """Register a function making it available for import in SuperGSL."""
+        nested_symbol_table = self.symbol_table.nested_scope('imports')
+        self.functions[function_name] = function_declaration
+        nested_symbol_table.insert(import_path, self)
+
+
+    def register(self, compiler_settings : dict):
         """Register Functions, enums, etc that the plugin provides.
 
         Example: symbol_table.register(import_path, mod_class)
@@ -46,5 +87,4 @@ class PluginProvider(object):
             if issubclass(plugin_class, SuperGSLPlugin):
                 print('Registering plugin...', plugin_class)
 
-                plugin_inst = plugin_class()
-                plugin_inst.register(self._symbol_table, self._compiler_settings)
+                plugin_class(self._symbol_table, self._compiler_settings)

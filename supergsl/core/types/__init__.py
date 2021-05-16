@@ -1,25 +1,3 @@
-from .builtin import (
-    SuperGSLType,
+"""Define a hierarchy of types that can be used by SuperGSL and its plugins."""
 
-    NucleotideSequence,
-    AminoAcidSequence,
-
-    Primer,
-    PrimerPair,
-)
-
-TYPES = [
-    SuperGSLType,
-    NucleotideSequence,
-    AminoAcidSequence,
-
-    Primer,
-    PrimerPair,
-]
-
-def resolve_type(type_name):
-    for type in TYPES:
-        if type.__class__ == type_name:
-            return type
-
-    raise Exception('Unknown Type "%s"' % type_name)
+from .base import SuperGSLType
