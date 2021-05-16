@@ -1,23 +1,6 @@
 from typing import List
-
 from supergsl.core.function import SuperGSLFunction
 from supergsl.core.types.assembly import AssemblyDeclaration, AssemblyList
-
-
-class Assembly(object):
-    """Store the an assembled construct."""
-
-    def get_sequence(self):
-        """Return the complete sequence of the construct."""
-        raise NotImplementedError('Subclass to implement.')
-
-    def get_required_parts(self):
-        """Return a list of parts required to construct this assembly."""
-        raise NotImplementedError('Subclass to implement.')
-
-    def get_part(self):
-        """Retrieve a Part corresponding to this construct."""
-        raise NotImplementedError('Subclass to implement.')
 
 
 class AssemblerBase(SuperGSLFunction):
