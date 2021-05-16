@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Restriction import Restriction, RestrictionBatch
@@ -10,6 +10,7 @@ from supergsl.core.exception import PartNotFoundError
 from supergsl.core.assembly import AssemblerBase
 from supergsl.core.constants import THREE_PRIME, SO_HOMOLOGOUS_REGION
 from supergsl.core.parts.provider import PartProvider
+from supergsl.core.types.assembly import AssemblyDeclaration, AssemblyList
 from supergsl.core.types.position import SeqPosition
 from supergsl.core.types.part import Part
 
@@ -164,7 +165,7 @@ class BioBrick3AAssembler(AssemblerBase):
         assembly = Assembly(fragments)
         print(assembly)
 
-    def assemble(self, assemblies):
+    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyList:
         """
         Strategy:
             assemblies is a collection ordered list of parts
@@ -187,11 +188,12 @@ class BioBrick3AAssembler(AssemblerBase):
 
         """
 
-        for assembly_node in assemblies.definitions:
+        assemblies : List[Assembly] = []
+        for assembly_idx, assembly_request in enumerate(assembly_requests):
+            parts = assembly_request.get_parts()
 
-            parts = assembly_node.parts
-            p1 = parts[0].part
-            p2 = parts[1].part
+            p1 = parts[0]
+            p2 = parts[1]
 
             print('ASSEMBLE', type(p1), p1.identifier, p2.identifier)
 

@@ -1,5 +1,11 @@
+"""Implement a Assembler useful for creating parts via overlapping short oligonucleotides."""
+from typing import List
 from Bio.Seq import Seq
-from supergsl.core.types.assembly import Assembly
+from supergsl.core.types.assembly import (
+    AssemblyDeclaration,
+    Assembly,
+    AssemblyList
+)
 from supergsl.core.assembly import AssemblerBase
 
 DEFAULT_MAX_OLIGO_LEN = 200
@@ -22,20 +28,19 @@ class SyntheticOligoAssembler(AssemblerBase):
         self.min_overlap = config_options.get('max_oligo_len', DEFAULT_MIN_OVERLAP)
         self.max_num_oligos = config_options.get('max_num_oligos', DEFAULT_NUM_OLIGOS)
 
+    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyList:
+        """Iterate over `Part` and generate an Assembly object."""
 
-    def assemble(self, assemblies):
-        """Assemble for synthesis using synthetic oligos."""
         oligos = []
-        for assembly_node in assemblies.definitions:
-            part_sequences = []
-            for part_node in assembly_node.parts:
-                part = part_node.part
 
-                print('PART', part)
-                part_sequences.append(part.get_sequence().seq)
+        assemblies : List[Assembly] = []
+        for assembly_idx, assembly_request in enumerate(assembly_requests):
+            parts = assembly_request.get_parts()
 
-            # Todo: Find a better way to concatenate Bio.Seq objects.
-            assembly_sequence = Seq(''.join(str(part_sequences)))
+            assembly_sequence = Seq(''.join([
+                str(part.get_sequence().seq)
+                for part in parts
+            ]))
 
             oligo_idx = 0
             seq_pos = 0
@@ -63,4 +68,9 @@ class SyntheticOligoAssembler(AssemblerBase):
                 oligo_idx += 1
 
             print(oligos)
-            new_assembly = Assembly(assembly_sequence, oligos)
+
+            identifier = str('ASM-%05d' % assembly_idx)
+            assembly = Assembly(identifier, assembly_sequence, oligos)
+            assemblies.append(assembly)
+
+        return AssemblyList(assemblies)

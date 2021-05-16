@@ -2,6 +2,7 @@ from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.function import SuperGSLFunctionDeclaration
 
 from .fuse import FusionAssembler
+from .oligos import SyntheticOligoAssembler
 from .print import SuperGSLTypePrintFunction
 
 class BuiltinAssemblersPlugin(SuperGSLPlugin):
@@ -14,3 +15,6 @@ class BuiltinAssemblersPlugin(SuperGSLPlugin):
 
         self.register_function('builtin', 'print', SuperGSLFunctionDeclaration(
             SuperGSLTypePrintFunction, compiler_settings))
+
+        self.register_function('synthesis', 'synthetic_oligos', SuperGSLFunctionDeclaration(
+            SyntheticOligoAssembler, compiler_settings))
