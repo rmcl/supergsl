@@ -90,7 +90,7 @@ class SuperGSLFunction(SuperGSLType):
             argument_value = positional_arguments[argument_idx]
 
             if argument_key == 'children':
-                raise Exception('Cannot define an argument named "children". It is reserved.')
+                raise FunctionInvokeError('Cannot define an argument named "children". It is reserved.')
 
             if not isinstance(argument_value, expected_argument_type):
                 raise FunctionInvokeError(
@@ -101,6 +101,9 @@ class SuperGSLFunction(SuperGSLType):
                 )
 
             function_parameters[argument_key] = argument_value
+
+        if child_arguments:
+            function_parameters['children'] = child_arguments
 
         return function_parameters
 
