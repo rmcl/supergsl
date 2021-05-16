@@ -7,6 +7,7 @@ SuperGSL is inspired by the original Genome Specification Language (See: [Paper]
 [![Documentation Status](https://readthedocs.org/projects/supergsl/badge/?version=latest)](https://supergsl.readthedocs.io/en/latest/?badge=latest)
 ![SuperGSL Tests](https://github.com/rmcl/supergsl/workflows/SuperGSL%20Tests/badge.svg)
 [![codecov](https://codecov.io/gh/rmcl/supergsl/branch/master/graph/badge.svg?token=LANIO2RFVI)](https://codecov.io/gh/rmcl/supergsl)
+[![PyPI version](https://badge.fury.io/py/supergsl.svg)](https://badge.fury.io/py/supergsl)
 
 ### New Features in SuperGSL
 
