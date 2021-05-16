@@ -9,6 +9,8 @@ RUN mkdir /code
 WORKDIR /code
 COPY . /code
 
+RUN pip install -e .[plugins]
+
 RUN python setup.py develop
 
 ENTRYPOINT [ "invoke" ]

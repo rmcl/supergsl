@@ -42,10 +42,10 @@ docker-compose run supergsl test
 To start the REPL shell:
 
 ```
-docker-compose run supergsl sgsl
+docker-compose run supergsl
 ```
 
-To run the compiler with source input file: 
+To run the compiler with source input file:
 ```
 docker-compose run supergsl sgsl <input-file>
 ```
