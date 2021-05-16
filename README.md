@@ -39,7 +39,13 @@ docker-compose run supergsl test
 
 #### Run the Compiler
 
-To run the compiler (Note: This sort of doesn't work right now because you would somehow need to get the input file into the docker container, but is useful to me for testing):
+To start the REPL shell:
+
+```
+docker-compose run supergsl sgsl
+```
+
+To run the compiler with source input file: 
 ```
 docker-compose run supergsl sgsl <input-file>
 ```
