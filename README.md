@@ -11,7 +11,7 @@ SuperGSL is inspired by the original Genome Specification Language (See: [Paper]
 
 ### New Features in SuperGSL
 
-See how SuperGSL differs from the original gsl [here](/docs/build/gsl_vs_supergsl)
+See how SuperGSL differs from the original GSL [here](https://supergsl.readthedocs.io/en/latest/gsl_vs_supergsl.html).
 
 ### Install *SuperGSL*
 
