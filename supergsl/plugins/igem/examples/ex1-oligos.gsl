@@ -28,15 +28,13 @@ Make sure the following configuration is in your `supergsl-config.yml` file:
 
 */
 
-from synthesis import synthetic-oligos
+from synthesis import synthetic_oligos
 from biobrick import prefix, suffix
 from igem import BBa_J23112 # promoter part
 from igem import BBa_E0040 # Red Fluorescent Protein
 
-# once we get variable asssignment syntax
-# let bricked_parts =
-
-synthetic-oligos {
+# once we get variable assignment syntax
+let bricked_parts = synthetic_oligos {
     prefix ; BBa_J23112 ; suffix
     prefix ; BBa_E0040 ; suffix
 }

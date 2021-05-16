@@ -1,5 +1,6 @@
 from Bio.Seq import Seq
-from supergsl.core.assembly import AssemblerBase, Assembly
+from supergsl.core.types.assembly import Assembly
+from supergsl.core.assembly import AssemblerBase
 
 DEFAULT_MAX_OLIGO_LEN = 200
 DEFAULT_MIN_OVERLAP = 20
