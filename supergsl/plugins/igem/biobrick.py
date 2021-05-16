@@ -9,8 +9,9 @@ from pydna.dseqrecord import Dseqrecord
 from supergsl.core.exception import PartNotFoundError
 from supergsl.core.assembly import AssemblerBase
 from supergsl.core.constants import THREE_PRIME, SO_HOMOLOGOUS_REGION
-from supergsl.core.parts import SeqPosition
-from supergsl.core.parts import PartProvider, Part
+from supergsl.core.parts.provider import PartProvider
+from supergsl.core.types.position import SeqPosition
+from supergsl.core.types.part import Part
 
 class InvalidBioBrickError(Exception):
     pass
