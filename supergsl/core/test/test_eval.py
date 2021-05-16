@@ -3,6 +3,7 @@ import unittest
 from mock import Mock, call, patch
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.eval import EvaluatePass
+from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.constants import (
     STRING_CONSTANT,
     NUMBER_CONSTANT,
@@ -254,3 +255,18 @@ class EvaluatePassTestCase(unittest.TestCase):
             SuperGSLTypeError,
             self.eval_pass.visit_function_invocation,
             function_invoke_node)
+
+    def test_visit_function_invocation(self):
+        function_declare = SuperGSLFunctionDeclaration(Mock(), {})
+        func_inst = Mock()
+        function_declare.eval = Mock(return_value = func_inst)
+        func_inst.evaluate_arguments_and_execute.return_value = 'HELLO world!'
+        self.symbol_table.insert('great_function', function_declare)
+
+        function_invoke_node = FunctionInvocation(
+            'great_function', [], [], None)
+
+        result = self.eval_pass.visit_function_invocation(function_invoke_node)
+        self.assertEqual(result, 'HELLO world!')
+        func_inst.evaluate_arguments_and_execute.assert_called_once_with(
+            [], [])
