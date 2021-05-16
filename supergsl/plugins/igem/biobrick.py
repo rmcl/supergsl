@@ -215,7 +215,7 @@ class BioBrickPartProvider(PartProvider):
     ```
     {
         "name": "biobrick",
-        "provider_class": "supergsl.plugins.igem.BioBrickPartProvider",
+        "provider_class": "supergsl.plugins.igem.BioBrickPartProvider"
     }
 
     References

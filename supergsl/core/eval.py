@@ -234,8 +234,9 @@ class EvaluatePass(BackendPipelinePass):
 
         params = function_invoke_node.params
         positional_arguments = []
-        for param_value in params:
-            positional_arguments.append(self.visit(param_value))
+        if params:
+            for param_value in params:
+                positional_arguments.append(self.visit(param_value))
 
         return function_inst.evaluate_arguments_and_execute(
             positional_arguments,
