@@ -37,6 +37,10 @@ class FunctionNotFoundError(NotFoundError):
     """The specified function cannot be found."""
 
 
+class PartError(SuperGSLError):
+    """Raise by `PartProviders` when there is something wrong with a part."""
+
+
 class PartNotFoundError(NotFoundError):
     """Raised by `PartProvider` when a part cannot be found when imported or referenced."""
 

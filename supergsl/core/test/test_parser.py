@@ -227,3 +227,31 @@ class ParserTestCase(unittest.TestCase):
             'imports': [],
             'node': 'Program'
         })
+
+    def test_build_ast_sequence_constant_amino_acid(self):
+        """Parse to an AST for a constant amino acid sequence."""
+        tokens = iter((
+            Token('FORWARD_SLASH', '/'),
+            Token('AMINO_ACID_SEQUENCE', '$NYWKDGGSSGRS*'),
+            Token('FORWARD_SLASH', '/'),
+
+        ))
+        ast = self.parser.parse(tokens)
+
+        self.assertEqual(type(ast), Program)
+        self.assertEqual(ast.to_dict(), {
+            'definitions': {
+                'node': 'DefinitionList',
+                'items': [{
+                    'label': None,
+                    'node': 'Assembly',
+                    'parts': [{
+                        'node': 'SequenceConstant',
+                        'sequence': 'NYWKDGGSSGRS*',
+                        'type': 'PROTEIN'
+                    }]
+                }],
+            },
+            'imports': [],
+            'node': 'Program'
+        })

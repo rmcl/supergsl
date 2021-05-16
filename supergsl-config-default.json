@@ -9,6 +9,7 @@
         }
     ],
     "plugins": [
+        "supergsl.plugins.builtin",
         "supergsl.core.parts.provider"
     ]
 }

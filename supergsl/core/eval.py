@@ -1,13 +1,25 @@
 """Evaluate a SuperGSL Program."""
-from typing import Any, Dict, Optional, Callable
+from typing import Any, Dict, Optional, Callable, Union
 
 from supergsl.core.types import SuperGSLType
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.backend import BackendPipelinePass
+from supergsl.core.types.builtin import (
+    NucleotideSequence,
+    AminoAcidSequence,
+    Collection
+)
 from supergsl.core.types.part import Part
 from supergsl.core.parts.slice import convert_slice_position_to_seq_position
-from supergsl.core.types.builtin import Collection
 from supergsl.core.types.assembly import AssemblyDeclaration
+
+from supergsl.core.constants import (
+    UNAMBIGUOUS_DNA_SEQUENCE,
+    UNAMBIGUOUS_PROTEIN_SEQUENCE,
+    NUMBER_CONSTANT,
+    STRING_CONSTANT
+)
+
 from supergsl.core.ast import (
     Node,
     Program,
@@ -19,10 +31,17 @@ from supergsl.core.ast import (
     FunctionInvocation,
     Slice,
     SlicePosition,
+    SequenceConstant,
+    Constant
 )
 
 from supergsl.core.function import SuperGSLFunctionDeclaration
-from supergsl.core.exception import FunctionInvokeError, SuperGSLTypeError
+from supergsl.core.exception import (
+    FunctionInvokeError,
+    SuperGSLTypeError,
+    SymbolNotFoundError,
+    FunctionNotFoundError
+)
 
 #pylint: disable=E1136
 
@@ -45,6 +64,8 @@ class EvaluatePass(BackendPipelinePass):
             'SymbolReference': self.visit_symbol_reference,
             'Slice': self.visit_slice,
             'SlicePosition': self.visit_slice_position,
+            'Constant': self.visit_constant,
+            'SequenceConstant': self.visit_sequence_constant,
         }
 
     def perform(self, ast_node : Node):
@@ -115,6 +136,7 @@ class EvaluatePass(BackendPipelinePass):
             variable_declaration.identifier,
             expression_result)
 
+
     def visit_symbol_reference(self, symbol_reference : SymbolReference) -> SuperGSLType:
         symbol = self.symbol_table.lookup(symbol_reference.identifier)
         symbol = symbol.eval()
@@ -128,6 +150,7 @@ class EvaluatePass(BackendPipelinePass):
             raise NotImplementedError('Inverted parts not implemented yet!')
 
         return symbol
+
 
     def visit_slice(self, slice_node : Slice, parent_part : Part):
         start_position = self.visit(slice_node.start, parent_part)
@@ -144,54 +167,76 @@ class EvaluatePass(BackendPipelinePass):
 
 
     def visit_slice_position(self, slice_position : SlicePosition, parent_part : Part):
+        """Convert a SlicePosition node into a SeqPosition for the given Part."""
         return convert_slice_position_to_seq_position(
             parent_part,
             slice_position)
 
 
     def visit_list_declaration(self, list_declaration : ListDeclaration) -> Collection:
+        """Instantiate a Collection based on details of list declaration."""
         return Collection([
             self.visit(item_node)
             for item_node in list_declaration.item_nodes
         ])
 
+    def visit_constant(self, constant_node : Constant):
+        """Create the appropriate constant object based on `Constant` type."""
+        if constant_node.constant_type == NUMBER_CONSTANT:
+            return int(constant_node.value)
+
+        if constant_node.constant_type == STRING_CONSTANT:
+            return constant_node.value
+
+        raise SuperGSLTypeError('Unknown constant type.')
+
+
+    def visit_sequence_constant(
+        self,
+        sequence_constant : SequenceConstant
+    ) -> Union[NucleotideSequence, AminoAcidSequence]:
+        """Return a Sequence Type based on the constant defined SequenceConstant Node."""
+
+        sequence_type = sequence_constant.sequence_type
+        if sequence_type == UNAMBIGUOUS_PROTEIN_SEQUENCE:
+            return AminoAcidSequence(sequence_constant.sequence)
+
+        if sequence_type == UNAMBIGUOUS_DNA_SEQUENCE:
+            return NucleotideSequence(sequence_constant.sequence)
+
+        raise SuperGSLTypeError('Unhandled sequence type "%s"' % sequence_type)
+
     def visit_function_invocation(self, function_invoke_node : FunctionInvocation) -> SuperGSLType:
         """Evaluate this node by initializing and executing a SuperGSLFunction."""
-        function_declaration = self.symbol_table.lookup(function_invoke_node.identifier)
+
+        try:
+            function_declaration = self.symbol_table.lookup(function_invoke_node.identifier)
+        except SymbolNotFoundError as error:
+            raise FunctionNotFoundError(
+                'Function %s has not been imported.' % (
+                    function_invoke_node.identifier)) from error
+
         if not isinstance(function_declaration, SuperGSLFunctionDeclaration):
-            raise SuperGSLTypeError('{} is not of type Function. It is a "{}"'.format(
-                function_invoke_node.identifier,
-                type(function_declaration)
-            ))
+            raise SuperGSLTypeError(
+                '{} is not of type FunctionDeclaration. It is a "{}"'.format(
+                    function_invoke_node.identifier,
+                    type(function_declaration)))
 
         function_inst = function_declaration.eval()
 
-        expected_return_type = function_inst.get_return_type()
-        eval_params : Dict[Any, Any] = {
-            'children': []
-        }
-
-        params = function_invoke_node.params
+        child_arguments = []
         children = function_invoke_node.children
-        if params:
-            # TODO: Right now we are using positional indexes for arguments in a
-            # rather inelegant way. Reflect on this and attempt to improve.
-            for idx in range(len(params)):
-                eval_params[idx] = self.visit(params[idx])
-
         if children:
-            eval_params['children'] = [
+            child_arguments = [
                 self.visit(child)
                 for child in children.definitions
             ]
 
-        function_result = function_inst.execute(eval_params)
-        if not isinstance(function_result, expected_return_type):
-            raise FunctionInvokeError(
-                '"%s" Return type does not match expectation. Expected: "%s", Actual: "%s"' % (
-                    function_inst,
-                    expected_return_type,
-                    type(function_result)
-                ))
+        params = function_invoke_node.params
+        positional_arguments = []
+        for param_value in params:
+            positional_arguments.append(self.visit(param_value))
 
-        return function_result
+        return function_inst.evaluate_arguments_and_execute(
+            positional_arguments,
+            child_arguments)

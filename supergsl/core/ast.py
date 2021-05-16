@@ -5,6 +5,7 @@ from typing import (
     Optional,
     Any,
     Union,
+    Type,
     cast,
 )
 
@@ -238,11 +239,13 @@ class Assembly(Node):
 
 
 class FunctionInvocation(Node):
+    """AST node representing function calls."""
     def __init__(
-        self, identifier : str,
+        self,
+        identifier : str,
         children : DefinitionList,
-        params : Optional[List[Any]] = None,
-        label : str = None
+        params : List[Any],
+        label : Optional[str]
     ):
         self.identifier = identifier
         self.children = children
@@ -272,6 +275,18 @@ class FunctionInvocation(Node):
         if self.params:
             all_child_nodes.extend(self.params)
         return all_child_nodes
+
+class Constant(Node):
+    def __init__(self, value : str, constant_type : Type):
+        self.value = value
+        self.constant_type = constant_type
+
+    def to_dict(self) -> dict:
+        return {
+            'node': 'Constant',
+            'type': self.constant_type,
+            'value': self.value
+        }
 
 class SequenceConstant(Node):
     def __init__(self, sequence : str, sequence_type : str):

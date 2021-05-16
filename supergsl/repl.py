@@ -60,7 +60,6 @@ class SuperGSLShell:
             except EOFError:
                 break  # Control-D pressed.
 
-            print('PRINT COMMAND', inp)
             if inp[0] == '?':
                 self.run_help()
             elif inp == '.symbols':

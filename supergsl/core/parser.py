@@ -2,7 +2,8 @@
 from rply import ParserGenerator
 from supergsl.core.constants import (
     UNAMBIGUOUS_DNA_SEQUENCE,
-    UNAMBIGUOUS_PROTEIN_SEQUENCE
+    UNAMBIGUOUS_PROTEIN_SEQUENCE,
+    NUMBER_CONSTANT
 )
 
 from . import ast
@@ -40,10 +41,10 @@ class ParserBuilder(object):
         'PERIOD',
         'NUMBER',
         'IDENTIFIER',
+        'AMINO_ACID_SEQUENCE',
         'EQUAL',
         'TILDE',
         'EXCLAMATION',
-        'DOLLAR_SIGN',
     )
 
     def __init__(self):
@@ -130,7 +131,7 @@ class ParserBuilder(object):
         def definition(state, p):
             return p[0]
 
-        @self.pg.production('variable_definition : LET IDENTIFIER EQUAL symbol_reference')
+        @self.pg.production('variable_definition : LET IDENTIFIER EQUAL definition_item')
         @self.pg.production('variable_definition : LET IDENTIFIER EQUAL function_invoke')
         @self.pg.production('variable_definition : LET IDENTIFIER EQUAL list_declaration')
         @self.pg.production('variable_definition : LET IDENTIFIER type_declaration EQUAL list_declaration')
@@ -153,18 +154,19 @@ class ParserBuilder(object):
         def list_declaration(state, p):
             return ast.ListDeclaration(p[1])
 
-        @self.pg.production('list_items : list_item')
-        @self.pg.production('list_items : list_item COMMA list_items')
+        @self.pg.production('list_items : definition_item')
+        @self.pg.production('list_items : definition_item COMMA list_items')
         def list_items(state, p):
             new_list = [p[0]]
             if len(p) == 3:
                 new_list.extend(p[2])
             return new_list
 
-        @self.pg.production('list_item : symbol_reference')
-        @self.pg.production('list_item : nucleotide_constant')
-        @self.pg.production('list_item : amino_acid_constant')
-        def list_item(state, p):
+        @self.pg.production('definition_item : symbol_reference')
+        @self.pg.production('definition_item : nucleotide_constant')
+        @self.pg.production('definition_item : amino_acid_constant')
+        @self.pg.production('definition_item : number_constant')
+        def definition_item(state, p):
             return p[0]
 
         @self.pg.production('function_name_and_label : IDENTIFIER')
@@ -193,8 +195,8 @@ class ParserBuilder(object):
 
             return p[1]
 
-        @self.pg.production('function_parameters : symbol_reference')
-        @self.pg.production('function_parameters : symbol_reference COMMA function_parameters')
+        @self.pg.production('function_parameters : definition_item')
+        @self.pg.production('function_parameters : definition_item COMMA function_parameters')
         def function_parameters(state, p):
             x = [p[0]]
             if len(p) == 3:
@@ -209,8 +211,8 @@ class ParserBuilder(object):
             elif len(p) == 3:
                 return ast.Assembly(p[2], label=p[0].value)
 
-        @self.pg.production('assembly_list : assembly_list SEMICOLON assembly_list_item')
-        @self.pg.production('assembly_list : assembly_list_item')
+        @self.pg.production('assembly_list : assembly_list SEMICOLON definition_item')
+        @self.pg.production('assembly_list : definition_item')
         def assembly_list(state, p):
             if len(p) == 1:
                 return [p[0]]
@@ -218,18 +220,17 @@ class ParserBuilder(object):
                 p[0].append(p[2])
                 return p[0]
 
-        @self.pg.production('assembly_list_item : symbol_reference')
-        @self.pg.production('assembly_list_item : nucleotide_constant')
-        def assembly_list_item(state, p):
-            return p[0]
+        @self.pg.production('number_constant : NUMBER')
+        def number_constant(state, p):
+            return ast.Constant(p[0].value, NUMBER_CONSTANT)
 
         @self.pg.production('nucleotide_constant : FORWARD_SLASH IDENTIFIER FORWARD_SLASH')
         def nucleotide_constant(state, p):
             return ast.SequenceConstant(p[1].value, UNAMBIGUOUS_DNA_SEQUENCE)
 
-        @self.pg.production('amino_acid_constant : FORWARD_SLASH DOLLAR_SIGN IDENTIFIER FORWARD_SLASH')
+        @self.pg.production('amino_acid_constant : FORWARD_SLASH AMINO_ACID_SEQUENCE FORWARD_SLASH')
         def protein_constant(state, p):
-            return ast.SequenceConstant(p[1].value, UNAMBIGUOUS_PROTEIN_SEQUENCE)
+            return ast.SequenceConstant(p[1].value[1:], UNAMBIGUOUS_PROTEIN_SEQUENCE)
 
         @self.pg.production('symbol_reference : symbol_identifier OPEN_BRACKET slice_index CLOSE_BRACKET')
         @self.pg.production('symbol_reference : symbol_identifier')
