@@ -12,7 +12,7 @@ class SymbolTable:
         self.name = name
         self._parent = parent
 
-        # Todo: We want to restrict the type of the values of the symbol table.
+        # TODO: We want to restrict the type of the values of the symbol table.
         # Ideally, this would be Union[SuperGSLType, SuperGSLPlugin]. Need to resolve
         # a circular dependency first.
         self._symbols : Dict[str, Any] = {}
