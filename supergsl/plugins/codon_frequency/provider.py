@@ -19,13 +19,9 @@ class CodonFrequencyTableProvider(SuperGSLProvider):
     status for the year 2000.
     Nakamura, Y., Gojobori, T. and Ikemura, T. (2000) Nucl. Acids Res. 28, 292.
 
-    To configure this part provider add the following to `supergsl-config.json`:
-    ```
-    {
-        "name": "kazusa_codon_tables",
-        "provider_class": "supergsl.plugins.codon_frequency.CodonFrequencyTableProvider"
-    }
-
+    This provider uses the nice python package "python_codon_tables" from
+    Edinburgh Genome Foundry.
+    (https://github.com/Edinburgh-Genome-Foundry/codon-usage-tables/tree/master/python_codon_tables)
     """
 
     def __init__(self, compiler_settings : dict):
