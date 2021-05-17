@@ -1,14 +1,15 @@
 import os
 import inspect
+from typing import Optional
 import docker
 from docker.errors import ImageNotFound
 from supergsl.core.function import SuperGSLFunction
 
 
 class DockerFunction(SuperGSLFunction):
-    image_tag = None
+    image_tag : Optional[str] = None
 
-    def execute(self, sgsl_args, child_nodes=None):
+    def execute(self, params):
         """Invoke the function using docker."""
 
         # Setup gRPC????
@@ -20,8 +21,6 @@ class DockerFunction(SuperGSLFunction):
         self.invoke()
 
         return None
-
-
 
     @property
     def docker_client(self):

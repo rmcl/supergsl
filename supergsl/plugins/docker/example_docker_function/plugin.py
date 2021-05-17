@@ -1,4 +1,6 @@
 from supergsl.core.plugin import SuperGSLPlugin
+from supergsl.core.function import SuperGSLFunctionDeclaration
+from supergsl.core.types.builtin import NucleotideSequence
 from supergsl.plugins.docker import DockerFunction
 
 class ExampleDockerFunction(DockerFunction):
@@ -13,15 +15,21 @@ class ExampleDockerFunction(DockerFunction):
 
     def get_arguments(self):
         return [
-            argument('num_results', int)
+            ('num_results', int)
         ]
 
     def get_return_type(self):
-        return NucleotideConstant
+        return NucleotideSequence
 
 
 class ExampleDockerPlugin(SuperGSLPlugin):
+    """Register example docker plugin."""
 
-    def register(self, symbol_table, compiler_settings):
+    def register(self, compiler_settings):
         """Register functions provide by chopchop."""
-        symbol_table.register('examples', ExampleDockerFunction())
+        self.symbol_table.register(
+            'examples',
+            'docker_example',
+            SuperGSLFunctionDeclaration(
+                ExampleDockerFunction,
+                compiler_settings))
