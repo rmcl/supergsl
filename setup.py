@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="supergsl",
-    version="0.0.1",
+    version="0.1.0",
     author="Russell McLoughlin",
     author_email="russ.mcl@gmail.com",
     description="A python implementation of the Genome Specification Language (GSL) for genetic engineering.",
@@ -31,7 +31,7 @@ setuptools.setup(
         'mock',
         'mypy',
         'mypy-extensions',
-
+        'prompt_toolkit',
     ],
     extras_require={
         "plugins": [

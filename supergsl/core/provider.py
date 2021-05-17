@@ -1,17 +1,14 @@
-"""Support for SuperGSL's plugin infrastructure."""
-from re import Pattern, Match
-from supergsl.core.types import SuperGSLType
+"""Support SuperGSL's symbol provider mechanism."""
+from supergsl.core.symbol_table import SymbolTable
 
 class SuperGSLProvider(object):
+    """Base class to define objects that can provide symbols."""
 
-    def resolve_import(self, identifier : str, alias : str) -> Pattern:
-        """Resolve an identifier to be imported from this provider.
-
-        Return a tuple with:
-            * A regular expression to match symbols against
-            * A callback method that given the actual identifier will return the `Part`.
-        """
-        raise NotImplementedError('Subclass to implement')
-
-    def get_symbol(self, identifier_match : Match) -> SuperGSLType:
+    def resolve_import(
+        self,
+        symbol_table : SymbolTable,
+        identifier : str,
+        alias : str
+    ) -> None:
+        """Import a identifier and register it in the symbol table."""
         raise NotImplementedError('Subclass to implement')

@@ -10,6 +10,7 @@ class Lexer():
         self.lexer.add('FROM', r'from')
         self.lexer.add('IMPORT', r'import')
         self.lexer.add('AS', r'as\ ')
+        self.lexer.add('LET', r'let')
 
         # Other characters
         self.lexer.add('OPEN_PAREN', r'\(')
@@ -24,12 +25,14 @@ class Lexer():
         self.lexer.add('SEMICOLON', r'\;')
         self.lexer.add('COMMA', r'\,')
         self.lexer.add('PERIOD', r'\.')
-        self.lexer.add('DOLLAR_SIGN', r'$')
+        #self.lexer.add('DOLLAR_SIGN', r'$')
         #self.lexer.add('HASH', r'\#')
 
+        self.lexer.add('EQUAL', r'=')
         self.lexer.add('TILDE', r'~')
         self.lexer.add('EXCLAMATION', r'!')
         self.lexer.add('NUMBER', r'-?\d+')
+        self.lexer.add('AMINO_ACID_SEQUENCE', r'\$[ACDEFGHIKLMNPQRSTVWY\*]+')
         self.lexer.add('IDENTIFIER', r'\w[\w\d\_\-]*')
 
         # Ignore spaces
