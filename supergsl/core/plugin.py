@@ -2,7 +2,7 @@
 
 import inspect
 import importlib
-from typing import Dict
+from typing import Dict, Set, Type
 from supergsl.core.exception import ConfigurationError, NotFoundError
 from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.symbol_table import SymbolTable
@@ -64,7 +64,8 @@ class PluginProvider(object):
     """Resolve and register SuperGSL plugins."""
 
     def __init__(self, symbol_table: SymbolTable, compiler_settings : dict):
-        self._plugins: Dict[str, SuperGSLPlugin] = {}
+        # We add SuperGSLPlugin base type so that we don't attempt to register it.
+        self._resolved_plugins : Set[Type] = set([SuperGSLPlugin])
         self._symbol_table: SymbolTable = symbol_table
         self._compiler_settings = compiler_settings
 
@@ -73,7 +74,7 @@ class PluginProvider(object):
                 'No plugins have been defined. Check your supergGSL settings.')
 
         for plugin_path in compiler_settings['plugins']:
-            print('Resolving plugin "%s"' % plugin_path)
+            print('Resolving plugin path "%s"' % plugin_path)
 
             self.resolve_plugins_from_config(plugin_path)
 
@@ -85,6 +86,12 @@ class PluginProvider(object):
 
         for _, plugin_class in module_classes:
             if issubclass(plugin_class, SuperGSLPlugin):
+                # Sometimes we encounter a plugin more than once. Ignore already
+                # initialized plugins.
+                if plugin_class in self._resolved_plugins:
+                    continue
+                self._resolved_plugins.add(plugin_class)
+
                 print('Registering plugin...', plugin_class)
 
                 plugin_class(self._symbol_table, self._compiler_settings)
