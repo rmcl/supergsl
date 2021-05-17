@@ -4,6 +4,7 @@ import inspect
 import importlib
 from typing import Dict, Set, Type
 from supergsl.core.exception import ConfigurationError, NotFoundError
+from supergsl.core.provider import SuperGSLProvider
 from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.symbol_table import SymbolTable
 
@@ -39,6 +40,14 @@ class SuperGSLPlugin(object):
 
         symbol_table.insert(alias or identifier, self.functions[identifier])
 
+    def register_provider(
+        self,
+        import_path : str,
+        provider_inst : SuperGSLProvider
+    ):
+        """Register a provider allowing the user to import things from a SuperGSLProgram."""
+        import_symbol_table = self.symbol_table.nested_scope('imports')
+        import_symbol_table.insert(import_path, provider_inst)
 
     def register_function(
         self,
@@ -81,7 +90,16 @@ class PluginProvider(object):
 
     def resolve_plugins_from_config(self, module_path: str) -> None:
         """Attempt to resolve and register a plugin at a specific path."""
-        module = importlib.import_module(module_path)
+
+        try:
+            module = importlib.import_module(module_path)
+        except ModuleNotFoundError as load_error:
+            print('ERROR\nERROR: Could not load "%s". %s\nERROR' % (
+                module_path,
+                str(load_error)
+            ))
+            return
+
         module_classes = inspect.getmembers(module, inspect.isclass)
 
         for _, plugin_class in module_classes:
