@@ -42,9 +42,7 @@ class CodonFrequencyTableProvider(SuperGSLProvider):
         Return: `CodonFrequencyTable`
         """
         table = get_codons_table(identifier)
-
-        # TODO: Figure out how we convert this table to a gsl type.
-        return CodonFrequencyTable()
+        return CodonFrequencyTable(identifier, table)
 
     def resolve_import(
         self,
