@@ -27,7 +27,8 @@ class CodonFrequencyTableProvider(SuperGSLProvider):
     def __init__(self, compiler_settings : dict):
         self.settings = compiler_settings
 
-    def list_tables(self):
+    def list(self) -> List[str]:
+        """Return a listing of available codon tables by name."""
         return available_codon_tables_names
 
     def get_table(self, identifier : str) -> CodonFrequencyTable:
