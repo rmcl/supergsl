@@ -1,6 +1,6 @@
 from typing import Dict, Tuple, List
 
-from supergsl.core.types.builtin import CodonFrequencyTable
+from supergsl.core.types.codon import CodonFrequencyTable
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.provider import SuperGSLProvider
 
