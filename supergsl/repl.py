@@ -18,9 +18,11 @@ class SuperGSLShell:
     )
     prompt = '[sGSL] '
 
+    def __init__(self, compiler_settings : dict):
+        self.settings = compiler_settings
+
     def start(self):
-        settings = load_settings()
-        self.compiler_pipeline = CompilerPipeline(settings)
+        self.compiler_pipeline = CompilerPipeline(self.settings)
 
         self.prompt_session = PromptSession(
             auto_suggest=AutoSuggestFromHistory(),
@@ -59,6 +61,9 @@ class SuperGSLShell:
                 continue  # Control-C pressed. Try again.
             except EOFError:
                 break  # Control-D pressed.
+
+            if inp.strip() == '':
+                continue
 
             if inp[0] == '?':
                 self.run_help()

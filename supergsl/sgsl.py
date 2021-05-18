@@ -7,9 +7,6 @@ import pprint
 
 
 def main():
-    settings = load_settings()
-    compiler_pipeline = CompilerPipeline(settings)
-
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "input_file",
@@ -20,12 +17,13 @@ def main():
 
     args = parser.parse_args()
 
-    print(args.input_file)
+    compiler_settings = load_settings()
     if not args.input_file:
-        SuperGSLShell().start()
+        SuperGSLShell(compiler_settings).start()
     else:
         print('Compiling "%s".' % args.input_file)
 
+        compiler_pipeline = CompilerPipeline(compiler_settings)
         with open(args.input_file, 'r') as input_file_fp:
             compiler_pipeline.compile(input_file_fp.read())
 

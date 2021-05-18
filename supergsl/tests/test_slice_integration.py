@@ -1,17 +1,18 @@
 from unittest import TestCase
 from Bio import SeqIO
 from supergsl.core.pipeline import CompilerPipeline
-from supergsl.test.fixtures import SuperGSLIntegrationFixtures
-from supergsl.test.fixtures.utils import TestOutputAstPass
+from supergsl.tests.fixtures import SuperGSLIntegrationFixtures
+from supergsl.tests.fixtures.utils import TestOutputAstPass
 
 from supergsl.utils import display_symbol_table
+
 
 class SuperGSLIntegrationTestCases(TestCase):
 
     def setUp(self):
         self.maxDiff = None
         self.expected_sequences = SeqIO.index(
-            'supergsl/test/expected_sequences.fasta', 'fasta')
+            'supergsl/tests/expected_sequences.fasta', 'fasta')
 
         self.fixtures = SuperGSLIntegrationFixtures()
         self.compiler_settings = self.fixtures.get_supergsl_settings()

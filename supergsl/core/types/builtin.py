@@ -36,12 +36,6 @@ class AminoAcidSequence(SuperGSLType):
     def __repr__(self):
         return 'AminoAcidSequence: %s' % self.get_sequence()
 
-class CodonFrequencyTable(SuperGSLType):
-    """
-    https://github.com/Edinburgh-Genome-Foundry/codon-usage-tables/tree/master/codon_usage_data/tables
-    """
-    pass
-
 
 class CodonTranslationTable(SuperGSLType):
     """Encode the mapping of DNA/RNA codons to protein.
@@ -50,7 +44,6 @@ class CodonTranslationTable(SuperGSLType):
     https://biopython.org/docs/1.75/api/Bio.Data.CodonTable.html
     """
     pass
-
 
 class Primer(NucleotideSequence):
     """Represent a short nucleotide sequence that provides a starting point for replication"""

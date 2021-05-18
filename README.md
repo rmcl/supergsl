@@ -7,10 +7,11 @@ SuperGSL is inspired by the original Genome Specification Language (See: [Paper]
 [![Documentation Status](https://readthedocs.org/projects/supergsl/badge/?version=latest)](https://supergsl.readthedocs.io/en/latest/?badge=latest)
 ![SuperGSL Tests](https://github.com/rmcl/supergsl/workflows/SuperGSL%20Tests/badge.svg)
 [![codecov](https://codecov.io/gh/rmcl/supergsl/branch/master/graph/badge.svg?token=LANIO2RFVI)](https://codecov.io/gh/rmcl/supergsl)
+[![PyPI version](https://badge.fury.io/py/supergsl.svg)](https://badge.fury.io/py/supergsl)
 
 ### New Features in SuperGSL
 
-See how SuperGSL differs from the original gsl [here](/docs/build/gsl_vs_supergsl)
+See how SuperGSL differs from the original GSL [here](https://supergsl.readthedocs.io/en/latest/gsl_vs_supergsl.html).
 
 ### Install *SuperGSL*
 
@@ -39,7 +40,13 @@ docker-compose run supergsl test
 
 #### Run the Compiler
 
-To run the compiler (Note: This sort of doesn't work right now because you would somehow need to get the input file into the docker container, but is useful to me for testing):
+To start the REPL shell:
+
+```
+docker-compose run supergsl
+```
+
+To run the compiler with source input file:
 ```
 docker-compose run supergsl sgsl <input-file>
 ```

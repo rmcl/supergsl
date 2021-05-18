@@ -53,6 +53,7 @@ class PartProvider(SuperGSLProvider):
 
 
 class PartProviderPlugin(SuperGSLPlugin):
+    """Plugin stub to register part providers."""
     name = 'part_provider'
 
     def register(self, compiler_settings):
@@ -62,15 +63,9 @@ class PartProviderPlugin(SuperGSLPlugin):
             raise ConfigurationError(
                 'No part providers have been defined. Check your supergGSL settings.')
 
-        import_symbol_table = self.symbol_table.nested_scope('imports')
-
         for provider_config in compiler_settings['part_providers']:
             print('Initializing "%s"' % provider_config['name'])
             provider_class = import_class(provider_config['provider_class'])
             provider_inst = provider_class(provider_config['name'], provider_config)
 
-            provider_name = provider_inst.get_provider_name()
-            if not provider_name:
-                raise ConfigurationError('Provider "%s" does not specify a name.' % provider_class)
-
-            import_symbol_table.insert(provider_name, provider_inst)
+            self.register_provider(provider_config['name'], provider_inst)

@@ -1,5 +1,5 @@
 import unittest
-from supergsl.core.test.fixtures import SuperGSLCoreFixtures
+from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.core.types.part import Part
 from supergsl.core.constants import SO_PROMOTER
 

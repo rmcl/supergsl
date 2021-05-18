@@ -1,6 +1,6 @@
 """Tests for the output core module."""
 import unittest
-from supergsl.core.test.fixtures import SuperGSLCoreFixtures
+from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.plugins.pydna.primers import ExtractionPrimerBuilder
 
 class ExtractionPrimerBuilderTestCase(unittest.TestCase):

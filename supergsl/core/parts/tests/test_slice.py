@@ -9,7 +9,7 @@ from supergsl.core.ast import (
 from supergsl.core.types.part import Part
 from supergsl.core.types.position import SeqPosition
 
-from supergsl.core.test.fixtures import SuperGSLCoreFixtures
+from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.core.constants import (
     PART_SLICE_POSTFIX_START,
     PART_SLICE_POSTFIX_END

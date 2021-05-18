@@ -37,5 +37,5 @@ class GenBankFilePartProviderTestCase(TestCase):
         self.assertEqual(rep.end.get_absolute_position_in_reference()[1], 2243)
         self.assertEqual(rep.get_sequence().seq, self.expected_sequences.get('rep').seq)
 
-    EXAMPLE_GB_FILE_PATH = 'supergsl/plugins/ncbi/test/fixtures/nucleotide-U89790.gb.gz'
-    EXAMPLE_FASTA_FILE_PATH = 'supergsl/plugins/ncbi/test/fixtures/nucleotide-U89790.fa'
+    EXAMPLE_GB_FILE_PATH = 'supergsl/plugins/ncbi/tests/fixtures/nucleotide-U89790.gb.gz'
+    EXAMPLE_FASTA_FILE_PATH = 'supergsl/plugins/ncbi/tests/fixtures/nucleotide-U89790.fa'
