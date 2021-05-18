@@ -3,9 +3,9 @@ from supergsl.core.function import SuperGSLFunction
 from supergsl.core.types.builtin import (
     Collection,
     NucleotideSequence,
-    AminoAcidSequence,
-    CodonFrequencyTable
+    AminoAcidSequence
 )
+from supergsl.core.types.codon import CodonFrequencyTable
 
 from dnachisel import (
     DnaOptimizationProblem,

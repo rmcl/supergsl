@@ -1,0 +1,4 @@
+from builtin import print
+from codon_frequency import s_cerevisiae_4932
+
+print(s_cerevisiae_4932)
