@@ -4,7 +4,7 @@ from typing import Optional
 import docker
 from docker.errors import ImageNotFound
 from supergsl.core.function import SuperGSLFunction
-
+from supergsl.grpc import CompilerFunctionService
 
 class DockerFunction(SuperGSLFunction):
     image_tag : Optional[str] = None
@@ -12,26 +12,32 @@ class DockerFunction(SuperGSLFunction):
     def execute(self, params):
         """Invoke the function using docker."""
 
-        # Setup gRPC????
-        # Invoke the docker container
+        print('Starting invoke of docker container function. %s' % self)
+        grpc_server = self.start_grpc_server(
+            self.serialize_params(params))
 
-        print('CUT IT UP!')
+        command = self.get_docker_command(params)
+        self.start_docker_container(command)
 
+        # Wait for the functions to all return values or timeout.
+        grpc_server.wait_for_function_completion(timeout=60)
 
-        self.invoke()
+        return grpc_server.get_return_value()
 
-        return None
+    def serialize_params(self, params : dict):
+        return params
 
-    @property
-    def docker_client(self):
-        return docker.from_env()
+    def start_grpc_server(self, serialized_params : str):
+        service = CompilerFunctionService(serialized_params)
+        service.start_listening()
+        return service
 
-    def get_image_tag(self):
-        if not self.image_tag:
-            raise Exception('Image tag must be defined for docker plugin.')
-        return self.image_tag
+    def get_docker_command(self, params):
+        """Generate the command string that will be passed to the docker container."""
+        raise NotImplementedError('Subclass to implement.')
 
-    def invoke(self):
+    def start_docker_container(self, command : str):
+        """Run the docker container with the given command."""
         try:
             image = self.docker_client.images.get(self.get_image_tag())
         except ImageNotFound:
@@ -39,12 +45,24 @@ class DockerFunction(SuperGSLFunction):
 
         container = self.docker_client.containers.run(
             image,
-            command='hello',
+            command=command,
             auto_remove=True,
             detach=True)
 
         for log in container.logs(stream=True):
             print(log)
+
+
+    @property
+    def docker_client(self):
+        return docker.from_env()
+
+
+    def get_image_tag(self):
+        if not self.image_tag:
+            raise Exception('Image tag must be defined for docker plugin.')
+        return self.image_tag
+
 
     def build(self):
         print('!--- Building Docker Image to invoke Plugin "%s" ----' % (
