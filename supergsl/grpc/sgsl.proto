@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package supergsl;
+option py_generic_services = true;
+
+
+service CompilerFunction {
+
+    rpc GetFunctionArguments(FunctionCallIdentifier) returns (MessageFunctionArguments) {}
+    rpc SetFunctionReturnValue(FunctionReturnValue) returns (SetFunctionReturnValueResponse) {}
+}
+
+message FunctionCallIdentifier {
+    string identifier = 1;
+}
+
+message MessageFunctionArguments {
+    string name = 1;
+}
+
+message FunctionReturnValue {
+    string value = 1;
+}
+
+message SetFunctionReturnValueResponse {
+    bool received = 1;
+}

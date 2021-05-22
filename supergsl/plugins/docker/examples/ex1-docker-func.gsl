@@ -1,0 +1,3 @@
+from examples import random_sequence
+
+random_sequence()

@@ -1,0 +1,4 @@
+from tab.S288C import GAL3
+from chopchop import cut_cas9
+
+cut_cas9(gGAL3, 2)
