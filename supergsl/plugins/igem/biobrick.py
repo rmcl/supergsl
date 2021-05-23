@@ -6,7 +6,7 @@ from Bio.Restriction import Restriction, RestrictionBatch
 from pydna.assembly import Assembly
 from pydna.dseqrecord import Dseqrecord
 
-from supergsl.core.exception import PartNotFoundError
+from supergsl.core.exception import PartNotFoundError, SuperGSLError
 from supergsl.core.assembly import AssemblerBase
 from supergsl.core.constants import THREE_PRIME, SO_HOMOLOGOUS_REGION
 from supergsl.core.parts.provider import PartProvider
@@ -14,7 +14,7 @@ from supergsl.core.types.assembly import AssemblyDeclaration, AssemblyList
 from supergsl.core.types.position import SeqPosition
 from supergsl.core.types.part import Part
 
-class InvalidBioBrickError(Exception):
+class InvalidBioBrickError(SuperGSLError):
     pass
 
 # From the docs, "BioBrick RFC[10] it must not contain the following
@@ -61,8 +61,6 @@ class BioBrick3AAssembler(AssemblerBase):
         http://parts.igem.org/Help:Assembly/3A_Assembly
         http://parts.igem.org/Help:Protocols/3A_Assembly
     """
-    import_path = 'biobrick'
-    name = 'assemble-3a'
 
     def __init__(self, config_options):
         self.plasmid_backbone_name = config_options.get('plasmid_backbone', 'pSB1C3')
@@ -122,7 +120,7 @@ class BioBrick3AAssembler(AssemblerBase):
         """Cut a sequence with a particular restriction enzyme."""
         restriction_fragments = restriction_enzyme.catalyze(sequence)
         if len(restriction_fragments) != expected_fragments:
-            raise Exception('Unexpected restriction cut; part is not a valid biobrick')
+            raise InvalidBioBrickError('Unexpected restriction cut; part is not a valid biobrick')
 
         return restriction_fragments
 
@@ -199,12 +197,11 @@ class BioBrick3AAssembler(AssemblerBase):
 
             # TODO: NEED TO CONFIRM PART ARE VALID BIO BRICKS -
             # ie have prefix and suffix and no bad cut sites
-            #check_is_valid_biobrick(p1.get_sequence().seq)
+            check_is_valid_biobrick(p1.get_sequence().seq)
 
             self.assemble_part_tuple(p1, p2)
             # validate that each part has the appropriate biobrick prefix/suffix
             # confirm that each part does not contain disallowed restriction sites.
-
 
 
 class BioBrickPartProvider(PartProvider):

@@ -20,7 +20,7 @@ class NucleotideSequence(SuperGSLType):
         return self._sequence
 
     def __repr__(self):
-        return 'NucleotideSequence: %s' % self.get_sequence()
+        return 'NucleotideSequence: %s' % self.get_sequence().seq
 
 
 class AminoAcidSequence(SuperGSLType):

@@ -11,7 +11,7 @@ Make sure the following configuration is in your `supergsl-config.yml` file:
         {
             "name": "igem",
             "provider_class": "supergsl.plugins.synbiohub.SynBioHubPartProvider",
-            "repository_url": "https://synbiohub.org/public/igem",
+            "repository_url": "https://synbiohub.org/public/igem"
         }
     ],
     ...
@@ -29,14 +29,19 @@ Make sure the following configuration is in your `supergsl-config.yml` file:
 */
 
 from json import output_json
+from builtin import fuse
 from synthesis import synthetic_oligos
 from biobrick import prefix, suffix
 from igem import BBa_J23112 # promoter part
 from igem import BBa_E0040 # Red Fluorescent Protein
 
-let bricked_parts = synthetic_oligos {
+let promoter = synthetic_oligos {
     prefix ; BBa_J23112 ; suffix
+}
+let orfs = fuse {
     prefix ; BBa_E0040 ; suffix
 }
 
-output_json(bricked_parts)
+
+
+output_json(orfs)
