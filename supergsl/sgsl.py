@@ -4,6 +4,7 @@ from supergsl.core.config import load_settings
 from supergsl.core.pipeline import CompilerPipeline
 from supergsl.core.exception import SuperGSLError
 from supergsl.repl import SuperGSLShell
+from supergsl.grpc.server import SuperGSLCompilerService
 import pprint
 
 
@@ -17,6 +18,12 @@ def main():
         nargs='?')
 
     parser.add_argument(
+        "-l", "--listen",
+        help="Start up a gRPC server.",
+        default=False,
+        action='store_true')
+
+    parser.add_argument(
         "-s", "--start-shell-on-error",
         help="If an error occurs during execution of SuperGSL program then start the repl shell.",
         default=False,
@@ -25,6 +32,15 @@ def main():
     args = parser.parse_args()
 
     compiler_settings = load_settings()
+
+    if args.listen:
+        print('Starting gRPC compiler server.')
+        service = SuperGSLCompilerService(compiler_settings)
+        service.start_listening()
+
+        print('Stoping compiler server')
+        return
+
     compiler_pipeline = CompilerPipeline(compiler_settings)
 
     if not args.input_file:

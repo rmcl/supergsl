@@ -34,8 +34,9 @@ class SymbolTable:
         """Lookup a symbol in the table."""
         try:
             return self._symbols[identifier]
-        except KeyError:
-            raise SymbolNotFoundError('Symbol "{}" does not exist.'.format(identifier))
+        except KeyError as error:
+            raise SymbolNotFoundError(
+                'Symbol "{}" does not exist.'.format(identifier)) from error
 
     def insert(self, identifier : str, value : Any) -> None:
         """Set a symbol to a value in the current scope."""
