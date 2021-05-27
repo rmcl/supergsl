@@ -8,8 +8,11 @@ from supergsl.grpc.stubs.sgsl_pb2_grpc import (
     add_SuperGSLCompilerServicer_to_server
 )
 from supergsl.grpc.stubs.sgsl_pb2 import (
+    CreateCompilerSessionRequest,
     CreateCompilerSessionResult,
+    ListSymbolTableRequest,
     ListSymbolTableResult,
+    CompileRequest,
     CompileResult,
     Symbol
 )
@@ -26,14 +29,24 @@ class SuperGSLCompilerService(SuperGSLCompilerServicer):
 
         self.compiler_sessions : Dict[str, CompilerPipeline] = {}
 
-    def CreateCompilerSession(self, request, context) -> CreateCompilerSessionResult:
+    def CreateCompilerSession(
+        self,
+        request : CreateCompilerSessionRequest,
+        context
+    ) -> CreateCompilerSessionResult:
         """Missing associated documentation comment in .proto file."""
 
         identifier = str(uuid.uuid4())
         self.compiler_sessions[identifier] = CompilerPipeline(self.compiler_settings)
         return CreateCompilerSessionResult(session_identifier=identifier)
 
-    def ListSymbolTable(self, request, context) -> ListSymbolTableResult:
+    def ListSymbolTable(
+        self, request : ListSymbolTableRequest,
+        context
+    ) -> ListSymbolTableResult:
+        """List the symbols from the given compiler session's symbol table."""
+        print(type(request))
+        print(type(context))
         compiler_pipeline = self.get_compiler_session(request.session_identifier)
 
         symbol_table = compiler_pipeline.get_symbol_table()
@@ -44,7 +57,12 @@ class SuperGSLCompilerService(SuperGSLCompilerServicer):
 
         return ListSymbolTableResult(symbols=symbol_map)
 
-    def Compile(self, request, context) -> CompileResult:
+    def Compile(
+        self,
+        request : CompileRequest,
+        context
+    ) -> CompileResult:
+        """Compile a string of source code in the specified compiler session."""
         compiler_pipeline = self.get_compiler_session(request.session_identifier)
         compiler_pipeline.compile(request.source_code)
         return CompileResult(
@@ -52,7 +70,7 @@ class SuperGSLCompilerService(SuperGSLCompilerServicer):
             error='test'
         )
 
-    def get_compiler_session(self, session_identifier) -> CompilerPipeline:
+    def get_compiler_session(self, session_identifier : str) -> CompilerPipeline:
         """Return a CompilerPipeline corresponding to the provided session identifier."""
         return self.compiler_sessions[session_identifier]
 
