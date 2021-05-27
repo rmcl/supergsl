@@ -37,6 +37,7 @@ setuptools.setup(
         "plugins": [
             'docker',
             'grpcio-tools',
+            'mypy-protobuf',
             'dnachisel',
             'graphviz',
         ]

@@ -4,11 +4,7 @@ import supergsl.grpc.stubs.sgsl_pb2 as pb2
 
 
 class SuperGSLCompilerClient(object):
-    """Execute a SuperGSL program through gRPC.
-
-    This is useful for Docker based plugins so they can interact with the compiler
-    which is executing on the host machine or in a different container.
-    """
+    """Execute SuperGSL code through gRPC."""
 
     def __init__(self):
         self.host = 'localhost'
@@ -21,9 +17,8 @@ class SuperGSLCompilerClient(object):
         # bind the client and the server
         self.stub = pb2_grpc.SuperGSLCompilerStub(self.channel)
 
-    def compile(self):
-        """
-        Client function to call the rpc for GetServerResponse
+    def repl(self):
+        """Await user input and then send it to a remote SuperGSL instance via gRPC.
         """
         result = self.stub.CreateCompilerSession(pb2.CreateCompilerSessionRequest())
         session_identifier = result.session_identifier
@@ -45,4 +40,4 @@ class SuperGSLCompilerClient(object):
 
 if __name__ == '__main__':
     client = SuperGSLCompilerClient()
-    client.compile()
+    client.repl()
