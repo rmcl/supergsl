@@ -18,12 +18,10 @@ class SuperGSLShell:
     )
     prompt = '[sGSL] '
 
-    def __init__(self, compiler_settings : dict):
-        self.settings = compiler_settings
+    def __init__(self, compiler_pipeline : CompilerPipeline):
+        self.compiler_pipeline = compiler_pipeline
 
     def start(self):
-        self.compiler_pipeline = CompilerPipeline(self.settings)
-
         self.prompt_session = PromptSession(
             auto_suggest=AutoSuggestFromHistory(),
             history=FileHistory('sgsl_history.txt'))

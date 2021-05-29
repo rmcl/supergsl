@@ -25,7 +25,7 @@ class SymbolTableTestCase(unittest.TestCase):
         table = SymbolTable('root', None)
         table.insert('HELLO', mock_symbol_1)
 
-        child_table = table.nested_scope('child_scope')
+        child_table = table.enter_nested_scope('child_scope')
 
         self.assertRaises(SymbolNotFoundError, child_table.lookup, 'HELLO')
 

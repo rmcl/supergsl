@@ -93,7 +93,7 @@ class EvaluatePass(BackendPipelinePass):
 
 
     def visit_import(self, import_node : Import):
-        import_table = self.symbol_table.nested_scope('imports')
+        import_table = self.symbol_table.enter_nested_scope('imports')
 
         module_path = '.'.join(import_node.module_path)
         provider = import_table.lookup(module_path)
