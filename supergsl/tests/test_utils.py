@@ -15,8 +15,8 @@ class UtilitiesTestCases(TestCase):
     def test_display_symbol_table(self):
         st = SymbolTable('GLOBAL', None)
         st.insert('BOB', 'HELLO')
-        st.nested_scope('BOOM')
-        st.insert('BOB', 'TAMBORINE')
+        sub_st = st.enter_nested_scope('BOOM')
+        sub_st.insert('BOB', 'TAMBORINE')
 
         old_stdout = sys.stdout
         sys.stdout = StringIO()
@@ -34,6 +34,7 @@ class UtilitiesTestCases(TestCase):
                 Key: BOB, Type: <class 'str'>
 
                 Table: BOOM ----
+                    Key: BOB, Type: <class 'str'>
                 --- End Table: BOOM ----
             --- End Table: GLOBAL ----
             """))

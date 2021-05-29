@@ -6,8 +6,19 @@ from supergsl.core.types.builtin import PrimerPair
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
 from supergsl.core.types.position import SeqPosition
+from supergsl.core.symbol_table import SymbolTable
 
 class SuperGSLCoreFixtures(object):
+
+    def mk_symbol_table(self):
+        """Create a simple symbol table with a nested scope."""
+        symbol_table = SymbolTable('awesome', None)
+        symbol_table.insert('uHO', self.mk_part('uHO', 100)[1])
+
+        nested_symbol_table = symbol_table.enter_nested_scope('awesome')
+        nested_symbol_table.insert('tHUG', self.mk_part('tHUG', 33)[1])
+
+        return symbol_table
 
     def get_assembly_ast(self):
         ast_part_nodes = [

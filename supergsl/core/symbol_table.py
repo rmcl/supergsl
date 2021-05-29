@@ -22,7 +22,7 @@ class SymbolTable:
         """Return the SymbolTable for the parent scope."""
         return self._parent
 
-    def nested_scope(self, name : str) -> 'SymbolTable':
+    def enter_nested_scope(self, name : str) -> 'SymbolTable':
         """Get or Create a nested scope within the current table."""
         try:
             return self._nested_scopes[name]
@@ -41,3 +41,11 @@ class SymbolTable:
     def insert(self, identifier : str, value : Any) -> None:
         """Set a symbol to a value in the current scope."""
         self._symbols[identifier] = value
+
+    def __iter__(self):
+        """Make the table iterable returning tuples of (key, value)."""
+        return iter(self._symbols.items())
+
+    def nested_scopes(self):
+        """Return a list of nested scopes"""
+        return iter(self._nested_scopes.items())

@@ -40,7 +40,7 @@ class EvaluatePassTestCase(unittest.TestCase):
 
     def setUp(self):
         self.symbol_table = SymbolTable('global', None)
-        self.import_table = self.symbol_table.nested_scope('imports')
+        self.import_table = self.symbol_table.enter_nested_scope('imports')
         self.eval_pass = EvaluatePass(self.symbol_table)
         self.eval_pass.visit = Mock()
 
