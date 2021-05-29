@@ -46,6 +46,6 @@ class SuperGSLCompilerServiceTestCase(unittest.TestCase):
 
         compiler_pipeline_class_mock.assert_called_once_with(self.settings)
 
-        self.assertEqual(
-            str(result.symbols),
-            '{\'awesome.tHUG\': type: "Part"\n, \'uHO\': type: "Part"\n}')
+        self.assertEqual(len(result.symbols), 2)
+        self.assertEqual(result.symbols['uHO'].type, 'Part')
+        self.assertEqual(result.symbols['awesome.tHUG'].type, 'Part')
