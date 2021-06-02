@@ -4,19 +4,78 @@ from Bio.Seq import Seq
 from supergsl.core.types import SuperGSLType
 from supergsl.core.types.part import Part
 
+from pyDOE import fullfact
+
+class AssemblyFactor:
+    def __init__(self, type, levels):
+        self.type = type
+        self.levels = levels
+
+    @property
+    def levels(self):
+        return self.levels
+
+    def get_level(self, index):
+        return self.levels[index]
+
 
 class AssemblyDeclaration(SuperGSLType):
-    """A declaration of a desired assembly."""
+    """A declaration of a desired assembly.
 
+    Factors -
+        * Part groups
+        * Assembly Options
+
+    Levels
+        Each factor has a set of possible values currenly must be discrete
+
+    """
     def __init__(self, label : Optional[str], parts : List[Part]):
         self.label : Optional[str] = label
-        self.parts : List[Part] = parts
+        self.factors = self.build_factors_from_parts(parts)
 
-    def get_label(self) -> Optional[str]:
-        return self.label
+    def build_factors_from_parts(self, parts : List[Part]):
+        return [
+            AssemblyFactor('Part', [part])
+            for part in parts
+        ]
 
-    def get_parts(self) -> List[Part]:
-        return self.parts
+    @property
+    def num_designs(self):
+        """Return the number of possible designs in the assembly declaration."""
+        count = 1
+        for factor in self.factors:
+            count *= len(factor.levels)
+        return count
+
+    def get_full_factorial_designs(self):
+        """Return full-factorial iterator of the assembly designs."""
+
+        if self.num_designs > 500:
+            raise Exception('AssemblyDeclaration will generate %d designs.' % self.num_designs)
+
+        designs = fullfact([
+            len(factor.levels)
+            for factor in self.factors
+        ])
+
+        for design in designs:
+            yield [
+                self.factors[factor_index].get_level(level_index)
+                for factor_index, level_index in enumerate(design)
+            ]
+
+
+
+class AssemblyResultSet(SuperGSLType):
+    """The product of assembler.
+
+
+    ????
+    """
+
+
+
 
 class Assembly(SuperGSLType):
     """Store an assembled construct."""
