@@ -5,26 +5,33 @@ from supergsl.core.assembly import AssemblerBase
 from supergsl.core.types.assembly import (
     AssemblyDeclaration,
     Assembly,
-    AssemblyList
+    AssemblyResultSet
 )
 
 
 class FusionAssembler(AssemblerBase):
     """Create an assembly by fusing adjacent parts together without overlap."""
 
-    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyList:
-        """Iterate over `Part` and generate an Assembly object."""
+    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyResultSet:
+        """Iterate over `AssemblyDeclaration` and generate a set of assemblies."""
 
         assemblies : List[Assembly] = []
         for assembly_idx, assembly_request in enumerate(assembly_requests):
-            parts = assembly_request.get_parts()
-            assembly_sequence = Seq(''.join([
-                str(part.get_sequence().seq)
-                for part in parts
-            ]))
 
-            identifier = str('ASM-%05d' % assembly_idx)
-            assembly = Assembly(identifier, assembly_sequence, parts)
-            assemblies.append(assembly)
+            designs = assembly_request.get_full_factorial_designs()
+            for design_idx, design_parts in enumerate(designs):
 
-        return AssemblyList(assemblies)
+                assembly_sequence = Seq(''.join([
+                    str(part.get_sequence().seq)
+                    for part in design_parts
+                ]))
+
+                assembly_label = assembly_request.label or ('%03d' % assembly_idx)
+                identifier = 'ASM-%s-%03d' % (
+                    assembly_label,
+                    design_idx)
+
+                assembly = Assembly(identifier, assembly_sequence, design_parts)
+                assemblies.append(assembly)
+
+        return AssemblyResultSet(assemblies)
