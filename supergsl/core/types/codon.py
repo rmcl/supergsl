@@ -11,6 +11,9 @@ class CodonFrequencyTable(SuperGSLType):
         self.table = table
 
     def __repr__(self):
+        return self.name
+
+    def print(self):
         """Display the table of amino acid, codon, and frequency."""
         result = [
             'Codon Frequencies for: %s' % self.name,

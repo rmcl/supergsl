@@ -38,7 +38,7 @@ class AssemblyDeclaration(SuperGSLType):
         label : Optional[str],
         items : List[AssemblyDeclarationItems]
     ):
-        self.label : Optional[str] = label
+        self._label : Optional[str] = label
         self._factors = self._build_factors_from_parts(items)
 
     def _build_factors_from_parts(self, items : List[AssemblyDeclarationItems]):
@@ -52,6 +52,11 @@ class AssemblyDeclaration(SuperGSLType):
 
             factors.append(AssemblyFactor('Part', levels))
         return factors
+
+    @property
+    def label(self):
+        """Return the label of this assembly declaration."""
+        return self._label
 
     @property
     def num_designs(self):
