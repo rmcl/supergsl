@@ -10,7 +10,7 @@ from supergsl.core.exception import PartNotFoundError, SuperGSLError
 from supergsl.core.assembly import AssemblerBase
 from supergsl.core.constants import THREE_PRIME, SO_HOMOLOGOUS_REGION
 from supergsl.core.parts.provider import PartProvider
-from supergsl.core.types.assembly import AssemblyDeclaration, AssemblyList
+from supergsl.core.types.assembly import AssemblyDeclaration, AssemblyResultSet
 from supergsl.core.types.position import SeqPosition
 from supergsl.core.types.part import Part
 
@@ -163,7 +163,7 @@ class BioBrick3AAssembler(AssemblerBase):
         assembly = Assembly(fragments)
         print(assembly)
 
-    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyList:
+    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyResultSet:
         """
         Strategy:
             assemblies is a collection ordered list of parts
@@ -224,6 +224,7 @@ class BioBrickPartProvider(PartProvider):
     def __init__(self, name : str, settings : dict):
         self.name = name
         self._cached_parts: Dict[str, Part] = {}
+        self._setings = settings
 
 
     def get_part(self, identifier : str) -> Part:
