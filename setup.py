@@ -25,13 +25,14 @@ setuptools.setup(
         'rply',
         'nose',
         'coverage',
-        'biopython',
+        'biopython==1.78',
         'pydna',
         'sbol2',
         'mock',
         'mypy',
         'mypy-extensions',
         'prompt_toolkit',
+        'pyDOE2',
     ],
     extras_require={
         "plugins": [
