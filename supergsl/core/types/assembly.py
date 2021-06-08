@@ -135,7 +135,7 @@ class AssemblyResultSet(SuperGSLType):
     def __iter__(self):
         return iter(self.assemblies)
 
-    def __repr__(self):
+    def print(self):
         result = 'Assembly Result Set: %d assemblies\n' % len(self.assemblies)
         for assembly in self.assemblies:
             result += '    %s\n' % assembly.identifier
