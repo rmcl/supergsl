@@ -40,7 +40,7 @@ class EvaluatePassTestCase(unittest.TestCase):
 
     def setUp(self):
         self.symbol_table = SymbolTable('global', None)
-        self.import_table = self.symbol_table.nested_scope('imports')
+        self.import_table = self.symbol_table.enter_nested_scope('imports')
         self.eval_pass = EvaluatePass(self.symbol_table)
         self.eval_pass.visit = Mock()
 
@@ -92,11 +92,10 @@ class EvaluatePassTestCase(unittest.TestCase):
         assembly_node = Assembly(parts, 'LABEL1112')
 
         assembly_declaration = self.eval_pass.visit_assembly(assembly_node)
-        self.assertEqual(assembly_declaration.get_label(), 'LABEL1112')
-        self.assertEqual(assembly_declaration.get_parts(), [
+        self.assertEqual(assembly_declaration.label, 'LABEL1112')
+        self.assertEqual(assembly_declaration.get_levels_by_factor_type('Part'), {
             'BOOM',
-            'BOOM'
-        ])
+        })
         self.eval_pass.visit.assert_has_calls([
             call(parts[0]),
             call(parts[1])

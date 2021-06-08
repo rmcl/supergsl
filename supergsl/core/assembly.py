@@ -1,6 +1,6 @@
 from typing import List
 from supergsl.core.function import SuperGSLFunction
-from supergsl.core.types.assembly import AssemblyDeclaration, AssemblyList
+from supergsl.core.types.assembly import AssemblyDeclaration, AssemblyResultSet
 
 
 class AssemblerBase(SuperGSLFunction):
@@ -9,11 +9,11 @@ class AssemblerBase(SuperGSLFunction):
         return []
 
     def get_return_type(self):
-        return AssemblyList
+        return AssemblyResultSet
 
     def execute(self, params):
         return self.assemble(params['children'])
 
-    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyList:
+    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyResultSet:
         """Iterate over `Part` and generate an Assembly object."""
         raise NotImplementedError('Not implemented. Subclass to implement.')

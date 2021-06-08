@@ -26,6 +26,11 @@ class CompilerPipeline(object):
             EvaluatePass
         ])
 
+    def get_provider(self, module_path):
+        """Return the provider instantiated at a give module path."""
+        import_table = self._global_symbol_table.enter_nested_scope('imports')
+        return import_table.lookup(module_path)
+
     def perform_frontend_compile(self, source_code):
         """Generate an IR from SuperGSL source code.
 

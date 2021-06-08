@@ -62,6 +62,56 @@ class ParserTestCase(unittest.TestCase):
             'node': 'Program'
         })
 
+    def test_multiline_import(self):
+        """Confirm parser can handle a multi-line import statement."""
+        tokens = iter((
+            # Import
+            Token('FROM', 'from'),
+            Token('IDENTIFIER', 'S288C'),
+            Token('IMPORT', 'import'),
+            Token('OPEN_PAREN', '('),
+            Token('IDENTIFIER', 'ADHA'),
+            Token('AS', 'as'),
+            Token('IDENTIFIER', 'BLOOP'),
+            Token('COMMA', ','),
+            Token('IDENTIFIER', 'ERG10'),
+            Token('COMMA', ','),
+            Token('IDENTIFIER', 'HO'),
+            Token('CLOSE_PAREN', ')'),
+
+            # Single Assembly
+            Token('IDENTIFIER', 'uHO'),
+        ))
+        ast = self.parser.parse(tokens)
+
+        self.assertEqual(type(ast), Program)
+        self.assertEqual(ast.to_dict(), {
+            'definitions': {
+                'items': [{
+                    'label': None,
+                    'node': 'Assembly',
+                    'parts': [{
+                        'node': 'SymbolReference',
+                        'identifier': 'uHO',
+                        'invert': False,
+                        'slice': None
+                    }]
+                }],
+                'node': 'DefinitionList'
+            },
+            'imports': [{
+                'imports': [
+                    {'alias': 'BLOOP', 'identifier': 'ADHA'},
+                    {'alias': None, 'identifier': 'ERG10'},
+                    {'alias': None, 'identifier': 'HO'}
+                ],
+                'module': ['S288C'],
+                'node': 'Import'
+            }],
+            'node': 'Program'
+        })
+
+
     def test_build_ast_assembly(self):
         tokens = iter((
             Token('IDENTIFIER', 'uHO'),

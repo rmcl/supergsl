@@ -84,9 +84,17 @@ class ParserBuilder(object):
 
             return [p[0]]
 
+        @self.pg.production('import : FROM import_module IMPORT OPEN_PAREN import_identifiers CLOSE_PAREN')
         @self.pg.production('import : FROM import_module IMPORT import_identifiers')
         def program_import(state, p):
-            return ast.Import(p[1], p[3])
+            if len(p) == 6:
+                import_module = p[1]
+                import_identifiers = p[4]
+            if len(p) == 4:
+                import_module = p[1]
+                import_identifiers = p[3]
+
+            return ast.Import(import_module, import_identifiers)
 
         @self.pg.production('import_module : import_module PERIOD IDENTIFIER')
         @self.pg.production('import_module : IDENTIFIER')

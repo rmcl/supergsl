@@ -46,7 +46,7 @@ class SuperGSLPlugin(object):
         provider_inst : SuperGSLProvider
     ):
         """Register a provider allowing the user to import things from a SuperGSLProgram."""
-        import_symbol_table = self.symbol_table.nested_scope('imports')
+        import_symbol_table = self.symbol_table.enter_nested_scope('imports')
         import_symbol_table.insert(import_path, provider_inst)
 
     def register_function(
@@ -56,7 +56,7 @@ class SuperGSLPlugin(object):
         function_declaration : SuperGSLFunctionDeclaration
     ):
         """Register a function making it available for import in SuperGSL."""
-        nested_symbol_table = self.symbol_table.nested_scope('imports')
+        nested_symbol_table = self.symbol_table.enter_nested_scope('imports')
         self.functions[function_name] = function_declaration
         nested_symbol_table.insert(import_path, self)
 
