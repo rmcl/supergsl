@@ -10,7 +10,7 @@ from typing import (
 )
 from inspect import getdoc
 
-from supergsl.core.types import SuperGSLType
+from supergsl.types import SuperGSLType
 from supergsl.core.exception import FunctionInvokeError
 #pylint: disable=E1136
 

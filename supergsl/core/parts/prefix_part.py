@@ -16,7 +16,7 @@ from supergsl.core.constants import (
 )
 
 from supergsl.core.ast import SymbolReference
-from supergsl.core.types.part import Part, LazyLoadedPart
+from supergsl.types.part import Part, LazyLoadedPart
 from .provider import PartProvider
 
 

@@ -1,5 +1,5 @@
 import unittest
-from supergsl.core.types.codon import CodonFrequencyTable
+from supergsl.types.codon import CodonFrequencyTable
 
 
 class CodonFrequencyTestCase(unittest.TestCase):

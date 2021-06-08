@@ -1,11 +1,11 @@
 from typing import List, Optional
 from supergsl.core.function import SuperGSLFunction
-from supergsl.core.types.builtin import (
+from supergsl.types.builtin import (
     Collection,
     NucleotideSequence,
     AminoAcidSequence
 )
-from supergsl.core.types.codon import CodonFrequencyTable
+from supergsl.types.codon import CodonFrequencyTable
 
 from dnachisel import (
     DnaOptimizationProblem,

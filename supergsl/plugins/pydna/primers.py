@@ -6,7 +6,7 @@ from pydna.design import assembly_fragments
 from pydna.design import primer_design
 from pydna.dseqrecord import Dseqrecord
 
-from supergsl.core.types.builtin import PrimerPair
+from supergsl.types.builtin import PrimerPair
 
 
 class ExtractionPrimerBuilder(object):

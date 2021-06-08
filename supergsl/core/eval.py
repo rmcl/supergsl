@@ -1,17 +1,17 @@
 """Evaluate a SuperGSL Program."""
 from typing import Any, Dict, Optional, Callable, Union
 
-from supergsl.core.types import SuperGSLType
+from supergsl.types import SuperGSLType
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.backend import BackendPipelinePass
-from supergsl.core.types.builtin import (
+from supergsl.types.builtin import (
     NucleotideSequence,
     AminoAcidSequence,
     Collection
 )
-from supergsl.core.types.part import Part
+from supergsl.types.part import Part
 from supergsl.core.parts.slice import convert_slice_position_to_seq_position
-from supergsl.core.types.assembly import AssemblyDeclaration
+from supergsl.types.assembly import AssemblyDeclaration
 
 from supergsl.core.constants import (
     UNAMBIGUOUS_DNA_SEQUENCE,

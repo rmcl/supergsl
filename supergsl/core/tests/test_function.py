@@ -1,7 +1,7 @@
 import unittest
 from Bio.Seq import Seq
 from supergsl.core.function import SuperGSLFunction
-from supergsl.core.types.builtin import AminoAcidSequence, NucleotideSequence
+from supergsl.types.builtin import AminoAcidSequence, NucleotideSequence
 from supergsl.core.exception import FunctionInvokeError
 
 class SuperGSLFunctionTestCase(unittest.TestCase):

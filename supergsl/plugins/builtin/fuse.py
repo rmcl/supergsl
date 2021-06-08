@@ -2,7 +2,7 @@
 from typing import List
 from Bio.Seq import Seq
 from supergsl.core.assembly import AssemblerBase
-from supergsl.core.types.assembly import (
+from supergsl.types.assembly import (
     AssemblyDeclaration,
     Assembly,
     AssemblyList

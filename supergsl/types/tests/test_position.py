@@ -2,7 +2,7 @@ import unittest
 import mock
 from Bio.Seq import Seq
 from supergsl.core.constants import THREE_PRIME, FIVE_PRIME
-from supergsl.core.types.position import SeqPosition
+from supergsl.types.position import SeqPosition
 
 class SeqPositionTestCase(unittest.TestCase):
     """Test case for SeqPosition."""

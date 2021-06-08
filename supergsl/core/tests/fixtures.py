@@ -2,10 +2,10 @@ import mock
 import random
 from Bio.Seq import Seq
 from supergsl.core.ast import Assembly, SymbolReference
-from supergsl.core.types.builtin import PrimerPair
+from supergsl.types.builtin import PrimerPair
 from supergsl.core.constants import THREE_PRIME
-from supergsl.core.types.part import Part
-from supergsl.core.types.position import SeqPosition
+from supergsl.types.part import Part
+from supergsl.types.position import SeqPosition
 from supergsl.core.symbol_table import SymbolTable
 
 class SuperGSLCoreFixtures(object):

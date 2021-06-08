@@ -1,7 +1,7 @@
 from typing import List
 
 from supergsl.core.function import SuperGSLFunction
-from supergsl.core.types.assembly import AssemblyDeclaration, AssemblyList
+from supergsl.types.assembly import AssemblyDeclaration, AssemblyList
 
 
 class AssemblerBase(SuperGSLFunction):

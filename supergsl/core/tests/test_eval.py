@@ -24,7 +24,7 @@ from supergsl.core.ast import (
     FunctionInvocation
 )
 
-from supergsl.core.types.builtin import (
+from supergsl.types.builtin import (
     Collection,
     NucleotideSequence,
     AminoAcidSequence

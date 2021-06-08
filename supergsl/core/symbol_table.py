@@ -1,7 +1,7 @@
 """Implement the symbol table of the SuperGSL Compiler."""
 from typing import Optional, List, Dict, Any
 from supergsl.core.exception import SymbolNotFoundError
-from supergsl.core.types import SuperGSLType
+from supergsl.types import SuperGSLType
 
 # pylint: disable=E1136
 

@@ -6,8 +6,8 @@ from supergsl.core.ast import (
     SlicePosition as AstSlicePosition,
     SymbolReference as AstSymbolReference
 )
-from supergsl.core.types.part import Part
-from supergsl.core.types.position import SeqPosition
+from supergsl.types.part import Part
+from supergsl.types.position import SeqPosition
 
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.core.constants import (

@@ -2,7 +2,7 @@ from unittest import TestCase
 from mock import Mock
 from Bio import SeqIO
 from Bio.Seq import Seq
-from supergsl.core.types.builtin import AminoAcidSequence
+from supergsl.types.builtin import AminoAcidSequence
 from supergsl.plugins.dnachisel_optimize import DNAChiselOptimizeFunction
 
 from dnachisel import reverse_translate

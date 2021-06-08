@@ -4,8 +4,8 @@ from supergsl.core.exception import ConfigurationError
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.provider import SuperGSLProvider
 from supergsl.core.symbol_table import SymbolTable
-from supergsl.core.types.part import Part
-from supergsl.core.types.position import SeqPosition
+from supergsl.types.part import Part
+from supergsl.types.position import SeqPosition
 
 
 class PartProvider(SuperGSLProvider):

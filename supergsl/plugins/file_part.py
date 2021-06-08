@@ -6,9 +6,9 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 
 from supergsl.core.constants import THREE_PRIME
-from supergsl.core.types.position import SeqPosition
+from supergsl.types.position import SeqPosition
 from supergsl.core.exception import PartNotFoundError
-from supergsl.core.types.part import Part
+from supergsl.types.part import Part
 from supergsl.core.parts import PartProvider
 from supergsl.core.parts.prefix_part import PrefixedSlicePartProviderMixin
 from supergsl.plugins.pydna.primers import ExtractionPrimerBuilder

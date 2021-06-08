@@ -1,5 +1,5 @@
 """Simple function to print SuperGSLTypes."""
-from supergsl.core.types import SuperGSLType
+from supergsl.types import SuperGSLType
 from supergsl.core.function import SuperGSLFunction
 
 

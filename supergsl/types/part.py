@@ -5,8 +5,8 @@ from supergsl.core.constants import (
     PART_SLICE_POSTFIX_END
 )
 
-from supergsl.core.types import SuperGSLType
-from supergsl.core.types.builtin import (
+from supergsl.types import SuperGSLType
+from supergsl.types.builtin import (
     NucleotideSequence,
     PrimerPair,
 )

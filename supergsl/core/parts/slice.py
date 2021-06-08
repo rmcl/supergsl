@@ -1,6 +1,6 @@
 from supergsl.core.ast import SlicePosition
-from supergsl.core.types.part import Part
-from supergsl.core.types.position import SeqPosition
+from supergsl.types.part import Part
+from supergsl.types.position import SeqPosition
 from supergsl.core.constants import (
     PART_SLICE_POSTFIX_START,
     PART_SLICE_POSTFIX_END

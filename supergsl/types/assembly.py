@@ -1,8 +1,8 @@
 from typing import List, Optional
 from Bio.Seq import Seq
 
-from supergsl.core.types import SuperGSLType
-from supergsl.core.types.part import Part
+from supergsl.types import SuperGSLType
+from supergsl.types.part import Part
 
 
 class AssemblyDeclaration(SuperGSLType):

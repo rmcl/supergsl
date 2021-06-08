@@ -4,8 +4,8 @@ from Bio import SeqIO
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.exception import PartNotFoundError
 from supergsl.core.parts import PartProvider
-from supergsl.core.types.part import Part
-from supergsl.core.types.position import SeqPosition
+from supergsl.types.part import Part
+from supergsl.types.position import SeqPosition
 
 
 

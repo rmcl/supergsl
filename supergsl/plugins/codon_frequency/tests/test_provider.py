@@ -1,6 +1,6 @@
 import unittest
 from mock import Mock
-from supergsl.core.types.codon import CodonFrequencyTable
+from supergsl.types.codon import CodonFrequencyTable
 from supergsl.plugins.codon_frequency.provider import CodonFrequencyTableProvider
 
 class CodonFrequencyTableProviderTestCase(unittest.TestCase):

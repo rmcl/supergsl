@@ -5,7 +5,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
-from supergsl.core.types.assembly import AssemblyList, Assembly
+from supergsl.types.assembly import AssemblyList, Assembly
 
 
 class GenBankOutput(SuperGSLFunction):
