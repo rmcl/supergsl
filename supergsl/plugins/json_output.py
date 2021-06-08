@@ -4,7 +4,7 @@ import json
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
-from supergsl.core.assembly import AssemblyList
+from supergsl.core.types.assembly import AssemblyResultSet
 
 class JSONOutput(SuperGSLFunction):
     """Generate JSON document containing a list of parts and assemblies.
@@ -21,7 +21,7 @@ class JSONOutput(SuperGSLFunction):
     @classmethod
     def get_arguments(cls) -> List[Tuple[str, Type]]:
         return [
-            ('assemblies', AssemblyList)
+            ('assemblies', AssemblyResultSet)
             #('filename', str),
         ]
 
@@ -32,7 +32,7 @@ class JSONOutput(SuperGSLFunction):
             'assemblies': []
         }
 
-        assembly_list : AssemblyList = params['assemblies']
+        assembly_list : AssemblyResultSet = params['assemblies']
         for assembly_idx, assembly in enumerate(assembly_list):
             assembly_sequence = assembly.get_sequence()
             assembly_parts = [

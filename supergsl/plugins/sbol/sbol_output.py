@@ -1,6 +1,6 @@
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
-from supergsl.core.assembly import AssemblyList
+from supergsl.core.assembly import AssemblyResultSet
 
 from sbol2 import (
     ComponentDefinition,
@@ -69,7 +69,7 @@ class SBOLOutput(SuperGSLFunction):
         self.sbol_doc = Document()
         self.assembly_count = 0
 
-        assembly_list : AssemblyList = params[0]
+        assembly_list : AssemblyResultSet = params[0]
         for assembly in assembly_list:
             self.handle_assembly(assembly)
 

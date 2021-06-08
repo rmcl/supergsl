@@ -1,7 +1,7 @@
 import mock
 import random
+from typing import Tuple
 from Bio.Seq import Seq
-from supergsl.core.ast import Assembly, SymbolReference
 from supergsl.core.types.builtin import PrimerPair
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
@@ -12,7 +12,7 @@ from supergsl.core.symbol_table import SymbolTable
 
 class SuperGSLCoreFixtures(object):
 
-    def mk_symbol_table(self):
+    def mk_symbol_table(self) -> SymbolTable:
         """Create a simple symbol table with a nested scope."""
         symbol_table = SymbolTable('awesome', None)
         symbol_table.insert('uHO', self.mk_part('uHO', 100)[1])
@@ -22,26 +22,11 @@ class SuperGSLCoreFixtures(object):
 
         return symbol_table
 
-    def get_assembly_ast(self):
-        ast_part_nodes = [
-            SymbolReference('uHO', None, False),
-            SymbolReference('pADH1', None, False),
-            SymbolReference('gERG10', None, False),
-            SymbolReference('tADH1', None, False),
-            SymbolReference('dHO', None, False),
-        ]
-        assembly = Assembly(ast_part_nodes)
-
-        for part_node in ast_part_nodes:
-            _, part_node.part = self.mk_part(part_node.identifier, 500, mk_primers=True)
-
-        return assembly
-
-    def mk_random_dna_sequence(self, seq_len):
+    def mk_random_dna_sequence(self, seq_len) -> Seq:
         seq_str = ''.join(random.choice('CGTA') for _ in range(seq_len))
         return Seq(seq_str)
 
-    def mk_extraction_primers(self, part):
+    def mk_extraction_primers(self, part) -> PrimerPair:
         """Primers are often complementary sequences flanking the DNA sequence of interest.
 
         Real primers woud use some smarter algorithm to make sure the resulting
@@ -60,7 +45,7 @@ class SuperGSLCoreFixtures(object):
         part_seq_len,
         mk_primers=True,
         roles=None
-    ) -> Part:
+    ) -> Tuple[Seq,Part]:
         """Create a mock Part.
 
         Part is derived from a reference sequence three times longer than the part
@@ -99,7 +84,7 @@ class SuperGSLCoreFixtures(object):
             for index in range(num_parts)
         ])
 
-    def mk_assembly_declaration_ex1(self, name='test_declaration'):
+    def mk_assembly_declaration_ex1(self, name='test_declaration') -> AssemblyDeclaration:
         """Make a AssemblyDeclaration with 4 parts including one with a collection of three parts"""
         promoter_collection = self.mk_part_collection(num_parts=3)
         gene = self.mk_part('gGENE', 500)[1]

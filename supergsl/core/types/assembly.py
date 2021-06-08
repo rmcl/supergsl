@@ -42,7 +42,7 @@ class AssemblyDeclaration(SuperGSLType):
         self._factors = self._build_factors_from_parts(items)
 
     def _build_factors_from_parts(self, items : List[AssemblyDeclarationItems]):
-        factors : AssemblyFactor = []
+        factors : List[AssemblyFactor] = []
 
         for item in items:
             if isinstance(item, Collection):

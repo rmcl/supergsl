@@ -32,6 +32,7 @@ setuptools.setup(
         'mypy',
         'mypy-extensions',
         'prompt_toolkit',
+        'pyDOE2',
     ],
     extras_require={
         "plugins": [
