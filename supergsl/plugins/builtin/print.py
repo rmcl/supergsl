@@ -18,4 +18,4 @@ class SuperGSLTypePrintFunction(SuperGSLFunction):
         return None
 
     def execute(self, params : dict):
-        print(params['item'])
+        print(params['item'].print())

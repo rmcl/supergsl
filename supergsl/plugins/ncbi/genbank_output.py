@@ -5,7 +5,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
-from supergsl.types.assembly import AssemblyList, Assembly
+from supergsl.types.assembly import AssemblyResultSet, Assembly
 
 
 class GenBankOutput(SuperGSLFunction):
@@ -23,7 +23,7 @@ class GenBankOutput(SuperGSLFunction):
     def execute(self, params : dict):
         records : List[SeqRecord] = []
 
-        assembly_list : AssemblyList = params[0]
+        assembly_list : AssemblyResultSet = params[0]
         for assembly_idx, assembly in enumerate(assembly_list):
             features = []
             part_start_pos = 0

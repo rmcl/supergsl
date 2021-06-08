@@ -13,7 +13,7 @@ class CodonFrequencyTestCase(unittest.TestCase):
             'C': {'TGC': 0.45, 'TGT': 0.55},
         }
 
-        table = CodonFrequencyTable('awesome', ex1)
+        table = CodonFrequencyTable('awesome', ex1).print()
         expected = '\n'.join([
             'Codon Frequencies for: awesome',
             'AmAcid\tCodon\tFrequency',

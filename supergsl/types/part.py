@@ -107,6 +107,8 @@ class Part(NucleotideSequence):
         """Evaluate this part."""
         return self
 
+    def __repr__(self):
+        return self.identifier
 
 class LazyLoadedPart(SuperGSLType):
     def eval(self) -> SuperGSLType:

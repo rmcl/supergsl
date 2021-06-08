@@ -112,7 +112,10 @@ class EvaluatePass(BackendPipelinePass):
         for symbol_reference in assembly.symbol_references:
             part = self.visit(symbol_reference)
 
-            # Todo: We need to do type checking here.
+            # TODO: We need to do type checking here.
+            # Ultimately I think these "parts" can be part collections, parts,
+            # and nucleotide constants
+            #
             #for part in parts:
             #    if not isinstance(part, Part):
             #        raise Exception(
@@ -234,8 +237,9 @@ class EvaluatePass(BackendPipelinePass):
 
         params = function_invoke_node.params
         positional_arguments = []
-        for param_value in params:
-            positional_arguments.append(self.visit(param_value))
+        if params:
+            for param_value in params:
+                positional_arguments.append(self.visit(param_value))
 
         return function_inst.evaluate_arguments_and_execute(
             positional_arguments,
