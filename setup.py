@@ -28,11 +28,13 @@ setuptools.setup(
         'biopython==1.78',
         'pydna',
         'sbol2',
-        'mock',
         'mypy',
         'mypy-extensions',
         'prompt_toolkit',
         'pyDOE2',
+        'types-mock',
+        'types-protobuf',
+        'types-requests',
     ],
     extras_require={
         "plugins": [

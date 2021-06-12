@@ -1,4 +1,4 @@
-import mock
+from unittest.mock import Mock
 import random
 from typing import Tuple
 from Bio.Seq import Seq
@@ -66,7 +66,7 @@ class SuperGSLCoreFixtures(object):
             identifier,
             start,
             end,
-            provider=mock.Mock(),
+            provider=Mock(),
             roles=roles
         )
 
