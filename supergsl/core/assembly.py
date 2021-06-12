@@ -23,7 +23,17 @@ class AssemblerBase(SuperGSLFunction):
 
 
 class AssemblyResultOutputFunction(SuperGSLFunction):
-    """Base SuperGSLFunction for creating exporters for AssemblyResultSets."""
+    """Base SuperGSLFunction for creating exporters for AssemblyResultSets.
+
+    When subclassed creates a SuperGSL Function with the following parameters:
+    ```output_sbol(assemblies, filename)``` and the side effect of creating a
+    file (filename) with outputted AssemblyResultSet.
+
+    Good examples:
+        supergsl/plugins/builtin/output/json_output.py
+        supergsl/plugins/builtin/output/sbol_output.py
+
+    """
 
     def output(self, assemblies : AssemblyResultSet, file_handle : TextIO):
         """Output an `AssemblyResultSet` to the supplied file_handle."""
