@@ -1,13 +1,18 @@
+"""Define fixture data for testing SuperGSL."""
 from unittest.mock import Mock
 import random
-from typing import Tuple
+from typing import Tuple, List
 from Bio.Seq import Seq
 from supergsl.core.types.primer import PrimerPair
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
 from supergsl.core.types.builtin import Collection
 from supergsl.core.types.position import SeqPosition
-from supergsl.core.types.assembly import AssemblyDeclaration
+from supergsl.core.types.assembly import (
+    Assembly,
+    AssemblyDeclaration,
+    AssemblyResultSet
+)
 from supergsl.core.symbol_table import SymbolTable
 
 class SuperGSLCoreFixtures(object):
@@ -96,4 +101,25 @@ class SuperGSLCoreFixtures(object):
             promoter_collection,
             gene,
             downstream
+        ])
+
+    def mk_assembly(self, identifier='asm1', num_parts=2) -> Assembly:
+        """Create a `Assembly` containing num_parts with random sequences of len 0 to 100."""
+        parts : List[Part] = list([
+            self.mk_part('part-%03d' % part_index, random.randint(20, 100))[1]
+            for part_index in range(num_parts)
+        ])
+        sequence = Seq(''.join([
+            str(part.sequence)
+            for part in parts
+        ]))
+        return Assembly(identifier, sequence, parts)
+
+    def mk_assembly_result_set(self, num_assembly=2) -> AssemblyResultSet:
+        """Create an AssemblyResultSet with `num_assembly` assemblies."""
+        return AssemblyResultSet([
+            self.mk_assembly(
+                'asm-%d' % assembly_index,
+                num_parts=random.randint(1,5))
+            for assembly_index in range(num_assembly)
         ])
