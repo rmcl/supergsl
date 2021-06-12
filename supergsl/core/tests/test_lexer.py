@@ -1,5 +1,6 @@
 import unittest
-from supergsl.core.lexer import Lexer
+from rply.errors import LexingError
+from supergsl.core.lexer import SuperGSLLexer
 
 
 class LexerTestCase(unittest.TestCase):
@@ -7,26 +8,51 @@ class LexerTestCase(unittest.TestCase):
     maxDiff = None
 
     def setUp(self):
-        self.lexer = Lexer().get_lexer()
+        self.lexer = SuperGSLLexer()
+
+    def test_single_quote_multiline_string_constant_not_allowed(self):
+        """Newline characters are not allowed in single quoted constants."""
+        input_string = """
+            'HELLO
+            WORLD'
+        """
+        with self.assertRaises(LexingError):
+            list(self.lexer.lex(input_string))
+
+    def test_string_constant_does_not_match_bad_constants(self):
+        """"""
+        bad_examples = [
+            "\'\'\'",
+        ]
+
+        for example_str in bad_examples:
+            with self.assertRaises(LexingError):
+                list(self.lexer.lex(example_str))
+
 
     def test_scan_some_examples(self):
+        """Test that lexer output matches expectation for a number of examples."""
         for idx, example in enumerate(examples):
             inp = example[0]
             expected_tokens = list(example[1:])
 
-            tokens = [
-                (
-                    token.gettokentype(),
-                    token.value
-                )
-                for token in self.lexer.lex(inp)
-            ]
+            try:
+                tokens = [
+                    (
+                        token.gettokentype(),
+                        token.value
+                    )
+                    for token in self.lexer.lex(inp)
+                ]
+            except LexingError as error:
+                print(inp)
+                raise error
+
 
             self.assertEqual(
                 tokens,
                 expected_tokens,
                 'Unexpected tokens for example %d' % idx)
-
 
 examples = [
     (
@@ -92,5 +118,8 @@ examples = [
         ('FORWARD_SLASH', '/'),
         ('AMINO_ACID_SEQUENCE', '$MAAADR*'),
         ('FORWARD_SLASH', '/'),
+    ), (
+        "'HELLO WORLD'",
+        ('STRING_CONSTANT', '\'HELLO WORLD\'')
     )
 ]

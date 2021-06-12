@@ -3,7 +3,8 @@ from rply import ParserGenerator
 from supergsl.core.constants import (
     UNAMBIGUOUS_DNA_SEQUENCE,
     UNAMBIGUOUS_PROTEIN_SEQUENCE,
-    NUMBER_CONSTANT
+    NUMBER_CONSTANT,
+    STRING_CONSTANT
 )
 
 from . import ast
@@ -17,7 +18,9 @@ class ParserState(object):
         self.filename = filename
 
 
-class ParserBuilder(object):
+class SuperGSLParser(object):
+    """Construct a parser for the SuperGSL Language."""
+
     # A list of all token names accepted by the parser.
     ACCEPTED_TOKENS = (
         'FROM',
@@ -35,16 +38,20 @@ class ParserBuilder(object):
 
         'OPEN_BRACKET',
         'CLOSE_BRACKET',
+
         'COLON',
         'SEMICOLON',
         'COMMA',
         'PERIOD',
+
         'NUMBER',
         'IDENTIFIER',
         'AMINO_ACID_SEQUENCE',
         'EQUAL',
         'TILDE',
         'EXCLAMATION',
+
+        'STRING_CONSTANT',
     )
 
     def __init__(self):
@@ -174,6 +181,7 @@ class ParserBuilder(object):
         @self.pg.production('definition_item : nucleotide_constant')
         @self.pg.production('definition_item : amino_acid_constant')
         @self.pg.production('definition_item : number_constant')
+        @self.pg.production('definition_item : string_constant')
         def definition_item(state, p):
             return p[0]
 
@@ -231,6 +239,12 @@ class ParserBuilder(object):
         @self.pg.production('number_constant : NUMBER')
         def number_constant(state, p):
             return ast.Constant(p[0].value, NUMBER_CONSTANT)
+
+        @self.pg.production('string_constant : STRING_CONSTANT')
+        def string_constant(state, p):
+            # Remove the leading and trailing quote.
+            value = p[0].value[1:-1]
+            return ast.Constant(value, STRING_CONSTANT)
 
         @self.pg.production('nucleotide_constant : FORWARD_SLASH IDENTIFIER FORWARD_SLASH')
         def nucleotide_constant(state, p):
@@ -296,6 +310,7 @@ class ParserBuilder(object):
                 'An error occurred parsing source document at %s' % lookahead.source_pos)
 
     def parse(self, tokens):
+        """Given a iterator of tokens parse them into a AST."""
         parser = self.pg.build()
 
         parser_state = ParserState()

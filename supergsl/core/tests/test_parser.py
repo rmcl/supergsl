@@ -1,7 +1,7 @@
 """Unit tests for the SuperGSL parser."""
 from unittest import TestCase
 from rply import Token
-from supergsl.core.parser import ParserBuilder
+from supergsl.core.parser import SuperGSLParser
 from supergsl.core.ast import Program
 from supergsl.core.exception import ParsingError
 
@@ -11,7 +11,7 @@ class ParserTestCase(TestCase):
     maxDiff = None
 
     def setUp(self):
-        self.parser = ParserBuilder()
+        self.parser = SuperGSLParser()
 
     def test_build_ast_import(self):
         """Test building an AST from the parsed tokens of "from S288C import ADHA, ERG10, HO"."""
