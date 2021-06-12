@@ -20,15 +20,18 @@ class PairedPrimer(Primer):
         self._body = body
         self._tail = tail
 
-    def get_sequence(self) -> Seq:
+    @property
+    def sequence(self) -> Seq:
         return Seq(str(self._tail) + str(self._body))
 
     @property
     def body(self) -> Seq:
+        """Return a Sequence representing "body" region of the primer."""
         return self._body
 
     @property
     def tail(self) -> Seq:
+        """Return a Sequence representing "tail" region of the primer."""
         return self._tail
 
 
