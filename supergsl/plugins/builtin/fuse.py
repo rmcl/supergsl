@@ -22,7 +22,7 @@ class FusionAssembler(AssemblerBase):
             for design_idx, design_parts in enumerate(designs):
 
                 assembly_sequence = Seq(''.join([
-                    str(part.get_sequence().seq)
+                    str(part.sequence)
                     for part in design_parts
                 ]))
 

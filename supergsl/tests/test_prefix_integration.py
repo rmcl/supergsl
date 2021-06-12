@@ -41,6 +41,6 @@ class SuperGSLIntegrationTestCases(TestCase):
             symbol_table = result.get_symbol_table()
             part = symbol_table.lookup('test_part')
             self.assertEqual(
-                part.get_sequence().seq,
+                part.sequence,
                 self.expected_sequences.get(part_name).seq,
                 '%s sequence does not match expection' % part_name)

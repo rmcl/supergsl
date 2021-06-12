@@ -107,16 +107,17 @@ class Assembly(SuperGSLType):
 
     def __init__(self, identifier : str, sequence : Seq, parts : List[Part]):
         self._identifier = identifier
-        self.sequence = sequence
+        self._sequence = sequence
         self.parts = parts
 
     @property
     def identifier(self):
         return self._identifier
 
-    def get_sequence(self) -> Seq:
+    @property
+    def sequence(self) -> Seq:
         """Return the complete sequence of the construct."""
-        return self.sequence
+        return self._sequence
 
     def get_required_parts(self):
         """Return a list of parts required to construct this assembly."""

@@ -34,7 +34,6 @@ class JSONOutput(SuperGSLFunction):
 
         assembly_list : AssemblyResultSet = params['assemblies']
         for assembly_idx, assembly in enumerate(assembly_list):
-            assembly_sequence = assembly.get_sequence()
             assembly_parts = [
                 part.identifier
                 for part in assembly.get_required_parts()
@@ -43,7 +42,7 @@ class JSONOutput(SuperGSLFunction):
             json_output['assemblies'].append({
                 'identifier': assembly_idx,
                 'parts': assembly_parts,
-                'sequence': str(assembly_sequence)
+                'sequence': str(assembly.sequence)
             })
 
             for part in assembly.get_required_parts():
@@ -52,14 +51,14 @@ class JSONOutput(SuperGSLFunction):
         for part in parts:
             part_details = {
                 'name': part.identifier,
-                'sequence': str(part.get_sequence().seq),
+                'sequence': str(part.sequence),
             }
 
             if part.has_primers:
                 primers = part.get_extraction_primers()
-                primers.forward.get_sequence()
-                part_details['forward_primer'] = primers.forward.get_sequence()
-                part_details['reverse_primer'] = primers.reverse.get_sequence()
+                primers.forward.sequence
+                part_details['forward_primer'] = primers.forward.sequence
+                part_details['reverse_primer'] = primers.reverse.sequence
 
             json_output['parts'].append(part_details)
 

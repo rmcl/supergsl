@@ -8,9 +8,11 @@ class Primer(NucleotideSequence):
     def __init__(self, primer_seq : Seq):
         self._sequence = primer_seq
 
-    def get_sequence(self) -> Seq:
+    @property
+    def sequence(self) -> Seq:
         """Return the amino acid sequence as a `Bio.Seq`."""
         return self._sequence
+
 
 class PairedPrimer(Primer):
     """A primer with a `body` and `tail` region useful for annealing two parts."""

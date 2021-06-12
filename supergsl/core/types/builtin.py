@@ -14,12 +14,13 @@ class NucleotideSequence(SuperGSLType):
     def __init__(self, sequence : Seq):
         self._sequence = sequence
 
-    def get_sequence(self) -> Seq:
+    @property
+    def sequence(self) -> Seq:
         """Return the nucleotide sequence as a `Bio.Seq`."""
         return self._sequence
 
     def __repr__(self):
-        return 'NucleotideSequence: %s' % self.get_sequence()
+        return 'NucleotideSequence: %s' % self.sequence
 
 
 class AminoAcidSequence(SuperGSLType):
@@ -28,12 +29,13 @@ class AminoAcidSequence(SuperGSLType):
     def __init__(self, sequence : Seq):
         self._sequence = sequence
 
-    def get_sequence(self):
+    @property
+    def sequence(self):
         """Return the amino acid sequence as a `Bio.Seq`."""
         return self._sequence
 
     def __repr__(self):
-        return 'AminoAcidSequence: %s' % self.get_sequence()
+        return 'AminoAcidSequence: %s' % self.sequence
 
 
 class CodonTranslationTable(SuperGSLType):

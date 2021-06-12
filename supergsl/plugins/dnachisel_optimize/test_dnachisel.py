@@ -38,7 +38,7 @@ class DnaChiselTestCases(TestCase):
         results = self.optimize.execute(params)
 
         result_sequences = [
-            item.get_sequence()
+            item.sequence
             for item in results
         ]
 

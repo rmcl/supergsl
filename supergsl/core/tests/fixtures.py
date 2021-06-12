@@ -33,7 +33,7 @@ class SuperGSLCoreFixtures(object):
         DNA sequence has a melting temperature that is conducive to the parameters
         of a the particular PCR thermocycler.
         """
-        complement_sequence = part.get_sequence().seq.complement()
+        complement_sequence = part.sequence.complement()
         return PrimerPair.from_sequences(
             complement_sequence[:20],
             complement_sequence[-20:]

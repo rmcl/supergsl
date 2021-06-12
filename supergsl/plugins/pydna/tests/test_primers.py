@@ -22,8 +22,8 @@ class ExtractionPrimerBuilderTestCase(unittest.TestCase):
 
         primer_pair = part.get_extraction_primers()
         self.assertEqual(
-            primer_pair.forward.get_sequence(),
+            primer_pair.forward.sequence,
             amplicon.forward_primer.seq)
         self.assertEqual(
-            primer_pair.reverse.get_sequence(),
+            primer_pair.reverse.sequence,
             amplicon.reverse_primer.seq)
