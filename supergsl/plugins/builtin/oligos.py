@@ -4,7 +4,7 @@ from Bio.Seq import Seq
 from supergsl.core.types.assembly import (
     AssemblyDeclaration,
     Assembly,
-    AssemblyList
+    AssemblyResultSet
 )
 from supergsl.core.assembly import AssemblerBase
 
@@ -28,14 +28,14 @@ class SyntheticOligoAssembler(AssemblerBase):
         self.min_overlap = config_options.get('max_oligo_len', DEFAULT_MIN_OVERLAP)
         self.max_num_oligos = config_options.get('max_num_oligos', DEFAULT_NUM_OLIGOS)
 
-    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyList:
+    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyResultSet:
         """Iterate over `Part` and generate an Assembly object."""
 
-        oligos = []
+        oligos : List[Seq] = []
 
         assemblies : List[Assembly] = []
         for assembly_idx, assembly_request in enumerate(assembly_requests):
-            parts = assembly_request.get_parts()
+            parts = assembly_request.get_levels_by_factor_type('Part')
 
             assembly_sequence = Seq(''.join([
                 str(part.get_sequence().seq)
@@ -73,4 +73,4 @@ class SyntheticOligoAssembler(AssemblerBase):
             assembly = Assembly(identifier, assembly_sequence, oligos)
             assemblies.append(assembly)
 
-        return AssemblyList(assemblies)
+        return AssemblyResultSet(assemblies)

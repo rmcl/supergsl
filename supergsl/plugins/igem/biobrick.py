@@ -188,7 +188,7 @@ class BioBrick3AAssembler(AssemblerBase):
 
         assemblies : List[Assembly] = []
         for assembly_idx, assembly_request in enumerate(assembly_requests):
-            parts = assembly_request.get_parts()
+            parts = assembly_request.get_levels_by_factor_type('Part')
 
             p1 = parts[0]
             p2 = parts[1]
@@ -202,6 +202,8 @@ class BioBrick3AAssembler(AssemblerBase):
             self.assemble_part_tuple(p1, p2)
             # validate that each part has the appropriate biobrick prefix/suffix
             # confirm that each part does not contain disallowed restriction sites.
+
+        return AssemblyResultSet([])
 
 
 class BioBrickPartProvider(PartProvider):
