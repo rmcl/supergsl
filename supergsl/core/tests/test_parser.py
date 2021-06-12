@@ -304,3 +304,30 @@ class ParserTestCase(TestCase):
             'imports': [],
             'node': 'Program'
         })
+
+    def test_string_constant(self):
+        """Parse a string constant to an AST"""
+        tokens = iter((
+            Token('STRING_CONSTANT', '\'HEY THERE\''),
+
+        ))
+        ast = self.parser.parse(tokens)
+
+        self.assertEqual(type(ast), Program)
+        print(ast.to_dict())
+        self.assertEqual(ast.to_dict(), {
+            'node': 'Program',
+            'imports': [],
+            'definitions': {
+                'node': 'DefinitionList',
+                'items': [{
+                    'node': 'Assembly',
+                    'parts': [{
+                        'node': 'Constant',
+                        'type': 'STRING',
+                        'value': 'HEY THERE'
+                    }],
+                    'label': None
+                }]
+            }
+        })
