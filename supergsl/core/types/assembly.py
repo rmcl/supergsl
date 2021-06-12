@@ -108,10 +108,10 @@ class Assembly(SuperGSLType):
     def __init__(self, identifier : str, sequence : Seq, parts : List[Part]):
         self._identifier = identifier
         self._sequence = sequence
-        self.parts = parts
+        self._parts = parts
 
     @property
-    def identifier(self):
+    def identifier(self) -> str:
         return self._identifier
 
     @property
@@ -119,12 +119,13 @@ class Assembly(SuperGSLType):
         """Return the complete sequence of the construct."""
         return self._sequence
 
-    def get_required_parts(self):
+    @property
+    def parts(self) -> List[Part]:
         """Return a list of parts required to construct this assembly."""
-        return self.parts
+        return self._parts
 
-    def get_part(self):
-        """Retrieve a Part corresponding to this construct."""
+    def get_part(self) -> Part:
+        """Retrieve a `Part` corresponding to this construct."""
         raise NotImplementedError('Subclass to implement.')
 
 
