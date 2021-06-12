@@ -1,7 +1,7 @@
 """Tests for the output core module."""
 import unittest
 import requests
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from Bio.Seq import Seq
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.plugins.synbiohub.provider import SynBioHubPartProvider
@@ -38,7 +38,7 @@ class SynBioHubProviderTestCase(unittest.TestCase):
             'http://identifiers.org/so/SO:0000167',
             'http://wiki.synbiohub.org/wiki/Terms/igem#partType/Regulatory',
         ])
-        self.assertEqual(str(part.get_sequence().seq), 'tttacggctagctcagtcctaggtatagtgctagc')
+        self.assertEqual(str(part.sequence), 'tttacggctagctcagtcctaggtatagtgctagc')
         self.assertEqual(part.provider, provider)
 
     @patch('requests.get')
@@ -68,7 +68,7 @@ class SynBioHubProviderTestCase(unittest.TestCase):
             'http://identifiers.org/so/SO:0000316'
         ]))
         self.assertEqual(
-            str(part.get_sequence().seq),
+            str(part.sequence),
             'atgcgtaaaggagaagaacttttcactggagttgtcccaattcttgttgaattagatggtgatgtta'
             'atgggcacaaattttctgtcagtggagagggtgaaggtgatgcaacatacggaaaacttacccttaa'
             'atttatttgcactactggaaaactacctgttccatggccaacacttgtcactactttcggttatggt'

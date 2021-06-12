@@ -1,8 +1,8 @@
-import mock
+from unittest.mock import Mock
 import random
 from typing import Tuple
 from Bio.Seq import Seq
-from supergsl.core.types.builtin import PrimerPair
+from supergsl.core.types.primer import PrimerPair
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
 from supergsl.core.types.builtin import Collection
@@ -33,7 +33,7 @@ class SuperGSLCoreFixtures(object):
         DNA sequence has a melting temperature that is conducive to the parameters
         of a the particular PCR thermocycler.
         """
-        complement_sequence = part.get_sequence().seq.complement()
+        complement_sequence = part.sequence.complement()
         return PrimerPair.from_sequences(
             complement_sequence[:20],
             complement_sequence[-20:]
@@ -66,7 +66,7 @@ class SuperGSLCoreFixtures(object):
             identifier,
             start,
             end,
-            provider=mock.Mock(),
+            provider=Mock(),
             roles=roles
         )
 

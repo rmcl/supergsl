@@ -24,14 +24,19 @@ def main():
         action='store_true')
 
     parser.add_argument(
-        "-s", "--start-shell-on-error",
+        "-D", "--start-shell-on-error",
         help="If an error occurs during execution of SuperGSL program then start the repl shell.",
         default=False,
         action='store_true')
 
-    args = parser.parse_args()
+    parser.add_argument(
+        "-s", "--settings",
+        help="Provide the path to a supergsl-config.json file.",
+        default=None,
+        nargs='+')
 
-    compiler_settings = load_settings()
+    args = parser.parse_args()
+    compiler_settings = load_settings(args.settings)
 
     if args.listen:
         print('Starting gRPC compiler server.')

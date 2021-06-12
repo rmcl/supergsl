@@ -30,12 +30,12 @@ class GenBankFilePartProviderTestCase(TestCase):
         capsid = parts_by_identifier['capsid']
         self.assertEqual(capsid.start.get_absolute_position_in_reference()[1], 2259)
         self.assertEqual(capsid.end.get_absolute_position_in_reference()[1], 4464)
-        self.assertEqual(capsid.get_sequence().seq, self.expected_sequences.get('capsid').seq)
+        self.assertEqual(capsid.sequence, self.expected_sequences.get('capsid').seq)
 
         rep = parts_by_identifier['rep']
         self.assertEqual(rep.start.get_absolute_position_in_reference()[1], 371)
         self.assertEqual(rep.end.get_absolute_position_in_reference()[1], 2243)
-        self.assertEqual(rep.get_sequence().seq, self.expected_sequences.get('rep').seq)
+        self.assertEqual(rep.sequence, self.expected_sequences.get('rep').seq)
 
     EXAMPLE_GB_FILE_PATH = 'supergsl/plugins/ncbi/tests/fixtures/nucleotide-U89790.gb.gz'
     EXAMPLE_FASTA_FILE_PATH = 'supergsl/plugins/ncbi/tests/fixtures/nucleotide-U89790.fa'

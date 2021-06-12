@@ -52,7 +52,7 @@ class SBOLOutput(SuperGSLFunction):
 
             part_component = ComponentDefinition(sanitized_ident)
             part_component.roles = part.roles
-            part_component.sequence = Sequence(sanitized_ident, str(part.get_sequence().seq))
+            part_component.sequence = Sequence(sanitized_ident, str(part.sequence))
 
             part_components.append(part_component)
 

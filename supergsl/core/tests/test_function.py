@@ -99,4 +99,4 @@ class SuperGSLFunctionTestCase(unittest.TestCase):
         result = self.function.evaluate_arguments_and_execute(
             positional_arguments, child_arguments)
 
-        self.assertEqual(result.get_sequence(), 'ATG')
+        self.assertEqual(result.sequence, 'ATG')

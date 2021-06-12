@@ -1,7 +1,7 @@
 """Test the Entrez part provider."""
 import os
 from unittest import TestCase
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from io import StringIO
 from tempfile import TemporaryDirectory
 from Bio import SeqIO

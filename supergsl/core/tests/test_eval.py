@@ -1,6 +1,6 @@
 """Tests for the eval module."""
 import unittest
-from mock import Mock, call, patch
+from unittest.mock import Mock, call, patch
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.eval import EvaluatePass
 from supergsl.core.function import SuperGSLFunctionDeclaration
@@ -207,7 +207,7 @@ class EvaluatePassTestCase(unittest.TestCase):
 
         result = self.eval_pass.visit_sequence_constant(constant_dna_node)
         self.assertEqual(type(result), NucleotideSequence)
-        self.assertEqual(result.get_sequence(), 'ATGC')
+        self.assertEqual(result.sequence, 'ATGC')
 
     def test_visit_protein_sequence_constant(self):
         """Create the right type for a protein sequence constant."""
@@ -216,7 +216,7 @@ class EvaluatePassTestCase(unittest.TestCase):
 
         result = self.eval_pass.visit_sequence_constant(constant_protein_node)
         self.assertEqual(type(result), AminoAcidSequence)
-        self.assertEqual(result.get_sequence(), 'MATTTGAC*')
+        self.assertEqual(result.sequence, 'MATTTGAC*')
 
     def test_visit_sequence_constant_weird_type(self):
         """Raise exception for a unknown type of constant."""
