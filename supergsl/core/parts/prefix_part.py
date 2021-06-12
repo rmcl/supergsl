@@ -173,6 +173,9 @@ class PrefixedSlicePartProviderMixin(_Base):
 
             return new_start, parent_part.start
 
+        elif part_slice_type == 'orf':
+            return parent_part.start, parent_part.end
+
         elif part_slice_type == 'gene':
             return parent_part.start, parent_part.end
 
