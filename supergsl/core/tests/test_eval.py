@@ -1,6 +1,6 @@
 """Tests for the eval module."""
 import unittest
-from mock import Mock, call, patch
+from unittest.mock import Mock, call, patch
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.eval import EvaluatePass
 from supergsl.core.function import SuperGSLFunctionDeclaration

@@ -1,10 +1,9 @@
-import unittest
-import mock
+from unittest import TestCase
 from Bio.Seq import Seq
 from supergsl.core.constants import THREE_PRIME, FIVE_PRIME
 from supergsl.core.types.position import SeqPosition
 
-class SeqPositionTestCase(unittest.TestCase):
+class SeqPositionTestCase(TestCase):
     """Test case for SeqPosition."""
     maxDiff = None
 

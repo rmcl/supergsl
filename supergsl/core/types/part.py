@@ -6,10 +6,8 @@ from supergsl.core.constants import (
 )
 
 from supergsl.core.types import SuperGSLType
-from supergsl.core.types.builtin import (
-    NucleotideSequence,
-    PrimerPair,
-)
+from supergsl.core.types.builtin import NucleotideSequence
+from supergsl.core.types.primer import PrimerPair
 from supergsl.core.exception import PartError
 from .position import SeqPosition
 

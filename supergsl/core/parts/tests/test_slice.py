@@ -1,5 +1,4 @@
 import unittest
-import mock
 from Bio.Seq import Seq
 from supergsl.core.ast import (
     Slice as AstSlice,
