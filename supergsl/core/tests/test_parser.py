@@ -314,7 +314,6 @@ class ParserTestCase(TestCase):
         ast = self.parser.parse(tokens)
 
         self.assertEqual(type(ast), Program)
-        print(ast.to_dict())
         self.assertEqual(ast.to_dict(), {
             'node': 'Program',
             'imports': [],
@@ -329,5 +328,56 @@ class ParserTestCase(TestCase):
                     }],
                     'label': None
                 }]
+            }
+        })
+
+    def test_list_items(self):
+        """Test that we construct AST from list item declaration."""
+        tokens = iter((
+            Token('LET', 'LET'),
+            Token('IDENTIFIER', 'x'),
+            Token('EQUAL', '='),
+
+            Token('OPEN_BRACKET', '['),
+            Token('IDENTIFIER', 'pHO'),
+            Token('COMMA', ','),
+            Token('IDENTIFIER', 'pGAL3'),
+            Token('CLOSE_BRACKET', ']')
+
+        ))
+        ast = self.parser.parse(tokens)
+
+        self.assertEqual(type(ast), Program)
+        self.assertEqual(ast.to_dict(), {
+            'node':'Program',
+            'imports':[
+
+            ],
+            'definitions':{
+                'node':'DefinitionList',
+                'items':[
+                    {
+                        'node':'VariableDeclaration',
+                        'identifier':'x',
+                        'value':{
+                            'node':'ListDeclaration',
+                            'items':[
+                                {
+                                    'node': 'SymbolReference',
+                                    'identifier': 'pHO',
+                                    'invert': False,
+                                    'slice': None
+                                },
+                                {
+                                    'node': 'SymbolReference',
+                                    'identifier': 'pGAL3',
+                                    'invert': False,
+                                    'slice': None
+                                }
+                            ]
+                        },
+                        'type_declaration': None
+                    }
+                ]
             }
         })
