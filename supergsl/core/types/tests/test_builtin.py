@@ -15,5 +15,5 @@ class BuiltinTypeTestCase(unittest.TestCase):
         reverse = Seq('TTAGACACATGGGAC')
 
         result = PrimerPair.from_sequences(forward, reverse)
-        self.assertEqual(result.forward.get_sequence(), forward)
-        self.assertEqual(result.reverse.get_sequence(), reverse)
+        self.assertEqual(result.forward.sequence, forward)
+        self.assertEqual(result.reverse.sequence, reverse)
