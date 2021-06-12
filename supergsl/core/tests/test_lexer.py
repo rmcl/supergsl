@@ -121,5 +121,9 @@ examples = [
     ), (
         "'HELLO WORLD'",
         ('STRING_CONSTANT', '\'HELLO WORLD\'')
+    ), (
+        "'HELLO' 'HELO'",
+        ('STRING_CONSTANT', '\'HELLO\''),
+        ('STRING_CONSTANT', '\'HELO\'')
     )
 ]
