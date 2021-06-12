@@ -39,7 +39,7 @@ class SuperGSLLexer():
         self.lexer.add('IDENTIFIER', r'\w[\w\d\_\-]*')
 
         # String Constants
-        self.lexer.add('STRING_CONSTANT', r'\'[^\'^\n.]*\'')
+        self.lexer.add('STRING_CONSTANT', r'\'([^\'^\n]*|[.]*)\'')
 
 
         # Ignore spaces

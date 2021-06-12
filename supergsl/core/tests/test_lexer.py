@@ -125,5 +125,8 @@ examples = [
         "'HELLO' 'HELO'",
         ('STRING_CONSTANT', '\'HELLO\''),
         ('STRING_CONSTANT', '\'HELO\'')
+    ),(
+        "'HELLO.json'",
+        ('STRING_CONSTANT', '\'HELLO.json\'')
     )
 ]
