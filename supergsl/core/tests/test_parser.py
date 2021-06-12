@@ -1,13 +1,12 @@
 """Unit tests for the SuperGSL parser."""
-import unittest
-import mock
+from unittest import TestCase
 from rply import Token
 from supergsl.core.parser import ParserBuilder
 from supergsl.core.ast import Program
 from supergsl.core.exception import ParsingError
 
 
-class ParserTestCase(unittest.TestCase):
+class ParserTestCase(TestCase):
     """Test that the parser correctly tokens into a valid AST."""
     maxDiff = None
 

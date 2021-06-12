@@ -1,7 +1,7 @@
 """Tests for the output core module."""
 import unittest
 from Bio.Seq import Seq
-from supergsl.core.types.builtin import PrimerPair
+from supergsl.core.types.primer import PrimerPair
 
 
 class BuiltinTypeTestCase(unittest.TestCase):

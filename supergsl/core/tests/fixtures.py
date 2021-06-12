@@ -1,8 +1,8 @@
-import mock
+from unittest.mock import Mock
 import random
 from typing import Tuple
 from Bio.Seq import Seq
-from supergsl.core.types.builtin import PrimerPair
+from supergsl.core.types.primer import PrimerPair
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
 from supergsl.core.types.builtin import Collection
@@ -66,7 +66,7 @@ class SuperGSLCoreFixtures(object):
             identifier,
             start,
             end,
-            provider=mock.Mock(),
+            provider=Mock(),
             roles=roles
         )
 

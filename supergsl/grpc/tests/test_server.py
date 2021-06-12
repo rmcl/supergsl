@@ -1,4 +1,4 @@
-from mock import patch, Mock
+from unittest.mock import patch, Mock
 import unittest
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.grpc.server import SuperGSLCompilerService

@@ -1,7 +1,7 @@
 """Tests for the output core module."""
 import unittest
 import requests
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 from Bio.Seq import Seq
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.plugins.synbiohub.provider import SynBioHubPartProvider
