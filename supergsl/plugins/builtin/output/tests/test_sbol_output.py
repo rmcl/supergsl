@@ -1,7 +1,8 @@
 """Tests for the SBOL output module."""
 import unittest
 import requests
-from unittest.mock import Mock
+from io import StringIO
+from unittest.mock import Mock, call, patch
 from Bio.Seq import Seq
 
 from sbol2 import Document
@@ -17,6 +18,27 @@ class SBOLOutputTestCase(unittest.TestCase):
     def setUp(self):
         self.fixtures = SuperGSLCoreFixtures()
         self.sbol_output = SBOLOutput({})
+
+    @patch('supergsl.plugins.builtin.output.sbol_output.Document')
+    def test_output(self, sbol_document_class_mock):
+        """Test that output method makes appropriate calls to setup SBOL doc and add assemblies."""
+        sbol_doc_mock = sbol_document_class_mock.return_value
+        sbol_doc_mock.writeString.return_value = 'THE SBOL DOC!'
+
+        results = self.fixtures.mk_assembly_result_set()
+        assembly_fixtures = list(results)
+        output_fp = StringIO()
+
+        self.sbol_output.handle_assembly = Mock()
+
+        self.sbol_output.output(results, output_fp)
+
+        self.sbol_output.handle_assembly.assert_has_calls([
+            call(sbol_doc_mock, assembly_fixtures[0], 1),
+            call(sbol_doc_mock, assembly_fixtures[1], 2)
+        ])
+
+        self.assertEqual(output_fp.getvalue(), 'THE SBOL DOC!')
 
     def test_sanitize_identifier(self):
         """Make sure that sanitize method removes bad characters."""
@@ -45,12 +67,12 @@ class SBOLOutputTestCase(unittest.TestCase):
         self.sbol_output.handle_assembly(sbol_doc, assembly, 22)
 
         expected_doc_items = [
-            'http://examples.org/ComponentDefinition/asm1/1',
-            'http://examples.org/ComponentDefinition/part-000/1',
-            'http://examples.org/Sequence/part-000/1',
-            'http://examples.org/ComponentDefinition/part-001/1',
-            'http://examples.org/Sequence/part-001/1',
-            'http://examples.org/Sequence/asm1/1'
+            'http://sbols.org/SuperGSL/ComponentDefinition/asm1/1',
+            'http://sbols.org/SuperGSL/ComponentDefinition/part-000/1',
+            'http://sbols.org/SuperGSL/Sequence/part-000/1',
+            'http://sbols.org/SuperGSL/ComponentDefinition/part-001/1',
+            'http://sbols.org/SuperGSL/Sequence/part-001/1',
+            'http://sbols.org/SuperGSL/Sequence/asm1/1'
         ]
         for expected_uri in expected_doc_items:
             self.assertTrue(

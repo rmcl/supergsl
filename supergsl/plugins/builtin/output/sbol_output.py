@@ -23,7 +23,7 @@ class SBOLOutput(AssemblyResultOutputFunction):
     def output(self, assemblies : AssemblyResultSet, file_handle : TextIO) -> None:
         """Output Assembly results as an SBOL document."""
 
-        setHomespace('http://sbols.org/SuperGSL_Example/')
+        setHomespace('http://sbols.org/SuperGSL/')
         Config.setOption('sbol_compliant_uris', True)
         Config.setOption('sbol_typed_uris', True)
 
