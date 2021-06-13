@@ -14,14 +14,11 @@ DEFAULT_NUM_OLIGOS = 2
 
 
 class SyntheticOligoAssembler(AssemblerBase):
-    """Create parts that to constructed by ordering a set of short synthetic oligos.
+    """Create parts to be constructed by ordering a set of short synthetic oligos.
 
     These oligos are typically used as primers, but can be used for short parts
     without a template.
     """
-
-    import_path = 'basic'
-    name = 'synthetic-oligos'
 
     def __init__(self, config_options):
         self.max_oligo_len = config_options.get('max_oligo_len', DEFAULT_MAX_OLIGO_LEN)

@@ -30,7 +30,7 @@ class GenBankFilePartProvider(PartProvider):
     """
 
     def __init__(self, name, settings):
-        self.name = name
+        self._provider_name = name
         self.genbank_file_path = settings['sequence_file_path']
         self.features_by_identifier = {}
         self.loaded = False
@@ -118,7 +118,7 @@ class GenBankFilePartProvider(PartProvider):
             feature, parent_record = self.features_by_identifier[identifier]
         except KeyError:
             raise PartNotFoundError('Part not found "%s" in %s.' % (
-                identifier, self.get_provider_name()))
+                identifier, self.provider_name))
 
         return self.get_part_from_feature(
             identifier,
