@@ -4,6 +4,8 @@ from supergsl.core.function import SuperGSLFunctionDeclaration
 from .fuse import FusionAssembler
 from .oligos import SyntheticOligoAssembler
 from .print import SuperGSLTypePrintFunction
+from .output.json_output import JSONOutput
+from .output.sbol_output import SBOLOutput
 
 class BuiltinAssemblersPlugin(SuperGSLPlugin):
     """Plugin stub to help register basic Assemblers."""
@@ -13,8 +15,21 @@ class BuiltinAssemblersPlugin(SuperGSLPlugin):
         self.register_function('builtin', 'fuse', SuperGSLFunctionDeclaration(
             FusionAssembler, compiler_settings))
 
+        self.register_function(
+            'builtin',
+            'synthetic_oligos',
+            SuperGSLFunctionDeclaration(
+                SyntheticOligoAssembler, compiler_settings))
+
         self.register_function('builtin', 'print', SuperGSLFunctionDeclaration(
             SuperGSLTypePrintFunction, compiler_settings))
 
-        self.register_function('synthesis', 'synthetic_oligos', SuperGSLFunctionDeclaration(
-            SyntheticOligoAssembler, compiler_settings))
+        self.register_function(
+            'builtin',
+            'output_json',
+            SuperGSLFunctionDeclaration(JSONOutput, compiler_settings))
+
+        self.register_function(
+            'builtin',
+            'output_sbol',
+            SuperGSLFunctionDeclaration(SBOLOutput, compiler_settings))
