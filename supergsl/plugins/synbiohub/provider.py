@@ -21,8 +21,8 @@ class SynBioHubPartProvider(PartProvider):
         "name": "igem",
         "provider_class": "supergsl.plugins.synbiohub.SynBioHubPartProvider",
         "repository_url": "https://synbiohub.org/public/igem",
-        "repository_username": None,
-        "repository_password": None
+        "repository_username": null,
+        "repository_password": null
     }
     ```
     `repository_username` and `repository_password` are optional.

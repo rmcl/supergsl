@@ -1,3 +1,4 @@
+"""Define SuperGSL builtin types that can be used by plugins."""
 from Bio.Seq import Seq
 from typing import List, Type
 from collections import OrderedDict
