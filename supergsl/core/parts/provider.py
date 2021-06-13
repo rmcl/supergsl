@@ -85,6 +85,7 @@ class ConstantPartProvider(PartProvider):
 
 
     def get_part_details(self, part_identifier):
+        """Return constant details about a part."""
         return self.PART_DETAILS[part_identifier]
 
     def get_part(self, identifier : str) -> Part:
@@ -101,7 +102,7 @@ class ConstantPartProvider(PartProvider):
             pass
 
         try:
-            reference_sequence, description, roles = \
+            description, reference_sequence, roles = \
                 self.get_part_details(identifier)
 
         except KeyError as error:
