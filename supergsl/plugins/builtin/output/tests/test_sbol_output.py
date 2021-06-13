@@ -18,6 +18,25 @@ class SBOLOutputTestCase(unittest.TestCase):
         self.fixtures = SuperGSLCoreFixtures()
         self.sbol_output = SBOLOutput({})
 
+    def test_sanitize_identifier(self):
+        """Make sure that sanitize method removes bad characters."""
+        bad_examples = [
+            ('poop[~1:3]', 'poop__1_3_'),
+            ('turdeeee', 'turdeeee'),
+            ('pGAL3[~500:2500]', 'pGAL3__500_2500_'),
+        ]
+
+        for example_input, expected_output in bad_examples:
+            output = self.sbol_output.sanitize_identifier(example_input)
+            self.assertEqual(
+                output,
+                expected_output,
+                '"%s" did not result in expected output ""%s". Got "%s"' % (
+                    example_input,
+                    expected_output,
+                    output
+                ))
+
     def test_sbol_handle_assembly(self):
         """Test that we correctly add an assembly to a SBOL document"""
         assembly = self.fixtures.mk_assembly()
