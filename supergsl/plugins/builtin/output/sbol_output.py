@@ -1,5 +1,5 @@
 from typing import TextIO
-from supergsl.core.function import SuperGSLFunction
+from supergsl.core.types.assembly import Assembly
 from supergsl.core.assembly import (
     AssemblyResultOutputFunction,
     AssemblyResultSet
@@ -20,40 +20,37 @@ class SBOLOutput(AssemblyResultOutputFunction):
 
     name = 'sbol'
 
-
-    def sanitize_identifier(self, identifier):
-        """Sanitize SuperGSL Identifiers to conform to identifiers in the SBOL spec."""
-        bad_chars = '[]~:'
-        for c in bad_chars:
-            identifier = identifier.replace(c, '_')
-        return identifier
-
-    def output(self, assemblies : AssemblyResultSet, file_handle : TextIO):
+    def output(self, assemblies : AssemblyResultSet, file_handle : TextIO) -> None:
         """Output Assembly results as an SBOL document."""
 
         setHomespace('http://sbols.org/SuperGSL_Example/')
         Config.setOption('sbol_compliant_uris', True)
         Config.setOption('sbol_typed_uris', True)
 
-        self.sbol_doc = Document()
-        self.assembly_count = 0
+        sbol_doc = Document()
 
+        assembly_count = 1
         for assembly in assemblies:
-            self.handle_assembly(assembly)
+            self.handle_assembly(sbol_doc, assembly, assembly_count)
+            assembly_count += 1
 
-        file_handle.write(self.sbol_doc.writeString())
+        file_handle.write(sbol_doc.writeString())
 
 
-    def handle_assembly(self, assembly):
-        """Add each assembly to the SBOL Document."""
-        self.assembly_count += 1
+    def handle_assembly(
+        self,
+        sbol_doc : Document,
+        assembly : Assembly,
+        assembly_count : int
+    ) -> None:
+        """Add an assembly to a SBOL Document."""
 
         label = assembly.identifier
         if not label:
-            label = 'Assembly%05d' % self.assembly_count
+            label = 'Assembly%05d' % assembly_count
 
         assembly_comp_def = ComponentDefinition(label)
-        self.sbol_doc.addComponentDefinition(assembly_comp_def)
+        sbol_doc.addComponentDefinition(assembly_comp_def)
 
         part_components = []
         for part in assembly.parts:
@@ -67,3 +64,10 @@ class SBOLOutput(AssemblyResultOutputFunction):
 
         assembly_comp_def.assemblePrimaryStructure(part_components)
         assembly_comp_def.compile()
+
+    def sanitize_identifier(self, identifier : str) -> str:
+        """Sanitize SuperGSL Identifiers to conform to identifiers in the SBOL spec."""
+        bad_chars = '[]~:'
+        for c in bad_chars:
+            identifier = identifier.replace(c, '_')
+        return identifier
