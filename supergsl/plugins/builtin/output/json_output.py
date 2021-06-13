@@ -28,7 +28,7 @@ class JSONOutput(AssemblyResultOutputFunction):
             ]
 
             json_output['assemblies'].append({
-                'identifier': assembly_idx,
+                'identifier': assembly.identifier,
                 'parts': assembly_parts,
                 'sequence': str(assembly.sequence)
             })
@@ -38,14 +38,14 @@ class JSONOutput(AssemblyResultOutputFunction):
 
         for part in parts:
             part_details = {
-                'name': part.identifier,
+                'identifier': part.identifier,
                 'sequence': str(part.sequence),
             }
 
             if part.has_primers:
                 primers = part.get_extraction_primers()
-                part_details['forward_primer'] = primers.forward.sequence
-                part_details['reverse_primer'] = primers.reverse.sequence
+                part_details['forward_primer'] = str(primers.forward.sequence)
+                part_details['reverse_primer'] = str(primers.reverse.sequence)
 
             json_output['parts'].append(part_details)
 

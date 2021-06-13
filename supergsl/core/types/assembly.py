@@ -1,22 +1,29 @@
+"""Define SuperGSL Types related to the construction of new genetic assemblies"""
 from typing import List, Optional, Union
 from Bio.Seq import Seq
+from pyDOE2 import fullfact
 
 from supergsl.core.types import SuperGSLType
 from supergsl.core.types.builtin import Collection
 from supergsl.core.types.part import Part
 
-from pyDOE2 import fullfact
+# pylint: disable=E1136
+
 
 class AssemblyFactor:
     def __init__(self, factor_type, levels):
-        self.factor_type = factor_type
+        self._factor_type = factor_type
         self._levels = levels
+
+    @property
+    def factor_type(self):
+        return self._factor_type
 
     @property
     def levels(self):
         return self._levels
 
-    def get_level(self, index):
+    def __getitem__(self, index: int):
         return self._levels[index]
 
 
@@ -97,7 +104,7 @@ class AssemblyDeclaration(SuperGSLType):
 
         for design in designs:
             yield [
-                self._factors[factor_index].get_level(int(level_index))
+                self._factors[factor_index][int(level_index)]
                 for factor_index, level_index in enumerate(design)
             ]
 
@@ -112,6 +119,7 @@ class Assembly(SuperGSLType):
 
     @property
     def identifier(self) -> str:
+        """Return the identifier of this assembly."""
         return self._identifier
 
     @property
