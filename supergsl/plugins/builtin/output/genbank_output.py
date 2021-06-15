@@ -39,8 +39,8 @@ class GenBankOutput(AssemblyResultOutputFunction):
                     'description': part.description
                 },
                 location=FeatureLocation(
-                    start=start.x,
-                    end=end.x
+                    start=start.get_absolute_position_in_reference()[1],
+                    end=end.get_absolute_position_in_reference()[1]
                 ),
                 type='part')
 
