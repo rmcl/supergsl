@@ -1,17 +1,16 @@
 """Tests for the SBOL output module."""
-import unittest
-import requests
-from io import StringIO
+from unittest import TestCase
 from unittest.mock import Mock, call, patch
-from Bio.Seq import Seq
+from io import StringIO
 
+from Bio.Seq import Seq
 from sbol2 import Document
 
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.plugins.builtin.output.sbol_output import SBOLOutput
 
 
-class SBOLOutputTestCase(unittest.TestCase):
+class SBOLOutputTestCase(TestCase):
     """Test the behavior of SynBioHub provider"""
     maxDiff = None
 

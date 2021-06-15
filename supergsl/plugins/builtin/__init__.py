@@ -5,6 +5,7 @@ from .fuse import FusionAssembler
 from .print import SuperGSLTypePrintFunction
 from .output.json_output import JSONOutput
 from .output.sbol_output import SBOLOutput
+from .output.genbank_output import GenBankOutput
 
 class BuiltinAssemblersPlugin(SuperGSLPlugin):
     """Plugin stub to help register basic Assemblers."""
@@ -26,3 +27,8 @@ class BuiltinAssemblersPlugin(SuperGSLPlugin):
             'builtin',
             'output_sbol',
             SuperGSLFunctionDeclaration(SBOLOutput, compiler_settings))
+
+        self.register_function(
+            'builtin',
+            'output_genbank',
+            SuperGSLFunctionDeclaration(GenBankOutput, compiler_settings))

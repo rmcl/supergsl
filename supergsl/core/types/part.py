@@ -99,14 +99,18 @@ class Part(NucleotideSequence):
         self._roles.extend(roles)
         self._roles = list(set(self._roles))
 
-    def get_child_part_by_slice(self, identifier, start, end) -> 'Part':
+    def get_child_part_by_slice(
+        self,
+        identifier : str,
+        start : SeqPosition,
+        end : SeqPosition
+    ) -> 'Part':
         return self.provider.get_child_part_by_slice(
             self,
             identifier,
             start,
             end
         )
-
 
     def eval(self):
         """Evaluate this part."""
