@@ -25,6 +25,8 @@ The most basic strategy is a "fusion" strategy where each part is annealed to it
             HO_pTDA1_gERG10: uHO ; pTDH1 ; gERG10[1:728] ; dHO
         }
 
+.. autoclass:: supergsl.plugins.builtin.fuse.FusionAssembler
+
 
 ===================================================
 Seamless Assembly
@@ -108,21 +110,27 @@ Many biotechs have proprietary asssembly strategies and the infrastructure for b
 
 .. code-block:: gsl
 
+        from mycompany import secret-assembly-method
         from S288C import ADH1, ERG10, HO
 
-        assemble_company_parts {
+        secret-assembly-method {
             HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
             HO_pTDA1_gERG10: uHO ; pTDA1 ; gERG10[1:728] ; dHO
             HO_pGAL3_gERG10: uHO ; pGAL3 ; gERG10[1:728] ; dHO
             HO_pGAL7_gERG10: uHO ; pGAL7 ; gERG10[1:728] ; dHO
         }
 
+You can implement your own Assembly strategy by subclassing `AssemblerBase`
+
+.. autoclass:: supergsl.core.assembly.AssemblerBase
+    :members: assemble
+
 
 ===================================================
 Registering Custom Assembly Types
 ===================================================
 
-You can use the `assembly_strategies` section of `supergsl-config.json` to register custom assembly types or to override parameters of built in assembly types.
+Once you implement your Assembler, you should register it in a SuperGSL plugin and optionally add an assembly config section to your `supergsl-config.json` file.
 
 .. code-block:: json
 
@@ -136,9 +144,12 @@ You can use the `assembly_strategies` section of `supergsl-config.json` to regis
                         "max_part_len": 5000
                     }
                 }
+            ],
+            "plugins": [
+                ...
+                "path.to.your.plugin"
             ]
         }
-
 
 
 ******************************************************************************
