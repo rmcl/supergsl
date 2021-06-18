@@ -11,6 +11,20 @@ class SeqPositionTestCase(TestCase):
         self.seq_ex1 = Seq(self.example_seq)
 
 
+    def test_get_reference_sequence(self):
+        """Return the reference sequence even for hierarchical positions."""
+        sp = SeqPosition.from_reference(
+            x=100,
+            rel_to=THREE_PRIME,
+            approximate=True,
+            reference=self.seq_ex1
+        )
+
+        self.assertEqual(sp.reference_sequence, self.seq_ex1)
+
+        child_sp = sp.get_relative_position(x=25)
+        self.assertEqual(child_sp.reference_sequence, self.seq_ex1)
+
     def test_seq_position_string_representation(self):
         sp = SeqPosition.from_reference(
             x=100,

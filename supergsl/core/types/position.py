@@ -29,7 +29,6 @@ class SeqPosition:
             approximate=approximate,
             reference=reference)
 
-
     def get_relative_position(self, x : int, approximate : bool = False) -> 'SeqPosition':
         """Retrieve a new `SeqPosition` relative to the current position.
 
@@ -50,6 +49,14 @@ class SeqPosition:
             approximate=approximate,
             parent=self)
 
+    @property
+    def reference_sequence(self) -> Seq:
+        """Return the `Seq` representing the reference sequence for this position."""
+        if self._reference:
+            return self._reference
+
+        return self._parent.reference_sequence
+
 
     def __init__(self, x, approximate=False, reference=None, parent=None):
         """Instantiate a SeqPosition object. Don't use this constructor directly.
@@ -60,8 +67,8 @@ class SeqPosition:
         self.x = x
         self.approximate = approximate
 
-        self.reference = reference
-        self.parent = parent
+        self._reference = reference
+        self._parent = parent
 
     def __str__(self):
         return '3\'%+dbp Approx:%s (Abs Pos: %s)' % (
@@ -72,8 +79,8 @@ class SeqPosition:
 
     def get_absolute_position_in_reference(self) -> Tuple[Seq, int]:
         """Return the absolute position in the reference sequence."""
-        if self.parent:
-            reference, ref_relative_x = self.parent.get_absolute_position_in_reference()
+        if self._parent:
+            reference, ref_relative_x = self._parent.get_absolute_position_in_reference()
             ref_relative_x += self.x
 
             if ref_relative_x < 0:
@@ -88,8 +95,8 @@ class SeqPosition:
 
             return reference, ref_relative_x
 
-        elif self.reference:
-            return self.reference, self.x
+        elif self._reference:
+            return self._reference, self.x
 
         raise Exception('SeqPosition does not have a parent or a reference')
 

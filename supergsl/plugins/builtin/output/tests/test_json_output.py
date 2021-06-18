@@ -1,14 +1,13 @@
 """Tests for the JSON output module."""
-import unittest
-import requests
+from unittest import TestCase
 import json
 from io import StringIO
 from Bio.Seq import Seq
-from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 
+from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.plugins.builtin.output.json_output import JSONOutput
 
-class JSONOutputTestCase(unittest.TestCase):
+class JSONOutputTestCase(TestCase):
     """Test the behavior of SynBioHub provider"""
     maxDiff = None
 

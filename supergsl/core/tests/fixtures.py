@@ -109,11 +109,30 @@ class SuperGSLCoreFixtures(object):
             self.mk_part('part-%03d' % part_index, random.randint(20, 100))[1]
             for part_index in range(num_parts)
         ])
-        sequence = Seq(''.join([
+        assembly_sequence = Seq(''.join([
             str(part.sequence)
             for part in parts
         ]))
-        return Assembly(identifier, sequence, parts)
+
+        assembly = Assembly(
+            identifier,
+            assembly_sequence,
+            'this is a great assembly named %s' % identifier)
+
+        cur_pos = 0
+        for part in parts:
+            part_seq_len = len(part.sequence)
+            start = SeqPosition.from_reference(
+                cur_pos,
+                rel_to=THREE_PRIME,
+                approximate=False,
+                reference=assembly_sequence)
+
+            end = start.get_relative_position(part_seq_len)
+            assembly.add_part(part, start, end)
+            cur_pos += part_seq_len
+
+        return assembly
 
     def mk_assembly_result_set(self, num_assembly=2) -> AssemblyResultSet:
         """Create an AssemblyResultSet with `num_assembly` assemblies."""

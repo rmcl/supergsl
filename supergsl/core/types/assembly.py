@@ -1,11 +1,12 @@
 """Define SuperGSL Types related to the construction of new genetic assemblies"""
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Tuple
 from Bio.Seq import Seq
 from pyDOE2 import fullfact
 
 from supergsl.core.types import SuperGSLType
 from supergsl.core.types.builtin import Collection
 from supergsl.core.types.part import Part
+from supergsl.core.types.position import SeqPosition
 
 # pylint: disable=E1136
 
@@ -112,10 +113,35 @@ class AssemblyDeclaration(SuperGSLType):
 class Assembly(SuperGSLType):
     """Store an assembled construct."""
 
-    def __init__(self, identifier : str, sequence : Seq, parts : List[Part]):
-        self._identifier = identifier
-        self._sequence = sequence
-        self._parts = parts
+    def __init__(
+        self,
+        identifier : str,
+        sequence : Seq,
+        description : Optional[str] = None
+    ):
+        self._identifier : str = identifier
+        self._sequence : Seq = sequence
+        self._parts : List[Tuple[Part, SeqPosition, SeqPosition]] = []
+        self.description : Optional[str] = description
+
+    def add_part(
+        self,
+        part : Part,
+        start_position : SeqPosition,
+        end_position : SeqPosition
+    ):
+        """Add a part at a specific position in the Assembly."""
+
+        start_reference, _ = start_position.get_absolute_position_in_reference()
+        if start_reference != self.sequence:
+            raise Exception('Start `SeqPosition` must be from the Assembly sequence.')
+
+        end_reference, _ = start_position.get_absolute_position_in_reference()
+        if end_reference != self.sequence:
+            raise Exception('End `SeqPosition` must be from the Assembly sequence.')
+
+        self._parts.append(
+            (part, start_position, end_position))
 
     @property
     def identifier(self) -> str:
@@ -128,9 +154,16 @@ class Assembly(SuperGSLType):
         return self._sequence
 
     @property
+    def parts_with_positions(self) -> List[Tuple[Part, SeqPosition, SeqPosition]]:
+        return self._parts
+
+    @property
     def parts(self) -> List[Part]:
         """Return a list of parts required to construct this assembly."""
-        return self._parts
+        return [
+            part_tuple[0]
+            for part_tuple in self._parts
+        ]
 
     def get_part(self) -> Part:
         """Retrieve a `Part` corresponding to this construct."""
