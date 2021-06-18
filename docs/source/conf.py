@@ -51,6 +51,7 @@ extensions = [
     'recommonmark',
     'sphinx_rtd_theme',
     'sphinxcontrib.mermaid',
+    'sphinx.ext.autosectionlabel',
 ]
 
 # Add mappings https://kev.inburke.com/kevin/sphinx-interlinks/
@@ -59,6 +60,8 @@ intersphinx_mapping = {
     "pydna": ("https://pydna.readthedocs.io", None),
     "python": ("http://docs.python.org/3.9", None),
 }
+
+autosectionlabel_prefix_document = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
