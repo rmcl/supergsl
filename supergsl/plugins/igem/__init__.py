@@ -8,7 +8,7 @@ class BioBrickPlugin(SuperGSLPlugin):
         """Register functions provide by the igem plugin."""
 
         self.register_function(
-            'biobrick.assemble',
+            'biobrick',
             'assemble-3a',
             SuperGSLFunctionDeclaration(BioBrick3AAssembler, compiler_settings))
 
