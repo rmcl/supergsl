@@ -27,14 +27,3 @@ jobs:
     - name: Run nosetests via invoke
       run: |
         invoke test
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        files: ./coverage.xml
-        directory: ./coverage/reports/
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: true
-        path_to_write_report: ./coverage/codecov_report.txt
-        verbose: true
