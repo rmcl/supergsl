@@ -4,7 +4,7 @@ import requests
 from unittest.mock import Mock, patch
 from Bio.Seq import Seq
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
-from supergsl.plugins.synbiohub.provider import SynBioHubPartProvider
+from supergsl.plugins.builtin.providers.synbiohub import SynBioHubPartProvider
 
 
 class SynBioHubProviderTestCase(unittest.TestCase):
@@ -48,7 +48,7 @@ class SynBioHubProviderTestCase(unittest.TestCase):
 
         request_mock_get.return_value.status_code = 200
         request_mock_get.return_value.content = open(
-            'supergsl/plugins/synbiohub/tests/BBa_E0040.xml', 'rb').read()
+            'supergsl/plugins/builtin/providers/tests/BBa_E0040.xml', 'rb').read()
 
         part = provider.get_part('BBa_E0040')
 

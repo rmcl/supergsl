@@ -1,58 +1,21 @@
 from typing import Dict, Tuple, List
-from Bio import SeqIO
 from Bio.Seq import Seq
-from Bio.Restriction import Restriction, RestrictionBatch
+from Bio.Restriction import Restriction
 
-from pydna.assembly import Assembly
+from pydna.assembly import Assembly as PyDnaAssembly
 from pydna.dseqrecord import Dseqrecord
 
-from supergsl.core.exception import PartNotFoundError, SuperGSLError
 from supergsl.core.assembly import AssemblerBase
-from supergsl.core.constants import THREE_PRIME, SO_HOMOLOGOUS_REGION
-from supergsl.core.parts.provider import ConstantPartProvider
-from supergsl.core.types.assembly import AssemblyDeclaration, AssemblyResultSet
-from supergsl.core.types.position import SeqPosition
-from supergsl.core.types.part import Part
-
-class InvalidBioBrickError(SuperGSLError):
-    pass
-
-# From the docs, "BioBrick RFC[10] it must not contain the following
-# restriction sites, as these are unique to the prefix and suffix"
-# Taken from http://parts.igem.org/Help:Standards/Assembly/RFC10
-BIOBRICK_ILLEGAL_RESTRICTION_SITES = ['EcoRI', 'XbaI', 'SpeI', 'PstI', 'NotI']
-
-BIOBRICK_PREFIX_CODING_SEQUENCE = Seq('GAATTCGCGGCCGCTTCTAG')
-BIOBRICK_PREFIX_SEQUENCE = Seq('GAATTCGCGGCCGCTTCTAGAG')
-BIOBRICK_SUFFIX_SEQUENCE = Seq('TACTAGTAGCGGCCGCTGCAG')
-
-def load_biobrick_constant_sequences():
-    file_path = 'supergsl/plugins/igem/biobrick.fa'
-    records = SeqIO.parse(file_path, "fasta")
-
-    return {
-        record.name: record
-        for record in records
-    }
-
-
-def check_is_valid_biobrick(sequence):
-    """A valid biobrick part does not have any disallowed restriction sites except in
-    the prefix and suffix.
-
-    Return True if sequence is valid or raise `InvalidSequenceError`.
-    """
-    illegal_sites = RestrictionBatch(BIOBRICK_ILLEGAL_RESTRICTION_SITES)
-    results = illegal_sites.search(sequence)
-
-    for restriction_site, match_positions in results.items():
-
-        if len(match_positions) > 0:
-            raise InvalidBioBrickError(
-                '{} site found in sequence.'.format(restriction_site))
-
-    return True
-
+from supergsl.core.types.assembly import (
+    AssemblyDeclaration,
+    AssemblyResultSet,
+    Assembly
+)
+from .exception import InvalidBioBrickError
+from .utils import (
+    load_biobrick_constant_sequences,
+    check_is_valid_biobrick
+)
 
 class BioBrick3AAssembler(AssemblerBase):
     """Assemble BioBrick standard parts using the 3A (three antibiotic) assembly protocol.
@@ -160,7 +123,7 @@ class BioBrick3AAssembler(AssemblerBase):
             Dseqrecord(digested_backbone_sequence)
         ]
 
-        assembly = Assembly(fragments)
+        assembly = PyDnaAssembly(fragments)
         print(assembly)
 
     def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyResultSet:
@@ -203,35 +166,4 @@ class BioBrick3AAssembler(AssemblerBase):
             # validate that each part has the appropriate biobrick prefix/suffix
             # confirm that each part does not contain disallowed restriction sites.
 
-        return AssemblyResultSet([])
-
-
-class BioBrickPartProvider(ConstantPartProvider):
-    """A Part provider for returning constant regions from the BioBrick standard.
-
-    More about the BioBrick standard can be found here:
-        http://parts.igem.org/Help:Standards/Assembly/RFC10
-
-    To configure this part provider add the following to `supergsl-config.json`:
-    ```
-    {
-        "name": "biobrick",
-        "provider_class": "supergsl.plugins.igem.BioBrickPartProvider"
-    }
-
-    References
-    * http://parts.igem.org/Help:Standards/Assembly/RFC10
-    """
-
-    PART_DETAILS = {
-        'prefix': (
-            'Biobrick RFC[10] prefix',
-            BIOBRICK_PREFIX_SEQUENCE,
-            [SO_HOMOLOGOUS_REGION]
-        ),
-        'suffix': (
-            'Biobrick RFC[10] suffix',
-            BIOBRICK_SUFFIX_SEQUENCE,
-            [SO_HOMOLOGOUS_REGION]
-        )
-    }
+        return AssemblyResultSet(assemblies)

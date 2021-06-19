@@ -1,6 +1,9 @@
+"""Declare imports for the igem plugin."""
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.function import SuperGSLFunctionDeclaration
-from .biobrick import BioBrick3AAssembler, BioBrickPartProvider
+from .biobrick import BioBrick3AAssembler
+from .part_registry import BioBrickPartProvider
+
 
 class BioBrickPlugin(SuperGSLPlugin):
 

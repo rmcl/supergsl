@@ -67,7 +67,7 @@ class SyntheticOligoAssembler(AssemblerBase):
             print(oligos)
 
             identifier = str('ASM-%05d' % assembly_idx)
-            assembly = Assembly(identifier, assembly_sequence, oligos)
+            assembly = Assembly(identifier, assembly_sequence, 'description')
             assemblies.append(assembly)
 
         return AssemblyResultSet(assemblies)
