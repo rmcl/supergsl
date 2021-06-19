@@ -8,11 +8,8 @@ from supergsl.core.types.assembly import AssemblyDeclaration, AssemblyResultSet
 
 class AssemblerBase(SuperGSLFunction):
     """Base class for functions implementing Assemblers."""
-    def get_arguments(self):
-        return []
 
-    def get_return_type(self):
-        return AssemblyResultSet
+    return_type = AssemblyResultSet
 
     def execute(self, params):
         return self.assemble(params['children'])
