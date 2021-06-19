@@ -9,8 +9,8 @@ from pydna.dseqrecord import Dseqrecord
 from supergsl.core.exception import PartNotFoundError, SuperGSLError
 from supergsl.core.assembly import AssemblerBase
 from supergsl.core.constants import THREE_PRIME, SO_HOMOLOGOUS_REGION
-from supergsl.core.parts.provider import PartProvider
-from supergsl.core.types.assembly import AssemblyDeclaration, AssemblyList
+from supergsl.core.parts.provider import ConstantPartProvider
+from supergsl.core.types.assembly import AssemblyDeclaration, AssemblyResultSet
 from supergsl.core.types.position import SeqPosition
 from supergsl.core.types.part import Part
 
@@ -163,7 +163,7 @@ class BioBrick3AAssembler(AssemblerBase):
         assembly = Assembly(fragments)
         print(assembly)
 
-    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyList:
+    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyResultSet:
         """
         Strategy:
             assemblies is a collection ordered list of parts
@@ -188,7 +188,7 @@ class BioBrick3AAssembler(AssemblerBase):
 
         assemblies : List[Assembly] = []
         for assembly_idx, assembly_request in enumerate(assembly_requests):
-            parts = assembly_request.get_parts()
+            parts = assembly_request.get_levels_by_factor_type('Part')
 
             p1 = parts[0]
             p2 = parts[1]
@@ -203,8 +203,10 @@ class BioBrick3AAssembler(AssemblerBase):
             # validate that each part has the appropriate biobrick prefix/suffix
             # confirm that each part does not contain disallowed restriction sites.
 
+        return AssemblyResultSet([])
 
-class BioBrickPartProvider(PartProvider):
+
+class BioBrickPartProvider(ConstantPartProvider):
     """A Part provider for returning constant regions from the BioBrick standard.
 
     More about the BioBrick standard can be found here:
@@ -221,51 +223,15 @@ class BioBrickPartProvider(PartProvider):
     * http://parts.igem.org/Help:Standards/Assembly/RFC10
     """
 
-    def __init__(self, name : str, settings : dict):
-        self.name = name
-        self._cached_parts: Dict[str, Part] = {}
-
-
-    def get_part(self, identifier : str) -> Part:
-        """Retrieve a part by identifier.
-
-        Arguments:
-            identifier  A identifier to select a part from this provider
-        Return: `Part`
-        """
-
-        try:
-            return self._cached_parts[identifier]
-        except KeyError:
-            pass
-
-        if identifier == 'prefix':
-            reference_sequence = BIOBRICK_PREFIX_SEQUENCE
-            description = 'Biobrick RFC[10] prefix'
-        elif identifier == 'suffix':
-            reference_sequence = BIOBRICK_SUFFIX_SEQUENCE
-            description = 'Biobrick RFC[10] suffix'
-        else:
-            raise PartNotFoundError('Part %s not found.' % identifier)
-
-        start = SeqPosition.from_reference(
-            x=0,
-            rel_to=THREE_PRIME,
-            approximate=False,
-            reference=reference_sequence
+    PART_DETAILS = {
+        'prefix': (
+            'Biobrick RFC[10] prefix',
+            BIOBRICK_PREFIX_SEQUENCE,
+            [SO_HOMOLOGOUS_REGION]
+        ),
+        'suffix': (
+            'Biobrick RFC[10] suffix',
+            BIOBRICK_SUFFIX_SEQUENCE,
+            [SO_HOMOLOGOUS_REGION]
         )
-        end = start.get_relative_position(
-            x=len(reference_sequence))
-
-        part = Part(
-            identifier,
-            start,
-            end,
-            provider=self,
-            description=description,
-            roles=[
-                SO_HOMOLOGOUS_REGION
-            ])
-
-        self._cached_parts[identifier] = part
-        return part
+    }

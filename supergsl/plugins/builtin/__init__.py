@@ -16,6 +16,12 @@ class BuiltinAssemblersPlugin(SuperGSLPlugin):
         self.register_function('builtin', 'fuse', SuperGSLFunctionDeclaration(
             FusionAssembler, compiler_settings))
 
+        self.register_function(
+            'builtin',
+            'synthetic_oligos',
+            SuperGSLFunctionDeclaration(
+                SyntheticOligoAssembler, compiler_settings))
+
         self.register_function('builtin', 'print', SuperGSLFunctionDeclaration(
             SuperGSLTypePrintFunction, compiler_settings))
 
