@@ -5,8 +5,8 @@ from supergsl.core.plugin import PluginProvider
 from supergsl.core.backend import BackendPipelinePass
 from supergsl.core.eval import EvaluatePass
 
-from .lexer import Lexer
-from .parser import ParserBuilder
+from .lexer import SuperGSLLexer
+from .parser import SuperGSLParser
 
 
 class CompilerPipeline(object):
@@ -26,6 +26,11 @@ class CompilerPipeline(object):
             EvaluatePass
         ])
 
+    def get_provider(self, module_path):
+        """Return the provider instantiated at a give module path."""
+        import_table = self._global_symbol_table.enter_nested_scope('imports')
+        return import_table.lookup(module_path)
+
     def perform_frontend_compile(self, source_code):
         """Generate an IR from SuperGSL source code.
 
@@ -35,7 +40,8 @@ class CompilerPipeline(object):
         Input: (str) source code
         Output: `ast.Program`
         """
-        tokens = self.get_lexer().lex(source_code)
+        lexer = self.get_lexer()
+        tokens = lexer.lex(source_code)
 
         parser = self.get_parser()
         return parser.parse(tokens)
@@ -58,8 +64,8 @@ class CompilerPipeline(object):
 
     def get_lexer(self):
         """Retrieve a reference to the lexer."""
-        return Lexer().get_lexer()
+        return SuperGSLLexer()
 
     def get_parser(self):
         """Retrieve a reference to the parser."""
-        return ParserBuilder()
+        return SuperGSLParser()

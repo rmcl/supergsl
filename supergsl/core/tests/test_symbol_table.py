@@ -1,6 +1,6 @@
 """Unit tests for the symbol table."""
 import unittest
-from mock import Mock
+from unittest.mock import Mock
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.exception import SymbolNotFoundError
 
@@ -25,7 +25,7 @@ class SymbolTableTestCase(unittest.TestCase):
         table = SymbolTable('root', None)
         table.insert('HELLO', mock_symbol_1)
 
-        child_table = table.nested_scope('child_scope')
+        child_table = table.enter_nested_scope('child_scope')
 
         self.assertRaises(SymbolNotFoundError, child_table.lookup, 'HELLO')
 

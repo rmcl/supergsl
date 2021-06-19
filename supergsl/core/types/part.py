@@ -1,4 +1,5 @@
 from typing import List, Optional
+from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from supergsl.core.constants import (
     PART_SLICE_POSTFIX_START,
@@ -6,10 +7,8 @@ from supergsl.core.constants import (
 )
 
 from supergsl.core.types import SuperGSLType
-from supergsl.core.types.builtin import (
-    NucleotideSequence,
-    PrimerPair,
-)
+from supergsl.core.types.builtin import NucleotideSequence
+from supergsl.core.types.primer import PrimerPair
 from supergsl.core.exception import PartError
 from .position import SeqPosition
 
@@ -71,16 +70,22 @@ class Part(NucleotideSequence):
 
         return self.extraction_primers
 
-    def get_sequence(self):
+    @property
+    def sequence(self) -> Seq:
         ref, start_pos = self.start.get_absolute_position_in_reference()
         ref_2, end_pos = self.end.get_absolute_position_in_reference()
 
         if ref != ref_2:
             raise Exception("Reference sequences do not match.")
 
+        return ref[start_pos:end_pos]
+
+    @property
+    def sequence_record(self) -> SeqRecord:
+        """Return a `Bio.SeqRecord` entry for this part."""
         description = self.description or ''
         return SeqRecord(
-            ref[start_pos:end_pos],
+            self.sequence,
             name=self.identifier,
             description=description)
 
@@ -94,7 +99,12 @@ class Part(NucleotideSequence):
         self._roles.extend(roles)
         self._roles = list(set(self._roles))
 
-    def get_child_part_by_slice(self, identifier, start, end) -> 'Part':
+    def get_child_part_by_slice(
+        self,
+        identifier : str,
+        start : SeqPosition,
+        end : SeqPosition
+    ) -> 'Part':
         return self.provider.get_child_part_by_slice(
             self,
             identifier,
@@ -102,11 +112,12 @@ class Part(NucleotideSequence):
             end
         )
 
-
     def eval(self):
         """Evaluate this part."""
         return self
 
+    def __repr__(self):
+        return self.identifier
 
 class LazyLoadedPart(SuperGSLType):
     def eval(self) -> SuperGSLType:

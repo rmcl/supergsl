@@ -1,0 +1,12 @@
+from s288c import HO, GAL1, GAL3, GAL7, ERG10, CYC1
+from builtin import fuse
+
+let promoters = [
+    pGAL1,
+    pGAL3,
+    pGAL7
+]
+
+let result = fuse {
+    dHO ; promoters ; gERG10 ; tCYC1 ; uHO
+}

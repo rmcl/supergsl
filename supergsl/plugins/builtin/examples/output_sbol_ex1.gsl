@@ -1,0 +1,6 @@
+from builtin import fuse, output_sbol
+from S288C import GAL1, GAL3, GAL7
+
+let assembly = fuse { uGAL1 ; pGAL7 ; gGAL3 ; dGAL1 }
+
+output_sbol(assembly, 'output.sbol.xml')

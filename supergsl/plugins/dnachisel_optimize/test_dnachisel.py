@@ -1,5 +1,5 @@
 from unittest import TestCase
-from mock import Mock
+from unittest.mock import Mock
 from Bio import SeqIO
 from Bio.Seq import Seq
 from supergsl.core.types.builtin import AminoAcidSequence
@@ -38,7 +38,7 @@ class DnaChiselTestCases(TestCase):
         results = self.optimize.execute(params)
 
         result_sequences = [
-            item.get_sequence()
+            item.sequence
             for item in results
         ]
 

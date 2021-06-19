@@ -1,6 +1,6 @@
 """Tests for the eval module."""
 import unittest
-from mock import Mock, call, patch
+from unittest.mock import Mock, call, patch
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.eval import EvaluatePass
 from supergsl.core.function import SuperGSLFunctionDeclaration
@@ -40,7 +40,7 @@ class EvaluatePassTestCase(unittest.TestCase):
 
     def setUp(self):
         self.symbol_table = SymbolTable('global', None)
-        self.import_table = self.symbol_table.nested_scope('imports')
+        self.import_table = self.symbol_table.enter_nested_scope('imports')
         self.eval_pass = EvaluatePass(self.symbol_table)
         self.eval_pass.visit = Mock()
 
@@ -92,11 +92,10 @@ class EvaluatePassTestCase(unittest.TestCase):
         assembly_node = Assembly(parts, 'LABEL1112')
 
         assembly_declaration = self.eval_pass.visit_assembly(assembly_node)
-        self.assertEqual(assembly_declaration.get_label(), 'LABEL1112')
-        self.assertEqual(assembly_declaration.get_parts(), [
+        self.assertEqual(assembly_declaration.label, 'LABEL1112')
+        self.assertEqual(assembly_declaration.get_levels_by_factor_type('Part'), {
             'BOOM',
-            'BOOM'
-        ])
+        })
         self.eval_pass.visit.assert_has_calls([
             call(parts[0]),
             call(parts[1])
@@ -208,7 +207,7 @@ class EvaluatePassTestCase(unittest.TestCase):
 
         result = self.eval_pass.visit_sequence_constant(constant_dna_node)
         self.assertEqual(type(result), NucleotideSequence)
-        self.assertEqual(result.get_sequence(), 'ATGC')
+        self.assertEqual(result.sequence, 'ATGC')
 
     def test_visit_protein_sequence_constant(self):
         """Create the right type for a protein sequence constant."""
@@ -217,7 +216,7 @@ class EvaluatePassTestCase(unittest.TestCase):
 
         result = self.eval_pass.visit_sequence_constant(constant_protein_node)
         self.assertEqual(type(result), AminoAcidSequence)
-        self.assertEqual(result.get_sequence(), 'MATTTGAC*')
+        self.assertEqual(result.sequence, 'MATTTGAC*')
 
     def test_visit_sequence_constant_weird_type(self):
         """Raise exception for a unknown type of constant."""

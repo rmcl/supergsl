@@ -1,7 +1,7 @@
 """Tests for the output core module."""
 import unittest
 from Bio.Seq import Seq
-from supergsl.core.types.builtin import PrimerPair
+from supergsl.core.types.primer import PrimerPair
 
 
 class BuiltinTypeTestCase(unittest.TestCase):
@@ -15,5 +15,5 @@ class BuiltinTypeTestCase(unittest.TestCase):
         reverse = Seq('TTAGACACATGGGAC')
 
         result = PrimerPair.from_sequences(forward, reverse)
-        self.assertEqual(result.forward.get_sequence(), forward)
-        self.assertEqual(result.reverse.get_sequence(), reverse)
+        self.assertEqual(result.forward.sequence, forward)
+        self.assertEqual(result.reverse.sequence, reverse)
