@@ -39,8 +39,8 @@ class GenBankFilePartProvider(PartProvider):
         """Open a genbank file whether gunziped or uncompressed."""
         if path[-2:] == 'gz':
             return gzip.open(path, "rt")
-        else:
-            return open(path, "rt")
+
+        return open(path, "rt")
 
     def get_identifier_for_feature(self, feature) -> List[str]:
         """Retrieve part details from a genbank feature.
@@ -100,7 +100,7 @@ class GenBankFilePartProvider(PartProvider):
 
         return [
             self.get_part(identifier)
-            for identifier in self.features_by_identifier.keys()
+            for identifier in self.features_by_identifier
         ]
 
     def get_part(self, identifier) -> Part:
@@ -116,9 +116,9 @@ class GenBankFilePartProvider(PartProvider):
 
         try:
             feature, parent_record = self.features_by_identifier[identifier]
-        except KeyError:
+        except KeyError as error:
             raise PartNotFoundError('Part not found "%s" in %s.' % (
-                identifier, self.provider_name))
+                identifier, self.provider_name)) from error
 
         return self.get_part_from_feature(
             identifier,

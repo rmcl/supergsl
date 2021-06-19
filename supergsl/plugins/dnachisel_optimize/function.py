@@ -26,17 +26,18 @@ class DNAChiselOptimizeFunction(SuperGSLFunction):
     option one in this github issue [3].
 
     Example sGSL syntax:
+
         from dnachisel import optimize
-        from s288c import codon_frequency
+        from S288C import codon_frequency
 
         let aa_sequence = /MRRAGA...RRACC/
 
         optimize(aa_sequence, codon_frequency, results=5)
 
     References
-        * https://edinburgh-genome-foundry.github.io/DnaChisel/
-        * https://github.com/Edinburgh-Genome-Foundry/codon-usage-tables/tree/master/codon_usage_data/tables
-        * https://github.com/Edinburgh-Genome-Foundry/DnaChisel/issues/39
+        1. https://edinburgh-genome-foundry.github.io/DnaChisel/
+        2. https://github.com/Edinburgh-Genome-Foundry/codon-usage-tables/tree/master/codon_usage_data/tables
+        3. https://github.com/Edinburgh-Genome-Foundry/DnaChisel/issues/39
     """
     name = 'codon_optimize'
     arguments = [

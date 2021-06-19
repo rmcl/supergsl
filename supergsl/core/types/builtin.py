@@ -49,6 +49,7 @@ class CodonTranslationTable(SuperGSLType):
 
 
 class Collection(SuperGSLType):
+    """Store a list of items."""
 
     def __init__(self, items : List[SuperGSLType]):
         self._items = items
