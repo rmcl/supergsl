@@ -1,4 +1,6 @@
+from typing import Dict
 from Bio import SeqIO
+from Bio.Seq import Seq
 from Bio.Restriction import RestrictionBatch
 
 from .exception import InvalidBioBrickError
@@ -22,11 +24,11 @@ def check_is_valid_biobrick(sequence):
 
     return True
 
-def load_biobrick_constant_sequences():
+def load_biobrick_constant_sequences() -> Dict[str, Seq]:
     file_path = 'supergsl/plugins/igem/biobrick.fa'
     records = SeqIO.parse(file_path, "fasta")
 
     return {
-        record.name: record
+        record.name: record.seq
         for record in records
     }

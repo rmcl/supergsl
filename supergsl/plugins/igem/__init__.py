@@ -6,6 +6,7 @@ from .part_registry import BioBrickPartProvider
 
 
 class BioBrickPlugin(SuperGSLPlugin):
+    """Define imports for the BioBrick Plugin."""
 
     def register(self, compiler_settings):
         """Register functions provide by the igem plugin."""

@@ -13,10 +13,8 @@ from supergsl.core.types.assembly import (
     Assembly
 )
 from .exception import InvalidBioBrickError
-from .utils import (
-    load_biobrick_constant_sequences,
-    check_is_valid_biobrick
-)
+from .utils import load_biobrick_constant_sequences
+
 
 class BioBrick3AAssembler(AssemblerBase):
     """Assemble BioBrick standard parts using the 3A (three antibiotic) assembly protocol.
@@ -114,8 +112,8 @@ class BioBrick3AAssembler(AssemblerBase):
 
         """
         left_digested_part_sequence, right_digested_part_sequence = self.digest_part_sequence(
-            left_part.get_sequence().seq,
-            right_part.get_sequence().seq)
+            left_part.sequence,
+            right_part.sequence)
         digested_backbone_sequence = self.digest_backbone(self.plasmid_backbone_name)
 
         fragments = [
@@ -127,7 +125,7 @@ class BioBrick3AAssembler(AssemblerBase):
         assembly = PyDnaAssembly(fragments)
         print(assembly)
 
-    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyResultSet:
+    def assemble(self, assembly_declarations : List[AssemblyDeclaration]) -> AssemblyResultSet:
         """
         Strategy:
             assemblies is a collection ordered list of parts
@@ -151,20 +149,18 @@ class BioBrick3AAssembler(AssemblerBase):
         """
 
         assemblies : List[Assembly] = []
-        for assembly_idx, assembly_request in enumerate(assembly_requests):
-            parts = assembly_request.get_levels_by_factor_type('Part')
+        for assembly_idx, assembly_declaration in enumerate(assembly_declarations):
+            #type of designs = Generator[List[AssemblyLevel]]
+            designs = assembly_declaration.get_full_factorial_designs()
+            for design_parts in designs:
 
-            p1 = parts[0]
-            p2 = parts[1]
+                p1 = design_parts[0]
+                p2 = design_parts[1]
 
-            print('ASSEMBLE', type(p1), p1.identifier, p2.identifier)
+                print('ASSEMBLE', type(p1), p1.identifier, p2.identifier)
 
-            # TODO: NEED TO CONFIRM PART ARE VALID BIO BRICKS -
-            # ie have prefix and suffix and no bad cut sites
-            check_is_valid_biobrick(p1.get_sequence().seq)
-
-            self.assemble_part_tuple(p1, p2)
-            # validate that each part has the appropriate biobrick prefix/suffix
-            # confirm that each part does not contain disallowed restriction sites.
+                self.assemble_part_tuple(p1, p2)
+                # validate that each part has the appropriate biobrick prefix/suffix
+                # confirm that each part does not contain disallowed restriction sites.
 
         return AssemblyResultSet(assemblies)

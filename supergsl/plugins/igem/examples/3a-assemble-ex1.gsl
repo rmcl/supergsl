@@ -7,25 +7,21 @@ Make sure the following configuration is in your `supergsl-config.yml` file:
         ...
         {
             "name": "igem",
-            "provider_class": "supergsl.plugins.synbiohub.SynBioHubPartProvider",
+            "provider_class": "supergsl.plugins.builtin.providers.SynBioHubPartProvider",
             "repository_url": "https://synbiohub.org/public/igem",
         }
     ],
     ...
-    "assemblers": [
+    "plugins": [
         ...
-        {
-            "name": "biobrick-3a",
-            "assembler_class": "supergsl.plugins.igem.biobrick.BioBrick3AAssembler",
-            "assembler_options": {}
-        }
+        "supergsl.plugins.igem",
     ]
 }
 ```
 
 */
 
-from biobrick.assemble import assemble-3a
+from biobrick import assemble-3a
 from igem import BBa_J23112 # promoter part
 from igem import BBa_E0040 # RFP
 

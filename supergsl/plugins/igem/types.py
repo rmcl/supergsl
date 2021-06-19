@@ -1,3 +1,4 @@
+from Bio.Seq import Seq
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
 from supergsl.core.types.position import SeqPosition
@@ -20,11 +21,11 @@ class BioBrickPart(Part):
         check_is_valid_biobrick(payload_sequence)
         self._payload_sequence = payload_sequence
 
-        sequence = ''.join([
+        sequence = Seq(''.join([
             str(BIOBRICK_PREFIX_SEQUENCE).lower(),
             str(payload_sequence).lower(),
             str(BIOBRICK_SUFFIX_SEQUENCE).lower()
-        ])
+        ]))
 
         kwargs['start_position'] = SeqPosition.from_reference(
             x=0,
