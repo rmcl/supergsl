@@ -3,8 +3,12 @@
 import inspect
 import importlib
 from typing import Dict, Set, Type
-from supergsl.core.exception import ConfigurationError, NotFoundError
-from supergsl.core.provider import SuperGSLProvider
+from supergsl.core.exception import (
+    ConfigurationError,
+    NotFoundError,
+    SymbolNotFoundError
+)
+from supergsl.core.provider import SuperGSLProvider, ProviderGroup
 from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.symbol_table import SymbolTable
 
@@ -40,14 +44,24 @@ class SuperGSLPlugin(object):
 
         symbol_table.insert(alias or identifier, self.functions[identifier])
 
+    def get_or_create_provider_group_for_module_path(self, module_path):
+        import_symbol_table = self.symbol_table.enter_nested_scope('imports')
+        try:
+            provider_group = import_symbol_table.lookup(module_path)
+        except SymbolNotFoundError:
+            provider_group = ProviderGroup()
+            import_symbol_table.insert(module_path, provider_group)
+
+        return provider_group
+
     def register_provider(
         self,
         import_path : str,
         provider_inst : SuperGSLProvider
     ):
         """Register a provider allowing the user to import things from a SuperGSLProgram."""
-        import_symbol_table = self.symbol_table.enter_nested_scope('imports')
-        import_symbol_table.insert(import_path, provider_inst)
+        provider_group = self.get_or_create_provider_group_for_module_path(import_path)
+        provider_group.add_provider(provider_inst)
 
     def register_function(
         self,
@@ -56,9 +70,12 @@ class SuperGSLPlugin(object):
         function_declaration : SuperGSLFunctionDeclaration
     ):
         """Register a function making it available for import in SuperGSL."""
-        nested_symbol_table = self.symbol_table.enter_nested_scope('imports')
+
         self.functions[function_name] = function_declaration
-        nested_symbol_table.insert(import_path, self)
+
+        provider_group = self.get_or_create_provider_group_for_module_path(import_path)
+        if self not in provider_group:
+            provider_group.add_provider(self)
 
 
     def register(self, compiler_settings : dict):
@@ -66,7 +83,6 @@ class SuperGSLPlugin(object):
 
         Example: symbol_table.register(import_path, mod_class)
         """
-        pass
 
 
 class PluginProvider(object):
