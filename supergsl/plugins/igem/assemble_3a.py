@@ -1,3 +1,4 @@
+"""Implement the 3A (three antibiotic) assembly protocol for BioBrick Parts."""
 from typing import Dict, Tuple, List
 from Bio.Seq import Seq
 from Bio.Restriction import Restriction
