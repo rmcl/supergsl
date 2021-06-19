@@ -24,7 +24,6 @@ class PartRegistryTestCase(TestCase):
             'repository_url': 'http://example.testbla/repo',
         }
 
-
     @patch('requests.get')
     def test_get_biobrick_part(self, request_mock_get):
         """Patch the http call to test the entire provider and part retrieval."""
@@ -76,7 +75,10 @@ class PartRegistryTestCase(TestCase):
 
 
 class BioBrickPartProviderTestCase(TestCase):
+    """Test that the BioBrickProvider can return prefix and suffix sequences."""
+
     def test_get_prefix_part(self):
+        """Return a part with the biobrick prefix."""
         provider = BioBrickPartProvider('biobrick', {})
 
         prefix_part = provider.get_part('prefix')
@@ -85,6 +87,7 @@ class BioBrickPartProviderTestCase(TestCase):
         self.assertEqual(prefix_part.roles, [SO_HOMOLOGOUS_REGION])
 
     def test_get_suffix_part(self):
+        """Return a part with the biobrick suffix."""
         provider = BioBrickPartProvider('biobrick', {})
 
         prefix_part = provider.get_part('suffix')
