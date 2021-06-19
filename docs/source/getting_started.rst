@@ -26,7 +26,7 @@ Option 2: I just need a sequence to synthesize
 ============================================================================
 
 ============================================================================
-Option 3: All I want (for christmas is you ::cough::) primers!
+Option 3: All I want are primers!
 ============================================================================
 
 Say all you want from SuperGSL is to use its convenient slice syntax to retrieve primers of your favorite gene.

@@ -1,25 +1,33 @@
-from typing import Optional
+from typing import Optional, Dict
+from Bio.Seq import Seq
+
 from supergsl.utils import import_class
-from supergsl.core.exception import ConfigurationError
+
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.provider import SuperGSLProvider
 from supergsl.core.symbol_table import SymbolTable
-from supergsl.core.parts import Part, SeqPosition
+from supergsl.core.types.part import Part
+from supergsl.core.types.position import SeqPosition
+
+from supergsl.core.exception import ConfigurationError, PartNotFoundError
+from supergsl.core.constants import THREE_PRIME
 
 
 class PartProvider(SuperGSLProvider):
-    name : Optional[str] = None
 
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, name, compiler_settings):
+        self._provider_name = name
+        self._compiler_settings = compiler_settings
 
-    def get_provider_name(self):
-        return self.name
+    @property
+    def provider_name(self):
+        """Return the name of this part provider."""
+        return self._provider_name
 
     def list_parts(self):
-        # The method is optional
+        """Return all parts available through this provider."""
         raise NotImplementedError(
-            'List parts is not supported by "%s" part provider.' % self.name
+            'List parts is not supported by "%s" part provider.' % self.provider_name
         )
 
     def resolve_import(
@@ -51,25 +59,93 @@ class PartProvider(SuperGSLProvider):
         raise NotImplementedError('Subclass to implement')
 
 
+class ConstantPartProvider(PartProvider):
+    """Base class for providing constant parts.
+
+    To utilize this class, subclass and define a PART_DETAILS dictionary.
+    ```
+    {
+        <part-identifier>: (
+            <description>
+            <sequence>
+            [<list of roles>]
+        )
+    }
+    ```
+    """
+
+    PART_DETAILS = {
+        'part-name': ('part description', 'ATGC', ['LIST OF ROLES']),
+    }
+
+    def __init__(self, name : str, compiler_settings : dict):
+        self._provider_name = name
+        self._settings = compiler_settings
+        self._cached_parts: Dict[str, Part] = {}
+
+
+    def get_part_details(self, part_identifier):
+        """Return constant details about a part."""
+        return self.PART_DETAILS[part_identifier]
+
+    def get_part(self, identifier : str) -> Part:
+        """Retrieve a part by identifier.
+
+        Arguments:
+            identifier  A identifier to select a part from this provider
+        Return: `Part`
+        """
+
+        try:
+            return self._cached_parts[identifier]
+        except KeyError:
+            pass
+
+        try:
+            description, reference_sequence, roles = \
+                self.get_part_details(identifier)
+
+        except KeyError as error:
+            raise PartNotFoundError(
+                'Part "%s" not found.' % identifier) from error
+
+        reference_sequence = Seq(reference_sequence)
+
+        start = SeqPosition.from_reference(
+            x=0,
+            rel_to=THREE_PRIME,
+            approximate=False,
+            reference=reference_sequence
+        )
+        end = start.get_relative_position(
+            x=len(reference_sequence))
+
+        part = Part(
+            identifier,
+            start,
+            end,
+            provider=self,
+            description=description,
+            roles=roles)
+
+        self._cached_parts[identifier] = part
+        return part
+
+
 class PartProviderPlugin(SuperGSLPlugin):
+    """Plugin stub to register part providers."""
     name = 'part_provider'
 
-    def register(self, symbol_table, compiler_settings):
+    def register(self, compiler_settings):
         """Instantiate and register each part_providers defined in settings."""
 
         if 'part_providers' not in compiler_settings:
             raise ConfigurationError(
                 'No part providers have been defined. Check your supergGSL settings.')
 
-        import_symbol_table = symbol_table.nested_scope('imports')
-
         for provider_config in compiler_settings['part_providers']:
             print('Initializing "%s"' % provider_config['name'])
             provider_class = import_class(provider_config['provider_class'])
             provider_inst = provider_class(provider_config['name'], provider_config)
 
-            provider_name = provider_inst.get_provider_name()
-            if not provider_name:
-                raise ConfigurationError('Provider "%s" does not specify a name.' % provider_class)
-
-            import_symbol_table.insert(provider_name, provider_inst)
+            self.register_provider(provider_config['name'], provider_inst)

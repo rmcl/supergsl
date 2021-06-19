@@ -1,35 +1,31 @@
-"""Define the mechanism of SuperGSLFunction and an AST pass to invoke those functions."""
-from typing import Optional, List
+"""Define the base class for SuperGSL Functions."""
+from typing import (
+    Optional,
+    List,
+    Type,
+    Dict,
+    Tuple,
+    Union,
+    Any
+)
 from inspect import getdoc
 
 from supergsl.core.types import SuperGSLType
-from supergsl.core.provider import SuperGSLProvider
-from supergsl.core.symbol_table import SymbolTable
-from supergsl.core.backend import DepthFirstNodeFilteredPass
-from supergsl.core.exception import FunctionInvokeError, FunctionNotFoundError
-
+from supergsl.core.exception import FunctionInvokeError
 #pylint: disable=E1136
 
-class SuperGSLFunction(SuperGSLProvider, SuperGSLType):
+
+class SuperGSLFunction(SuperGSLType):
     """Add a callable function to SuperGSL."""
 
     name: Optional[str] = None
-    arguments : List[SuperGSLType] = []
-    return_type : Optional[SuperGSLType] = None
+    compiler_settings : Optional[Dict] = None
 
-    def resolve_import(self,
-        symbol_table : SymbolTable,
-        identifier : str,
-        alias : str
-    ) -> None:
-        """Resolve the import of a function from this provider.
+    arguments : List[Tuple[str, Type]] = []
+    return_type : Optional[Type[SuperGSLType]] = None
 
-        """
-        if identifier != self.name:
-            raise FunctionNotFoundError('Function {} not provided by {}'.format(
-                identifier, self))
-
-        symbol_table.insert(alias or identifier, self)
+    def __init__(self, compiler_settings : dict):
+        self.settings = compiler_settings
 
     @classmethod
     def get_name(cls):
@@ -38,49 +34,102 @@ class SuperGSLFunction(SuperGSLProvider, SuperGSLType):
 
         raise NotImplementedError('sGSL function definitions must specify a "name" in "%s".' % cls)
 
-    @classmethod
-    def get_help(cls) -> Optional[str]:
+    @property
+    def help(cls) -> Optional[str]:
         return getdoc(cls)
 
     @classmethod
-    def get_arguments(cls):
+    def get_arguments(cls) -> List[Tuple[str, Type]]:
         """Return a list of expected arguments."""
         return cls.arguments
 
     @classmethod
-    def get_return_type(cls):
+    def get_return_type(cls) -> Union[Type[SuperGSLType], Type[None]]:
         """Return the expected return value of the function."""
-        return cls.return_type
+        return cls.return_type or type(None)
 
-    def execute(self, sgsl_args, child_nodes=None):
+    def execute(self, params : dict):
         """Called when the function is invoke in SuperGSL."""
-        pass
+        raise NotImplementedError('Subclass to implement.')
 
+    ### Helper Methods for Function Invocation
 
-class InvokeFunctionPass(DepthFirstNodeFilteredPass):
-    """Traverse the AST and execute encountered SuperGSLFunctions."""
+    def check_function_result(self, result) -> None:
+        """Check the result of a function against the declared return type."""
+        expected_return_type = self.get_return_type()
+        if not expected_return_type:
+            expected_return_type = type(None)
 
-    def get_node_handlers(self):
-        return {
-            'FunctionInvocation': self.visit_function_invoke_node,
-        }
-
-    def visit_function_invoke_node(self, node):
-        print('INVOKE', node.params, node.identifier)
-
-        if node.params is not None:
-            print('WARNING!!! PASSING PARAMS NOT IMPLEMENTED YET!!!!!!!')
-            #raise NotImplementedError('Passing parameters to functions is not yet implemented.')
-
-        args = {}
-        result_node = node.function.execute(args, node.get_definition_list())
-        expected_return_type = node.function.get_return_type()
-        if not isinstance(result_node, expected_return_type):
+        if not isinstance(result, expected_return_type):
             raise FunctionInvokeError(
                 '"%s" Return type does not match expectation. Expected: "%s", Actual: "%s"' % (
-                    node.function,
+                    self,
                     expected_return_type,
-                    type(result_node[0])
+                    type(result)
                 ))
 
-        return result_node
+    def build_argument_map(
+        self,
+        positional_arguments,
+        child_arguments
+    ) -> Dict[str, Any]:
+        """Build an argument dict from positional arugments."""
+
+        expected_arguments = self.get_arguments()
+        if len(positional_arguments) != len(expected_arguments):
+            raise FunctionInvokeError(
+                'Number of positional arguments does not match function definition. '
+                'Expected %d, but received %d' % (
+                    len(expected_arguments),
+                    len(positional_arguments))
+            )
+
+        function_parameters = {}
+        for argument_idx, argument_details in enumerate(expected_arguments):
+            argument_key, expected_argument_type = argument_details
+            argument_value = positional_arguments[argument_idx]
+
+            if argument_key == 'children':
+                raise FunctionInvokeError('Cannot define an argument named "children". It is reserved.')
+
+            if not isinstance(argument_value, expected_argument_type):
+                raise FunctionInvokeError(
+                    'Provided type does not match expectation. '
+                    'Expected %s, but received %s' % (
+                        expected_argument_type,
+                        type(argument_value))
+                )
+
+            function_parameters[argument_key] = argument_value
+
+        if child_arguments:
+            function_parameters['children'] = child_arguments
+
+        return function_parameters
+
+    def evaluate_arguments_and_execute(
+        self,
+        positional_arguments : List[Any],
+        child_arguments : List[Any]
+    ):
+        """Perform type checking and execute the desired SuperGSL Function."""
+
+        arguments = self.build_argument_map(
+            positional_arguments,
+            child_arguments)
+
+        result = self.execute(arguments)
+        self.check_function_result(result)
+
+        return result
+
+
+
+
+class SuperGSLFunctionDeclaration(SuperGSLType):
+    def __init__(self, function_class : Type[SuperGSLFunction], compiler_settings : dict):
+        self.function_class = function_class
+        self.compiler_settings = compiler_settings
+
+    def eval(self) -> SuperGSLFunction:
+        return self.function_class(self.compiler_settings)

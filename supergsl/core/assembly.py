@@ -1,36 +1,65 @@
-from typing import List
-from supergsl.core.backend import BreadthFirstNodeFilteredPass
+import sys
+import contextlib
+from typing import List, TextIO
+
 from supergsl.core.function import SuperGSLFunction
-from supergsl.core.exception import ConfigurationError
-from supergsl.utils import import_class
+from supergsl.core.types.assembly import AssemblyDeclaration, AssemblyResultSet
 
 
 class AssemblerBase(SuperGSLFunction):
+    """Base class for functions implementing Assemblers."""
 
-    # TODO(rmcl): How can we still retrieve some configuration for the assembler
-    # from supergsl-config.json?
+    return_type = AssemblyResultSet
 
-    #def __init__(self, name, config_options):
-    #    self.name = name
-    #    self.options = config_options
+    def execute(self, params):
+        return self.assemble(params['children'])
+
+    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyResultSet:
+        """Iterate over `Part` and generate an Assembly object."""
+        raise NotImplementedError('Not implemented. Subclass to implement.')
+
+
+class AssemblyResultOutputFunction(SuperGSLFunction):
+    """Base SuperGSLFunction for creating exporters for AssemblyResultSets.
+
+    When subclassed creates a SuperGSL Function with the following parameters:
+    ```output_sbol(assemblies, filename)``` and the side effect of creating a
+    file (filename) with outputted AssemblyResultSet.
+
+    Good examples:
+        supergsl/plugins/builtin/output/json_output.py
+        supergsl/plugins/builtin/output/sbol_output.py
+
+    """
+
+    def output(self, assemblies : AssemblyResultSet, file_handle : TextIO):
+        """Output an `AssemblyResultSet` to the supplied file_handle."""
+        raise NotImplementedError('Subclass to implement.')
 
     def get_arguments(self):
-        return []
+        return [
+            ('assemblies', AssemblyResultSet),
+            ('filename', str),
+        ]
 
     def get_return_type(self):
-        return list
+        return type(None)
 
-    def execute(self, sgsl_args, child_nodes=None):
-        """
-        """
-        return self.assemble(child_nodes)
+    @contextlib.contextmanager
+    def open_output_fp(self, filename = None):
+        """Open the output file. Use contextmanager to do smart stuff around stdout."""
+        if filename and filename != '-':
+            file_handle = open(filename, 'w+')
+        else:
+            file_handle = sys.stdout
 
-    def assemble(self):
-        raise Exception('Not implemented. Subclass to implement.')
+        try:
+            yield file_handle
+        finally:
+            if file_handle is not sys.stdout:
+                file_handle.close()
 
-
-class FusionAssembler(AssemblerBase):
-    """Create an assembly by fusing adjacent parts together without overlap."""
-
-    def assemble(self, assemblies):
-        pass
+    def execute(self, params : dict):
+        """Execute the Output Function."""
+        with self.open_output_fp(params['filename']) as output_fp:
+            self.output(params['assemblies'], output_fp)

@@ -1,11 +1,8 @@
+"""Define SuperGSL builtin types that can be used by plugins."""
 from Bio.Seq import Seq
-from typing import List
-
-
-class SuperGSLType(object):
-    """Base class defining types available in SuperGSL."""
-    pass
-
+from typing import List, Type
+from collections import OrderedDict
+from .base import SuperGSLType
 
 class SuperGSLEnum(SuperGSLType):
     """Define a list of choices."""
@@ -15,24 +12,31 @@ class SuperGSLEnum(SuperGSLType):
 class NucleotideSequence(SuperGSLType):
     """A type representing a nucleotide sequence."""
 
-    def get_sequence(self):
+    def __init__(self, sequence : Seq):
+        self._sequence = sequence
+
+    @property
+    def sequence(self) -> Seq:
         """Return the nucleotide sequence as a `Bio.Seq`."""
-        raise NotImplementedError('Subclass to implement.')
+        return self._sequence
+
+    def __repr__(self):
+        return 'NucleotideSequence: %s' % self.sequence
 
 
 class AminoAcidSequence(SuperGSLType):
     """A type representing arbitrary an amino acid sequence."""
 
-    def get_sequence(self):
+    def __init__(self, sequence : Seq):
+        self._sequence = sequence
+
+    @property
+    def sequence(self):
         """Return the amino acid sequence as a `Bio.Seq`."""
-        raise NotImplementedError('Subclass to implement.')
+        return self._sequence
 
-
-class CodonFrequencyTable(SuperGSLType):
-    """
-    https://github.com/Edinburgh-Genome-Foundry/codon-usage-tables/tree/master/codon_usage_data/tables
-    """
-    pass
+    def __repr__(self):
+        return 'AminoAcidSequence: %s' % self.sequence
 
 
 class CodonTranslationTable(SuperGSLType):
@@ -44,34 +48,26 @@ class CodonTranslationTable(SuperGSLType):
     pass
 
 
-class Primer(NucleotideSequence):
-    """Represent a short nucleotide sequence that provides a starting point for replication"""
-    def __init__(self, primer_seq : Seq):
-        self._sequence = primer_seq
+class Collection(SuperGSLType):
+    """Store a list of items."""
 
-    def get_sequence(self) -> Seq:
-        """Return the amino acid sequence as a `Bio.Seq`."""
-        return self._sequence
+    def __init__(self, items : List[SuperGSLType]):
+        self._items = items
 
+    def __iter__(self):
+        return iter(self._items)
 
-class PrimerPair(SuperGSLType):
-    """A pair of primers used in PCR reactions to amplify a region of DNA."""
+    def count(self):
+        return len(self._items)
 
-    @classmethod
-    def from_sequences(cls, forward_primer_seq, reverse_primer_seq):
-        """Construct a PrimerPair from two sequences."""
-        return PrimerPair(Primer(forward_primer_seq), Primer(reverse_primer_seq))
+    def get_by_label(self, idx):
+        pass
 
-    def __init__(self, forward_primer, reverse_primer):
-        self._forward_primer : Primer = forward_primer
-        self._reverse_primer : Primer = reverse_primer
+    def get_by_index(self, idx):
+        pass
 
-    @property
-    def forward(self) -> Primer:
-        """Return the forward primer of the pair"""
-        return self._forward_primer
-
-    @property
-    def reverse(self) -> Primer:
-        """Return the reverse primer of the pair"""
-        return self._reverse_primer
+    def __repr__(self):
+        output = 'Collection (count: %d)\n' % len(self._items)
+        for item_idx, item in enumerate(self._items):
+            output += '  %d. %s \n' % (item_idx, item)
+        return output

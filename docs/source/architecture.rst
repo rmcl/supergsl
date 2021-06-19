@@ -1,11 +1,11 @@
 Architecture
 =============
 
-SuperGSL is a fairly standard [multi-pass compiler](https://en.wikipedia.org/wiki/Multi-pass_compiler). The author fondly remembers his undergraduate compiler course at UC Santa Barbara and refreshed his memories on the finer points of compiler design by referring to [1].
+SuperGSL attempts to use concepts from [multi-pass compiler](https://en.wikipedia.org/wiki/Multi-pass_compiler) and the apply/eval magic described in Structure and Interpretation of Computer Programs. The author fondly remembers his undergraduate compiler course at UC Santa Barbara and refreshed his memories on the finer points of compiler design by referring to [1].
 
-The superGSL compiler converts the superGSL source code into an Abstract Syntax Tree (AST) and then executes a series of passes over the AST which incrementally resolve parts, resolve functions, perform assemblies, generate primers and a number of other tasks to ultimately generate final DNA sequences.
+The superGSL compiler converts the superGSL source code into an Abstract Syntax Tree (AST) and then executes a series of passes over the AST to incrementally resolve parts, functions, and other primitives. It then translates to AST into an IR which is used to build assemblies, generate primers and a number of other tasks to ultimately generate final DNA sequences.
 
-The parts of the compiler that convert raw source code into a AST is called the "front-end". The front-end of the compiler first performs [lexical analysis](https://en.wikipedia.org/wiki/Lexical_analysis) or "lexing" to chunk the source code into a series of tokens. These tokens are then passed to the [Parser](https://en.wikipedia.org/wiki/Parsing) which enforces the syntax of the SuperGSL language and generates the AST.
+The parts of the compiler that convert raw source code into a AST is called the "front-end". The front-end of the compiler first performs [lexical analysis](https://en.wikipedia.org/wiki/Lexical_analysis) or "lexing" to chunk the source code into a series of tokens. These tokens are then passed to the [Parser](https://en.wikipedia.org/wiki/Parsing) which enforces the syntax of the SuperGSL language and generates the AST. From there, eval() methods in the AST classes generate the IR classes from the AST graph nodes.
 
 .. mermaid::
     :align: center
@@ -16,8 +16,8 @@ The parts of the compiler that convert raw source code into a AST is called the 
         end
         subgraph "Backend"
         B --> C(AST)
-        C -->|Resolve Parts| D(ASTv2)
-        D -->|Generate Assemblies| E[ASTv3]
+        C -->|Eval| D(IR)
+        D -->|Assemble| E[IRv2]
         end
 
         subgraph "Output Generation"

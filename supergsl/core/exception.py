@@ -1,5 +1,3 @@
-"""Define custom exceptions for SuperGSL."""
-
 class SuperGSLError(Exception):
     """Base exception for all custom SuperGSL errors."""
 
@@ -20,6 +18,10 @@ class NotFoundError(SuperGSLError):
     """Base class representing class of errors that occur when a SuperGSL object cannot be found."""
 
 
+class ConfigFileNotFound(NotFoundError):
+    """Attempted to load a configuration file, but it could not be found."""
+
+
 class SymbolNotFoundError(NotFoundError):
     """A symbol cannot be found in the symbol table."""
 
@@ -33,6 +35,10 @@ class ProviderNotFoundError(NotFoundError):
 
 class FunctionNotFoundError(NotFoundError):
     """The specified function cannot be found."""
+
+
+class PartError(SuperGSLError):
+    """Raise by `PartProviders` when there is something wrong with a part."""
 
 
 class PartNotFoundError(NotFoundError):

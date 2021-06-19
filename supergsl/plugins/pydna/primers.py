@@ -6,7 +6,7 @@ from pydna.design import assembly_fragments
 from pydna.design import primer_design
 from pydna.dseqrecord import Dseqrecord
 
-from supergsl.core.types import PrimerPair
+from supergsl.core.types.primer import PrimerPair
 
 
 class ExtractionPrimerBuilder(object):
@@ -17,13 +17,12 @@ class ExtractionPrimerBuilder(object):
 
     def build_primers_for_part(self, part):
         """Build extraction primers and assign them into the part."""
-        part_seq_record = part.get_sequence()
 
         forward_primer = part.extraction_primers.forward_primer if part.has_primers else None
         reverse_primer = part.extraction_primers.reverse_primer if part.has_primers else None
 
         amplicon = primer_design(
-            Dseqrecord(part_seq_record),
+            Dseqrecord(part.sequence_record),
             fp=forward_primer,
             rp=reverse_primer,
             tm_func=self._perform_tm_func,

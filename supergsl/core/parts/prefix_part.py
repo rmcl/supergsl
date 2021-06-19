@@ -15,7 +15,8 @@ from supergsl.core.constants import (
     SO_MRNA
 )
 
-from .part import Part, LazyLoadedPart
+from supergsl.core.ast import SymbolReference
+from supergsl.core.types.part import Part, LazyLoadedPart
 from .provider import PartProvider
 
 
@@ -56,7 +57,7 @@ class PrefixedSliceLazyLoadedPart(LazyLoadedPart):
         self.parent_part = parent_part
         self.part_prefix = prefix
 
-    def instantiate(self):
+    def eval(self) -> Part:
         return self.parent_part.get_prefixed_part(
             self.identifier,
             self.part_prefix)
@@ -115,7 +116,7 @@ class PrefixedSlicePartProviderMixin(_Base):
             symbol_table.insert(part_name, lazy_part)
 
 
-    def get_prefixed_part(self, identifier : str, prefix : str):
+    def get_prefixed_part(self, identifier : str, prefix : str) -> Part:
         parent_part = self.get_part(identifier)
         if prefix == '':
             return parent_part
@@ -171,6 +172,9 @@ class PrefixedSlicePartProviderMixin(_Base):
                 approximate=True)
 
             return new_start, parent_part.start
+
+        elif part_slice_type == 'orf':
+            return parent_part.start, parent_part.end
 
         elif part_slice_type == 'gene':
             return parent_part.start, parent_part.end

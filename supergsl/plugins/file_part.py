@@ -6,9 +6,10 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 
 from supergsl.core.constants import THREE_PRIME
-from supergsl.core.parts.position import SeqPosition
+from supergsl.core.types.position import SeqPosition
 from supergsl.core.exception import PartNotFoundError
-from supergsl.core.parts import PartProvider, Part
+from supergsl.core.types.part import Part
+from supergsl.core.parts import PartProvider
 from supergsl.core.parts.prefix_part import PrefixedSlicePartProviderMixin
 from supergsl.plugins.pydna.primers import ExtractionPrimerBuilder
 
@@ -25,7 +26,7 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
     """
 
     def __init__(self, name : str, settings : dict):
-        self.name = name
+        self._provider_name = name
         self.fasta_file_path : str = settings['fasta_file_path']
         self.feature_file_path : str = settings['feature_file_path']
         self._cached_parts : Dict[str, Part] = {}
@@ -76,7 +77,7 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
             reference_feature = self._genes[gene_name]
         except KeyError:
             raise PartNotFoundError('Part not found "%s" in %s.' % (
-                gene_name, self.get_provider_name()))
+                gene_name, self.provider_name))
 
         # Make a copy of the reference feature and modify it to conform
         # to possibly complemented reference sequence

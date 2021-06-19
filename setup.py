@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="supergsl",
-    version="0.0.1",
+    version="0.5.0",
     author="Russell McLoughlin",
     author_email="russ.mcl@gmail.com",
     description="A python implementation of the Genome Specification Language (GSL) for genetic engineering.",
@@ -25,16 +25,22 @@ setuptools.setup(
         'rply',
         'nose',
         'coverage',
-        'biopython',
+        'biopython==1.78',
         'pydna',
         'sbol2',
-        'mock',
         'mypy',
         'mypy-extensions',
+        'prompt_toolkit',
+        'pyDOE2',
+        'types-mock',
+        'types-protobuf',
+        'types-requests',
     ],
     extras_require={
         "plugins": [
             'docker',
+            'grpcio-tools',
+            'mypy-protobuf',
             'dnachisel',
             'graphviz',
         ]

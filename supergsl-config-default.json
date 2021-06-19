@@ -1,10 +1,15 @@
 {
     "part_providers": [],
-    "assemblers": [],
-    "output_providers": [
-        "supergsl.core.output.ASTPrintOutputProvider",
-        "supergsl.plugins.sbol_output.SBOLOutputPass",
-        "supergsl.plugins.json_output.JSONOutputPass",
-        "supergsl.plugins.genebank_output.GeneBankOutputPass"
+    "output_providers": [],
+    "assemblers": [
+        {
+            "name": "fuse",
+            "assembler_class": "supergsl.core.assembly.base.FusionAssembler",
+            "assembler_options": {}
+        }
+    ],
+    "plugins": [
+        "supergsl.plugins.builtin",
+        "supergsl.core.parts.provider"
     ]
 }

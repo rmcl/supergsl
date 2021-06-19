@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package supergsl;
+option py_generic_services = true;
+
+
+service SuperGSLCompiler {
+
+    rpc CreateCompilerSession(CreateCompilerSessionRequest) returns (CreateCompilerSessionResult) {}
+    rpc DestroyCompilerSession(DestroyCompilerSessionRequest) returns (DestroyCompilerSessionResult) {}
+    rpc Compile(CompileRequest) returns (CompileResult) {}
+
+    rpc ListSymbolTable(ListSymbolTableRequest) returns (ListSymbolTableResult) {}
+
+    rpc GetFunctionArguments(FunctionCallIdentifier) returns (MessageFunctionArguments) {}
+    rpc SetFunctionReturnValue(FunctionReturnValue) returns (SetFunctionReturnValueResponse) {}
+}
+
+
+message CreateCompilerSessionRequest {}
+message CreateCompilerSessionResult {
+    string session_identifier = 1;
+}
+
+message DestroyCompilerSessionRequest {}
+message DestroyCompilerSessionResult {
+    bool success = 1;
+    string error = 2;
+}
+
+message CompileRequest {
+    string session_identifier = 1;
+    string source_code = 2;
+}
+
+message CompileResult {
+    bool success = 1;
+    string error = 2;
+}
+
+
+message ListSymbolTableRequest {
+    string session_identifier = 1;
+}
+message ListSymbolTableResult {
+    map<string, Symbol> symbols = 1;
+}
+
+message Symbol {
+    string type = 1;
+}
+
+
+message FunctionCallIdentifier {
+    string identifier = 1;
+}
+
+message MessageFunctionArguments {
+    string name = 1;
+}
+
+message FunctionReturnValue {
+    string value = 1;
+}
+
+message SetFunctionReturnValueResponse {
+    bool received = 1;
+}

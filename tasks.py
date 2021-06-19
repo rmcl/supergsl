@@ -1,8 +1,8 @@
 from invoke import task
 
-@task
+@task(default=True)
 def sgsl(c):
-    c.run('python supergsl/sgsl')
+    c.run('python supergsl/sgsl.py', pty=True)
 
 @task
 def typecheck(c):

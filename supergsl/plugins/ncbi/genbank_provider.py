@@ -3,7 +3,10 @@ from typing import List
 from Bio import SeqIO
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.exception import PartNotFoundError
-from supergsl.core.parts import PartProvider, Part, SeqPosition
+from supergsl.core.parts import PartProvider
+from supergsl.core.types.part import Part
+from supergsl.core.types.position import SeqPosition
+
 
 
 class GenBankFilePartProvider(PartProvider):
@@ -27,7 +30,7 @@ class GenBankFilePartProvider(PartProvider):
     """
 
     def __init__(self, name, settings):
-        self.name = name
+        self._provider_name = name
         self.genbank_file_path = settings['sequence_file_path']
         self.features_by_identifier = {}
         self.loaded = False
@@ -36,8 +39,8 @@ class GenBankFilePartProvider(PartProvider):
         """Open a genbank file whether gunziped or uncompressed."""
         if path[-2:] == 'gz':
             return gzip.open(path, "rt")
-        else:
-            return open(path, "rt")
+
+        return open(path, "rt")
 
     def get_identifier_for_feature(self, feature) -> List[str]:
         """Retrieve part details from a genbank feature.
@@ -97,7 +100,7 @@ class GenBankFilePartProvider(PartProvider):
 
         return [
             self.get_part(identifier)
-            for identifier in self.features_by_identifier.keys()
+            for identifier in self.features_by_identifier
         ]
 
     def get_part(self, identifier) -> Part:
@@ -113,9 +116,9 @@ class GenBankFilePartProvider(PartProvider):
 
         try:
             feature, parent_record = self.features_by_identifier[identifier]
-        except KeyError:
+        except KeyError as error:
             raise PartNotFoundError('Part not found "%s" in %s.' % (
-                identifier, self.get_provider_name()))
+                identifier, self.provider_name)) from error
 
         return self.get_part_from_feature(
             identifier,
