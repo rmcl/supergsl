@@ -25,9 +25,10 @@ class BioBrick3AAssembler(AssemblerBase):
     """
 
     def __init__(self, config_options):
+        constant_file_path = config_options.get('biobrick_sequence_file_path', None)
         self.plasmid_backbone_name = config_options.get('plasmid_backbone', 'pSB1C3')
 
-        self.constant_sequences = load_biobrick_constant_sequences()
+        self.constant_sequences = load_biobrick_constant_sequences(constant_file_path)
 
     def digest_backbone(self, backbone_name):
         """Prepare a plasmid for recombination to construct new composite BioBrick part."""

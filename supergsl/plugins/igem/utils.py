@@ -24,8 +24,8 @@ def check_is_valid_biobrick(sequence):
 
     return True
 
-def load_biobrick_constant_sequences() -> Dict[str, Seq]:
-    file_path = 'supergsl/plugins/igem/biobrick.fa'
+def load_biobrick_constant_sequences(file_path : str = None) -> Dict[str, Seq]:
+    file_path = file_path or 'supergsl/plugins/igem/biobrick.fa'
     records = SeqIO.parse(file_path, "fasta")
 
     return {
