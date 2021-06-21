@@ -119,6 +119,10 @@ class Part(NucleotideSequence):
     def __repr__(self):
         return self.identifier
 
+    def print(self) -> str:
+        """Display details about the SuperGSL object."""
+        return '%s: %s' % (self.identifier, self.sequence)
+
 class LazyLoadedPart(SuperGSLType):
     def eval(self) -> SuperGSLType:
         raise NotImplementedError('Subclass to implement.')

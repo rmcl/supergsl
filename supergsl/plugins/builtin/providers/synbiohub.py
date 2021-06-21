@@ -1,3 +1,4 @@
+"""Implement access to SynBioHub powered genetic part repos."""
 from typing import Dict
 from Bio.Seq import Seq
 from sbol2 import Document, PartShop
@@ -7,6 +8,7 @@ from supergsl.core.constants import THREE_PRIME
 from supergsl.core.parts import PartProvider
 from supergsl.core.types.part import Part
 from supergsl.core.types.position import SeqPosition
+
 
 class SynBioHubPartProvider(PartProvider):
     """A Part provider for accessing SynBioHub powered genetic part repos.
@@ -19,7 +21,7 @@ class SynBioHubPartProvider(PartProvider):
     ```
     {
         "name": "igem",
-        "provider_class": "supergsl.plugins.synbiohub.SynBioHubPartProvider",
+        "provider_class": "supergsl.plugins.builtin.providers.SynBioHubPartProvider",
         "repository_url": "https://synbiohub.org/public/igem",
         "repository_username": null,
         "repository_password": null

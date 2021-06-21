@@ -109,7 +109,8 @@ class ConstantPartProvider(PartProvider):
             raise PartNotFoundError(
                 'Part "%s" not found.' % identifier) from error
 
-        reference_sequence = Seq(reference_sequence)
+        if not isinstance(reference_sequence, Seq):
+            reference_sequence = Seq(reference_sequence)
 
         start = SeqPosition.from_reference(
             x=0,
