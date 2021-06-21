@@ -24,7 +24,7 @@ class SeamlessLigationAssembler(AssemblerBase):
             for part_node in assembly.parts:
                 part = part_node.part
 
-                part_amplicon, part_seq_record = primer_builder.design_primer_for_part(part)
+                part_amplicon, part_seq_record = primer_builder.build_primers_for_part(part)
 
                 part_records.append(part_seq_record)
                 part_amplicons.append(part_amplicon)
