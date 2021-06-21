@@ -16,3 +16,11 @@ class PartTestCase(unittest.TestCase):
         ])
 
         self.assertEqual(p1.roles, [SO_PROMOTER])
+
+    def test_part_print(self):
+        """Test the part print statement outputs in a nice format."""
+        _, part = self.fixtures.mk_part(identifier='BOOM', part_seq_len=25)
+
+        self.assertEqual(
+            part.print(),
+            "BOOM: %s" % part.sequence)
