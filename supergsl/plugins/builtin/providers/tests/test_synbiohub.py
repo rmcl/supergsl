@@ -19,7 +19,7 @@ class SynBioHubProviderTestCase(unittest.TestCase):
     def test_get_part_from_mocked_detail(self):
         """Confirm that the provider correctly initializes and returns a SuperGSL Part"""
         provider = SynBioHubPartProvider('igem', self.mock_settings)
-        provider.retrieve_part_details = Mock(
+        provider.get_cached_part_details = Mock(
             return_value={
                 'roles': [
                     'http://identifiers.org/so/SO:0000167',
@@ -31,7 +31,7 @@ class SynBioHubProviderTestCase(unittest.TestCase):
 
         part = provider.get_part('BBa_J23106')
 
-        provider.retrieve_part_details.assert_called_once_with('BBa_J23106')
+        provider.get_cached_part_details.assert_called_once_with('BBa_J23106')
         self.assertEqual(part.identifier, 'BBa_J23106')
         self.assertEqual(part.description, 'constitutive promoter family member')
         self.assertEqual(part.roles, [
