@@ -7,6 +7,10 @@ from supergsl.core.symbol_table import SymbolTable
 class SuperGSLProvider:
     """Base class to define objects that can provide symbols."""
 
+    @property
+    def help(self):
+        return ''
+
     def resolve_import(
         self,
         symbol_table : SymbolTable,
@@ -30,6 +34,14 @@ class ProviderGroup(SuperGSLProvider):
     def __contains__(self, provider : SuperGSLProvider):
         """Test if a provider is present in the group."""
         return provider in self._providers
+
+    @property
+    def help(self) -> str:
+        result = 'A collection providers\n\n'
+        for provider in self._providers:
+            result += type(provider).__name__ + '\n'
+            result += provider.help + '\n\n'
+        return result
 
     def resolve_import(
         self,
