@@ -42,6 +42,7 @@ class SynBioHubPartProvider(PartProvider, LocalFileCachePartProviderMixin):
         if not self.repository_url:
             ConfigurationError('"%s" requires that repository_url be set.')
 
+        self.enable_part_cache = settings.get('enable_part_cache', True)
         self.repository_username = settings.get('repository_username', None)
         self.repository_password = settings.get('repository_password', None)
 

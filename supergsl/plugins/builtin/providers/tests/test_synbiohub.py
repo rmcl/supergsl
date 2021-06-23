@@ -14,6 +14,7 @@ class SynBioHubProviderTestCase(unittest.TestCase):
     def setUp(self):
         self.mock_settings = {
             'repository_url': 'http://example.testbla/repo',
+            'enable_part_cache' : False
         }
 
     def test_get_part_from_mocked_detail(self):

@@ -12,6 +12,7 @@ class LocalFileCachePartProviderMixin(object):
     DELETE_EXPIRED_FILES = False
 
     _provider_name : str
+    enable_part_cache : bool = True
 
     def get_cached_path(self, identifier : str) -> Path:
         """Return the path to the cache file."""
@@ -43,7 +44,7 @@ class LocalFileCachePartProviderMixin(object):
     def get_cached_part_details(self, identifier) -> Any:
         """Retrieve part details from the cache."""
         cached_file_path = self.get_cached_path(identifier)
-        if self.cached_file_exists(cached_file_path):
+        if self.enable_part_cache and self.cached_file_exists(cached_file_path):
             with open(cached_file_path, 'rb') as file_handle:
                 return pickle.load(file_handle)
         else:
