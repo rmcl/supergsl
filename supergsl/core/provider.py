@@ -37,7 +37,7 @@ class ProviderGroup(SuperGSLProvider):
 
     @property
     def help(self) -> str:
-        result = 'A collection providers\n\n'
+        result = 'A collection of providers\n\n'
         for provider in self._providers:
             result += type(provider).__name__ + '\n'
             result += provider.help + '\n\n'
