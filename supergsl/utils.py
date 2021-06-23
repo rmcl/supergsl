@@ -1,7 +1,8 @@
 import importlib
 import logging
 import textwrap
-
+from pathlib import Path
+from supergsl.core.config import load_settings
 
 def import_class(class_path_str):
     """Import a class via str."""
@@ -18,6 +19,16 @@ def get_logger(class_inst):
     ])
 
     return logging.getLogger(full_path)
+
+def get_local_cache_path(provider_name) -> Path:
+    settings = load_settings()
+    cache_path = Path(
+        settings['local_cache_path'],
+        provider_name)
+
+    cache_path.mkdir(parents=True, exist_ok=True)
+
+    return cache_path
 
 def get_logo():
     """Return the SuperGSL ASCII logo.

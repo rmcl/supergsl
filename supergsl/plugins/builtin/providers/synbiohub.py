@@ -6,11 +6,12 @@ from supergsl.core.exception import ConfigurationError
 from supergsl.core.constants import THREE_PRIME
 
 from supergsl.core.parts import PartProvider
+from supergsl.core.parts.cache import LocalFileCachePartProviderMixin
 from supergsl.core.types.part import Part
 from supergsl.core.types.position import SeqPosition
 
 
-class SynBioHubPartProvider(PartProvider):
+class SynBioHubPartProvider(PartProvider, LocalFileCachePartProviderMixin):
     """A Part provider for accessing SynBioHub powered genetic part repos.
 
     From the pysbol2 docs here here are two examples:
@@ -35,16 +36,17 @@ class SynBioHubPartProvider(PartProvider):
     """
 
     def __init__(self, name : str, settings : dict):
-        self.name = name
+        self._provider_name = name
         self._cached_parts: Dict[str, Part] = {}
         self.repository_url = settings.get('repository_url', None)
         if not self.repository_url:
             ConfigurationError('"%s" requires that repository_url be set.')
 
+        self.enable_part_cache = settings.get('enable_part_cache', True)
         self.repository_username = settings.get('repository_username', None)
         self.repository_password = settings.get('repository_password', None)
 
-    def retrieve_part_details(self, identifier : str) -> dict:
+    def get_part_details(self, identifier : str) -> dict:
         """Retrieve Part details from the remote repository."""
         part_doc = Document()
         part_shop = PartShop(self.repository_url)
@@ -74,7 +76,7 @@ class SynBioHubPartProvider(PartProvider):
         except KeyError:
             pass
 
-        part_details = self.retrieve_part_details(identifier)
+        part_details = self.get_cached_part_details(identifier)
         reference_sequence = part_details['sequence']
 
         start = SeqPosition.from_reference(
