@@ -8,7 +8,7 @@ from supergsl.utils import get_local_cache_path
 
 class LocalFileCachePartProviderMixin(object):
     CACHED_FILE_EXPIRATION = timedelta(days=7)
-    CACHED_FILE_EXTENSION = 'json'
+    CACHED_FILE_EXTENSION = 'p'
     DELETE_EXPIRED_FILES = False
 
     _provider_name : str

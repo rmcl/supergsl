@@ -25,7 +25,7 @@ class LocalFileCachePartProviderMixinTestCase(TestCase):
     @patch('supergsl.core.parts.cache.get_local_cache_path')
     def test_get_cached_part_details(self, get_local_cache_path_mock):
         temp_dir = TemporaryDirectory()
-        temp_file_path = Path(temp_dir.name + '/test.json')
+        temp_file_path = Path(temp_dir.name + '/test.p')
 
         self.provider.get_cached_path = Mock(return_value=temp_file_path)
         self.provider.get_part_details = Mock(return_value={
