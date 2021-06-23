@@ -20,7 +20,7 @@ class LocalFileCachePartProviderMixinTestCase(TestCase):
         get_local_cache_path_mock.return_value = Path('/tmp','hi')
         result = self.provider.get_cached_path('HELLO')
 
-        self.assertEqual(result, Path('/tmp', 'hi', 'HELLO.json'))
+        self.assertEqual(result, Path('/tmp', 'hi', 'HELLO.p'))
 
     @patch('supergsl.core.parts.cache.get_local_cache_path')
     def test_get_cached_part_details(self, get_local_cache_path_mock):
