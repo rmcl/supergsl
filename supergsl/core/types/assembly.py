@@ -201,6 +201,9 @@ class AssemblyResultSet(SuperGSLType):
     def __init__(self, assemblies : List[Assembly]):
         self.assemblies = assemblies
 
+    def add_assembly(self, assembly : Assembly):
+        self.assemblies.append(assembly)
+
     def __iter__(self):
         return iter(self.assemblies)
 

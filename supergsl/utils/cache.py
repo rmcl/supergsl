@@ -1,4 +1,5 @@
-from typing import Any, Optional
+"""Implement a utility class providing a file based cache."""
+from typing import Any
 import pickle
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -6,19 +7,23 @@ from pathlib import Path
 from supergsl.utils import get_local_cache_path
 
 
-class LocalFileCachePartProviderMixin(object):
+class FileCache(object):
+    """A file based cache storing data in the sgsl-lib folder."""
+
     CACHED_FILE_EXPIRATION = timedelta(days=7)
     CACHED_FILE_EXTENSION = 'p'
     DELETE_EXPIRED_FILES = False
 
-    _provider_name : str
-    enable_part_cache : bool = True
+    def __init__(self, cache_name, enable = True):
+        self._cache_name = cache_name
+        self._enable_cache = enable
+
 
     def get_cached_path(self, identifier : str) -> Path:
         """Return the path to the cache file."""
         filename = '%s.%s' % (identifier, self.CACHED_FILE_EXTENSION)
         return Path(
-            get_local_cache_path(self._provider_name),
+            get_local_cache_path(self._cache_name),
             filename)
 
     def cached_file_exists(self, cached_file_path : Path) -> bool:
@@ -35,23 +40,21 @@ class LocalFileCachePartProviderMixin(object):
 
         return True
 
-    def store_part_details(self, identifier : str, data : Any):
+    def store(self, identifier : str, data : Any) -> None:
         """Store part details in the cache."""
         cached_file_path = self.get_cached_path(identifier)
         with open(cached_file_path, 'wb+') as file_handle:
             pickle.dump(data, file_handle)
 
-    def get_cached_part_details(self, identifier) -> Any:
+    def get(self, identifier) -> Any:
         """Retrieve part details from the cache."""
         cached_file_path = self.get_cached_path(identifier)
-        if self.enable_part_cache and self.cached_file_exists(cached_file_path):
-            with open(cached_file_path, 'rb') as file_handle:
-                return pickle.load(file_handle)
-        else:
-            result = self.get_part_details(identifier)
-            self.store_part_details(identifier, result)
-            return result
+        if self._enable_cache and self.cached_file_exists(cached_file_path):
+            try:
+                with open(cached_file_path, 'rb') as file_handle:
+                    return pickle.load(file_handle)
+            except EOFError:
+                # Failed to load Pickle file. Treat as a cache miss.
+                pass
 
-    def get_part_details(self, identifier : str) -> Any:
-        """Retrieve part details from the source."""
-        raise NotImplementedError('Subclass to implement')
+        raise KeyError('%s does not exist in cache' % identifier)
