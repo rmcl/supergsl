@@ -1,9 +1,10 @@
 from typing import List, cast
 from supergsl.core.symbol_table import SymbolTable
-#from supergsl.core.function import InvokeFunctionPass
+from supergsl.core.types.builtin import SuperGSLType
 from supergsl.core.plugin import PluginProvider
 from supergsl.core.backend import BackendPipelinePass
 from supergsl.core.eval import EvaluatePass
+from supergsl.utils import resolve_import
 
 from .lexer import SuperGSLLexer
 from .parser import SuperGSLParser
@@ -17,7 +18,29 @@ class CompilerPipeline(object):
         self._settings = settings
         self.plugins = PluginProvider(self._global_symbol_table, self._settings)
 
-    def get_symbol_table(self) -> SymbolTable:
+    def compile(self, source_code):
+        """Run the compiler on the provided source code."""
+        ast = self.perform_frontend_compile(source_code)
+        return self.perform_backend_compile(ast)
+
+
+    def import_symbols(self, module_path : str, import_identifier_list : List[str]):
+        """Import a symbol from a provider into the SuperGSL symbol table.
+
+        This is equivlanet to the SuperGSL statement
+
+        from <provider> import a, b, c where provider is the module_path and
+        import_identifier_list is a list of strings of format ['a', 'b', 'c']
+        """
+        for import_identifier in import_identifier_list:
+            resolve_import(
+                self._global_symbol_table,
+                module_path.split('.'),
+                import_identifier,
+                None)
+
+    @property
+    def symbols(self) -> SymbolTable:
         return self._global_symbol_table
 
     def get_backend_passes(self) -> List[BackendPipelinePass]:
@@ -56,11 +79,6 @@ class CompilerPipeline(object):
             ast = backend_pass_inst.perform(ast)
 
         return ast
-
-    def compile(self, source_code):
-        """Run the compiler on the provided source code."""
-        ast = self.perform_frontend_compile(source_code)
-        return self.perform_backend_compile(ast)
 
     def get_lexer(self):
         """Retrieve a reference to the lexer."""

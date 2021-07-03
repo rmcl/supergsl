@@ -2,14 +2,40 @@ import importlib
 import logging
 import textwrap
 from pathlib import Path
+from typing import cast, Optional, List
 from supergsl.core.config import load_settings
+from supergsl.core.symbol_table import SymbolTable
+from supergsl.core.provider import SuperGSLProvider
 
-def import_class(class_path_str):
+def import_class(class_path_str : str):
     """Import a class via str."""
     module_path, class_name = class_path_str.rsplit('.', 1)
     module = importlib.import_module(module_path)
 
     return getattr(module, class_name)
+
+
+def resolve_import(
+    symbol_table : SymbolTable,
+    module_path : List[str],
+    identifier : str,
+    alias : Optional[str]
+):
+    """Resolve an import at a particular module path in the given symbol table."""
+    import_table = symbol_table.enter_nested_scope('imports')
+
+    module_path_str = '.'.join(module_path)
+    provider = import_table.lookup(module_path_str)
+    if not isinstance(provider, SuperGSLProvider):
+        raise Exception('"%s" is not a provider. It is a %s' % (
+            module_path_str,
+            type(provider)
+        ))
+
+    provider.resolve_import(
+        symbol_table,
+        identifier,
+        alias)
 
 
 def get_logger(class_inst):

@@ -9,6 +9,7 @@ from supergsl.core.types.builtin import (
     AminoAcidSequence,
     Collection
 )
+from supergsl.utils import resolve_import
 from supergsl.core.types.part import Part
 from supergsl.core.parts.slice import convert_slice_position_to_seq_position
 from supergsl.core.types.assembly import AssemblyDeclaration
@@ -93,14 +94,10 @@ class EvaluatePass(BackendPipelinePass):
 
 
     def visit_import(self, import_node : Import):
-        import_table = self.symbol_table.enter_nested_scope('imports')
-
-        module_path = '.'.join(import_node.module_path)
-        provider = import_table.lookup(module_path)
-
         for program_import in import_node.imports:
-            provider.resolve_import(
+            resolve_import(
                 self.symbol_table,
+                import_node.module_path,
                 program_import.identifier,
                 program_import.alias)
 

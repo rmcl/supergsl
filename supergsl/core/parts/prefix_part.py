@@ -1,6 +1,6 @@
 import typing
 import re
-from typing import Tuple, Callable
+from typing import Tuple, Callable, Optional
 from re import Pattern, Match
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.exception import PartSliceError
@@ -97,7 +97,7 @@ class PrefixedSlicePartProviderMixin(_Base):
         self,
         symbol_table : SymbolTable,
         identifier : str,
-        alias : str
+        alias : Optional[str]
     ) -> None:
         """Resolve the import of a part from this provider.
 

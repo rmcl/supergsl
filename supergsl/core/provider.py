@@ -1,5 +1,5 @@
 """Support SuperGSL's symbol provider mechanism."""
-from typing import List
+from typing import List, Optional
 from supergsl.core.exception import NotFoundError
 from supergsl.core.symbol_table import SymbolTable
 
@@ -15,7 +15,7 @@ class SuperGSLProvider:
         self,
         symbol_table : SymbolTable,
         identifier : str,
-        alias : str
+        alias : Optional[str]
     ) -> None:
         """Import a identifier and register it in the symbol table."""
         raise NotImplementedError('Subclass to implement')
@@ -47,7 +47,7 @@ class ProviderGroup(SuperGSLProvider):
         self,
         symbol_table : SymbolTable,
         identifier : str,
-        alias : str
+        alias : Optional[str]
     ) -> None:
         """Import a identifier and register it in the symbol table."""
 

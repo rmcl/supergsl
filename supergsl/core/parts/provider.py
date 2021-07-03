@@ -34,7 +34,7 @@ class PartProvider(SuperGSLProvider):
         self,
         symbol_table : SymbolTable,
         identifier : str,
-        alias : str
+        alias : Optional[str]
     ) -> None:
         """Resolve a part from the provider and register it in the symbol table."""
         part_identifier = alias or identifier

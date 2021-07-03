@@ -37,7 +37,7 @@ class SuperGSLCompilerServiceTestCase(unittest.TestCase):
         with patch('supergsl.grpc.server.CompilerPipeline') as compiler_pipeline_class_mock:
             compiler_pipeline = compiler_pipeline_class_mock.return_value
             symbol_table = self.fixtures.mk_symbol_table()
-            compiler_pipeline.get_symbol_table.return_value = symbol_table
+            compiler_pipeline.symbols = symbol_table
 
             identifier, compiler_mock_inst = self.service.create_compiler_session()
 
