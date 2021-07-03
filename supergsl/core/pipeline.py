@@ -1,4 +1,5 @@
-from typing import List, cast
+"""Define the core pipeline for compiling and running SuperGSL."""
+from typing import Dict, List, cast
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.types.builtin import SuperGSLType
 from supergsl.core.plugin import PluginProvider
@@ -10,7 +11,7 @@ from .lexer import SuperGSLLexer
 from .parser import SuperGSLParser
 
 
-class CompilerPipeline(object):
+class CompilerPipeline:
     """Orchestrate the conversion of superGSL source code to compiled sequences."""
 
     def __init__(self, settings):
@@ -24,7 +25,11 @@ class CompilerPipeline(object):
         return self.perform_backend_compile(ast)
 
 
-    def import_symbols(self, module_path : str, import_identifier_list : List[str]):
+    def import_symbols(
+        self,
+        module_path : str,
+        import_identifier_list : List[str]
+    ) -> Dict[str, SuperGSLType]:
         """Import a symbol from a provider into the SuperGSL symbol table.
 
         This is equivlanet to the SuperGSL statement
@@ -39,9 +44,17 @@ class CompilerPipeline(object):
                 import_identifier,
                 None)
 
+        return {
+            import_identifier: self.symbols[import_identifier]
+            for import_identifier in import_identifier_list
+        }
+
+
     @property
     def symbols(self) -> SymbolTable:
+        """Access the compiler's global symbol table."""
         return self._global_symbol_table
+
 
     def get_backend_passes(self) -> List[BackendPipelinePass]:
         """Return an ordered list of compiler backend passes to be executed."""
@@ -49,10 +62,12 @@ class CompilerPipeline(object):
             EvaluatePass
         ])
 
+
     def get_provider(self, module_path):
         """Return the provider instantiated at a give module path."""
         import_table = self._global_symbol_table.enter_nested_scope('imports')
         return import_table.lookup(module_path)
+
 
     def perform_frontend_compile(self, source_code):
         """Generate an IR from SuperGSL source code.
@@ -69,6 +84,7 @@ class CompilerPipeline(object):
         parser = self.get_parser()
         return parser.parse(tokens)
 
+
     def perform_backend_compile(self, ast):
         """Execute a series of backend compiler passes over the given AST."""
         pass_classes = self.get_backend_passes()
@@ -80,9 +96,11 @@ class CompilerPipeline(object):
 
         return ast
 
+
     def get_lexer(self):
         """Retrieve a reference to the lexer."""
         return SuperGSLLexer()
+
 
     def get_parser(self):
         """Retrieve a reference to the parser."""
