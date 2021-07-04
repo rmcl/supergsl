@@ -32,11 +32,14 @@ def resolve_import(
             type(provider)
         ))
 
-    provider.resolve_import(
-        symbol_table,
+    new_symbols = provider.resolve_import(
         identifier,
         alias)
 
+    for symbol_identifier, symbol_value in new_symbols.items():
+        symbol_table.insert(symbol_identifier, symbol_value)
+
+    return new_symbols
 
 def get_logger(class_inst):
     full_path = ".".join([

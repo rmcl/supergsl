@@ -1,7 +1,7 @@
 from typing import Dict, Tuple, List, Optional
 
+from supergsl.core.types import SuperGSLType
 from supergsl.core.types.codon import CodonFrequencyTable
-from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.provider import SuperGSLProvider
 
 from python_codon_tables import (
@@ -43,10 +43,11 @@ class CodonFrequencyTableProvider(SuperGSLProvider):
 
     def resolve_import(
         self,
-        symbol_table : SymbolTable,
         identifier : str,
         alias : Optional[str]
-    ) -> None:
+    ) -> Dict[str, SuperGSLType]:
         """Import a table and register it in the symbol table."""
         table_identifier = alias or identifier
-        symbol_table.insert(table_identifier, self.get_table(identifier))
+        return {
+            table_identifier: self.get_table(identifier)
+        }

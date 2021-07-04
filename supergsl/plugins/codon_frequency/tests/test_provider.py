@@ -16,12 +16,10 @@ class CodonFrequencyTableProviderTestCase(unittest.TestCase):
         self.assertEqual(table.name, 's_cerevisiae_4932')
 
     def test_resolve_import_inserts_into_symbol_table(self):
-        symbol_table = Mock()
         self.provider.get_table = Mock(return_value='HELLO')
-        self.provider.resolve_import(
-            symbol_table,
+        results = self.provider.resolve_import(
             's_cerevisiae_4932',
             'thesacc'
         )
 
-        symbol_table.insert.assert_called_once_with('thesacc', 'HELLO')
+        self.assertEqual(results['thesacc'], 'HELLO')

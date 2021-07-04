@@ -1,5 +1,5 @@
 """Define the core pipeline for compiling and running SuperGSL."""
-from typing import Dict, List, cast
+from typing import Dict, List, Union, cast
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.types.builtin import SuperGSLType
 from supergsl.core.plugin import PluginProvider
@@ -29,25 +29,31 @@ class CompilerPipeline:
         self,
         module_path : str,
         import_identifier_list : List[str]
-    ) -> Dict[str, SuperGSLType]:
+    ) -> Union[
+        SuperGSLType,
+        Dict[str, SuperGSLType]
+    ]:
         """Import a symbol from a provider into the SuperGSL symbol table.
 
-        This is equivlanet to the SuperGSL statement
+        This is equivalent to the SuperGSL statement:
+        ```
+        from <provider> import a, b, c
+        ```
 
-        from <provider> import a, b, c where provider is the module_path and
+        where provider is the module_path and
         import_identifier_list is a list of strings of format ['a', 'b', 'c']
         """
+        imported_symbols = {}
         for import_identifier in import_identifier_list:
-            resolve_import(
+            new_symbols = resolve_import(
                 self._global_symbol_table,
                 module_path.split('.'),
                 import_identifier,
                 None)
 
-        return {
-            import_identifier: self.symbols[import_identifier]
-            for import_identifier in import_identifier_list
-        }
+            imported_symbols.update(new_symbols)
+
+        return imported_symbols
 
 
     @property

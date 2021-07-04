@@ -66,6 +66,7 @@ class EvaluatePassTestCase(unittest.TestCase):
         """Test visiting a Import AST node."""
         provider_mock = Mock(__class__ = SuperGSLProvider)
         self.import_table.insert('mod_path.here', provider_mock)
+        provider_mock.resolve_import.return_value = {}
 
         import_node = Import(
             [
@@ -79,8 +80,8 @@ class EvaluatePassTestCase(unittest.TestCase):
         self.eval_pass.visit_import(import_node)
 
         provider_mock.resolve_import.assert_has_calls([
-            call(self.symbol_table, 'hello', None),
-            call(self.symbol_table, 'boop', None)
+            call('hello', None),
+            call('boop', None)
         ])
 
     def test_visit_assembly(self):
