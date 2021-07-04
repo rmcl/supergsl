@@ -42,6 +42,10 @@ class SymbolTable:
         """Set a symbol to a value in the current scope."""
         self._symbols[identifier] = value
 
+    def __getitem__(self, key):
+        """Lookup a symbol in the symbol table."""
+        return self.lookup(key)
+
     def __iter__(self):
         """Make the table iterable returning tuples of (key, value)."""
         return iter(self._symbols.items())
