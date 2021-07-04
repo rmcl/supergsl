@@ -20,10 +20,10 @@ class PartProviderTestCase(TestCase):
         provider = PartProvider('BOOMPROVIDER', {})
         provider.get_part = Mock(return_value='PART!')
 
-        provider.resolve_import(symbol_table, 'PARTIDENT', 'ALIASME')
+        new_symbols = provider.resolve_import('PARTIDENT', 'ALIASME')
 
         provider.get_part.assert_called_once_with('PARTIDENT')
-        symbol_table.insert.assert_called_once_with('ALIASME', 'PART!')
+        self.assertEqual(new_symbols['ALIASME'], 'PART!')
 
 class ConstantPartProviderTestCase(TestCase):
     """Test case for `ConstantPartProvider`."""
