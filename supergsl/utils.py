@@ -3,6 +3,7 @@ import logging
 import textwrap
 from pathlib import Path
 from typing import cast, Optional, List
+from supergsl.core.exception import ConfigurationError
 from supergsl.core.config import load_settings
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.provider import SuperGSLProvider
@@ -27,7 +28,7 @@ def resolve_import(
     module_path_str = '.'.join(module_path)
     provider = import_table.lookup(module_path_str)
     if not isinstance(provider, SuperGSLProvider):
-        raise Exception('"%s" is not a provider. It is a %s' % (
+        raise ConfigurationError('"%s" is not a provider. It is a %s' % (
             module_path_str,
             type(provider)
         ))
