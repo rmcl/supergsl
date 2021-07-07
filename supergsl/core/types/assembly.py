@@ -1,5 +1,5 @@
 """Define SuperGSL Types related to the construction of new genetic assemblies"""
-from typing import List, Optional, Union, Tuple
+from typing import Generator, List, Optional, Union, Tuple, Set
 from Bio.Seq import Seq
 from pyDOE2 import fullfact
 
@@ -11,24 +11,46 @@ from supergsl.core.types.position import SeqPosition
 # pylint: disable=E1136
 
 
+# Assembly Level Declarations are all the types that can be used to define levels
+# for a AssemblyFactor. In contrast, "Assembly Level" represents the concrete
+# levels available for designs.
+#
+# By way of a concrete example, a "Part Collection" can be used to declare levels,
+# but must be converted to its list of explicit "Parts" to be used in an
+# AssemblyFactor.
+AssemblyLevelDeclaration = Union[Part, Collection]
+AssemblyLevel = Union[Part]
+
 class AssemblyFactor:
-    def __init__(self, factor_type, levels):
+    """Define a Factor and its corresponding levels for one parameter of an Assembly.
+
+    The most concrete example of this is the part to use at an explicit position if
+    the assembly. Take this example:
+
+        let promoters = [pGAL1, pGAL3, pGAL7]
+        assembly {
+            uHO ; promoters ; gGENE ; dHO
+        }
+
+    The AssemblyFactor corresponding to the second position in the above assembly
+    has three levels pGAL1, pGAL3, and pGAL7
+    """
+    def __init__(self, factor_type : str, levels : List[AssemblyLevel]):
         self._factor_type = factor_type
-        self._levels = levels
+        self._levels : List[AssemblyLevel] = levels
 
     @property
-    def factor_type(self):
+    def factor_type(self) -> str:
+        """Return the type of this Factor."""
         return self._factor_type
 
     @property
-    def levels(self):
+    def levels(self) -> List[AssemblyLevel]:
+        """Return all possible levels for this factor."""
         return self._levels
 
     def __getitem__(self, index: int):
         return self._levels[index]
-
-
-AssemblyDeclarationItems = Union[Part, Collection]
 
 class AssemblyDeclaration(SuperGSLType):
     """A declaration of a desired assembly.
@@ -44,15 +66,19 @@ class AssemblyDeclaration(SuperGSLType):
     def __init__(
         self,
         label : Optional[str],
-        items : List[AssemblyDeclarationItems]
+        items : List[AssemblyLevelDeclaration]
     ):
         self._label : Optional[str] = label
-        self._factors = self._build_factors_from_parts(items)
+        self._factors : List[AssemblyFactor] = self._build_factors_from_parts(items)
 
-    def _build_factors_from_parts(self, items : List[AssemblyDeclarationItems]):
+    def _build_factors_from_parts(
+        self,
+        items : List[AssemblyLevelDeclaration]
+    ) -> List[AssemblyFactor]:
+        """Build a list of AssemblyFactors for the parts of this assembly declaration."""
         factors : List[AssemblyFactor] = []
-
         for item in items:
+            levels : List[AssemblyLevel] = []
             if isinstance(item, Collection):
                 levels = list(item)
             else:
@@ -62,23 +88,23 @@ class AssemblyDeclaration(SuperGSLType):
         return factors
 
     @property
-    def label(self):
+    def label(self) -> Optional[str]:
         """Return the label of this assembly declaration."""
         return self._label
 
     @property
-    def num_designs(self):
+    def num_designs(self) -> int:
         """Return the number of possible designs in the assembly declaration."""
         count = 1
         for factor in self._factors:
             count *= len(factor.levels)
         return count
 
-    def get_factors(self):
+    def get_factors(self) -> List[AssemblyFactor]:
         """Return all factors associated with this declaration."""
         return self._factors
 
-    def get_levels_by_factor_type(self, factor_type : str):
+    def get_levels_by_factor_type(self, factor_type : str) -> Set[AssemblyLevel]:
         """Return the available levels for a particular factor type.
 
         For example, you might retrieve all parts associated with this design by
@@ -92,7 +118,7 @@ class AssemblyDeclaration(SuperGSLType):
 
         return levels
 
-    def get_full_factorial_designs(self):
+    def get_full_factorial_designs(self) -> Generator[List[AssemblyLevel], None, None]:
         """Return full-factorial iterator of the assembly designs."""
 
         if self.num_designs > 500:
@@ -174,6 +200,9 @@ class AssemblyResultSet(SuperGSLType):
     """A collection of Assemblies."""
     def __init__(self, assemblies : List[Assembly]):
         self.assemblies = assemblies
+
+    def add_assembly(self, assembly : Assembly):
+        self.assemblies.append(assembly)
 
     def __iter__(self):
         return iter(self.assemblies)

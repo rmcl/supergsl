@@ -18,9 +18,6 @@ class BackendPipelinePass(object):
         self.symbol_table = symbol_table
         self.allow_modification = allow_modification
 
-    def get_symbol_table(self):
-        return self.symbol_table
-
     def get_pass_name(self):
         if not self.name:
             return type(self).__name__

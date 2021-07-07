@@ -1,8 +1,8 @@
 import typing
 import re
-from typing import Tuple, Callable
+from typing import Tuple, Callable, Optional, Mapping
 from re import Pattern, Match
-from supergsl.core.symbol_table import SymbolTable
+from supergsl.core.types import SuperGSLType
 from supergsl.core.exception import PartSliceError
 from supergsl.core.constants import (
     FIVE_PRIME,
@@ -95,16 +95,16 @@ class PrefixedSlicePartProviderMixin(_Base):
 
     def resolve_import(
         self,
-        symbol_table : SymbolTable,
         identifier : str,
-        alias : str
-    ) -> None:
+        alias : Optional[str]
+    ) -> Mapping[str, SuperGSLType]:
         """Resolve the import of a part from this provider.
 
         Override the default functionality and instead register a part for each
         of the part prefixes available to the user.
         """
 
+        new_symbols = {}
         part_identifier = alias or identifier
         for part_prefix in self.PART_TYPES.keys():
             part_name = '{}{}'.format(part_prefix, part_identifier)
@@ -113,7 +113,9 @@ class PrefixedSlicePartProviderMixin(_Base):
                 self,
                 part_prefix)
 
-            symbol_table.insert(part_name, lazy_part)
+            new_symbols[part_name] = lazy_part
+
+        return new_symbols
 
 
     def get_prefixed_part(self, identifier : str, prefix : str) -> Part:

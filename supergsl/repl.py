@@ -66,7 +66,7 @@ class SuperGSLShell:
             if inp[0] == '?':
                 self.run_help()
             elif inp == '.symbols':
-                display_symbol_table(self.compiler_pipeline.get_symbol_table())
+                display_symbol_table(self.compiler_pipeline.symbols)
             else:
                 try:
                     self.run_compiler(inp)

@@ -46,5 +46,8 @@ def load_settings(config_files : Optional[List[str]] = None):
                 'WARNING: supergsl-config.json not found. Using default config options. '
                 'Very limited providers and plugin functionality will be available.')
 
+    if 'local_cache_path' not in settings:
+        settings['local_cache_path'] = './sgsl-lib/'
+
     __cached_settings = settings
     return settings

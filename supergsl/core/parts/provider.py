@@ -1,11 +1,11 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, Mapping
 from Bio.Seq import Seq
 
 from supergsl.utils import import_class
 
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.provider import SuperGSLProvider
-from supergsl.core.symbol_table import SymbolTable
+from supergsl.core.types import SuperGSLType
 from supergsl.core.types.part import Part
 from supergsl.core.types.position import SeqPosition
 
@@ -32,13 +32,14 @@ class PartProvider(SuperGSLProvider):
 
     def resolve_import(
         self,
-        symbol_table : SymbolTable,
         identifier : str,
-        alias : str
-    ) -> None:
+        alias : Optional[str]
+    ) -> Mapping[str, SuperGSLType]:
         """Resolve a part from the provider and register it in the symbol table."""
         part_identifier = alias or identifier
-        symbol_table.insert(part_identifier, self.get_part(identifier))
+        return {
+            part_identifier: self.get_part(identifier)
+        }
 
     def get_part(self, identifier : str) -> Part:
         """Retrieve a part from the provider.
@@ -109,7 +110,8 @@ class ConstantPartProvider(PartProvider):
             raise PartNotFoundError(
                 'Part "%s" not found.' % identifier) from error
 
-        reference_sequence = Seq(reference_sequence)
+        if not isinstance(reference_sequence, Seq):
+            reference_sequence = Seq(reference_sequence)
 
         start = SeqPosition.from_reference(
             x=0,

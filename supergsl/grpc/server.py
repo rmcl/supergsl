@@ -68,7 +68,7 @@ class SuperGSLCompilerService(SuperGSLCompilerServicer):
         """List the symbols from the given compiler session's symbol table."""
         compiler_pipeline = self.get_compiler_session(request.session_identifier)
 
-        symbol_table = compiler_pipeline.get_symbol_table()
+        symbol_table = compiler_pipeline.symbols
         symbol_map : Dict[str, Symbol] = {}
         for key, value in self.serialize_symbol_table(symbol_table).items():
             symbol_map[key] = Symbol(type=type(value).__name__)

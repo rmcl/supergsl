@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import Mock, call, patch
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.eval import EvaluatePass
+from supergsl.core.provider import SuperGSLProvider
 from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.constants import (
     STRING_CONSTANT,
@@ -63,8 +64,9 @@ class EvaluatePassTestCase(unittest.TestCase):
 
     def test_visit_import(self):
         """Test visiting a Import AST node."""
-        provider_mock = Mock()
+        provider_mock = Mock(__class__ = SuperGSLProvider)
         self.import_table.insert('mod_path.here', provider_mock)
+        provider_mock.resolve_import.return_value = {}
 
         import_node = Import(
             [
@@ -78,8 +80,8 @@ class EvaluatePassTestCase(unittest.TestCase):
         self.eval_pass.visit_import(import_node)
 
         provider_mock.resolve_import.assert_has_calls([
-            call(self.symbol_table, 'hello', None),
-            call(self.symbol_table, 'boop', None)
+            call('hello', None),
+            call('boop', None)
         ])
 
     def test_visit_assembly(self):
