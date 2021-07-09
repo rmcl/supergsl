@@ -2,12 +2,13 @@
 
 import inspect
 import importlib
-from typing import Dict, Set, Type
+from typing import Dict, Set, Type, Mapping
 from supergsl.core.exception import (
     ConfigurationError,
     NotFoundError,
     SymbolNotFoundError
 )
+from supergsl.core.types import SuperGSLType
 from supergsl.core.provider import SuperGSLProvider, ProviderGroup
 from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.symbol_table import SymbolTable
@@ -36,7 +37,7 @@ class SuperGSLPlugin(object):
         self,
         identifier : str,
         alias : str
-    ) -> None:
+    ) -> Mapping[str, SuperGSLType]:
         """Import a identifier and register it in the symbol table."""
         if identifier not in self.functions:
             raise NotFoundError('%s not found in module.' % identifier)

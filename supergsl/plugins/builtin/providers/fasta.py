@@ -1,3 +1,4 @@
+"""Implementation of a part provider backed by simple FASTA files."""
 import csv
 import gzip
 from typing import Dict, List, Tuple, Any, TextIO
@@ -14,7 +15,16 @@ from supergsl.core.parts.prefix_part import PrefixedSlicePartProviderMixin
 from supergsl.plugins.pydna.primers import ExtractionPrimerBuilder
 
 class FastaPartProvider(PartProvider):
-    """Access parts provided by a simple FASTA file."""
+    """Access parts provided by a simple FASTA file.
+
+    Each entry in the FASTA file can be accessed as a part.
+
+    Options:
+    * fasta_file_path (required): The path to the FASTA file that will serve
+        as part source
+    * identifier_format (optional): A format string that will create identifiers
+        from the record header of each fasta entry.
+    """
 
     def __init__(self, name : str, settings : dict):
         self._provider_name = name
@@ -22,10 +32,9 @@ class FastaPartProvider(PartProvider):
         self.identifier_format : str = settings.get('identifier_format', '%s')
         self._cached_parts : Dict[str, Part] = {}
         self._sequences_by_entry : Dict[str, Seq] = {}
-        self._loaded = False
+        self._loaded : bool = False
 
     def load(self) -> None:
-
         def _open(file_path : str) -> TextIO:
             encoding = guess_type(file_path)[1]
             if encoding == 'gzip':

@@ -13,6 +13,7 @@ from google.protobuf import service_reflection
 _sym_db = _symbol_database.Default()
 
 
+from google.protobuf import struct_pb2 as google_dot_protobuf_dot_struct__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -21,8 +22,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\220\001\001',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\nsgsl.proto\x12\x08supergsl\"\x1e\n\x1c\x43reateCompilerSessionRequest\"9\n\x1b\x43reateCompilerSessionResult\x12\x1a\n\x12session_identifier\x18\x01 \x01(\t\"\x1f\n\x1d\x44\x65stroyCompilerSessionRequest\">\n\x1c\x44\x65stroyCompilerSessionResult\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05\x65rror\x18\x02 \x01(\t\"A\n\x0e\x43ompileRequest\x12\x1a\n\x12session_identifier\x18\x01 \x01(\t\x12\x13\n\x0bsource_code\x18\x02 \x01(\t\"/\n\rCompileResult\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05\x65rror\x18\x02 \x01(\t\"4\n\x16ListSymbolTableRequest\x12\x1a\n\x12session_identifier\x18\x01 \x01(\t\"\x98\x01\n\x15ListSymbolTableResult\x12=\n\x07symbols\x18\x01 \x03(\x0b\x32,.supergsl.ListSymbolTableResult.SymbolsEntry\x1a@\n\x0cSymbolsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1f\n\x05value\x18\x02 \x01(\x0b\x32\x10.supergsl.Symbol:\x02\x38\x01\"\x16\n\x06Symbol\x12\x0c\n\x04type\x18\x01 \x01(\t\",\n\x16\x46unctionCallIdentifier\x12\x12\n\nidentifier\x18\x01 \x01(\t\"(\n\x18MessageFunctionArguments\x12\x0c\n\x04name\x18\x01 \x01(\t\"$\n\x13\x46unctionReturnValue\x12\r\n\x05value\x18\x01 \x01(\t\"2\n\x1eSetFunctionReturnValueResponse\x12\x10\n\x08received\x18\x01 \x01(\x08\x32\xc6\x04\n\x10SuperGSLCompiler\x12h\n\x15\x43reateCompilerSession\x12&.supergsl.CreateCompilerSessionRequest\x1a%.supergsl.CreateCompilerSessionResult\"\x00\x12k\n\x16\x44\x65stroyCompilerSession\x12\'.supergsl.DestroyCompilerSessionRequest\x1a&.supergsl.DestroyCompilerSessionResult\"\x00\x12>\n\x07\x43ompile\x12\x18.supergsl.CompileRequest\x1a\x17.supergsl.CompileResult\"\x00\x12V\n\x0fListSymbolTable\x12 .supergsl.ListSymbolTableRequest\x1a\x1f.supergsl.ListSymbolTableResult\"\x00\x12^\n\x14GetFunctionArguments\x12 .supergsl.FunctionCallIdentifier\x1a\".supergsl.MessageFunctionArguments\"\x00\x12\x63\n\x16SetFunctionReturnValue\x12\x1d.supergsl.FunctionReturnValue\x1a(.supergsl.SetFunctionReturnValueResponse\"\x00\x42\x03\x90\x01\x01\x62\x06proto3'
-)
+  serialized_pb=b'\n\nsgsl.proto\x12\x08supergsl\x1a\x1cgoogle/protobuf/struct.proto\"\x1e\n\x1c\x43reateCompilerSessionRequest\"9\n\x1b\x43reateCompilerSessionResult\x12\x1a\n\x12session_identifier\x18\x01 \x01(\t\"\x1f\n\x1d\x44\x65stroyCompilerSessionRequest\">\n\x1c\x44\x65stroyCompilerSessionResult\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05\x65rror\x18\x02 \x01(\t\"A\n\x0e\x43ompileRequest\x12\x1a\n\x12session_identifier\x18\x01 \x01(\t\x12\x13\n\x0bsource_code\x18\x02 \x01(\t\"/\n\rCompileResult\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05\x65rror\x18\x02 \x01(\t\"4\n\x16ListSymbolTableRequest\x12\x1a\n\x12session_identifier\x18\x01 \x01(\t\"\x98\x01\n\x15ListSymbolTableResult\x12=\n\x07symbols\x18\x01 \x03(\x0b\x32,.supergsl.ListSymbolTableResult.SymbolsEntry\x1a@\n\x0cSymbolsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1f\n\x05value\x18\x02 \x01(\x0b\x32\x10.supergsl.Symbol:\x02\x38\x01\"@\n\x06Symbol\x12\x0c\n\x04type\x18\x01 \x01(\t\x12(\n\x07\x64\x65tails\x18\x04 \x01(\x0b\x32\x17.google.protobuf.Struct\",\n\x16\x46unctionCallIdentifier\x12\x12\n\nidentifier\x18\x01 \x01(\t\"(\n\x18MessageFunctionArguments\x12\x0c\n\x04name\x18\x01 \x01(\t\"$\n\x13\x46unctionReturnValue\x12\r\n\x05value\x18\x01 \x01(\t\"2\n\x1eSetFunctionReturnValueResponse\x12\x10\n\x08received\x18\x01 \x01(\x08\x32\xc6\x04\n\x10SuperGSLCompiler\x12h\n\x15\x43reateCompilerSession\x12&.supergsl.CreateCompilerSessionRequest\x1a%.supergsl.CreateCompilerSessionResult\"\x00\x12k\n\x16\x44\x65stroyCompilerSession\x12\'.supergsl.DestroyCompilerSessionRequest\x1a&.supergsl.DestroyCompilerSessionResult\"\x00\x12>\n\x07\x43ompile\x12\x18.supergsl.CompileRequest\x1a\x17.supergsl.CompileResult\"\x00\x12V\n\x0fListSymbolTable\x12 .supergsl.ListSymbolTableRequest\x1a\x1f.supergsl.ListSymbolTableResult\"\x00\x12^\n\x14GetFunctionArguments\x12 .supergsl.FunctionCallIdentifier\x1a\".supergsl.MessageFunctionArguments\"\x00\x12\x63\n\x16SetFunctionReturnValue\x12\x1d.supergsl.FunctionReturnValue\x1a(.supergsl.SetFunctionReturnValueResponse\"\x00\x42\x03\x90\x01\x01\x62\x06proto3'
+  ,
+  dependencies=[google_dot_protobuf_dot_struct__pb2.DESCRIPTOR,])
 
 
 
@@ -47,8 +49,8 @@ _CREATECOMPILERSESSIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=24,
-  serialized_end=54,
+  serialized_start=54,
+  serialized_end=84,
 )
 
 
@@ -79,8 +81,8 @@ _CREATECOMPILERSESSIONRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=56,
-  serialized_end=113,
+  serialized_start=86,
+  serialized_end=143,
 )
 
 
@@ -104,8 +106,8 @@ _DESTROYCOMPILERSESSIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=115,
-  serialized_end=146,
+  serialized_start=145,
+  serialized_end=176,
 )
 
 
@@ -143,8 +145,8 @@ _DESTROYCOMPILERSESSIONRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=148,
-  serialized_end=210,
+  serialized_start=178,
+  serialized_end=240,
 )
 
 
@@ -182,8 +184,8 @@ _COMPILEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=212,
-  serialized_end=277,
+  serialized_start=242,
+  serialized_end=307,
 )
 
 
@@ -221,8 +223,8 @@ _COMPILERESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=279,
-  serialized_end=326,
+  serialized_start=309,
+  serialized_end=356,
 )
 
 
@@ -253,8 +255,8 @@ _LISTSYMBOLTABLEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=328,
-  serialized_end=380,
+  serialized_start=358,
+  serialized_end=410,
 )
 
 
@@ -292,8 +294,8 @@ _LISTSYMBOLTABLERESULT_SYMBOLSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=471,
-  serialized_end=535,
+  serialized_start=501,
+  serialized_end=565,
 )
 
 _LISTSYMBOLTABLERESULT = _descriptor.Descriptor(
@@ -323,8 +325,8 @@ _LISTSYMBOLTABLERESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=383,
-  serialized_end=535,
+  serialized_start=413,
+  serialized_end=565,
 )
 
 
@@ -343,6 +345,13 @@ _SYMBOL = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='details', full_name='supergsl.Symbol.details', index=1,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -355,8 +364,8 @@ _SYMBOL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=537,
-  serialized_end=559,
+  serialized_start=567,
+  serialized_end=631,
 )
 
 
@@ -387,8 +396,8 @@ _FUNCTIONCALLIDENTIFIER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=561,
-  serialized_end=605,
+  serialized_start=633,
+  serialized_end=677,
 )
 
 
@@ -419,8 +428,8 @@ _MESSAGEFUNCTIONARGUMENTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=607,
-  serialized_end=647,
+  serialized_start=679,
+  serialized_end=719,
 )
 
 
@@ -451,8 +460,8 @@ _FUNCTIONRETURNVALUE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=649,
-  serialized_end=685,
+  serialized_start=721,
+  serialized_end=757,
 )
 
 
@@ -483,13 +492,14 @@ _SETFUNCTIONRETURNVALUERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=687,
-  serialized_end=737,
+  serialized_start=759,
+  serialized_end=809,
 )
 
 _LISTSYMBOLTABLERESULT_SYMBOLSENTRY.fields_by_name['value'].message_type = _SYMBOL
 _LISTSYMBOLTABLERESULT_SYMBOLSENTRY.containing_type = _LISTSYMBOLTABLERESULT
 _LISTSYMBOLTABLERESULT.fields_by_name['symbols'].message_type = _LISTSYMBOLTABLERESULT_SYMBOLSENTRY
+_SYMBOL.fields_by_name['details'].message_type = google_dot_protobuf_dot_struct__pb2._STRUCT
 DESCRIPTOR.message_types_by_name['CreateCompilerSessionRequest'] = _CREATECOMPILERSESSIONREQUEST
 DESCRIPTOR.message_types_by_name['CreateCompilerSessionResult'] = _CREATECOMPILERSESSIONRESULT
 DESCRIPTOR.message_types_by_name['DestroyCompilerSessionRequest'] = _DESTROYCOMPILERSESSIONREQUEST
@@ -615,8 +625,8 @@ _SUPERGSLCOMPILER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=740,
-  serialized_end=1322,
+  serialized_start=812,
+  serialized_end=1394,
   methods=[
   _descriptor.MethodDescriptor(
     name='CreateCompilerSession',

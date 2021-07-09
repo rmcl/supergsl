@@ -4,7 +4,7 @@ from supergsl.core.exception import NotFoundError
 from supergsl.core.types import SuperGSLType
 
 
-class SuperGSLProvider:
+class SuperGSLProvider(SuperGSLType):
     """Base class to define objects that can provide symbols."""
 
     @property
