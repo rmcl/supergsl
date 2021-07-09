@@ -34,7 +34,6 @@ class SuperGSLPlugin(object):
 
     def resolve_import(
         self,
-        symbol_table : SymbolTable,
         identifier : str,
         alias : str
     ) -> None:
@@ -42,7 +41,10 @@ class SuperGSLPlugin(object):
         if identifier not in self.functions:
             raise NotFoundError('%s not found in module.' % identifier)
 
-        symbol_table.insert(alias or identifier, self.functions[identifier])
+        symbol_alias = alias or identifier
+        return {
+            symbol_alias: self.functions[identifier]
+        }
 
     def get_or_create_provider_group_for_module_path(self, module_path):
         import_symbol_table = self.symbol_table.enter_nested_scope('imports')
