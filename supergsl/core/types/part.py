@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from supergsl.core.constants import (
@@ -118,6 +118,15 @@ class Part(NucleotideSequence):
 
     def __repr__(self):
         return self.identifier
+
+    def serialize(self) -> Dict:
+        return {
+            'identifier': self.identifier,
+            'start': self.start.serialize(),
+            'end': self.end.serialize(),
+            'description': self.description,
+            'sequence': str(self.sequence),
+        }
 
     def print(self) -> str:
         """Display details about the SuperGSL object."""

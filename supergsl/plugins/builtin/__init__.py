@@ -7,7 +7,7 @@ from .output.json_output import JSONOutput
 from .output.sbol_output import SBOLOutput
 from .output.genbank_output import GenBankOutput
 
-class BuiltinAssemblersPlugin(SuperGSLPlugin):
+class BuiltinPlugin(SuperGSLPlugin):
     """Plugin stub to help register basic Assemblers."""
 
     def register(self, compiler_settings):

@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/struct.proto";
+
 package supergsl;
 option py_generic_services = true;
 
@@ -48,6 +50,7 @@ message ListSymbolTableResult {
 
 message Symbol {
     string type = 1;
+    google.protobuf.Struct details = 4;
 }
 
 

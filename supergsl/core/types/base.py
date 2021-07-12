@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict
 from inspect import getdoc
 
 
@@ -15,3 +15,6 @@ class SuperGSLType(object):
     @property
     def help(cls) -> Optional[str]:
         return getdoc(cls)
+
+    def serialize(self) -> Dict:
+        return {}

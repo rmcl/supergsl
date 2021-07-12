@@ -1,11 +1,11 @@
 """Implement SeqPosition class for storing relative positions in a sequence."""
-from typing import Tuple
+from typing import Tuple, Dict
 from Bio.Seq import Seq
 from supergsl.core.constants import FIVE_PRIME
 from supergsl.core.exception import PartSliceError
+from .base import SuperGSLType
 
-
-class SeqPosition:
+class SeqPosition(SuperGSLType):
     """Store relative positions in a reference sequence.
 
     "Hierarchical parts" are subsequences of parent parts or reference genomes.
@@ -109,3 +109,10 @@ class SeqPosition:
 
         if ref1 != ref2:
             raise PartSliceError('Reference sequences do not match.')
+
+    def serialize(self) -> Dict:
+        return {
+            'relative_pos': self.x,
+            'absolute_pos': self.get_absolute_position_in_reference()[1],
+            'approximate': self.approximate
+        }
