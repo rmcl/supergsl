@@ -44,7 +44,6 @@ class FastaPartProvider(PartProvider):
 
         with _open(self.fasta_file_path) as fp:
             entries = SeqIO.parse(fp, 'fasta')
-            print(entries)
 
             self._sequences_by_entry = {}
             for entry in entries:
@@ -54,7 +53,7 @@ class FastaPartProvider(PartProvider):
         self._loaded = True
 
     def list_parts(self):
-        if not hasattr(self, '_sequences_by_entry'):
+        if not self._loaded:
             self.load()
 
         return list(self._sequences_by_entry.keys())
