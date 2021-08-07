@@ -7,7 +7,7 @@ from pydna.assembly import Assembly
 
 from supergsl.core.types.primer import Primer
 
-def build_two_part_assembly_primers(
+def build_two_part_assembly_sequence_and_primers(
     five_prime_seq: Seq,
     three_prime_seq : Seq,
     payload_seq : Seq

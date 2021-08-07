@@ -1,7 +1,7 @@
 from unittest import TestCase
 from Bio.Seq import Seq
 
-from supergsl.utils.primers import build_two_part_assembly_primers
+from supergsl.utils.primers import build_two_part_assembly_sequence_and_primers
 from supergsl.core.types.primer import Primer
 
 
@@ -15,7 +15,7 @@ class PrimerUtilTestCases(TestCase):
         three_primer_part_seq = Seq('ccaaacccaccaggtaccttatgtaagtacttcaagtcgccagaagacttcttggtcaagttgcc')
         payload_seq = Seq('ATGAACAT')
 
-        result = build_two_part_assembly_primers(
+        result = build_two_part_assembly_sequence_and_primers(
             five_prime_part_seq, three_primer_part_seq, payload_seq)
 
         self.assertEqual(result['assembly_sequence'], Seq(''.join([
