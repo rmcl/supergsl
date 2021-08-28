@@ -53,7 +53,7 @@ from supergsl.core.exception import (
 class EvaluatePass(BackendPipelinePass):
     """Traverse the AST to execute the GSL Program."""
 
-    def __init__(self, symbol_table : SymbolTable):
+    def __init__(self, symbol_table : Optional[SymbolTable]):
         self.symbol_table = symbol_table
 
     def get_node_handlers(self) -> Dict[Optional[str], Callable]:

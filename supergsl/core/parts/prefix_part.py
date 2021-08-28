@@ -1,6 +1,6 @@
 import typing
 import re
-from typing import Tuple, Callable, Optional, Mapping
+from typing import Tuple, Callable, Optional, Mapping, Dict
 from re import Pattern, Match
 from supergsl.core.types import SuperGSLType
 from supergsl.core.exception import PartSliceError
@@ -104,7 +104,7 @@ class PrefixedSlicePartProviderMixin(_Base):
         of the part prefixes available to the user.
         """
 
-        new_symbols = {}
+        new_symbols : Dict[str, SuperGSLType] = {}
         part_identifier = alias or identifier
 
         # Add the parent part
