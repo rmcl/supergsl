@@ -107,6 +107,12 @@ class Part(NucleotideSequence):
         start_seq_pos = convert_slice_position_to_seq_position(self, part_slice.start)
         end_seq_pos = convert_slice_position_to_seq_position(self, part_slice.end)
 
+        if not identifier:
+            identifier = '%s[%s]' % (
+                self.identifier,
+                part_slice.get_slice_str()
+            )
+
         return self.provider.get_child_part_by_slice(
             self,
             identifier,
