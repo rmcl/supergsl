@@ -11,8 +11,11 @@ from supergsl.core.types.builtin import (
 )
 from supergsl.utils import resolve_import
 from supergsl.core.types.part import Part
-from supergsl.core.parts.slice import convert_slice_position_to_seq_position
 from supergsl.core.types.assembly import AssemblyDeclaration
+from supergsl.core.types.slice import (
+    Position,
+    Slice
+)
 
 from supergsl.core.constants import (
     UNAMBIGUOUS_DNA_SEQUENCE,
@@ -30,8 +33,8 @@ from supergsl.core.ast import (
     VariableDeclaration,
     ListDeclaration,
     FunctionInvocation,
-    Slice,
-    SlicePosition,
+    Slice as AstSlice,
+    SlicePosition as AstSlicePosition,
     SequenceConstant,
     Constant
 )
@@ -50,7 +53,7 @@ from supergsl.core.exception import (
 class EvaluatePass(BackendPipelinePass):
     """Traverse the AST to execute the GSL Program."""
 
-    def __init__(self, symbol_table : SymbolTable):
+    def __init__(self, symbol_table : Optional[SymbolTable]):
         self.symbol_table = symbol_table
 
     def get_node_handlers(self) -> Dict[Optional[str], Callable]:
@@ -142,7 +145,14 @@ class EvaluatePass(BackendPipelinePass):
         symbol = symbol.eval()
 
         if symbol_reference.slice:
-            symbol = self.visit(symbol_reference.slice, symbol)
+            parent_part = symbol
+            part_slice = self.visit(symbol_reference.slice)
+
+            child_identifier = '%s[%s]' % (
+                parent_part.identifier,
+                part_slice.get_slice_str()
+            )
+            symbol = parent_part.slice(part_slice, identifier=child_identifier)
 
         if symbol_reference.invert:
             #    inverter = self.visit(symbol_reference.invert)
@@ -151,26 +161,18 @@ class EvaluatePass(BackendPipelinePass):
 
         return symbol
 
+    def visit_slice(self, slice_node : AstSlice):
+        start_position = self.visit(slice_node.start)
+        end_position = self.visit(slice_node.end)
 
-    def visit_slice(self, slice_node : Slice, parent_part : Part):
-        start_position = self.visit(slice_node.start, parent_part)
-        end_position = self.visit(slice_node.end, parent_part)
+        return Slice(start_position, end_position)
 
-        child_identifier = '%s[%s]' % (
-            parent_part.identifier,
-            slice_node.get_slice_str()
-        )
-        new_part = parent_part.get_child_part_by_slice(
-            child_identifier, start_position, end_position)
-
-        return new_part
-
-
-    def visit_slice_position(self, slice_position : SlicePosition, parent_part : Part):
+    def visit_slice_position(self, slice_position : AstSlicePosition):
         """Convert a SlicePosition node into a SeqPosition for the given Part."""
-        return convert_slice_position_to_seq_position(
-            parent_part,
-            slice_position)
+        return Position(
+            slice_position.index,
+            slice_position.postfix,
+            slice_position.approximate)
 
 
     def visit_list_declaration(self, list_declaration : ListDeclaration) -> Collection:

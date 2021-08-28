@@ -28,7 +28,7 @@ class CompilerPipeline:
     def import_symbols(
         self,
         module_path : str,
-        import_identifier_list : List[str]
+        import_identifier_list : Union[str, List[str]]
     ) -> Union[
         SuperGSLType,
         Dict[str, SuperGSLType]
@@ -43,6 +43,10 @@ class CompilerPipeline:
         where provider is the module_path and
         import_identifier_list is a list of strings of format ['a', 'b', 'c']
         """
+
+        if isinstance(import_identifier_list, str):
+            import_identifier_list = [import_identifier_list]
+
         imported_symbols = {}
         for import_identifier in import_identifier_list:
             new_symbols = resolve_import(
@@ -110,4 +114,4 @@ class CompilerPipeline:
 
     def get_parser(self):
         """Retrieve a reference to the parser."""
-        return SuperGSLParser()
+        return SuperGSLParser.create_supergsl_parser()

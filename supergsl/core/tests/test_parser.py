@@ -2,8 +2,43 @@
 from unittest import TestCase
 from rply import Token
 from supergsl.core.parser import SuperGSLParser
-from supergsl.core.ast import Program
+from supergsl.core.ast import Program, Slice
 from supergsl.core.exception import ParsingError
+
+
+class SliceParserTestCase(TestCase):
+    """Test that the Slice Parser builds valid AST."""
+    def setUp(self):
+        self.parser = SuperGSLParser.create_slice_parser()
+
+    def test_build_slice(self):
+        """Test building an AST from the parsed tokens of "10S:250E"."""
+
+        tokens = iter((
+            # Import
+            Token('NUMBER', '10'),
+            Token('IDENTIFIER', 'S'),
+            Token('COLON', 'import'),
+            Token('NUMBER', '250'),
+            Token('IDENTIFIER', 'E'),
+        ))
+        ast = self.parser.parse(tokens)
+
+        self.assertEquals(type(ast), Slice)
+        self.assertEqual(ast.to_dict(), {
+            'node': 'Slice',
+            'end': {
+                'approximate': False,
+                'index': 250,
+                'node': 'SlicePosition',
+                'postfix': 'E'},
+            'start': {
+                'approximate': False,
+                'index': 10,
+                'node': 'SlicePosition',
+                'postfix': 'S'
+            }
+        })
 
 
 class ParserTestCase(TestCase):
@@ -11,7 +46,7 @@ class ParserTestCase(TestCase):
     maxDiff = None
 
     def setUp(self):
-        self.parser = SuperGSLParser()
+        self.parser = SuperGSLParser.create_supergsl_parser()
 
     def test_build_ast_import(self):
         """Test building an AST from the parsed tokens of "from S288C import ADHA, ERG10, HO"."""
