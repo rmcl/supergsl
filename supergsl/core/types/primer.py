@@ -1,3 +1,4 @@
+from typing import Dict
 from Bio.Seq import Seq
 from .base import SuperGSLType
 from .builtin import NucleotideSequence
@@ -13,6 +14,10 @@ class Primer(NucleotideSequence):
         """Return the amino acid sequence as a `Bio.Seq`."""
         return self._sequence
 
+    def serialize(self, include_sequence=False) -> Dict:
+        return {
+            'sequence': str(self.sequence)
+        }
 
 class PairedPrimer(Primer):
     """A primer with a `body` and `tail` region useful for annealing two parts."""
@@ -33,6 +38,11 @@ class PairedPrimer(Primer):
     def tail(self) -> Seq:
         """Return a Sequence representing "tail" region of the primer."""
         return self._tail
+
+    def serialize(self, include_sequence=False) -> Dict:
+        return {
+            'sequence': str(self.sequence)
+        }
 
 
 class PrimerPair(SuperGSLType):
@@ -56,3 +66,9 @@ class PrimerPair(SuperGSLType):
     def reverse(self) -> Primer:
         """Return the reverse primer of the pair"""
         return self._reverse_primer
+
+    def serialize(self, include_sequence=False) -> Dict:
+        return {
+            'forward': self.forward.serialize(include_sequence),
+            'reverse': self.reverse.serialize(include_sequence)
+        }

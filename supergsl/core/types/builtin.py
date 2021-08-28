@@ -1,6 +1,6 @@
 """Define SuperGSL builtin types that can be used by plugins."""
 from Bio.Seq import Seq
-from typing import List, Type
+from typing import List, Type, Dict
 from collections import OrderedDict
 from .base import SuperGSLType
 
@@ -71,3 +71,11 @@ class Collection(SuperGSLType):
         for item_idx, item in enumerate(self._items):
             output += '  %d. %s \n' % (item_idx, item)
         return output
+
+    def serialize(self, include_sequence=False) -> Dict:
+        return {
+            'items': [
+                item.serialize(include_sequence)
+                for item in self._items
+            ]
+        }

@@ -50,7 +50,7 @@ message ListSymbolTableResult {
 
 message Symbol {
     string type = 1;
-    google.protobuf.Struct details = 4;
+    google.protobuf.Struct details = 2;
 }
 
 

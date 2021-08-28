@@ -1,5 +1,5 @@
 """Define SuperGSL Types related to the construction of new genetic assemblies"""
-from typing import Generator, List, Optional, Union, Tuple, Set
+from typing import Generator, List, Optional, Union, Tuple, Set, Dict
 from Bio.Seq import Seq
 from pyDOE2 import fullfact
 
@@ -195,6 +195,26 @@ class Assembly(SuperGSLType):
         """Retrieve a `Part` corresponding to this construct."""
         raise NotImplementedError('Subclass to implement.')
 
+    def serialize(self, include_sequence=True) -> Dict:
+        result = {
+            'identifier': self.identifier,
+            'annotations': [
+                {
+                    'identifier': part[0].identifier,
+                    'start': part[1].serialize(),
+                    'end': part[2].serialize(),
+                    'type': 'Part'
+                }
+                for part in self.parts_with_positions
+            ],
+            'description': self.description,
+        }
+
+        if include_sequence:
+            result['sequence'] = str(self.sequence)
+
+        return result
+
 
 class AssemblyResultSet(SuperGSLType):
     """A collection of Assemblies."""
@@ -212,3 +232,11 @@ class AssemblyResultSet(SuperGSLType):
         for assembly in self.assemblies:
             result += '    %s\n' % assembly.identifier
         return result
+
+    def serialize(self, include_sequence=False) -> Dict:
+        return {
+            'assemblies': [
+                assembly.serialize()
+                for assembly in self.assemblies
+            ]
+        }

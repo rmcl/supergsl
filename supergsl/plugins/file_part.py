@@ -162,10 +162,12 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
     ) -> Part:
         """Return a new part which is the child of the supplied parent."""
 
-        return Part(
+        part = Part(
             identifier,
             start,
             end,
             provider=self,
             parent_part=parent_part
         )
+        self.primer_builder.build_primers_for_part(part)
+        return part

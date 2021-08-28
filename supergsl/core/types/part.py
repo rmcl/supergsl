@@ -119,14 +119,22 @@ class Part(NucleotideSequence):
     def __repr__(self):
         return self.identifier
 
-    def serialize(self) -> Dict:
-        return {
+    def serialize(self, include_sequence=False) -> Dict:
+        result = {
             'identifier': self.identifier,
             'start': self.start.serialize(),
             'end': self.end.serialize(),
             'description': self.description,
-            'sequence': str(self.sequence),
+            'roles': self.roles
         }
+
+        if self.extraction_primers:
+            result['extraction_primers'] = self.extraction_primers.serialize()
+
+        #if include_sequence:
+        result['sequence'] = str(self.sequence)
+
+        return result
 
     def print(self) -> str:
         """Display details about the SuperGSL object."""
