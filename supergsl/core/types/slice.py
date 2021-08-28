@@ -31,12 +31,15 @@ class Slice(SuperGSLType):
 
     @classmethod
     def from_str(cls, slice_string : str) -> 'Slice':
-        raise NotImplementedError('WORK ON THIS!')
+        # Todo: Figure out how to resolve the circular dependency without putting
+        # the import here.
+        from supergsl.utils.slice import parse_slice_str
+        return parse_slice_str(slice_string)
 
     def serialize(self) -> Dict[str, Any]:
         return {
             'start': self.start.serialize(),
-            'start': self.end.serialize()
+            'end': self.end.serialize()
         }
 
     def get_slice_str(self):

@@ -106,6 +106,11 @@ class PrefixedSlicePartProviderMixin(_Base):
 
         new_symbols = {}
         part_identifier = alias or identifier
+
+        # Add the parent part
+        new_symbols[part_identifier] = self.get_part(identifier)
+
+        # Add all the prefix parts.
         for part_prefix in self.PART_TYPES.keys():
             part_name = '{}{}'.format(part_prefix, part_identifier)
             lazy_part = PrefixedSliceLazyLoadedPart(

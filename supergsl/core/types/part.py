@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Union
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from supergsl.core.constants import (
@@ -102,8 +102,14 @@ class Part(NucleotideSequence):
         self._roles.extend(roles)
         self._roles = list(set(self._roles))
 
-    def slice(self, part_slice : Slice, identifier : Optional[str] = None) -> 'Part':
-        """Return a new part representing a sliced region."""
+    def slice(self, part_slice : Union[Slice, str], identifier : Optional[str] = None) -> 'Part':
+        """Return a new part representing a sliced region.
+
+        part_slice is either a Slice object or a str.
+        """
+        if isinstance(part_slice, str):
+            part_slice = Slice.from_str(part_slice)
+
         start_seq_pos = convert_slice_position_to_seq_position(self, part_slice.start)
         end_seq_pos = convert_slice_position_to_seq_position(self, part_slice.end)
 

@@ -11,7 +11,7 @@ class ParserTestCase(TestCase):
     maxDiff = None
 
     def setUp(self):
-        self.parser = SuperGSLParser()
+        self.parser = SuperGSLParser.create_supergsl_parser()
 
     def test_build_ast_import(self):
         """Test building an AST from the parsed tokens of "from S288C import ADHA, ERG10, HO"."""

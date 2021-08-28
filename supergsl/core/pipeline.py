@@ -114,4 +114,4 @@ class CompilerPipeline:
 
     def get_parser(self):
         """Retrieve a reference to the parser."""
-        return SuperGSLParser()
+        return SuperGSLParser.create_supergsl_parser()
