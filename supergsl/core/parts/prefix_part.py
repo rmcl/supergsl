@@ -180,47 +180,24 @@ class PrefixedSlicePartProviderMixin(_Base):
                 Position(-500, relative_to=FIVE_PRIME, approximate=True),
                 Position(0, relative_to=FIVE_PRIME))
 
-            #new_start = parent_part.start.get_relative_position(
-            #    x=-1 * get_promoter_len(),
-            #    approximate=True)
-
-            #return new_start, parent_part.start
-
-        elif part_slice_type in ['orf', 'gene']:
+        if part_slice_type in ['orf', 'gene']:
             return Slice(
                 Position(0, relative_to=FIVE_PRIME),
                 Position(0, relative_to=THREE_PRIME))
 
-            #return parent_part.start, parent_part.end
-
-        elif part_slice_type == 'upstream':
+        if part_slice_type == 'upstream':
             return Slice(
                 Position(-1 * get_flank_len(), relative_to=FIVE_PRIME, approximate=True),
                 Position(0, relative_to=FIVE_PRIME))
 
-            #new_start = parent_part.start.get_relative_position(
-            #    x=-1 * get_flank_len(),
-            #    approximate=True)
-            #return new_start, parent_part.start
-
-        elif part_slice_type == 'downstream':
+        if part_slice_type == 'downstream':
             return Slice(
-                Position(-1 * get_flank_len(), relative_to=THREE_PRIME, approximate=True),
-                Position(0, relative_to=THREE_PRIME))
+                Position(0, relative_to=FIVE_PRIME),
+                Position(-1 * get_flank_len(), relative_to=FIVE_PRIME, approximate=True))
 
-            #new_end = parent_part.end.get_relative_position(
-            #    x=get_flank_len(),
-            #    approximate=True)
-            #return parent_part.end, new_end
-
-        elif part_slice_type == 'terminator':
+        if part_slice_type == 'terminator':
             return Slice(
-                Position(-1 * get_flank_len(), relative_to=THREE_PRIME, approximate=True),
-                Position(0, relative_to=THREE_PRIME))
-
-            #new_end = parent_part.end.get_relative_position(
-            #    x=get_terminator_len(),
-            #    approximate=True)
-            #return parent_part.end, new_end
+                Position(0, relative_to=FIVE_PRIME),
+                Position(-1 * get_terminator_len(), relative_to=FIVE_PRIME, approximate=True))
 
         raise PartSliceError('"%s" prefix is not implemented yet.' % part_slice_type)

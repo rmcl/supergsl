@@ -9,7 +9,6 @@ FIVE_PRIME = 'FivePrime'
 STRAND_WATSON = 'StrandWatson'
 STRAND_CRICK = 'StrandCrick'
 
-
 PART_SLICE_POSTFIX_START = 'S'
 PART_SLICE_POSTFIX_END = 'E'
 
