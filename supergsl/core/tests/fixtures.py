@@ -3,11 +3,11 @@ from unittest.mock import Mock
 import random
 from typing import Tuple, List
 from Bio.Seq import Seq
+from supergsl.core.sequence import SequenceStore, SequenceEntry
 from supergsl.core.types.primer import PrimerPair
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
 from supergsl.core.types.builtin import Collection
-from supergsl.core.types.position import SeqPosition
 from supergsl.core.types.assembly import (
     Assembly,
     AssemblyDeclaration,
@@ -44,6 +44,15 @@ class SuperGSLCoreFixtures(object):
             complement_sequence[-20:]
         )
 
+    @property
+    def sequence_store(self) -> SequenceStore:
+        if not hasattr(self, '_store'):
+            self._store = SequenceStore()
+        return self._store
+
+    def mk_sequence_entry(self, sequence) -> SequenceEntry:
+        return self.sequence_store.add_from_reference(sequence)
+
     def mk_part(
         self,
         identifier,
@@ -59,18 +68,11 @@ class SuperGSLCoreFixtures(object):
         ref_seq_len = part_seq_len * 3
         reference_sequence = self.mk_random_dna_sequence(ref_seq_len)
 
-        start = SeqPosition.from_reference(
-            x=part_seq_len,
-            rel_to=THREE_PRIME,
-            approximate=False,
-            reference=reference_sequence
-        )
-        end = start.get_relative_position(x=part_seq_len)
+        sequence_entry = self.mk_sequence_entry(reference_sequence)
 
         part = Part(
             identifier,
-            start,
-            end,
+            sequence_entry=sequence_entry,
             provider=Mock(),
             roles=roles
         )
@@ -118,6 +120,8 @@ class SuperGSLCoreFixtures(object):
             identifier,
             assembly_sequence,
             'this is a great assembly named %s' % identifier)
+
+        raise Exception('HELP!')
 
         cur_pos = 0
         for part in parts:

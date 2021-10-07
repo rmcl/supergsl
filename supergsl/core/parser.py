@@ -299,7 +299,9 @@ class SuperGSLParser(object):
         @self.pg.production('slice_coordinates : NUMBER IDENTIFIER')
         def slice_coordinates(state, p):
             position_index = int(p[0].value)
-            postfix = None
+
+            # If postfix not specified it should default to 'S'
+            postfix = 'S'
             if len(p) == 2:
                 postfix = p[1].value
                 if postfix not in ['S', 'E']:

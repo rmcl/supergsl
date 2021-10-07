@@ -6,6 +6,7 @@ from supergsl.core.plugin import PluginProvider
 from supergsl.core.backend import BackendPipelinePass
 from supergsl.core.eval import EvaluatePass
 from supergsl.utils import resolve_import
+from supergsl.core.sequence import SequenceStore
 
 from .lexer import SuperGSLLexer
 from .parser import SuperGSLParser
@@ -17,7 +18,12 @@ class CompilerPipeline:
     def __init__(self, settings):
         self._global_symbol_table = SymbolTable('global', None)
         self._settings = settings
+
+        sequence_store = SequenceStore()
+        self._global_symbol_table.insert('sequences', sequence_store)
+
         self.plugins = PluginProvider(self._global_symbol_table, self._settings)
+
 
     def compile(self, source_code):
         """Run the compiler on the provided source code."""

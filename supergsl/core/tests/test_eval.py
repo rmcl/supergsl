@@ -6,6 +6,7 @@ from supergsl.core.eval import EvaluatePass
 from supergsl.core.provider import SuperGSLProvider
 from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.constants import (
+    THREE_PRIME,
     STRING_CONSTANT,
     NUMBER_CONSTANT,
     UNAMBIGUOUS_DNA_SEQUENCE,
@@ -26,6 +27,7 @@ from supergsl.core.ast import (
     FunctionInvocation
 )
 
+from supergsl.core.types.slice import Position
 from supergsl.core.types.builtin import (
     Collection,
     NucleotideSequence,
@@ -135,13 +137,13 @@ class EvaluatePassTestCase(unittest.TestCase):
         start = Mock()
         end = Mock()
 
-        self.eval_pass.visit.return_value = 'VISIT-RETURN-VAL'
+        self.eval_pass.visit.return_value = position_mock = Position(0)
 
         slice_node = Slice(start, end)
-        slice = self.eval_pass.visit_slice(slice_node)
+        slice_obj = self.eval_pass.visit_slice(slice_node)
 
-        self.assertEqual(slice.start, 'VISIT-RETURN-VAL')
-        self.assertEqual(slice.end, 'VISIT-RETURN-VAL')
+        self.assertEqual(slice_obj.start, position_mock)
+        self.assertEqual(slice_obj.end, position_mock)
 
         self.eval_pass.visit.assert_has_calls([
             call(start),
@@ -151,13 +153,13 @@ class EvaluatePassTestCase(unittest.TestCase):
     def test_visit_slice_position(self):
         """Visit slice position should convert a SlicePosition AST node to a Position"""
 
-        slice_position = SlicePosition(123, 'W', False)
+        slice_position = SlicePosition(123, 'E', False)
 
         result = self.eval_pass.visit_slice_position(
             slice_position)
 
         self.assertEqual(result.index, 123)
-        self.assertEqual(result.postfix, 'W')
+        self.assertEqual(result.relative_to, THREE_PRIME)
         self.assertEqual(result.approximate, False)
 
     def test_visit_list_declaration(self):

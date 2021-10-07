@@ -6,14 +6,13 @@ from supergsl.core.constants import (
     PART_SLICE_POSTFIX_END
 )
 
-
+from supergsl.core.sequence import SequenceEntry
 from supergsl.core.types import SuperGSLType
 from supergsl.core.types.builtin import NucleotideSequence
 from supergsl.core.types.primer import PrimerPair
 from supergsl.core.exception import PartError
 from supergsl.core.types.slice import Position
 from .slice import Slice
-from .position import SeqPosition
 
 
 class Part(NucleotideSequence):
@@ -22,8 +21,7 @@ class Part(NucleotideSequence):
     def __init__(
         self,
         identifier : str,
-        start_position : SeqPosition,
-        end_position : SeqPosition,
+        sequence_entry : SequenceEntry,
         provider,
         parent_part : Optional['Part'] = None,
         extraction_primers : Optional[PrimerPair] = None,
@@ -39,10 +37,7 @@ class Part(NucleotideSequence):
         """
         self.identifier = identifier
 
-        self.start = start_position
-        self.end = end_position
-
-        start_position.check_position_compatibility(end_position)
+        self.sequence_entry = sequence_entry
 
         self.provider = provider
 
@@ -75,13 +70,7 @@ class Part(NucleotideSequence):
 
     @property
     def sequence(self) -> Seq:
-        ref, start_pos = self.start.get_absolute_position_in_reference()
-        ref_2, end_pos = self.end.get_absolute_position_in_reference()
-
-        if ref != ref_2:
-            raise Exception("Reference sequences do not match.")
-
-        return ref[start_pos:end_pos]
+        return self.sequence_entry.sequence
 
     @property
     def sequence_record(self) -> SeqRecord:
@@ -110,9 +99,6 @@ class Part(NucleotideSequence):
         if isinstance(part_slice, str):
             part_slice = Slice.from_str(part_slice)
 
-        start_seq_pos = convert_slice_position_to_seq_position(self, part_slice.start)
-        end_seq_pos = convert_slice_position_to_seq_position(self, part_slice.end)
-
         if not identifier:
             identifier = '%s[%s]' % (
                 self.identifier,
@@ -122,8 +108,7 @@ class Part(NucleotideSequence):
         return self.provider.get_child_part_by_slice(
             self,
             identifier,
-            start_seq_pos,
-            end_seq_pos
+            part_slice
         )
 
     def eval(self):
@@ -136,8 +121,6 @@ class Part(NucleotideSequence):
     def serialize(self) -> Dict:
         return {
             'identifier': self.identifier,
-            'start': self.start.serialize(),
-            'end': self.end.serialize(),
             'description': self.description,
             'sequence': str(self.sequence),
         }
@@ -150,32 +133,3 @@ class Part(NucleotideSequence):
 class LazyLoadedPart(SuperGSLType):
     def eval(self) -> SuperGSLType:
         raise NotImplementedError('Subclass to implement.')
-
-
-def convert_slice_position_to_seq_position(
-    parent_part : Part,
-    slice_position : Position
-) -> SeqPosition:
-    """Convert SuperGSL `ast.SlicePosition` to `types.position.SeqPosition` relative
-    to the parent part.
-
-    ast.SlicePosition has the following properties:
-        - index - The position on the part sequence.
-        - postfix - "S" or "E" - Whether the index is relative to the start
-            (S) or end (E) of the part.
-        - approximate - Boolean flag determines if the index is approximate
-            (True) or exact (False).
-    """
-    if slice_position.postfix == PART_SLICE_POSTFIX_START or slice_position.postfix is None:
-        # the index is relative to the start of the part.
-        return parent_part.start.get_relative_position(
-            slice_position.index,
-            slice_position.approximate)
-
-    elif slice_position.postfix == PART_SLICE_POSTFIX_END:
-        # the index is relative to the end of the part.
-        return parent_part.end.get_relative_position(
-            slice_position.index,
-            slice_position.approximate)
-
-    raise Exception('Unknown slice postfix: "%s"' % slice_position.postfix)

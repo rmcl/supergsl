@@ -3,7 +3,7 @@ from typing import List
 from Bio import SeqIO
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.exception import PartNotFoundError
-from supergsl.core.parts import PartProvider
+from supergsl.core.parts import PartProvider, PartProviderConfig
 from supergsl.core.types.part import Part
 from supergsl.core.types.position import SeqPosition
 
@@ -29,9 +29,10 @@ class GenBankFilePartProvider(PartProvider):
     `get_identifier_for_feature`. See method docstring for more information.
     """
 
-    def __init__(self, name, settings):
+    def __init__(self, name, config : PartProviderConfig):
         self._provider_name = name
-        self.genbank_file_path = settings['sequence_file_path']
+
+        self.genbank_file_path = config.settings['sequence_file_path']
         self.features_by_identifier = {}
         self.loaded = False
 

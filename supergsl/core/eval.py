@@ -21,7 +21,9 @@ from supergsl.core.constants import (
     UNAMBIGUOUS_DNA_SEQUENCE,
     UNAMBIGUOUS_PROTEIN_SEQUENCE,
     NUMBER_CONSTANT,
-    STRING_CONSTANT
+    STRING_CONSTANT,
+    FIVE_PRIME,
+    THREE_PRIME
 )
 
 from supergsl.core.ast import (
@@ -168,11 +170,19 @@ class EvaluatePass(BackendPipelinePass):
         return Slice(start_position, end_position)
 
     def visit_slice_position(self, slice_position : AstSlicePosition):
-        """Convert a SlicePosition node into a SeqPosition for the given Part."""
+        """Convert a SlicePosition node into a Position for the given Part."""
+
+        if slice_position.postfix == 'S':
+            rel_to = FIVE_PRIME
+        elif slice_position.postfix == 'E':
+            rel_to = THREE_PRIME
+        else:
+            raise Exception('Unknown postfix position. "%s"' % slice_position.postfix)
+
         return Position(
-            slice_position.index,
-            slice_position.postfix,
-            slice_position.approximate)
+            index=slice_position.index,
+            relative_to=rel_to,
+            approximate=slice_position.approximate)
 
 
     def visit_list_declaration(self, list_declaration : ListDeclaration) -> Collection:

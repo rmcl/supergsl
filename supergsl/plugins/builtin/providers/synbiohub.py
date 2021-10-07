@@ -6,7 +6,8 @@ from supergsl.core.exception import ConfigurationError
 from supergsl.core.constants import THREE_PRIME
 from supergsl.utils.cache import FileCache
 
-from supergsl.core.parts import PartProvider
+from supergsl.core.sequence import SequenceStore
+from supergsl.core.parts import PartProvider, PartProviderConfig
 from supergsl.core.types.part import Part
 from supergsl.core.types.position import SeqPosition
 
@@ -35,10 +36,11 @@ class SynBioHubPartProvider(PartProvider):
     * https://synbiohub.org/public/igem
     """
 
-    def __init__(self, name : str, settings : dict):
+    def __init__(self, name : str, config : PartProviderConfig):
         self._provider_name = name
         self._cached_parts: Dict[str, Part] = {}
 
+        settings = config.provider_config
         self.repository_url = settings.get('repository_url', None)
         if not self.repository_url:
             ConfigurationError('"%s" requires that repository_url be set.')

@@ -10,7 +10,8 @@ from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.position import SeqPosition
 from supergsl.core.exception import PartNotFoundError
 from supergsl.core.types.part import Part
-from supergsl.core.parts import PartProvider
+from supergsl.core.sequence import SequenceStore
+from supergsl.core.parts import PartProvider, PartProviderConfig
 from supergsl.core.parts.prefix_part import PrefixedSlicePartProviderMixin
 from supergsl.plugins.pydna.primers import ExtractionPrimerBuilder
 
@@ -26,10 +27,13 @@ class FastaPartProvider(PartProvider):
         from the record header of each fasta entry.
     """
 
-    def __init__(self, name : str, settings : dict):
+    def __init__(self, name : str, config : PartProviderConfig):
         self._provider_name = name
+
+        settings = config.compiler_settings
         self.fasta_file_path : str = settings['fasta_file_path']
         self.identifier_format : str = settings.get('identifier_format', '%s')
+
         self._cached_parts : Dict[str, Part] = {}
         self._sequences_by_entry : Dict[str, Seq] = {}
         self._loaded : bool = False

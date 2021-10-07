@@ -29,7 +29,7 @@ class Node(object):
 class SlicePosition(Node):
     def __init__(self, index: int, postfix : str, approximate : bool):
         self.index = index
-        self.postfix = postfix
+        self.postfix = postfix        
         self.approximate = approximate
 
     def to_dict(self) -> Dict[str, Any]:
