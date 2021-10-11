@@ -22,8 +22,25 @@ class EntryLink:
         self.target = target_slice
         self.annotations = annotations
 
-    def get_source_sequence(self):
-        return self.parent_entry.sequence[self.source.start.index:self.source.end.index]
+    def get_source_slice_sequence(self) -> Seq:
+        """Return the sub-sequence of the parent sequence covered by the source slice."""
+        sequence_length = self.parent_entry.sequence_length
+        start_abs_position = self.source.start.compute_absolute_position(sequence_length)
+        end_abs_position = self.source.end.compute_absolute_position(sequence_length)
+
+        if start_abs_position.is_out_of_bounds or end_abs_position.is_out_of_bounds:
+            raise Exception('OUT OF BOUNDS SEQUENCES NOT CURRENTLY SUPPORTED!')
+
+        parent_sequence = self.parent_entry.sequence
+        if start_abs_position.index > end_abs_position.index:
+            # This sequence is on the reverse strand. Retrieve the end to start
+            # sequence on the forward strand and then take the reverse complement.
+            forward_sequence = parent_sequence[end_abs_position.index:start_abs_position.index]
+            sequence = forward_sequence.reverse_complement()
+        else:
+            sequence = parent_sequence[start_abs_position.index:end_abs_position.index]
+
+        return sequence
 
 class SequenceEntry:
     """Represent a sequence in the sequence store."""
@@ -79,6 +96,26 @@ class SequenceEntry:
         return self.parent_links[0].is_composite()
 
     @property
+    def reference_sequence(self) -> Seq:
+        """Return the `Seq` representing the reference sequence for this position."""
+        if self.reference:
+            return self.reference
+
+        if len(self.parent_links) == 1:
+            return self.parent_links[0].reference_sequence
+
+        raise Exception('Composite parts have multiple reference sequences.')
+
+    @property
+    def sequence_length(self) -> int:
+        """Return the length of the stored sequence.
+
+        This method is here so we can in the future supply a better implementation
+        for figuring this out rather than evaluating the entire sequence entry tree.
+        """
+        return len(self.sequence)
+
+    @property
     def sequence(self) -> Seq:
         if self.reference:
             return self.reference
@@ -91,7 +128,8 @@ class SequenceEntry:
         # TODO: make sure parents are ordered
         for parent_link in self.parent_links:
             start_pos = parent_link.target.start.index
-            source_sequence = parent_link.get_source_sequence()
+            source_sequence = parent_link.get_source_slice_sequence()
+
             if start_pos == sequence_index:
                 result_sequence += source_sequence
                 sequence_index += len(source_sequence)
