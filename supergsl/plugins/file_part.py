@@ -11,7 +11,6 @@ from supergsl.core.constants import (
     STRAND_WATSON,
     STRAND_CRICK
 )
-from supergsl.core.types.position import SeqPosition
 from supergsl.core.types.slice import Slice, Position
 from supergsl.core.sequence import SequenceEntry
 from supergsl.core.exception import PartNotFoundError
@@ -98,39 +97,32 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
 
         chromosome_num = new_gene_feature['chrom#']
         chromosome_sequence_entry = self._sequence_by_chromosome[chromosome_num]
-        chromosome_sequence = chromosome_sequence_entry.sequence
 
         strand = new_gene_feature['strand']
         if strand == 'C':
-            # Translate the position present in the file to be relative to the
-            # other strand of DNA (reverse complement).
-            #reference_sequence = chromosome_sequence.reverse_complement()
-            reference_len = len(chromosome_sequence)
-
-            new_gene_feature['from'] = reference_len - int(reference_feature['to']) - 1
-            new_gene_feature['to'] = reference_len - int(reference_feature['from'])
+            # This gene is on the reverse strand.
+            # indicate this in the slice by swapping the to and from positions.
+            new_gene_feature['from'] = int(reference_feature['to']) + 1
+            new_gene_feature['to'] = int(reference_feature['from'])
 
             from_position = Position(
-                int(reference_feature['from']), FIVE_PRIME, False, STRAND_CRICK)
+                int(reference_feature['to']) + 1, FIVE_PRIME, False)
             to_position = Position(
-                int(reference_feature['to']) + 1, FIVE_PRIME, False, STRAND_CRICK)
+                int(reference_feature['from']), FIVE_PRIME, False)
 
         else:
             new_gene_feature['from'] = int(reference_feature['from'])
             new_gene_feature['to'] = int(reference_feature['to']) + 1
 
             from_position = Position(
-                int(reference_feature['from']), FIVE_PRIME, False, STRAND_WATSON)
+                int(reference_feature['from']), FIVE_PRIME, False)
             to_position = Position(
-                int(reference_feature['to']) + 1, FIVE_PRIME, False, STRAND_WATSON)
-
-            #reference_sequence = chromosome_sequence
+                int(reference_feature['to']) + 1, FIVE_PRIME, False)
 
         new_entry = self.sequence_store.slice(
             chromosome_sequence_entry,
             Slice(from_position, to_position))
 
-        print(gene_name, new_entry.sequence)
         return new_entry, new_gene_feature
 
     def _get_alternative_names_from_feature(self, feature : dict) -> List[str]:
@@ -150,41 +142,19 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
             identifier  A identifier to select a part from this provider
         Return: `Part`
         """
-
+        print('RETRIEVING PART ', identifier)
         try:
             return self._cached_parts[identifier]
         except KeyError:
             pass
 
-        gene_sequence_entry, feature = self.get_gene(identifier)
+        sequence_entry, feature = self.get_gene(identifier)
         alternative_names = self._get_alternative_names_from_feature(feature)
 
 
-        part_slice = Slice(
-            Position(feature['from'], relative_to=THREE_PRIME, approximate=False),
-            Position(feature['to'], relative_to=THREE_PRIME, approximate=False)
-        )
-        """
-        start = SeqPosition.from_reference(
-            x=feature['from'],
-            rel_to=THREE_PRIME,
-            approximate=False,
-            reference=reference_sequence
-        )
-
-        end = start.get_relative_position(
-            x=feature['to']-feature['from'])
-        """
-
-        part_sequence_entry = self.sequence_store.slice(
-            gene_sequence_entry,
-            part_slice)
-
-        print('yoooo', part_sequence_entry.id, part_sequence_entry.sequence)
-
         part = Part(
             identifier,
-            part_sequence_entry,
+            sequence_entry,
             provider=self,
             description=feature['Notes'],
             alternative_names=alternative_names)

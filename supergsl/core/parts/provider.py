@@ -13,6 +13,7 @@ from supergsl.core.sequence import SequenceStore
 from supergsl.core.exception import ConfigurationError, PartNotFoundError
 from supergsl.core.constants import THREE_PRIME
 
+
 class PartProviderConfig:
     """Store config parameters for Part Providers"""
 

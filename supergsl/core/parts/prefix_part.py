@@ -135,9 +135,7 @@ class PrefixedSlicePartProviderMixin(_Base):
         except KeyError:
             raise UnknownPartPrefixError('Invalid part prefix "{}" for "{}".'.format(
                 prefix,
-                identifier,
-
-            ))
+                identifier))
 
         new_slice = self.build_part_type_slice_pos(parent_part, part_type)
 
@@ -192,12 +190,12 @@ class PrefixedSlicePartProviderMixin(_Base):
 
         if part_slice_type == 'downstream':
             return Slice(
-                Position(0, relative_to=FIVE_PRIME),
-                Position(-1 * get_flank_len(), relative_to=FIVE_PRIME, approximate=True))
+                Position(0, relative_to=THREE_PRIME),
+                Position(-1 * get_flank_len(), relative_to=THREE_PRIME, approximate=True))
 
         if part_slice_type == 'terminator':
             return Slice(
-                Position(0, relative_to=FIVE_PRIME),
-                Position(-1 * get_terminator_len(), relative_to=FIVE_PRIME, approximate=True))
+                Position(0, relative_to=THREE_PRIME),
+                Position(-1 * get_terminator_len(), relative_to=THREE_PRIME, approximate=True))
 
         raise PartSliceError('"%s" prefix is not implemented yet.' % part_slice_type)

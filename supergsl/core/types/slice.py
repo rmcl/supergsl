@@ -1,25 +1,36 @@
 from typing import Dict, Any
 from supergsl.core.constants import (
     FIVE_PRIME,
-    THREE_PRIME,
-    STRAND_WATSON,
-    STRAND_CRICK
+    THREE_PRIME
 )
 from .base import SuperGSLType
 
+class AbsolutePosition:
+    """Capture an absolute position in a sequence of fixed length."""
+
+    def __init__(self, target_sequence_length, index, approximate):
+        self.target_sequence_length = target_sequence_length
+        self.index = index
+        self.approximate = approximate
+
+    @property
+    def is_out_of_bounds(self) -> bool:
+        """Return True if the index of this position exceeds the bounds of the sequence.
+
+        For example, index=-15 or sequence_length + 25
+        """
+        if self.index < 0 or self.index >= self.target_sequence_length:
+            return True
+        return False
 
 class Position:
-    """Capture a position.
-
-    This differs from `supergsl.core.types.position.SeqPosition` in that it does
-    not store the associated reference sequence."""
+    """Capture a position relative to a declared end of a Sequence."""
 
     def __init__(
         self,
         index: int,
         relative_to : str = FIVE_PRIME,
-        approximate : bool = False,
-        strand : str = STRAND_WATSON
+        approximate : bool = False
     ):
         self.index = index
 
@@ -29,11 +40,21 @@ class Position:
         assert self.relative_to in [FIVE_PRIME, THREE_PRIME]
 
         self.approximate = approximate
-        self.strand = strand
 
-        # Watson strand or crick
-        # TODO: DEFINE THESE AS CONSTANTS in constants.py
-        assert self.strand in [STRAND_WATSON, STRAND_CRICK]
+    def compute_absolute_position(self, sequence_length : int) -> AbsolutePosition:
+        """Given the length of the sequence compute the absolute position of this Position."""
+
+        if self.relative_to == FIVE_PRIME:
+            return AbsolutePosition(
+                sequence_length,
+                self.index,
+                self.approximate)
+        else:
+            return AbsolutePosition(
+                sequence_length,
+                sequence_length - self.index - 1,
+                self.approximate)
+
 
     def __repr__(self):
         return self.get_slice_pos_str()
@@ -44,7 +65,6 @@ class Position:
             'index': self.index,
             'relative_to': self.relative_to,
             'approximate': self.approximate,
-            'strand': self.strand
         }
 
     def get_slice_pos_str(self) -> str:
@@ -57,12 +77,14 @@ class Position:
 
 
 class Slice(SuperGSLType):
-    """Capture the start and end position of a part slice."""
+    """Capture the start and end position of a part slice.
+
+    If the end position is less than the start position then it is infered that
+    the desired sequence lays on the reverse strand of a double-stranded molecule.
+    """
     def __init__(self, start : Position, end : Position):
         self.start = start
         self.end = end
-
-        assert self.start.strand == self.end.strand, 'Strands of start and end positions must match'
 
     @classmethod
     def from_str(cls, slice_string : str) -> 'Slice':
