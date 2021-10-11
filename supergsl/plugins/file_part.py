@@ -5,12 +5,7 @@ from mimetypes import guess_type
 from Bio import SeqIO
 from Bio.Seq import Seq
 
-from supergsl.core.constants import (
-    FIVE_PRIME,
-    THREE_PRIME,
-    STRAND_WATSON,
-    STRAND_CRICK
-)
+from supergsl.core.constants import FIVE_PRIME, THREE_PRIME
 from supergsl.core.types.slice import Slice, Position
 from supergsl.core.sequence import SequenceEntry
 from supergsl.core.exception import PartNotFoundError
