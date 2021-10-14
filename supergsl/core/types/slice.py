@@ -86,6 +86,25 @@ class Slice(SuperGSLType):
         self.start = start
         self.end = end
 
+
+    @classmethod
+    def from_five_prime_indexes(self, start_index, end_index):
+        """Create a Slice from two sequence indexes both relative to the FIVE_PRIME side of the molecule."""
+        start = Position(start_index)
+        end = Position(end_index)
+
+        return Slice(start, end)
+
+
+    @classmethod
+    def from_entire_sequence(self):
+        """Create a Slice capturing the entire sequence."""
+        start = Position(0, relative_to=FIVE_PRIME)
+        end = Position(0, relative_to=THREE_PRIME)
+
+        return Slice(start, end)
+
+
     @classmethod
     def from_str(cls, slice_string : str) -> 'Slice':
         """Create a `Slice` from a slice string.

@@ -1,10 +1,20 @@
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, NamedTuple
+from collections import namedtuple
 from uuid import UUID, uuid4
 from Bio.Seq import Seq
 from Bio.SeqFeature import SeqFeature
 
+from supergsl.core.exception import SequenceStoreError
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.slice import Slice, Position
+
+
+class SliceMapping(NamedTuple):
+    """Represent the mapping of a sub-slice of a parent sequence onto a new target sequence."""
+
+    parent_entry: 'SequenceEntry'
+    source_slice: Slice
+    target_slice: Slice
 
 
 class EntryLink:
@@ -14,7 +24,7 @@ class EntryLink:
         self,
         parent_entry : 'SequenceEntry',
         source_slice : Slice,
-        target_slice : Optional[Slice],
+        target_slice : Slice,
         annotations
     ):
         self.parent_entry = parent_entry
@@ -29,7 +39,7 @@ class EntryLink:
         end_abs_position = self.source.end.compute_absolute_position(sequence_length)
 
         if start_abs_position.is_out_of_bounds or end_abs_position.is_out_of_bounds:
-            raise Exception('OUT OF BOUNDS SEQUENCES NOT CURRENTLY SUPPORTED!')
+            raise SequenceStoreError('OUT OF BOUNDS SEQUENCES NOT CURRENTLY SUPPORTED!')
 
         parent_sequence = self.parent_entry.sequence
         if start_abs_position.index > end_abs_position.index:
@@ -56,9 +66,9 @@ class SequenceEntry:
         self.reference = reference
 
         if not (self.parent_links or self.reference):
-            raise Exception('Must specify either parents or reference.')
+            raise SequenceStoreError('Must specify either parents or reference.')
         if self.parent_links and self.reference:
-            raise Exception('Must only specify parents or a reference sequence, but not both')
+            raise SequenceStoreError('Must only specify parents or a reference sequence, but not both')
 
     def add_annotation(self, slice, details):
         # Todo: maybe add this function to create EntryLinks for the provided annotations.
@@ -75,7 +85,7 @@ class SequenceEntry:
         Composite parts are those that derive from more that one part at any point in their sequence lineage.
         Hierarchical parts have only a single parent at every level of their lineage.
 
-        Essentially a composite part has been created by the concatination of several reference sequences whereas
+        A composite part has been created by the concatination of several reference sequences whereas
         a Hierarhical entry has been sliced out of a *single* reference.
 
         The primary reason for diferentiating is that it is obvious how to exceed the slice bounds of a hierarchical part.
@@ -101,10 +111,11 @@ class SequenceEntry:
         if self.reference:
             return self.reference
 
-        if len(self.parent_links) == 1:
-            return self.parent_links[0].reference_sequence
+        if self.parent_links:
+            if len(self.parent_links) == 1:
+                return self.parent_links[0].parent_entry.reference_sequence
 
-        raise Exception('Composite parts have multiple reference sequences.')
+        raise SequenceStoreError('Composite parts have multiple reference sequences.')
 
     @property
     def sequence_length(self) -> int:
@@ -125,6 +136,9 @@ class SequenceEntry:
         sequence_index = 0
         result_sequence = ''
 
+        if not self.parent_links:
+            return Seq(result_sequence)
+
         # TODO: make sure parents are ordered
         for parent_link in self.parent_links:
             start_pos = parent_link.target.start.index
@@ -134,17 +148,19 @@ class SequenceEntry:
                 result_sequence += source_sequence
                 sequence_index += len(source_sequence)
 
-            elif start_pos < index:
+            elif start_pos < sequence_index:
                 overlap = sequence_index - start_pos
                 remaining = len(source_sequence) - overlap
 
-                result += source_sequence[overlap:]
-                index += remaining
+                result_sequence += source_sequence[overlap:]
+                sequence_index += remaining
 
             else:
-                raise Exception('GAP DETECTED')
+                raise SequenceStoreError(
+                    'Gap detected in sequence of SequenceEntry. Entry sequence '
+                    'cannot be materialized.')
 
-        return result_sequence
+        return Seq(result_sequence)
 
 
     def _build_target_sequence_coordinate_map(self, parent_links):
@@ -213,15 +229,15 @@ class SequenceStore:
 
         return entry
 
-    def concatenate(self, slice_mapping : List[Tuple[SequenceEntry, Slice, Slice]]):
+    def concatenate(self, slice_mappings : List[SliceMapping]):
         """Concatenate several sequence slices into a composite sequence."""
         links = []
-        for slice_map in slice_mapping:
-            parent_entry = slice_map[0]
-            source_slice = slice_map[1]
-            target_slice = slice_map[2]
-
-            link = EntryLink(parent_entry, source_slice, target_slice, None)
+        for slice_mapping in slice_mappings:
+            link = EntryLink(
+                slice_mapping.parent_entry,
+                slice_mapping.source_slice,
+                slice_mapping.target_slice,
+                None)
             links.append(link)
 
         entry_id = self._create_record_id()

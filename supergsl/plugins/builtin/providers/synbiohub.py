@@ -3,13 +3,10 @@ from typing import Dict
 from Bio.Seq import Seq
 from sbol2 import Document, PartShop
 from supergsl.core.exception import ConfigurationError
-from supergsl.core.constants import THREE_PRIME
 from supergsl.utils.cache import FileCache
 
-from supergsl.core.sequence import SequenceStore
 from supergsl.core.parts import PartProvider, PartProviderConfig
 from supergsl.core.types.part import Part
-from supergsl.core.types.position import SeqPosition
 
 
 class SynBioHubPartProvider(PartProvider):
@@ -39,6 +36,7 @@ class SynBioHubPartProvider(PartProvider):
     def __init__(self, name : str, config : PartProviderConfig):
         self._provider_name = name
         self._cached_parts: Dict[str, Part] = {}
+        self.sequence_store = config.sequence_store
 
         settings = config.provider_config
         self.repository_url = settings.get('repository_url', None)
@@ -91,21 +89,11 @@ class SynBioHubPartProvider(PartProvider):
             pass
 
         part_details = self.get_part_details(identifier)
-        reference_sequence = part_details['sequence']
-
-        start = SeqPosition.from_reference(
-            x=0,
-            rel_to=THREE_PRIME,
-            approximate=False,
-            reference=reference_sequence
-        )
-        end = start.get_relative_position(
-            x=len(reference_sequence))
+        sequence_entry = self.sequence_store.add_from_reference(part_details['sequence'])
 
         part = Part(
             identifier,
-            start,
-            end,
+            sequence_entry,
             provider=self,
             description=part_details['description'],
             roles=part_details['roles'])
