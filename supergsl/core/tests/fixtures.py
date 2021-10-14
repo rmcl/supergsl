@@ -3,10 +3,11 @@ from unittest.mock import Mock
 import random
 from typing import Tuple, List
 from Bio.Seq import Seq
-from supergsl.core.sequence import SequenceStore, SequenceEntry
+from supergsl.core.sequence import SequenceStore, SequenceEntry, SliceMapping
 from supergsl.core.types.primer import PrimerPair
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
+from supergsl.core.types.slice import Slice
 from supergsl.core.types.builtin import Collection
 from supergsl.core.types.assembly import (
     Assembly,
@@ -111,30 +112,35 @@ class SuperGSLCoreFixtures(object):
             self.mk_part('part-%03d' % part_index, random.randint(20, 100))[1]
             for part_index in range(num_parts)
         ])
-        assembly_sequence = Seq(''.join([
-            str(part.sequence)
-            for part in parts
-        ]))
+
+        cur_seq_pos = 0
+        slice_mappings : List[SliceMapping] = []
+        part_mappings : List[Tuple[Part, Slice]] = []
+
+        for part in parts:
+            start_pos = cur_seq_pos
+            end_pos = cur_seq_pos + len(part.sequence)
+            cur_seq_pos = end_pos
+
+            source_slice = Slice.from_entire_sequence()
+            target_slice = Slice.from_five_prime_indexes(start_pos, end_pos)
+
+            slice_mappings.append(
+                SliceMapping(part.sequence_entry, source_slice, target_slice))
+            part_mappings.append(
+                (part, target_slice))
+
+        assembly_sequence_entry = self.sequence_store.concatenate(slice_mappings)
 
         assembly = Assembly(
             identifier,
-            assembly_sequence,
+            assembly_sequence_entry,
             'this is a great assembly named %s' % identifier)
 
-        raise Exception('HELP!')
-
-        cur_pos = 0
-        for part in parts:
-            part_seq_len = len(part.sequence)
-            start = SeqPosition.from_reference(
-                cur_pos,
-                rel_to=THREE_PRIME,
-                approximate=False,
-                reference=assembly_sequence)
-
-            end = start.get_relative_position(part_seq_len)
-            assembly.add_part(part, start, end)
-            cur_pos += part_seq_len
+        # TODO: I don't love this interface to creating assembly. Think about
+        # how to refactor
+        for part, target_slice in part_mappings:
+            assembly.add_part(part, target_slice)
 
         return assembly
 

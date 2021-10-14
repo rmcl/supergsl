@@ -6,7 +6,8 @@ from pyDOE2 import fullfact
 from supergsl.core.types import SuperGSLType
 from supergsl.core.types.builtin import Collection
 from supergsl.core.types.part import Part
-from supergsl.core.types.position import SeqPosition
+from supergsl.core.types.slice import Slice
+from supergsl.core.sequence import SequenceEntry
 
 # pylint: disable=E1136
 
@@ -142,32 +143,23 @@ class Assembly(SuperGSLType):
     def __init__(
         self,
         identifier : str,
-        sequence : Seq,
+        sequence_entry : SequenceEntry,
         description : Optional[str] = None
     ):
         self._identifier : str = identifier
-        self._sequence : Seq = sequence
-        self._parts : List[Tuple[Part, SeqPosition, SeqPosition]] = []
+        self._sequence_entry : SequenceEntry = sequence_entry
+        self._parts : List[Tuple[Part, Slice]] = []
         self.description : Optional[str] = description
 
     def add_part(
         self,
         part : Part,
-        start_position : SeqPosition,
-        end_position : SeqPosition
+        target_slice : Slice
     ):
         """Add a part at a specific position in the Assembly."""
 
-        start_reference, _ = start_position.get_absolute_position_in_reference()
-        if start_reference != self.sequence:
-            raise Exception('Start `SeqPosition` must be from the Assembly sequence.')
-
-        end_reference, _ = start_position.get_absolute_position_in_reference()
-        if end_reference != self.sequence:
-            raise Exception('End `SeqPosition` must be from the Assembly sequence.')
-
         self._parts.append(
-            (part, start_position, end_position))
+            (part, target_slice))
 
     @property
     def identifier(self) -> str:
@@ -175,12 +167,18 @@ class Assembly(SuperGSLType):
         return self._identifier
 
     @property
-    def sequence(self) -> Seq:
-        """Return the complete sequence of the construct."""
-        return self._sequence
+    def sequence_entry(self) -> Seq:
+        """Return the sequence entry in the sequence store of the construct."""
+        return self._sequence_entry
 
     @property
-    def parts_with_positions(self) -> List[Tuple[Part, SeqPosition, SeqPosition]]:
+    def sequence(self) -> Seq:
+        """Return the complete sequence of the construct."""
+        return self._sequence_entry.sequence
+
+    @property
+    def parts_with_positions(self) -> List[Tuple[Part, Slice]]:
+        """Return a list of parts and their position in this assembly's sequence."""
         return self._parts
 
     @property
@@ -202,12 +200,15 @@ class AssemblyResultSet(SuperGSLType):
         self.assemblies = assemblies
 
     def add_assembly(self, assembly : Assembly):
+        """Add an assembly to this assembly result set."""
         self.assemblies.append(assembly)
 
     def __iter__(self):
+        """Iterating over a result set should iterate over each assembly."""
         return iter(self.assemblies)
 
     def print(self):
+        """Return a string with details about this result set."""
         result = 'Assembly Result Set: %d assemblies\n' % len(self.assemblies)
         for assembly in self.assemblies:
             result += '    %s\n' % assembly.identifier
