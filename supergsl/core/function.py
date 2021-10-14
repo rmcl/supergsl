@@ -12,7 +12,16 @@ from inspect import getdoc
 
 from supergsl.core.types import SuperGSLType
 from supergsl.core.exception import FunctionInvokeError
+from supergsl.core.sequence import SequenceStore
+
 #pylint: disable=E1136
+
+class SuperGSLFunctionConfig:
+    """Details required to instantiate a SuperGSL Function."""
+
+    def __init__(self, sequence_store : SequenceStore, compiler_settings : dict):
+        self.sequence_store = sequence_store
+        self.compiler_settings = compiler_settings
 
 
 class SuperGSLFunction(SuperGSLType):
@@ -24,8 +33,9 @@ class SuperGSLFunction(SuperGSLType):
     arguments : List[Tuple[str, Type]] = []
     return_type : Optional[Type[SuperGSLType]] = None
 
-    def __init__(self, compiler_settings : dict):
-        self.settings = compiler_settings
+    def __init__(self, config : SuperGSLFunctionConfig):
+        self.settings = config.compiler_settings
+        self.sequence_store = config.sequence_store
 
     @classmethod
     def get_name(cls):
@@ -124,12 +134,20 @@ class SuperGSLFunction(SuperGSLType):
         return result
 
 
-
-
 class SuperGSLFunctionDeclaration(SuperGSLType):
+    """Store details related to the declaration of a SuperGSL Function."""
+
     def __init__(self, function_class : Type[SuperGSLFunction], compiler_settings : dict):
         self.function_class = function_class
         self.compiler_settings = compiler_settings
+        self.sequence_store : Optional[SequenceStore] = None
+
+    def set_sequence_store(self, sequence_store : SequenceStore):
+        self.sequence_store = sequence_store
 
     def eval(self) -> SuperGSLFunction:
-        return self.function_class(self.compiler_settings)
+        if not self.sequence_store:
+            raise Exception('SequenceStore not set.')
+
+        config = SuperGSLFunctionConfig(self.sequence_store, self.compiler_settings)
+        return self.function_class(config)

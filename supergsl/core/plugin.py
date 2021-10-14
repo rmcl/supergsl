@@ -2,7 +2,7 @@
 
 import inspect
 import importlib
-from typing import Dict, Set, Type, Mapping
+from typing import Dict, Set, Type, Mapping, cast
 from supergsl.core.exception import (
     ConfigurationError,
     NotFoundError,
@@ -12,6 +12,7 @@ from supergsl.core.types import SuperGSLType
 from supergsl.core.provider import SuperGSLProvider, ProviderGroup
 from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.symbol_table import SymbolTable
+from supergsl.core.sequence import SequenceStore
 
 
 class SuperGSLPlugin(object):
@@ -73,6 +74,10 @@ class SuperGSLPlugin(object):
         function_declaration : SuperGSLFunctionDeclaration
     ):
         """Register a function making it available for import in SuperGSL."""
+
+        # Todo: Improve the setup of function declarations so this is better.
+        function_declaration.set_sequence_store(
+            cast(SequenceStore, self.symbol_table.lookup('sequences')))
 
         self.functions[function_name] = function_declaration
 
