@@ -19,9 +19,54 @@ class AbsolutePosition:
 
         For example, index=-15 or sequence_length + 25
         """
-        if self.index < 0 or self.index >= self.target_sequence_length:
+        if self.index < 0 or self.index > self.target_sequence_length:
+            print(self.index, self.target_sequence_length)
             return True
         return False
+
+    def derive_from_relative_position(self, position: 'Position'):
+        """Derive a new AbsolutePosition using a position relative to this slice."""
+        if position.relative_to == FIVE_PRIME:
+            new_abs_position = AbsolutePosition(
+                self.target_sequence_length,
+                self.index + position.index,
+                position.approximate)
+        else:
+            new_abs_position = AbsolutePosition(
+                self.target_sequence_length,
+                self.index - position.index,
+                position.approximate)
+
+        if new_abs_position.is_out_of_bounds:
+            raise Exception('NEW POSITION IS OUT OF BOUNDS!')
+
+        return new_abs_position
+
+class AbsoluteSlice:
+    def __init__(self, start : AbsolutePosition, end : AbsolutePosition):
+        self.start = start
+        self.end = end
+
+        assert self.start.target_sequence_length == self.end.target_sequence_length
+
+    def __len__(self):
+        """Return the length of the sliced sequence."""
+        return self.start.target_sequence_length
+
+    def derive_from_relative_slice(self, child_slice: 'Slice'):
+        """Derive a new AbsoluteSlice from a Slice creating a subslice in this absolute slices reference sequence."""
+
+        if child_slice.start.relative_to == FIVE_PRIME:
+            start_child_abs_pos = self.start.derive_from_relative_position(child_slice.start)
+        else:
+            start_child_abs_pos = self.end.derive_from_relative_position(child_slice.start)
+
+        if child_slice.end.relative_to == FIVE_PRIME:
+            end_child_abs_pos = self.start.derive_from_relative_position(child_slice.end)
+        else:
+            end_child_abs_pos = self.end.derive_from_relative_position(child_slice.end)
+
+        return AbsoluteSlice(start_child_abs_pos, end_child_abs_pos)
 
 class Position:
     """Capture a position relative to a declared end of a Sequence."""
@@ -41,7 +86,7 @@ class Position:
 
         self.approximate = approximate
 
-    def compute_absolute_position(self, sequence_length : int) -> AbsolutePosition:
+    def build_absolute_position(self, sequence_length : int) -> AbsolutePosition:
         """Given the length of the sequence compute the absolute position of this Position."""
 
         if self.relative_to == FIVE_PRIME:
@@ -52,7 +97,7 @@ class Position:
         else:
             return AbsolutePosition(
                 sequence_length,
-                sequence_length - self.index - 1,
+                sequence_length - self.index,
                 self.approximate)
 
 
@@ -86,6 +131,13 @@ class Slice(SuperGSLType):
         self.start = start
         self.end = end
 
+
+    def build_absolute_slice(self, sequence_len : int) -> AbsoluteSlice:
+        """Given the length of the sequence compute the absolute positions of this Slice."""
+        return AbsoluteSlice(
+            self.start.build_absolute_position(sequence_len),
+            self.end.build_absolute_position(sequence_len)
+        )
 
     @classmethod
     def from_five_prime_indexes(self, start_index, end_index):

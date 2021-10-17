@@ -9,6 +9,23 @@ from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.slice import Slice, Position
 
 
+def get_slice_sequence_from_reference(sequence_reference, absolute_slice) -> Seq:
+    """Return the sub-sequence of the reference sequence covered by the provided slice."""
+
+    if absolute_slice.start.is_out_of_bounds or absolute_slice.end.is_out_of_bounds:
+        raise SequenceStoreError('OUT OF BOUNDS SEQUENCES NOT CURRENTLY SUPPORTED!')
+
+    if absolute_slice.start.index > absolute_slice.end.index:
+        # This sequence is on the reverse strand. Retrieve the end to start
+        # sequence on the forward strand and then take the reverse complement.
+        forward_sequence = sequence_reference[absolute_slice.end.index:absolute_slice.start.index]
+        sequence = forward_sequence.reverse_complement()
+    else:
+        sequence = sequence_reference[absolute_slice.start.index:absolute_slice.end.index]
+
+    return sequence
+
+
 class SliceMapping(NamedTuple):
     """Represent the mapping of a sub-slice of a parent sequence onto a new target sequence."""
 
@@ -28,29 +45,9 @@ class EntryLink:
         annotations
     ):
         self.parent_entry = parent_entry
-        self.source = source_slice
-        self.target = target_slice
+        self.source_slice = source_slice
+        self.target_slice = target_slice
         self.annotations = annotations
-
-    def get_source_slice_sequence(self) -> Seq:
-        """Return the sub-sequence of the parent sequence covered by the source slice."""
-        sequence_length = self.parent_entry.sequence_length
-        start_abs_position = self.source.start.compute_absolute_position(sequence_length)
-        end_abs_position = self.source.end.compute_absolute_position(sequence_length)
-
-        if start_abs_position.is_out_of_bounds or end_abs_position.is_out_of_bounds:
-            raise SequenceStoreError('OUT OF BOUNDS SEQUENCES NOT CURRENTLY SUPPORTED!')
-
-        parent_sequence = self.parent_entry.sequence
-        if start_abs_position.index > end_abs_position.index:
-            # This sequence is on the reverse strand. Retrieve the end to start
-            # sequence on the forward strand and then take the reverse complement.
-            forward_sequence = parent_sequence[end_abs_position.index:start_abs_position.index]
-            sequence = forward_sequence.reverse_complement()
-        else:
-            sequence = parent_sequence[start_abs_position.index:end_abs_position.index]
-
-        return sequence
 
 class SequenceEntry:
     """Represent a sequence in the sequence store."""
@@ -68,11 +65,12 @@ class SequenceEntry:
         if not (self.parent_links or self.reference):
             raise SequenceStoreError('Must specify either parents or reference.')
         if self.parent_links and self.reference:
-            raise SequenceStoreError('Must only specify parents or a reference sequence, but not both')
+            raise SequenceStoreError(
+                'Must only specify parents or a reference sequence, but not both')
 
-    def add_annotation(self, slice, details):
+    def add_annotation(self, annotation_slice : Slice, details : dict):
         # Todo: maybe add this function to create EntryLinks for the provided annotations.
-        raise NotImplemented()
+        raise NotImplementedError('')
 
     @property
     def id(self):
@@ -82,20 +80,24 @@ class SequenceEntry:
     def is_composite(self):
         """SequenceEntries can either by Composite or Hierarchical
 
-        Composite parts are those that derive from more that one part at any point in their sequence lineage.
-        Hierarchical parts have only a single parent at every level of their lineage.
+        Composite parts are those that derive from more that one part at any
+        point in their sequence lineage. Hierarchical parts have only a single
+        parent at every level of their lineage.
 
-        A composite part has been created by the concatination of several reference sequences whereas
-        a Hierarhical entry has been sliced out of a *single* reference.
+        A composite part has been created by the concatination of several
+        reference sequences whereas a Hierarhical entry has been sliced out of
+        a *single* reference.
 
-        The primary reason for diferentiating is that it is obvious how to exceed the slice bounds of a hierarchical part.
-        For example the part pGAL3[-500:0] would return 500bp upstream of the pGAL3 part's start position.
+        The primary reason for diferentiating is that it is obvious how to exceed
+        the slice bounds of a hierarchical part. For example the part pGAL3[-500:0]
+        would return 500bp upstream of the pGAL3 part's start position.
 
         In contrast a hierarchical part for example:
             let part = usHO ; pGAL3 ; GENE ; tSDH1 ; dsHO
             part[-500:0]
 
-        It is unclear what the sequence of 500 bp upstream should be? Does the user just want 500 bp of HO or something else?
+        It is unclear what the sequence of 500 bp upstream should be? Does the
+        user just want 500 bp of HO or something else?
 
         """
         if self.reference:
@@ -103,8 +105,9 @@ class SequenceEntry:
         if len(self.parent_links) > 1:
             return True
 
-        return self.parent_links[0].is_composite()
+        return False
 
+    '''
     @property
     def reference_sequence(self) -> Seq:
         """Return the `Seq` representing the reference sequence for this position."""
@@ -116,43 +119,82 @@ class SequenceEntry:
                 return self.parent_links[0].parent_entry.reference_sequence
 
         raise SequenceStoreError('Composite parts have multiple reference sequences.')
+    '''
 
     @property
     def sequence_length(self) -> int:
-        """Return the length of the stored sequence.
+        """Return the length of the stored sequence."""
+        entire_sequence_slice = Slice.from_entire_sequence()
+        _, absolute_slice = self.get_slice_absolute_position_and_reference(
+            entire_sequence_slice)
+        return len(absolute_slice)
 
-        This method is here so we can in the future supply a better implementation
-        for figuring this out rather than evaluating the entire sequence entry tree.
+
+    def get_slice_absolute_position_and_reference(self, target_slice) -> Tuple[Seq, 'AbsoluteSlice']:
+        """Return the reference sequence and absolute position position of slice.
+
+        SOURCE SEQ: 5'----------------3'
+        TARGET SEQ: 5'--|XXX|---------3'
+
+        source_slice: <start 5':0, end: 3'0>
+        target slice: <start: 5':3, end: 5'6>
+        reference: "SOURCE SEQ"
         """
-        return len(self.sequence)
+
+        if self.reference:
+            absolute_slice = target_slice.build_absolute_slice(len(self.reference))
+            return self.reference, absolute_slice
+
+        if not self.is_composite:
+            parent_link = self.parent_links[0]
+            parent_sequence_entry = parent_link.parent_entry
+            reference_sequence, parent_absolute_slice = parent_sequence_entry.get_slice_absolute_position_and_reference(
+                parent_link.source_slice)
+
+            absolute_source_slice = parent_absolute_slice.derive_from_relative_slice(target_slice)
+            return reference_sequence, absolute_source_slice
+
+
+        # This thing is a composite part so lets just materialize the sequence.
+        reference = self.sequence
+        absolute_slice = target_slice.build_absolute_slice(len(reference))
+        return reference, absolute_slice
+
+
 
     @property
     def sequence(self) -> Seq:
+        """Return the complete sequence of this sequence entry."""
         if self.reference:
             return self.reference
 
-        # build_target_sequence_coordinate_map(self.parents)
-
-        sequence_index = 0
         result_sequence = ''
-
+        sequence_index = 0
         if not self.parent_links:
             return Seq(result_sequence)
 
-        # TODO: make sure parents are ordered
+        # Iterate over parent links and concatenate sequences.
         for parent_link in self.parent_links:
-            start_pos = parent_link.target.start.index
-            source_sequence = parent_link.get_source_slice_sequence()
 
-            if start_pos == sequence_index:
-                result_sequence += source_sequence
+            reference_source_sequence, absolute_source_slice = \
+                parent_link.parent_entry.get_slice_absolute_position_and_reference(
+                    parent_link.source_slice)
+
+            source_sequence = get_slice_sequence_from_reference(
+                reference_source_sequence,
+                absolute_source_slice)
+
+            target_start_pos = parent_link.target_slice.start.index
+
+            if target_start_pos == sequence_index:
+                result_sequence += str(source_sequence)
                 sequence_index += len(source_sequence)
 
-            elif start_pos < sequence_index:
-                overlap = sequence_index - start_pos
+            elif target_start_pos < sequence_index:
+                overlap = sequence_index - target_start_pos
                 remaining = len(source_sequence) - overlap
 
-                result_sequence += source_sequence[overlap:]
+                result_sequence += str(source_sequence[overlap:])
                 sequence_index += remaining
 
             else:
@@ -162,26 +204,22 @@ class SequenceEntry:
 
         return Seq(result_sequence)
 
-
-    def _build_target_sequence_coordinate_map(self, parent_links):
-        """Translate all the target coordinates to be absolulte positions from the five prime start of the Watson strand."""
-        for parent_link in parent_links:
-            parent_link.target.start
-            parent_link.target.end
-
     def __repr__(self):
         return '%s: %s or %s' % (self.id, self.parent_links, self.reference)
 
 
 class SequenceStore:
+    """Store sequences and provided methods for deriving new sequences from existing ones."""
 
     def __init__(self):
         self._sequences_by_uuid : Dict[UUID, SequenceEntry] = {}
 
     def lookup(self, sequence_id : UUID) -> SequenceEntry:
+        """Lookup `SequenceEntry` by it's id."""
         return self._sequences_by_uuid[sequence_id]
 
     def _create_record_id(self):
+        """Create a new random id for a sequence entry."""
         return uuid4()
 
     def list(self):
@@ -189,6 +227,7 @@ class SequenceStore:
         raise NotImplementedError('implement me!')
 
     def add_from_reference(self, sequence : Seq):
+        """Add a sequence to the store."""
 
         # TODO: Do we want to support adding from a SeqRecord
         # If yes, consider iterating over the SeqRecord's features and adding them
@@ -198,10 +237,6 @@ class SequenceStore:
             store=self,
             sequence_id=self._create_record_id(),
             reference=sequence)
-
-        # Todo: Figure out a better way to do this
-        # seq_hash = hash(str(sequence))
-        # self._sequences_by_hash[seq_hash]
 
         self._sequences_by_uuid[entry.id] = entry
         return entry
