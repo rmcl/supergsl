@@ -33,6 +33,9 @@ class GenBankOutput(AssemblyResultOutputFunction):
             description=assembly.description or '')
 
         for part, target_slice in assembly.parts_with_positions:
+            start_abs_pos = target_slice.start.build_absolute_position(len(assembly_sequence))
+            end_abs_pos = target_slice.end.build_absolute_position(len(assembly_sequence))
+
             feature = SeqFeature(
                 id=part.identifier,
                 qualifiers={
@@ -40,8 +43,8 @@ class GenBankOutput(AssemblyResultOutputFunction):
                     'description': part.description
                 },
                 location=FeatureLocation(
-                    start=target_slice.start.compute_absolute_position(len(assembly_sequence)),
-                    end=target_slice.end.compute_absolute_position(len(assembly_sequence))
+                    start=start_abs_pos.index,
+                    end=end_abs_pos.index
                 ),
                 type='part')
 

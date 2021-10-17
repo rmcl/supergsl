@@ -4,6 +4,8 @@ import random
 from typing import Tuple, List
 from Bio.Seq import Seq
 from supergsl.core.sequence import SequenceStore, SequenceEntry, SliceMapping
+from supergsl.core.function import SuperGSLFunctionConfig
+from supergsl.core.parts.provider import PartProviderConfig
 from supergsl.core.types.primer import PrimerPair
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
@@ -44,6 +46,19 @@ class SuperGSLCoreFixtures(object):
             complement_sequence[:20],
             complement_sequence[-20:]
         )
+
+    def mk_function_config_object(self, options=None):
+        """Make a config object for instantiating supergsl functions."""
+        if not options:
+            options = {}
+
+        return SuperGSLFunctionConfig(self.sequence_store, options)
+
+    def mk_part_provider_config(self, options=None):
+        """Make a config object for instantiating part providers."""
+        if not options:
+            options = {}
+        return PartProviderConfig(self.sequence_store, options)
 
     @property
     def sequence_store(self) -> SequenceStore:
