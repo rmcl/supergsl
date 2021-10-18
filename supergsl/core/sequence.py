@@ -1,5 +1,4 @@
 from typing import List, Dict, Optional, Tuple, NamedTuple
-from collections import namedtuple
 from uuid import UUID, uuid4
 from Bio.Seq import Seq
 from Bio.SeqFeature import SeqFeature
@@ -15,11 +14,13 @@ def get_slice_sequence_from_reference(sequence_reference, absolute_slice) -> Seq
     if absolute_slice.start.is_out_of_bounds or absolute_slice.end.is_out_of_bounds:
         raise SequenceStoreError('OUT OF BOUNDS SEQUENCES NOT CURRENTLY SUPPORTED!')
 
-    if absolute_slice.start.index > absolute_slice.end.index:
+    if absolute_slice.strand == 'REVERSE':
+        # probably delete: absolute_slice.start.index > absolute_slice.end.index:
+
         # This sequence is on the reverse strand. Retrieve the end to start
         # sequence on the forward strand and then take the reverse complement.
-        forward_sequence = sequence_reference[absolute_slice.end.index:absolute_slice.start.index]
-        sequence = forward_sequence.reverse_complement()
+        reverse_sequence = sequence_reference.reverse_complement()
+        sequence = reverse_sequence[absolute_slice.start.index:absolute_slice.end.index]
     else:
         sequence = sequence_reference[absolute_slice.start.index:absolute_slice.end.index]
 
@@ -130,7 +131,10 @@ class SequenceEntry:
         return len(absolute_slice)
 
 
-    def get_slice_absolute_position_and_reference(self, target_slice) -> Tuple[Seq, 'AbsoluteSlice']:
+    def get_slice_absolute_position_and_reference(
+        self,
+        target_slice : Slice
+    ) -> Tuple[Seq, 'AbsoluteSlice']:
         """Return the reference sequence and absolute position position of slice.
 
         SOURCE SEQ: 5'----------------3'
@@ -154,12 +158,10 @@ class SequenceEntry:
             absolute_source_slice = parent_absolute_slice.derive_from_relative_slice(target_slice)
             return reference_sequence, absolute_source_slice
 
-
         # This thing is a composite part so lets just materialize the sequence.
         reference = self.sequence
         absolute_slice = target_slice.build_absolute_slice(len(reference))
         return reference, absolute_slice
-
 
 
     @property

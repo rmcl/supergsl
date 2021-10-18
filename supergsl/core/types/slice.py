@@ -20,22 +20,15 @@ class AbsolutePosition:
         For example, index=-15 or sequence_length + 25
         """
         if self.index < 0 or self.index > self.target_sequence_length:
-            print(self.index, self.target_sequence_length)
             return True
         return False
 
     def derive_from_relative_position(self, position: 'Position'):
         """Derive a new AbsolutePosition using a position relative to this slice."""
-        if position.relative_to == FIVE_PRIME:
-            new_abs_position = AbsolutePosition(
-                self.target_sequence_length,
-                self.index + position.index,
-                position.approximate)
-        else:
-            new_abs_position = AbsolutePosition(
-                self.target_sequence_length,
-                self.index - position.index,
-                position.approximate)
+        new_abs_position = AbsolutePosition(
+            self.target_sequence_length,
+            self.index + position.index,
+            position.approximate)
 
         if new_abs_position.is_out_of_bounds:
             raise Exception('NEW POSITION IS OUT OF BOUNDS!')
@@ -43,9 +36,10 @@ class AbsolutePosition:
         return new_abs_position
 
 class AbsoluteSlice:
-    def __init__(self, start : AbsolutePosition, end : AbsolutePosition):
+    def __init__(self, start : AbsolutePosition, end : AbsolutePosition, strand = 'FORWARD'):
         self.start = start
         self.end = end
+        self.strand = strand
 
         assert self.start.target_sequence_length == self.end.target_sequence_length
 
@@ -66,7 +60,7 @@ class AbsoluteSlice:
         else:
             end_child_abs_pos = self.end.derive_from_relative_position(child_slice.end)
 
-        return AbsoluteSlice(start_child_abs_pos, end_child_abs_pos)
+        return AbsoluteSlice(start_child_abs_pos, end_child_abs_pos, self.strand)
 
 class Position:
     """Capture a position relative to a declared end of a Sequence."""
@@ -97,7 +91,7 @@ class Position:
         else:
             return AbsolutePosition(
                 sequence_length,
-                sequence_length - self.index,
+                sequence_length + self.index,
                 self.approximate)
 
 
@@ -127,25 +121,27 @@ class Slice(SuperGSLType):
     If the end position is less than the start position then it is infered that
     the desired sequence lays on the reverse strand of a double-stranded molecule.
     """
-    def __init__(self, start : Position, end : Position):
+    def __init__(self, start : Position, end : Position, strand = 'FORWARD'):
         self.start = start
         self.end = end
+        self.strand = strand
 
 
     def build_absolute_slice(self, sequence_len : int) -> AbsoluteSlice:
         """Given the length of the sequence compute the absolute positions of this Slice."""
         return AbsoluteSlice(
             self.start.build_absolute_position(sequence_len),
-            self.end.build_absolute_position(sequence_len)
+            self.end.build_absolute_position(sequence_len),
+            self.strand
         )
 
     @classmethod
-    def from_five_prime_indexes(self, start_index, end_index):
+    def from_five_prime_indexes(self, start_index, end_index, strand='FORWARD'):
         """Create a Slice from two sequence indexes both relative to the FIVE_PRIME side of the molecule."""
         start = Position(start_index)
         end = Position(end_index)
 
-        return Slice(start, end)
+        return Slice(start, end, strand)
 
 
     @classmethod

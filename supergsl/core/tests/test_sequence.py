@@ -102,4 +102,45 @@ class SequenceStoreTestCase(unittest.TestCase):
         self.assertEqual(parent_entry.sequence, reference_sequence[100:250])
         self.assertEqual(child_entry.sequence, reference_sequence[150:200])
 
+    def test_slice_reverse_strand(self):
+        """Test slice behavior when desired slice is on CRICK strand."""
+
+        reference_sequence = self.fixtures.mk_random_dna_sequence(500)
+        parent_entry = self.fixtures.mk_sequence_entry(reference_sequence)
+
+        child_entry = self.sequence_store.slice(
+            parent_entry,
+            Slice.from_five_prime_indexes(100,250, strand='REVERSE')
+        )
+
+        self.assertEqual(child_entry.sequence, reference_sequence.reverse_complement()[100:250])
+
+    def test_slice_grandparent_part_with_reverse_strand(self):
+        """Slice a part that has itself been sliced and resides on reverse strand of reference sequence.
+
+        P1:     |---X-------------X-------------|
+        P1RC:   |-------------X-------------X---| <-- reverse complement of parent
+        P2:                   |---X----X----|
+        P3:                       |----|
+
+        """
+        reference_sequence = self.fixtures.mk_random_dna_sequence(500)
+        grandparent_entry = self.fixtures.mk_sequence_entry(reference_sequence)
+
+        parent_entry = self.sequence_store.slice(
+            grandparent_entry,
+            Slice.from_five_prime_indexes(100,250, strand='REVERSE')
+        )
+
+        child_entry = self.sequence_store.slice(
+            parent_entry,
+            Slice.from_five_prime_indexes(50,100)
+        )
+
+        expected_parent_sequence = reference_sequence.reverse_complement()[100:250]
+        self.assertEqual(parent_entry.sequence, expected_parent_sequence)
+
+        expected_child_sequence = expected_parent_sequence[50:100]
+        self.assertEqual(child_entry.sequence, expected_child_sequence)
+
     # test_slice_out_of_bound_part_with_reference

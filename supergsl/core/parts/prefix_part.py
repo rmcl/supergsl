@@ -175,7 +175,7 @@ class PrefixedSlicePartProviderMixin(_Base):
         """
         if part_slice_type == 'promoter':
             return Slice(
-                Position(-500, relative_to=FIVE_PRIME, approximate=True),
+                Position(-1 * get_promoter_len(), relative_to=FIVE_PRIME, approximate=True),
                 Position(0, relative_to=FIVE_PRIME))
 
         if part_slice_type in ['orf', 'gene']:

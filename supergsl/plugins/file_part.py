@@ -97,26 +97,28 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
         if strand == 'C':
             # This gene is on the reverse strand.
             # indicate this in the slice by swapping the to and from positions.
-            new_gene_feature['from'] = int(reference_feature['to']) + 1
-            new_gene_feature['to'] = int(reference_feature['from'])
+            #new_gene_feature['from'] = int(reference_feature['to']) + 1
+            #new_gene_feature['to'] = int(reference_feature['from'])
 
-            from_position = Position(
-                int(reference_feature['to']) + 1, FIVE_PRIME, False)
-            to_position = Position(
-                int(reference_feature['from']), FIVE_PRIME, False)
+            sequence_len = len(chromosome_sequence_entry.sequence)
+            new_gene_feature['from'] = sequence_len - int(reference_feature['to']) - 1
+            new_gene_feature['to'] = sequence_len - int(reference_feature['from'])
+            strand = 'REVERSE'
 
         else:
             new_gene_feature['from'] = int(reference_feature['from'])
             new_gene_feature['to'] = int(reference_feature['to']) + 1
+            strand = 'FORWARD'
 
-            from_position = Position(
-                int(reference_feature['from']), FIVE_PRIME, False)
-            to_position = Position(
-                int(reference_feature['to']) + 1, FIVE_PRIME, False)
+
+        part_slice = Slice(
+            Position(new_gene_feature['from'], FIVE_PRIME, False),
+            Position(new_gene_feature['to'], FIVE_PRIME, False),
+            strand=strand)
 
         new_entry = self.sequence_store.slice(
             chromosome_sequence_entry,
-            Slice(from_position, to_position))
+            part_slice)
 
         return new_entry, new_gene_feature
 

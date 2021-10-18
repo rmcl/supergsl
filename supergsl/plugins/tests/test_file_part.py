@@ -54,20 +54,20 @@ class FilePartTestCases(TestCase):
 
         entry, gene_feature = self.provider.get_gene('HO')
         del gene_feature['Notes']
+        print(gene_feature)
+        self.assertEqual(entry.sequence, self.expected_sequences['gHO'].seq)
         self.assertEqual(gene_feature, {
             '': '',
             '?': '',
             'aliases': 'HO',
             'chrom#': '4',
             'chromname': 'chromosome 4',
-            'from': 48031,
+            'from': 1483902, #'from': 48031,
             'gene': 'HO',
             'id': 'YDL227C',
             'qualifier': '?',
             'strand': 'C',
             'systematic': 'YDL227C',
-            'to': 46270,
+            'to': 1485663, #'to': 46270,
             'type': 'gene'
         })
-
-        self.assertEqual(entry.sequence, self.expected_sequences['gHO'].seq)
