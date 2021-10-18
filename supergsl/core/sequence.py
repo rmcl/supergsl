@@ -5,7 +5,7 @@ from Bio.SeqFeature import SeqFeature
 
 from supergsl.core.exception import SequenceStoreError
 from supergsl.core.constants import THREE_PRIME
-from supergsl.core.types.slice import Slice, Position
+from supergsl.core.types.slice import Slice, Position, AbsoluteSlice
 
 
 def get_slice_sequence_from_reference(sequence_reference, absolute_slice) -> Seq:
@@ -134,7 +134,7 @@ class SequenceEntry:
     def get_slice_absolute_position_and_reference(
         self,
         target_slice : Slice
-    ) -> Tuple[Seq, 'AbsoluteSlice']:
+    ) -> Tuple[Seq, AbsoluteSlice]:
         """Return the reference sequence and absolute position position of slice.
 
         SOURCE SEQ: 5'----------------3'
@@ -150,6 +150,9 @@ class SequenceEntry:
             return self.reference, absolute_slice
 
         if not self.is_composite:
+            if not self.parent_links:
+                raise Exception('no parent links')
+
             parent_link = self.parent_links[0]
             parent_sequence_entry = parent_link.parent_entry
             reference_sequence, parent_absolute_slice = parent_sequence_entry.get_slice_absolute_position_and_reference(
