@@ -27,7 +27,7 @@ from supergsl.core.ast import (
     FunctionInvocation
 )
 
-from supergsl.core.types.slice import Position
+from supergsl.core.types.position import Position
 from supergsl.core.types.builtin import (
     Collection,
     NucleotideSequence,

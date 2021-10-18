@@ -1,6 +1,6 @@
 from unittest import TestCase
 from supergsl.core.constants import FIVE_PRIME, THREE_PRIME
-from supergsl.core.types.slice import (
+from supergsl.core.types.position import (
     AbsoluteSlice,
     AbsolutePosition,
     Position,

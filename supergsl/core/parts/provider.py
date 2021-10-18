@@ -7,7 +7,7 @@ from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.provider import SuperGSLProvider
 from supergsl.core.types import SuperGSLType
 from supergsl.core.types.part import Part
-from supergsl.core.types.slice import Slice
+from supergsl.core.types.position import Slice
 
 from supergsl.core.sequence import SequenceStore
 from supergsl.core.exception import ConfigurationError, PartNotFoundError

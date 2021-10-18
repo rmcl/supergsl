@@ -6,7 +6,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 
 from supergsl.core.constants import FIVE_PRIME, THREE_PRIME
-from supergsl.core.types.slice import Slice, Position
+from supergsl.core.types.position import Slice, Position
 from supergsl.core.sequence import SequenceEntry
 from supergsl.core.exception import PartNotFoundError
 from supergsl.core.types.part import Part

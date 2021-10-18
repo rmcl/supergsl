@@ -1,18 +1,13 @@
 from typing import List, Optional, Dict, Union
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from supergsl.core.constants import (
-    PART_SLICE_POSTFIX_START,
-    PART_SLICE_POSTFIX_END
-)
 
+from supergsl.core.exception import PartError
 from supergsl.core.sequence import SequenceEntry
 from supergsl.core.types import SuperGSLType
 from supergsl.core.types.builtin import NucleotideSequence
 from supergsl.core.types.primer import PrimerPair
-from supergsl.core.exception import PartError
-from supergsl.core.types.slice import Position
-from .slice import Slice
+from supergsl.core.types.position import Slice
 
 
 class Part(NucleotideSequence):

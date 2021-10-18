@@ -9,7 +9,7 @@ from supergsl.core.parts.provider import PartProviderConfig
 from supergsl.core.types.primer import PrimerPair
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
-from supergsl.core.types.slice import Slice
+from supergsl.core.types.position import Slice
 from supergsl.core.types.builtin import Collection
 from supergsl.core.types.assembly import (
     Assembly,

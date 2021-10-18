@@ -1,7 +1,7 @@
 from supergsl.core.lexer import SuperGSLLexer
 from supergsl.core.parser import SuperGSLParser
 from supergsl.core.eval import EvaluatePass
-from supergsl.core.types.slice import Slice
+from supergsl.core.types.position import Slice
 
 
 def parse_slice_str(slice_source_code : str) -> Slice:

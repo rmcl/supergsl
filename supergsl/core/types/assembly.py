@@ -6,7 +6,7 @@ from pyDOE2 import fullfact
 from supergsl.core.types import SuperGSLType
 from supergsl.core.types.builtin import Collection
 from supergsl.core.types.part import Part
-from supergsl.core.types.slice import Slice
+from supergsl.core.types.position import Slice
 from supergsl.core.sequence import SequenceEntry
 
 # pylint: disable=E1136

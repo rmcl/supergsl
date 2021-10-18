@@ -8,7 +8,7 @@ from Bio.Seq import Seq
 
 from supergsl.core.exception import PartNotFoundError
 from supergsl.core.types.part import Part
-from supergsl.core.types.slice import Slice
+from supergsl.core.types.position import Slice
 from supergsl.core.sequence import SequenceStore, SequenceEntry
 from supergsl.core.parts import PartProvider, PartProviderConfig
 from supergsl.plugins.pydna.primers import ExtractionPrimerBuilder

@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.core.sequence import SequenceStore, SliceMapping
-from supergsl.core.types.slice import Slice, Position
+from supergsl.core.types.position import Slice, Position
 
 
 class SequenceStoreTestCase(unittest.TestCase):

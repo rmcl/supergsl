@@ -3,7 +3,7 @@ import re
 from typing import Tuple, Callable, Optional, Mapping, Dict
 from re import Pattern, Match
 from supergsl.core.types import SuperGSLType
-from supergsl.core.types.slice import Slice, Position
+from supergsl.core.types.position import Slice, Position
 from supergsl.core.exception import PartSliceError
 from supergsl.core.constants import (
     FIVE_PRIME,

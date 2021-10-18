@@ -5,7 +5,7 @@ from Bio.SeqFeature import SeqFeature
 
 from supergsl.core.exception import SequenceStoreError
 from supergsl.core.constants import THREE_PRIME
-from supergsl.core.types.slice import Slice, Position, AbsoluteSlice
+from supergsl.core.types.position import Slice, Position, AbsoluteSlice
 
 
 def get_slice_sequence_from_reference(sequence_reference, absolute_slice) -> Seq:

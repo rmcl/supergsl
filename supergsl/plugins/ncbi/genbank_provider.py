@@ -5,7 +5,7 @@ from supergsl.core.constants import FIVE_PRIME
 from supergsl.core.exception import PartNotFoundError
 from supergsl.core.sequence import SequenceEntry
 from supergsl.core.parts import PartProvider, PartProviderConfig
-from supergsl.core.types.slice import Slice, Position
+from supergsl.core.types.position import Slice, Position
 from supergsl.core.types.part import Part
 
 

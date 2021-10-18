@@ -12,7 +12,7 @@ from supergsl.core.types.builtin import (
 from supergsl.utils import resolve_import
 from supergsl.core.types.part import Part
 from supergsl.core.types.assembly import AssemblyDeclaration
-from supergsl.core.types.slice import (
+from supergsl.core.types.position import (
     Position,
     Slice
 )

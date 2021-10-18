@@ -4,7 +4,7 @@ from Bio.Seq import Seq
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.assembly import AssemblerBase
 from supergsl.core.types.part import Part
-from supergsl.core.types.slice import Slice
+from supergsl.core.types.position import Slice
 from supergsl.core.sequence import SliceMapping
 from supergsl.core.types.assembly import (
     AssemblyDeclaration,
