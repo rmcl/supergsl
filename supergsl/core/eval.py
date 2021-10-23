@@ -46,7 +46,9 @@ from supergsl.core.exception import (
     FunctionInvokeError,
     SuperGSLTypeError,
     SymbolNotFoundError,
-    FunctionNotFoundError
+    FunctionNotFoundError,
+    BackendError,
+    SuperGSLError
 )
 
 #pylint: disable=E1136
@@ -85,7 +87,7 @@ class EvaluatePass(BackendPipelinePass):
         node_type : str = type(node).__name__
         handler_method = handlers.get(node_type, None)
         if not handler_method:
-            raise Exception('Handler for node %s not specified.' % node_type)
+            raise BackendError('Handler for node %s not specified.' % node_type)
 
         return handler_method(node, *args, **kwargs)
 
@@ -177,7 +179,7 @@ class EvaluatePass(BackendPipelinePass):
         elif slice_position.postfix == 'E':
             rel_to = THREE_PRIME
         else:
-            raise Exception('Unknown postfix position. "%s"' % slice_position.postfix)
+            raise SuperGSLError('Unknown postfix position. "%s"' % slice_position.postfix)
 
         return Position(
             index=slice_position.index,

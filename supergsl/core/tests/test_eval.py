@@ -36,6 +36,7 @@ from supergsl.core.types.builtin import (
 
 from supergsl.core.exception import (
     SuperGSLTypeError,
+    SuperGSLError,
     FunctionNotFoundError
 )
 
@@ -161,6 +162,17 @@ class EvaluatePassTestCase(unittest.TestCase):
         self.assertEqual(result.index, 123)
         self.assertEqual(result.relative_to, THREE_PRIME)
         self.assertEqual(result.approximate, False)
+
+    def test_visit_slice_position_invalid_slice_position(self):
+        """Visit slice position should raise an error if invalid slice prefix is specified."""
+
+        slice_position = SlicePosition(123, 'R', False)
+
+        self.assertRaises(
+            SuperGSLError,
+            self.eval_pass.visit_slice_position,
+            slice_position)
+
 
     def test_visit_list_declaration(self):
         """Create a collection with result of visiting each item node in declaration."""
