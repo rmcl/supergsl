@@ -141,7 +141,6 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
             identifier  A identifier to select a part from this provider
         Return: `Part`
         """
-        print('RETRIEVING PART ', identifier)
         try:
             return self._cached_parts[identifier]
         except KeyError:
