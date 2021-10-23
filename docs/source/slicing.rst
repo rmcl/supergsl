@@ -44,16 +44,18 @@ Let s1 equal the following sequence:
 in sGSL shell you can define this sequence via:
 
 .. code-block:: gsl
-    let s1 = /ATGAATACAAACGTTCCAATGTTCTCCGGTCAGAGATTTACCAAGGTCTTTCGAACAAA/
+
+                let s1 = /ATGAATACAAACGTTCCAATGTTCTCCGGTCAGAGATTTACCAAGGTCTTTCGAACAAA/
 
 
 .. code-block:: gsl
-    s1[0:3]
-    -> ATG
-    s1[0S:3]
-    -> ATG
-    s1[-5E:0E]
-    -> ACAAA
+
+                s1[0:3]
+                -> ATG
+                s1[0S:3]
+                -> ATG
+                s1[-5E:0E]
+                -> ACAAA
 
 
 **********************************************
@@ -80,12 +82,14 @@ For example, you can slice from the S. cerevisiae (S288C) to extract genes as we
 as their promoters, terminators, ORFS and homology regions.
 
 .. code-block:: gsl
+
     from S288C import GAL3
     from builtin import detail
 
 Retrieving the details of GAL3 returns the ORF sequence by default.
 
 .. code-block:: gsl
+
     detail(GAL3)
     -> ATGAATACAAACGTT....
 
@@ -93,12 +97,14 @@ You can also retrieve the GAL3 promoter region which is defined as the 500bp imm
 upstream of the primary ORF.
 
 .. code-block:: gsl
+
     pGAL3
     -> CGCTTTTACTATTA...
 
 Or the terminator region...
 
 .. code-block:: gsl
+
     tGAL3
     -> CACTAAACACCTTCT...
 
