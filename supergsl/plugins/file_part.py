@@ -101,16 +101,13 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
         strand = new_gene_feature['strand']
         if strand == 'C':
             # This gene is on the reverse strand.
-            # indicate this in the slice by swapping the to and from positions.
-            #new_gene_feature['from'] = int(reference_feature['to']) + 1
-            #new_gene_feature['to'] = int(reference_feature['from'])
-
             sequence_len = len(chromosome_sequence_entry.sequence)
             new_gene_feature['from'] = sequence_len - int(reference_feature['to']) - 1
             new_gene_feature['to'] = sequence_len - int(reference_feature['from'])
             strand = STRAND_CRICK
 
         else:
+            # This gene is on the forward strand.
             new_gene_feature['from'] = int(reference_feature['from'])
             new_gene_feature['to'] = int(reference_feature['to']) + 1
             strand = STRAND_WATSON
