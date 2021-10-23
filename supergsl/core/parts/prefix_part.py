@@ -191,11 +191,11 @@ class PrefixedSlicePartProviderMixin(_Base):
         if part_slice_type == 'downstream':
             return Slice(
                 Position(0, relative_to=THREE_PRIME),
-                Position(-1 * get_flank_len(), relative_to=THREE_PRIME, approximate=True))
+                Position(1 * get_flank_len(), relative_to=THREE_PRIME, approximate=True))
 
         if part_slice_type == 'terminator':
             return Slice(
                 Position(0, relative_to=THREE_PRIME),
-                Position(-1 * get_terminator_len(), relative_to=THREE_PRIME, approximate=True))
+                Position(get_terminator_len(), relative_to=THREE_PRIME, approximate=True))
 
         raise PartSliceError('"%s" prefix is not implemented yet.' % part_slice_type)
