@@ -5,6 +5,7 @@ from unittest.mock import Mock
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.core.sequence import SequenceStore, SliceMapping
 from supergsl.core.types.position import Slice, Position
+from supergsl.core.constants import STRAND_CRICK
 
 
 class SequenceStoreTestCase(unittest.TestCase):
@@ -110,7 +111,7 @@ class SequenceStoreTestCase(unittest.TestCase):
 
         child_entry = self.sequence_store.slice(
             parent_entry,
-            Slice.from_five_prime_indexes(100,250, strand='REVERSE')
+            Slice.from_five_prime_indexes(100,250, strand=STRAND_CRICK)
         )
 
         self.assertEqual(child_entry.sequence, reference_sequence.reverse_complement()[100:250])
@@ -129,7 +130,7 @@ class SequenceStoreTestCase(unittest.TestCase):
 
         parent_entry = self.sequence_store.slice(
             grandparent_entry,
-            Slice.from_five_prime_indexes(100,250, strand='REVERSE')
+            Slice.from_five_prime_indexes(100,250, strand=STRAND_CRICK)
         )
 
         child_entry = self.sequence_store.slice(

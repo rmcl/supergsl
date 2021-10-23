@@ -1,9 +1,12 @@
+"""Define SuperGSL types for dealing with positions and slices of sequences."""
 from typing import Dict, Any
 from supergsl.core.constants import (
     FIVE_PRIME,
-    THREE_PRIME
+    THREE_PRIME,
+    STRAND_WATSON
 )
 from .base import SuperGSLType
+
 
 class AbsolutePosition:
     """Capture an absolute position in a sequence of fixed length."""
@@ -36,7 +39,7 @@ class AbsolutePosition:
         return new_abs_position
 
 class AbsoluteSlice:
-    def __init__(self, start : AbsolutePosition, end : AbsolutePosition, strand = 'FORWARD'):
+    def __init__(self, start : AbsolutePosition, end : AbsolutePosition, strand = STRAND_WATSON):
         self.start = start
         self.end = end
         self.strand = strand
@@ -121,7 +124,7 @@ class Slice(SuperGSLType):
     If the end position is less than the start position then it is infered that
     the desired sequence lays on the reverse strand of a double-stranded molecule.
     """
-    def __init__(self, start : Position, end : Position, strand = 'FORWARD'):
+    def __init__(self, start : Position, end : Position, strand = STRAND_WATSON):
         self.start = start
         self.end = end
         self.strand = strand

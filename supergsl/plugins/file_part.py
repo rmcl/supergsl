@@ -5,7 +5,12 @@ from mimetypes import guess_type
 from Bio import SeqIO
 from Bio.Seq import Seq
 
-from supergsl.core.constants import FIVE_PRIME, THREE_PRIME
+from supergsl.core.constants import (
+    FIVE_PRIME,
+    THREE_PRIME,
+    STRAND_WATSON,
+    STRAND_CRICK
+)
 from supergsl.core.types.position import Slice, Position
 from supergsl.core.sequence import SequenceEntry
 from supergsl.core.exception import PartNotFoundError
@@ -103,12 +108,12 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
             sequence_len = len(chromosome_sequence_entry.sequence)
             new_gene_feature['from'] = sequence_len - int(reference_feature['to']) - 1
             new_gene_feature['to'] = sequence_len - int(reference_feature['from'])
-            strand = 'REVERSE'
+            strand = STRAND_CRICK
 
         else:
             new_gene_feature['from'] = int(reference_feature['from'])
             new_gene_feature['to'] = int(reference_feature['to']) + 1
-            strand = 'FORWARD'
+            strand = STRAND_WATSON
 
 
         part_slice = Slice(

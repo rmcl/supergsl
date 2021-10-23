@@ -4,7 +4,7 @@ from Bio.Seq import Seq
 from Bio.SeqFeature import SeqFeature
 
 from supergsl.core.exception import SequenceStoreError
-from supergsl.core.constants import THREE_PRIME
+from supergsl.core.constants import THREE_PRIME, STRAND_CRICK
 from supergsl.core.types.position import Slice, Position, AbsoluteSlice
 
 
@@ -12,11 +12,10 @@ def get_slice_sequence_from_reference(sequence_reference, absolute_slice) -> Seq
     """Return the sub-sequence of the reference sequence covered by the provided slice."""
 
     if absolute_slice.start.is_out_of_bounds or absolute_slice.end.is_out_of_bounds:
-        raise SequenceStoreError('OUT OF BOUNDS SEQUENCES NOT CURRENTLY SUPPORTED!')
+        raise SequenceStoreError(
+            'The position defined in the slice exceeds the bounds of the reference sequence.')
 
-    if absolute_slice.strand == 'REVERSE':
-        # probably delete: absolute_slice.start.index > absolute_slice.end.index:
-
+    if absolute_slice.strand == STRAND_CRICK:
         # This sequence is on the reverse strand. Retrieve the end to start
         # sequence on the forward strand and then take the reverse complement.
         reverse_sequence = sequence_reference.reverse_complement()
