@@ -15,7 +15,7 @@ class JSONOutputTestCase(TestCase):
         self.fixtures = SuperGSLCoreFixtures()
 
         self.compiler_settings = {}
-        self.output = JSONOutput(self.compiler_settings)
+        self.output = JSONOutput(self.fixtures.mk_function_config_object(self.compiler_settings))
 
     def test_get_assemblies_from_mocked_detail(self):
         """Check that the assemblies serialized by JSON match to original assemblies."""

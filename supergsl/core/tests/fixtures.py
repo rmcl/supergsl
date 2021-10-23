@@ -3,11 +3,14 @@ from unittest.mock import Mock
 import random
 from typing import Tuple, List
 from Bio.Seq import Seq
+from supergsl.core.sequence import SequenceStore, SequenceEntry, SliceMapping
+from supergsl.core.function import SuperGSLFunctionConfig
+from supergsl.core.parts.provider import PartProviderConfig
 from supergsl.core.types.primer import PrimerPair
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
+from supergsl.core.types.position import Slice
 from supergsl.core.types.builtin import Collection
-from supergsl.core.types.position import SeqPosition
 from supergsl.core.types.assembly import (
     Assembly,
     AssemblyDeclaration,
@@ -44,6 +47,28 @@ class SuperGSLCoreFixtures(object):
             complement_sequence[-20:]
         )
 
+    def mk_function_config_object(self, options=None):
+        """Make a config object for instantiating supergsl functions."""
+        if not options:
+            options = {}
+
+        return SuperGSLFunctionConfig(self.sequence_store, options)
+
+    def mk_part_provider_config(self, options=None):
+        """Make a config object for instantiating part providers."""
+        if not options:
+            options = {}
+        return PartProviderConfig(self.sequence_store, options)
+
+    @property
+    def sequence_store(self) -> SequenceStore:
+        if not hasattr(self, '_store'):
+            self._store = SequenceStore()
+        return self._store
+
+    def mk_sequence_entry(self, sequence) -> SequenceEntry:
+        return self.sequence_store.add_from_reference(sequence)
+
     def mk_part(
         self,
         identifier,
@@ -59,18 +84,11 @@ class SuperGSLCoreFixtures(object):
         ref_seq_len = part_seq_len * 3
         reference_sequence = self.mk_random_dna_sequence(ref_seq_len)
 
-        start = SeqPosition.from_reference(
-            x=part_seq_len,
-            rel_to=THREE_PRIME,
-            approximate=False,
-            reference=reference_sequence
-        )
-        end = start.get_relative_position(x=part_seq_len)
+        sequence_entry = self.mk_sequence_entry(reference_sequence)
 
         part = Part(
             identifier,
-            start,
-            end,
+            sequence_entry=sequence_entry,
             provider=Mock(),
             roles=roles
         )
@@ -109,28 +127,35 @@ class SuperGSLCoreFixtures(object):
             self.mk_part('part-%03d' % part_index, random.randint(20, 100))[1]
             for part_index in range(num_parts)
         ])
-        assembly_sequence = Seq(''.join([
-            str(part.sequence)
-            for part in parts
-        ]))
+
+        cur_seq_pos = 0
+        slice_mappings : List[SliceMapping] = []
+        part_mappings : List[Tuple[Part, Slice]] = []
+
+        for part in parts:
+            start_pos = cur_seq_pos
+            end_pos = cur_seq_pos + len(part.sequence)
+            cur_seq_pos = end_pos
+
+            source_slice = Slice.from_entire_sequence()
+            target_slice = Slice.from_five_prime_indexes(start_pos, end_pos)
+
+            slice_mappings.append(
+                SliceMapping(part.sequence_entry, source_slice, target_slice))
+            part_mappings.append(
+                (part, target_slice))
+
+        assembly_sequence_entry = self.sequence_store.concatenate(slice_mappings)
 
         assembly = Assembly(
             identifier,
-            assembly_sequence,
+            assembly_sequence_entry,
             'this is a great assembly named %s' % identifier)
 
-        cur_pos = 0
-        for part in parts:
-            part_seq_len = len(part.sequence)
-            start = SeqPosition.from_reference(
-                cur_pos,
-                rel_to=THREE_PRIME,
-                approximate=False,
-                reference=assembly_sequence)
-
-            end = start.get_relative_position(part_seq_len)
-            assembly.add_part(part, start, end)
-            cur_pos += part_seq_len
+        # TODO: I don't love this interface to creating assembly. Think about
+        # how to refactor
+        for part, target_slice in part_mappings:
+            assembly.add_part(part, target_slice)
 
         return assembly
 

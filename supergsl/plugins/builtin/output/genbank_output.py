@@ -25,13 +25,17 @@ class GenBankOutput(AssemblyResultOutputFunction):
     def build_seq_record_for_assembly(self, assembly : Assembly) -> SeqRecord:
         """Build a `SeqRecord` entry for the given `Assembly`."""
 
+        assembly_sequence = assembly.sequence
         record = SeqRecord(
-            assembly.sequence,
+            assembly_sequence,
             id='123456789', # random accession number
             name=assembly.identifier,
             description=assembly.description or '')
 
-        for part, start, end in assembly.parts_with_positions:
+        for part, target_slice in assembly.parts_with_positions:
+            start_abs_pos = target_slice.start.build_absolute_position(len(assembly_sequence))
+            end_abs_pos = target_slice.end.build_absolute_position(len(assembly_sequence))
+
             feature = SeqFeature(
                 id=part.identifier,
                 qualifiers={
@@ -39,8 +43,8 @@ class GenBankOutput(AssemblyResultOutputFunction):
                     'description': part.description
                 },
                 location=FeatureLocation(
-                    start=start.get_absolute_position_in_reference()[1],
-                    end=end.get_absolute_position_in_reference()[1]
+                    start=start_abs_pos.index,
+                    end=end_abs_pos.index
                 ),
                 type='part')
 

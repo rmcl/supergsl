@@ -14,7 +14,8 @@ class GenBankOutputTestCase(TestCase):
         self.fixtures = SuperGSLCoreFixtures()
 
         self.compiler_settings = {}
-        self.output = GenBankOutput(self.compiler_settings)
+        self.output = GenBankOutput(
+            self.fixtures.mk_function_config_object(self.compiler_settings))
 
     def test_build_seq_record_for_assembly(self):
         """Test that the SeqRecord is created correctly."""

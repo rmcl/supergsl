@@ -11,10 +11,11 @@ class AssemblyResultOutputFunctionTestCase(unittest.TestCase):
 
     def setUp(self):
         self.fixtures = SuperGSLCoreFixtures()
+        self.function_config = self.fixtures.mk_function_config_object()
 
     def test_open_output_fp_stdout(self):
         """Test that open_output_fp returns a filepointer to stdout."""
-        output = AssemblyResultOutputFunction({})
+        output = AssemblyResultOutputFunction(self.function_config)
 
         with output.open_output_fp('-') as fp:
             self.assertEqual(fp, sys.stdout)
@@ -23,7 +24,7 @@ class AssemblyResultOutputFunctionTestCase(unittest.TestCase):
     def test_open_output_fp_file_open(self, open_mock):
         """Test that open_output_fp opens a file and then closes it when done."""
         open_mock.return_value = file_handle_mock = Mock()
-        output = AssemblyResultOutputFunction({})
+        output = AssemblyResultOutputFunction(self.function_config)
 
         with output.open_output_fp('test.txt') as output_fp:
             output_fp.write('hello world!')
@@ -33,7 +34,7 @@ class AssemblyResultOutputFunctionTestCase(unittest.TestCase):
 
     def test_execute_calls_expected_methods(self):
         """The execute method should call output with correct arguments."""
-        output = AssemblyResultOutputFunction({})
+        output = AssemblyResultOutputFunction(self.function_config)
         output.output = Mock()
         assemblies = ['hello', 'assemblies']
         output.execute({

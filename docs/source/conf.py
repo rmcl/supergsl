@@ -6,29 +6,30 @@
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
 
+import sphinx_rtd_theme
+
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-import sphinx_rtd_theme
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../../'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'SuperGSL'
-copyright = '2020, Russell McLoughlin'
+copyright = '2021, Russell McLoughlin'
 author = 'Russell McLoughlin'
 description = 'A python implementation of the GSL language.'
 
-# The short X.Y version
-version = ''
-# The full version, including alpha/beta/rc tags
-release = '1.0'
+
+from pkg_resources import get_distribution
+release = get_distribution("supergsl").version
+version = ".".join(release.split(".")[:3])
 
 
 # -- General configuration ---------------------------------------------------
@@ -42,10 +43,25 @@ release = '1.0'
 # ones.
 extensions = [
     'sphinx.ext.githubpages',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.intersphinx',
+
     'recommonmark',
     'sphinx_rtd_theme',
     'sphinxcontrib.mermaid',
+    'sphinx.ext.autosectionlabel',
 ]
+
+# Add mappings https://kev.inburke.com/kevin/sphinx-interlinks/
+intersphinx_mapping = {
+    "biopython": ("https://biopython.readthedocs.io/en/latest", None),
+    "pydna": ("https://pydna.readthedocs.io", None),
+    "python": ("http://docs.python.org/3.9", None),
+}
+
+autosectionlabel_prefix_document = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

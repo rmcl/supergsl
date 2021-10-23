@@ -58,3 +58,7 @@ class PartSliceError(SuperGSLError):
 
 class SuperGSLTypeError(SuperGSLError):
     """A base class for all errors related to SuperGSL's type system."""
+
+
+class SequenceStoreError(SuperGSLError):
+    """A base class for errors related to the Sequence Store."""
