@@ -107,19 +107,6 @@ class SequenceEntry:
 
         return False
 
-    '''
-    @property
-    def reference_sequence(self) -> Seq:
-        """Return the `Seq` representing the reference sequence for this position."""
-        if self.reference:
-            return self.reference
-
-        if self.parent_links:
-            if len(self.parent_links) == 1:
-                return self.parent_links[0].parent_entry.reference_sequence
-
-        raise SequenceStoreError('Composite parts have multiple reference sequences.')
-    '''
 
     @property
     def sequence_length(self) -> int:
