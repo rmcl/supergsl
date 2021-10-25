@@ -14,6 +14,9 @@ service SuperGSLCompiler {
 
     rpc ListSymbolTable(ListSymbolTableRequest) returns (ListSymbolTableResult) {}
 
+    rpc ListSequenceStore(ListSequenceStoreRequest) returns (ListSequenceStoreResult) {}
+    rpc GetSequenceDetail(GetSequenceDetailRequest) returns (GetSequenceDetailResult) {}
+
     rpc GetFunctionArguments(FunctionCallIdentifier) returns (MessageFunctionArguments) {}
     rpc SetFunctionReturnValue(FunctionReturnValue) returns (SetFunctionReturnValueResponse) {}
 }
@@ -50,9 +53,34 @@ message ListSymbolTableResult {
 
 message Symbol {
     string type = 1;
-    google.protobuf.Struct details = 4;
+    google.protobuf.Struct details = 2;
 }
 
+
+message SequenceEntry {
+    string identifier = 1;
+    bool is_composite = 2;
+    string sequence = 3;
+
+}
+message ListSequenceStoreRequest {
+    string session_identifier = 1;
+}
+message ListSequenceStoreResult {
+    // return a map of sequence uuid to SequenceEntry.
+    map<string, SequenceEntry> sequence_entries = 1;
+}
+
+message GetSequenceDetailRequest {
+    string session_identifier = 1;
+    string sequence_identifier = 2;
+    bool include_sequence = 3;
+}
+
+message GetSequenceDetailResult {
+    SequenceEntry sequence_entry = 1;
+    google.protobuf.Struct annotations = 2;
+}
 
 message FunctionCallIdentifier {
     string identifier = 1;

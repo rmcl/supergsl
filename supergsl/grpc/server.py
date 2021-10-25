@@ -11,8 +11,11 @@ from supergsl.grpc.stubs.sgsl_pb2_grpc import (
 from supergsl.grpc.stubs.sgsl_pb2 import (
     CreateCompilerSessionRequest,
     CreateCompilerSessionResult,
+    ListSequenceStoreRequest,
+    ListSequenceStoreResult,
     ListSymbolTableRequest,
     ListSymbolTableResult,
+    SequenceEntry,
     CompileRequest,
     CompileResult,
     Symbol
@@ -62,8 +65,48 @@ class SuperGSLCompilerService(SuperGSLCompilerServicer):
         return result
 
 
+    def ListSequenceStore(
+        self,
+        request : ListSequenceStoreRequest,
+        context
+    ):
+        """Return a map of Sequence Entries in the compiler Sequence Store."""
+        serialized_entries : Dict[str, SequenceEntry] = {}
+
+        compiler_pipeline = self.get_compiler_session(request.session_identifier)
+        sequence_store = compiler_pipeline.symbols['sequences']
+
+        for identifier, sequence_entry in sequence_store.items():
+            serialized_entry = SequenceEntry(
+                identifier=str(identifier),
+                is_composite=sequence_entry.is_composite,
+                sequence=''
+            )
+            serialized_entries[str(identifier)] = serialized_entry
+
+        return ListSequenceStoreResult(sequence_entries=serialized_entries)
+
+    def GetSequenceDetail(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        compiler_pipeline = self.get_compiler_session(request.session_identifier)
+        sequence_store = compiler_pipeline.symbols['sequences']
+        sequence_entry = sequence_store.lookup(request.sequence_identifier)
+
+        sequence = ''
+        if request.include_sequence:
+            sequence = sequence_entry.sequence
+
+        entry = SequenceEntry(
+            identifier=sequence_entry.id,
+            is_composite=sequence_entry.is_composite,
+            sequence=sequence
+        )
+
+        return GetSequenceDetailResult(sequence_entry=entry)
+
     def ListSymbolTable(
-        self, request : ListSymbolTableRequest,
+        self,
+        request : ListSymbolTableRequest,
         context
     ) -> ListSymbolTableResult:
         """List the symbols from the given compiler session's symbol table."""

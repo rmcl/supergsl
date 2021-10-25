@@ -213,9 +213,9 @@ class SequenceStore:
         """Create a new random id for a sequence entry."""
         return uuid4()
 
-    def list(self):
+    def items(self):
         """List sequences in the store."""
-        raise NotImplementedError('implement me!')
+        return iter(self._sequences_by_uuid.items())
 
     def add_from_reference(self, sequence : Seq):
         """Add a sequence to the store."""
@@ -270,3 +270,6 @@ class SequenceStore:
         entry = SequenceEntry(self, entry_id, links)
         self._sequences_by_uuid[entry_id] = entry
         return entry
+
+    def serialize(self) -> Dict:
+        return {}
