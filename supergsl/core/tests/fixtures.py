@@ -30,9 +30,15 @@ class SuperGSLCoreFixtures(object):
 
         return symbol_table
 
-    def mk_random_dna_sequence(self, seq_len) -> Seq:
+    def mk_random_dna_sequence(self, seq_len : int) -> Seq:
+        """Make a `Seq` with random DNA of a given length."""
         seq_str = ''.join(random.choice('CGTA') for _ in range(seq_len))
         return Seq(seq_str)
+
+    def mk_random_dna_sequence_entry(self, seq_len : int) -> SequenceEntry:
+        """Make a sequence entry with random DNA of a given length."""
+        sequence = self.mk_random_dna_sequence(seq_len)
+        return self.mk_sequence_entry(sequence)
 
     def mk_extraction_primers(self, part) -> PrimerPair:
         """Primers are often complementary sequences flanking the DNA sequence of interest.
@@ -66,7 +72,7 @@ class SuperGSLCoreFixtures(object):
             self._store = SequenceStore()
         return self._store
 
-    def mk_sequence_entry(self, sequence) -> SequenceEntry:
+    def mk_sequence_entry(self, sequence : Seq) -> SequenceEntry:
         return self.sequence_store.add_from_reference(sequence)
 
     def mk_part(

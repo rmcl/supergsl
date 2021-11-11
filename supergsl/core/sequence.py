@@ -26,12 +26,20 @@ def get_slice_sequence_from_reference(sequence_reference, absolute_slice) -> Seq
     return sequence
 
 
+class Role(NamedTuple):
+    """Represent a sequence role."""
+    uri : str
+    name : str
+    description : str
+
+
 class SliceMapping(NamedTuple):
     """Represent the mapping of a sub-slice of a parent sequence onto a new target sequence."""
 
     parent_entry: 'SequenceEntry'
     source_slice: Slice
     target_slice: Slice
+    roles : Optional[List[Role]] = None
 
 
 class EntryLink:
@@ -42,23 +50,27 @@ class EntryLink:
         parent_entry : 'SequenceEntry',
         source_slice : Slice,
         target_slice : Slice,
-        annotations
+        roles : List[Role]
     ):
         self.parent_entry = parent_entry
         self.source_slice = source_slice
         self.target_slice = target_slice
-        self.annotations = annotations
+        self.roles = roles
+
 
 class SequenceEntry:
     """Represent a sequence in the sequence store."""
     def __init__(
         self,
-        store : 'SequenceStore',
+        sequence_store : 'SequenceStore',
         sequence_id: UUID,
+        roles : Optional[List[Role]] = None,
         parent_links : Optional[List[EntryLink]] = None,
         reference : Optional[Seq] = None
     ):
+        self.sequence_store = sequence_store
         self.sequence_id = sequence_id
+        self.roles = roles if roles else []
         self.parent_links = parent_links
         self.reference = reference
 
@@ -68,12 +80,9 @@ class SequenceEntry:
             raise SequenceStoreError(
                 'Must only specify parents or a reference sequence, but not both')
 
-    def add_annotation(self, annotation_slice : Slice, details : dict):
-        # Todo: maybe add this function to create EntryLinks for the provided annotations.
-        raise NotImplementedError('')
-
     @property
-    def id(self):
+    def id(self) -> UUID:
+        """Return the UUID of the sequence entry."""
         return self.sequence_id
 
     @property
@@ -141,8 +150,9 @@ class SequenceEntry:
 
             parent_link = self.parent_links[0]
             parent_sequence_entry = parent_link.parent_entry
-            reference_sequence, parent_absolute_slice = parent_sequence_entry.get_slice_absolute_position_and_reference(
-                parent_link.source_slice)
+            reference_sequence, parent_absolute_slice = \
+                parent_sequence_entry.get_slice_absolute_position_and_reference(
+                    parent_link.source_slice)
 
             absolute_source_slice = parent_absolute_slice.derive_from_relative_slice(target_slice)
             return reference_sequence, absolute_source_slice
@@ -204,6 +214,7 @@ class SequenceStore:
 
     def __init__(self):
         self._sequences_by_uuid : Dict[UUID, SequenceEntry] = {}
+        self._links_by_uuid : Dict[UUID, List[EntryLink]] = {}
 
     def lookup(self, sequence_id : UUID) -> SequenceEntry:
         """Lookup `SequenceEntry` by it's id."""
@@ -217,7 +228,7 @@ class SequenceStore:
         """List sequences in the store."""
         return iter(self._sequences_by_uuid.items())
 
-    def add_from_reference(self, sequence : Seq):
+    def add_from_reference(self, sequence : Seq, roles : Optional[List[Role]] = None):
         """Add a sequence to the store."""
 
         # TODO: Do we want to support adding from a SeqRecord
@@ -225,18 +236,31 @@ class SequenceStore:
         # as annotations on EntryLinks
 
         entry = SequenceEntry(
-            store=self,
+            sequence_store=self,
             sequence_id=self._create_record_id(),
-            reference=sequence)
+            reference=sequence,
+            roles=roles if roles else [])
 
         self._sequences_by_uuid[entry.id] = entry
         return entry
 
-    def slice(self, sequence_entry : SequenceEntry, sequence_slice : Slice):
+    def slice(
+        self,
+        sequence_entry : SequenceEntry,
+        sequence_slice : Slice,
+        new_sequence_roles : Optional[List[Role]] = None,
+        entry_link_roles : Optional[List[Role]] = None
+    ):
         """Create a new entry from a subsequence of the provided sequence_entry.
 
         The new sequence will be defined by the `sequence_slice`.
         """
+        if not new_sequence_roles:
+            new_sequence_roles = []
+
+        if not entry_link_roles:
+            entry_link_roles = []
+
         link = EntryLink(
             parent_entry=sequence_entry,
             source_slice=sequence_slice,
@@ -244,18 +268,23 @@ class SequenceStore:
                 Position(0),
                 Position(0, relative_to=THREE_PRIME)
             ),
-            annotations=None)
+            roles=entry_link_roles)
 
         entry = SequenceEntry(
-            store=self,
+            sequence_store=self,
             sequence_id=self._create_record_id(),
-            parent_links=[link]
+            parent_links=[link],
+            roles=new_sequence_roles
         )
         self._sequences_by_uuid[entry.id] = entry
 
         return entry
 
-    def concatenate(self, slice_mappings : List[SliceMapping]):
+    def concatenate(
+        self,
+        slice_mappings : List[SliceMapping],
+        new_sequence_roles : Optional[List[Role]] = None
+    ) -> SequenceEntry:
         """Concatenate several sequence slices into a composite sequence."""
         links = []
         for slice_mapping in slice_mappings:
@@ -263,11 +292,14 @@ class SequenceStore:
                 slice_mapping.parent_entry,
                 slice_mapping.source_slice,
                 slice_mapping.target_slice,
-                None)
+                slice_mapping.roles if slice_mapping.roles else [])
             links.append(link)
 
+        if not new_sequence_roles:
+            new_sequence_roles = []
+
         entry_id = self._create_record_id()
-        entry = SequenceEntry(self, entry_id, links)
+        entry = SequenceEntry(self, entry_id, new_sequence_roles, links)
         self._sequences_by_uuid[entry_id] = entry
         return entry
 
