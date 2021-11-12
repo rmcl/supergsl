@@ -6,6 +6,9 @@ from supergsl.grpc.stubs.sgsl_pb2 import (
     CreateCompilerSessionRequest,
     CreateCompilerSessionResult,
 
+    GetSequenceDetailRequest,
+    GetSequenceDetailResult,
+
     ListSymbolTableRequest,
     ListSymbolTableResult
 )
@@ -21,6 +24,9 @@ class SuperGSLCompilerServiceTestCase(unittest.TestCase):
         self.service = SuperGSLCompilerService(self.settings)
         self.fixtures = SuperGSLCoreFixtures()
 
+        self.symbol_table = self.fixtures.mk_symbol_table()
+        self.symbol_table.insert('sequences', self.fixtures.sequence_store)
+
     def test_CreateCompilerSession_creates_new_session(self):
         """Test that CreateCompilerSession correctly initializes a CompilerPipeline."""
         with patch('supergsl.grpc.server.CompilerPipeline') as compiler_pipeline_mock:
@@ -34,10 +40,10 @@ class SuperGSLCompilerServiceTestCase(unittest.TestCase):
         self.assertEqual(session, 'HELLO WORLD!')
 
     def test_ListSymbolTable_returns_symbols(self):
+        """Verify that we get expected symbols from the symbol table."""
         with patch('supergsl.grpc.server.CompilerPipeline') as compiler_pipeline_class_mock:
             compiler_pipeline = compiler_pipeline_class_mock.return_value
-            symbol_table = self.fixtures.mk_symbol_table()
-            compiler_pipeline.symbols = symbol_table
+            compiler_pipeline.symbols = self.symbol_table
 
             identifier, compiler_mock_inst = self.service.create_compiler_session()
 
@@ -46,6 +52,52 @@ class SuperGSLCompilerServiceTestCase(unittest.TestCase):
 
         compiler_pipeline_class_mock.assert_called_once_with(self.settings)
 
-        self.assertEqual(len(result.symbols), 2)
+        self.assertEqual(len(result.symbols), 3) # Two parts + the Sequence entry
         self.assertEqual(result.symbols['uHO'].type, 'Part')
         self.assertEqual(result.symbols['awesome.tHUG'].type, 'Part')
+
+    def test_GetSequenceDetail_include_sequence(self):
+        """GetSequenceDetail including the sequence of the entry."""
+        with patch('supergsl.grpc.server.CompilerPipeline') as compiler_pipeline_class_mock:
+            compiler_pipeline = compiler_pipeline_class_mock.return_value
+            compiler_pipeline.symbols = self.symbol_table
+
+            session_identifier, compiler_mock_inst = self.service.create_compiler_session()
+
+            sequence_entry = self.fixtures.mk_random_dna_sequence_entry(150)
+            sequence_entry.roles = [self.fixtures.mk_sequence_role()]
+
+            result = self.service.GetSequenceDetail(
+                GetSequenceDetailRequest(
+                    session_identifier=session_identifier,
+                    sequence_identifier=str(sequence_entry.id),
+                    include_sequence=True),
+                Mock())
+
+            self.assertEqual(result.sequence_entry.sequence, str(sequence_entry.sequence))
+
+    def test_GetSequenceDetail(self):
+        """"""
+        with patch('supergsl.grpc.server.CompilerPipeline') as compiler_pipeline_class_mock:
+            compiler_pipeline = compiler_pipeline_class_mock.return_value
+            compiler_pipeline.symbols = self.symbol_table
+
+            session_identifier, compiler_mock_inst = self.service.create_compiler_session()
+
+            sequence_entry = self.fixtures.mk_random_dna_sequence_entry(150)
+            sequence_entry.roles = [self.fixtures.mk_sequence_role()]
+
+            result = self.service.GetSequenceDetail(
+                GetSequenceDetailRequest(
+                    session_identifier=session_identifier,
+                    sequence_identifier=str(sequence_entry.id)),
+                Mock())
+
+        self.assertEqual(result.sequence_entry.identifier, str(sequence_entry.id))
+        self.assertEqual(result.sequence_entry.is_composite, False)
+        self.assertEqual([
+            (role.uri, role.name, role.description)
+            for role in result.sequence_entry.roles
+        ], [
+            ('test/role/1', 'TestRole', 'test role')
+        ])

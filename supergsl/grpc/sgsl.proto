@@ -14,7 +14,6 @@ service SuperGSLCompiler {
 
     rpc ListSymbolTable(ListSymbolTableRequest) returns (ListSymbolTableResult) {}
 
-    rpc ListSequenceStore(ListSequenceStoreRequest) returns (ListSequenceStoreResult) {}
     rpc GetSequenceDetail(GetSequenceDetailRequest) returns (GetSequenceDetailResult) {}
 
     rpc GetFunctionArguments(FunctionCallIdentifier) returns (MessageFunctionArguments) {}
@@ -57,19 +56,36 @@ message Symbol {
 }
 
 
+message SequenceSlice {
+
+}
+
+message Role {
+    string uri = 1;
+    string name = 2;
+    string description = 3;
+}
+
 message SequenceEntry {
     string identifier = 1;
     bool is_composite = 2;
-    string sequence = 3;
+    repeated Role roles = 3;
+    repeated SequenceLink links = 4;
+    string sequence = 5;
+}
 
+message SequenceLink {
+    string parent_entry_identifier = 1;
+    string child_entry_identifier = 2;
+
+    // Todo: We may want to simplify things for the client by making these
+    // "absolute" positions in the source or target sequence.
+    SequenceSlice source_slice = 3;
+    SequenceSlice target_slice = 4;
+
+    repeated Role roles = 5;
 }
-message ListSequenceStoreRequest {
-    string session_identifier = 1;
-}
-message ListSequenceStoreResult {
-    // return a map of sequence uuid to SequenceEntry.
-    map<string, SequenceEntry> sequence_entries = 1;
-}
+
 
 message GetSequenceDetailRequest {
     string session_identifier = 1;
@@ -79,7 +95,6 @@ message GetSequenceDetailRequest {
 
 message GetSequenceDetailResult {
     SequenceEntry sequence_entry = 1;
-    google.protobuf.Struct annotations = 2;
 }
 
 message FunctionCallIdentifier {

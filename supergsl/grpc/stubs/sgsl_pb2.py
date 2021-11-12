@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\220\001\001',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\nsgsl.proto\x12\x08supergsl\x1a\x1cgoogle/protobuf/struct.proto\"\x1e\n\x1c\x43reateCompilerSessionRequest\"9\n\x1b\x43reateCompilerSessionResult\x12\x1a\n\x12session_identifier\x18\x01 \x01(\t\"\x1f\n\x1d\x44\x65stroyCompilerSessionRequest\">\n\x1c\x44\x65stroyCompilerSessionResult\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05\x65rror\x18\x02 \x01(\t\"A\n\x0e\x43ompileRequest\x12\x1a\n\x12session_identifier\x18\x01 \x01(\t\x12\x13\n\x0bsource_code\x18\x02 \x01(\t\"/\n\rCompileResult\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05\x65rror\x18\x02 \x01(\t\"4\n\x16ListSymbolTableRequest\x12\x1a\n\x12session_identifier\x18\x01 \x01(\t\"\x98\x01\n\x15ListSymbolTableResult\x12=\n\x07symbols\x18\x01 \x03(\x0b\x32,.supergsl.ListSymbolTableResult.SymbolsEntry\x1a@\n\x0cSymbolsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1f\n\x05value\x18\x02 \x01(\x0b\x32\x10.supergsl.Symbol:\x02\x38\x01\"@\n\x06Symbol\x12\x0c\n\x04type\x18\x01 \x01(\t\x12(\n\x07\x64\x65tails\x18\x02 \x01(\x0b\x32\x17.google.protobuf.Struct\"K\n\rSequenceEntry\x12\x12\n\nidentifier\x18\x01 \x01(\t\x12\x14\n\x0cis_composite\x18\x02 \x01(\x08\x12\x10\n\x08sequence\x18\x03 \x01(\t\"6\n\x18ListSequenceStoreRequest\x12\x1a\n\x12session_identifier\x18\x01 \x01(\t\"\xbc\x01\n\x17ListSequenceStoreResult\x12P\n\x10sequence_entries\x18\x01 \x03(\x0b\x32\x36.supergsl.ListSequenceStoreResult.SequenceEntriesEntry\x1aO\n\x14SequenceEntriesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12&\n\x05value\x18\x02 \x01(\x0b\x32\x17.supergsl.SequenceEntry:\x02\x38\x01\"m\n\x18GetSequenceDetailRequest\x12\x1a\n\x12session_identifier\x18\x01 \x01(\t\x12\x1b\n\x13sequence_identifier\x18\x02 \x01(\t\x12\x18\n\x10include_sequence\x18\x03 \x01(\x08\"x\n\x17GetSequenceDetailResult\x12/\n\x0esequence_entry\x18\x01 \x01(\x0b\x32\x17.supergsl.SequenceEntry\x12,\n\x0b\x61nnotations\x18\x02 \x01(\x0b\x32\x17.google.protobuf.Struct\",\n\x16\x46unctionCallIdentifier\x12\x12\n\nidentifier\x18\x01 \x01(\t\"(\n\x18MessageFunctionArguments\x12\x0c\n\x04name\x18\x01 \x01(\t\"$\n\x13\x46unctionReturnValue\x12\r\n\x05value\x18\x01 \x01(\t\"2\n\x1eSetFunctionReturnValueResponse\x12\x10\n\x08received\x18\x01 \x01(\x08\x32\x82\x06\n\x10SuperGSLCompiler\x12h\n\x15\x43reateCompilerSession\x12&.supergsl.CreateCompilerSessionRequest\x1a%.supergsl.CreateCompilerSessionResult\"\x00\x12k\n\x16\x44\x65stroyCompilerSession\x12\'.supergsl.DestroyCompilerSessionRequest\x1a&.supergsl.DestroyCompilerSessionResult\"\x00\x12>\n\x07\x43ompile\x12\x18.supergsl.CompileRequest\x1a\x17.supergsl.CompileResult\"\x00\x12V\n\x0fListSymbolTable\x12 .supergsl.ListSymbolTableRequest\x1a\x1f.supergsl.ListSymbolTableResult\"\x00\x12\\\n\x11ListSequenceStore\x12\".supergsl.ListSequenceStoreRequest\x1a!.supergsl.ListSequenceStoreResult\"\x00\x12\\\n\x11GetSequenceDetail\x12\".supergsl.GetSequenceDetailRequest\x1a!.supergsl.GetSequenceDetailResult\"\x00\x12^\n\x14GetFunctionArguments\x12 .supergsl.FunctionCallIdentifier\x1a\".supergsl.MessageFunctionArguments\"\x00\x12\x63\n\x16SetFunctionReturnValue\x12\x1d.supergsl.FunctionReturnValue\x1a(.supergsl.SetFunctionReturnValueResponse\"\x00\x42\x03\x90\x01\x01\x62\x06proto3'
+  serialized_pb=b'\n\nsgsl.proto\x12\x08supergsl\x1a\x1cgoogle/protobuf/struct.proto\"\x1e\n\x1c\x43reateCompilerSessionRequest\"9\n\x1b\x43reateCompilerSessionResult\x12\x1a\n\x12session_identifier\x18\x01 \x01(\t\"\x1f\n\x1d\x44\x65stroyCompilerSessionRequest\">\n\x1c\x44\x65stroyCompilerSessionResult\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05\x65rror\x18\x02 \x01(\t\"A\n\x0e\x43ompileRequest\x12\x1a\n\x12session_identifier\x18\x01 \x01(\t\x12\x13\n\x0bsource_code\x18\x02 \x01(\t\"/\n\rCompileResult\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05\x65rror\x18\x02 \x01(\t\"4\n\x16ListSymbolTableRequest\x12\x1a\n\x12session_identifier\x18\x01 \x01(\t\"\x98\x01\n\x15ListSymbolTableResult\x12=\n\x07symbols\x18\x01 \x03(\x0b\x32,.supergsl.ListSymbolTableResult.SymbolsEntry\x1a@\n\x0cSymbolsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1f\n\x05value\x18\x02 \x01(\x0b\x32\x10.supergsl.Symbol:\x02\x38\x01\"@\n\x06Symbol\x12\x0c\n\x04type\x18\x01 \x01(\t\x12(\n\x07\x64\x65tails\x18\x02 \x01(\x0b\x32\x17.google.protobuf.Struct\"\x0f\n\rSequenceSlice\"6\n\x04Role\x12\x0b\n\x03uri\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x03 \x01(\t\"\x91\x01\n\rSequenceEntry\x12\x12\n\nidentifier\x18\x01 \x01(\t\x12\x14\n\x0cis_composite\x18\x02 \x01(\x08\x12\x1d\n\x05roles\x18\x03 \x03(\x0b\x32\x0e.supergsl.Role\x12%\n\x05links\x18\x04 \x03(\x0b\x32\x16.supergsl.SequenceLink\x12\x10\n\x08sequence\x18\x05 \x01(\t\"\xcc\x01\n\x0cSequenceLink\x12\x1f\n\x17parent_entry_identifier\x18\x01 \x01(\t\x12\x1e\n\x16\x63hild_entry_identifier\x18\x02 \x01(\t\x12-\n\x0csource_slice\x18\x03 \x01(\x0b\x32\x17.supergsl.SequenceSlice\x12-\n\x0ctarget_slice\x18\x04 \x01(\x0b\x32\x17.supergsl.SequenceSlice\x12\x1d\n\x05roles\x18\x05 \x03(\x0b\x32\x0e.supergsl.Role\"m\n\x18GetSequenceDetailRequest\x12\x1a\n\x12session_identifier\x18\x01 \x01(\t\x12\x1b\n\x13sequence_identifier\x18\x02 \x01(\t\x12\x18\n\x10include_sequence\x18\x03 \x01(\x08\"J\n\x17GetSequenceDetailResult\x12/\n\x0esequence_entry\x18\x01 \x01(\x0b\x32\x17.supergsl.SequenceEntry\",\n\x16\x46unctionCallIdentifier\x12\x12\n\nidentifier\x18\x01 \x01(\t\"(\n\x18MessageFunctionArguments\x12\x0c\n\x04name\x18\x01 \x01(\t\"$\n\x13\x46unctionReturnValue\x12\r\n\x05value\x18\x01 \x01(\t\"2\n\x1eSetFunctionReturnValueResponse\x12\x10\n\x08received\x18\x01 \x01(\x08\x32\xa4\x05\n\x10SuperGSLCompiler\x12h\n\x15\x43reateCompilerSession\x12&.supergsl.CreateCompilerSessionRequest\x1a%.supergsl.CreateCompilerSessionResult\"\x00\x12k\n\x16\x44\x65stroyCompilerSession\x12\'.supergsl.DestroyCompilerSessionRequest\x1a&.supergsl.DestroyCompilerSessionResult\"\x00\x12>\n\x07\x43ompile\x12\x18.supergsl.CompileRequest\x1a\x17.supergsl.CompileResult\"\x00\x12V\n\x0fListSymbolTable\x12 .supergsl.ListSymbolTableRequest\x1a\x1f.supergsl.ListSymbolTableResult\"\x00\x12\\\n\x11GetSequenceDetail\x12\".supergsl.GetSequenceDetailRequest\x1a!.supergsl.GetSequenceDetailResult\"\x00\x12^\n\x14GetFunctionArguments\x12 .supergsl.FunctionCallIdentifier\x1a\".supergsl.MessageFunctionArguments\"\x00\x12\x63\n\x16SetFunctionReturnValue\x12\x1d.supergsl.FunctionReturnValue\x1a(.supergsl.SetFunctionReturnValueResponse\"\x00\x42\x03\x90\x01\x01\x62\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_struct__pb2.DESCRIPTOR,])
 
@@ -369,6 +369,77 @@ _SYMBOL = _descriptor.Descriptor(
 )
 
 
+_SEQUENCESLICE = _descriptor.Descriptor(
+  name='SequenceSlice',
+  full_name='supergsl.SequenceSlice',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=633,
+  serialized_end=648,
+)
+
+
+_ROLE = _descriptor.Descriptor(
+  name='Role',
+  full_name='supergsl.Role',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='uri', full_name='supergsl.Role.uri', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='name', full_name='supergsl.Role.name', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='description', full_name='supergsl.Role.description', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=650,
+  serialized_end=704,
+)
+
+
 _SEQUENCEENTRY = _descriptor.Descriptor(
   name='SequenceEntry',
   full_name='supergsl.SequenceEntry',
@@ -392,8 +463,22 @@ _SEQUENCEENTRY = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='sequence', full_name='supergsl.SequenceEntry.sequence', index=2,
-      number=3, type=9, cpp_type=9, label=1,
+      name='roles', full_name='supergsl.SequenceEntry.roles', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='links', full_name='supergsl.SequenceEntry.links', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='sequence', full_name='supergsl.SequenceEntry.sequence', index=4,
+      number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -410,92 +495,50 @@ _SEQUENCEENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=633,
-  serialized_end=708,
+  serialized_start=707,
+  serialized_end=852,
 )
 
 
-_LISTSEQUENCESTOREREQUEST = _descriptor.Descriptor(
-  name='ListSequenceStoreRequest',
-  full_name='supergsl.ListSequenceStoreRequest',
+_SEQUENCELINK = _descriptor.Descriptor(
+  name='SequenceLink',
+  full_name='supergsl.SequenceLink',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='session_identifier', full_name='supergsl.ListSequenceStoreRequest.session_identifier', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=710,
-  serialized_end=764,
-)
-
-
-_LISTSEQUENCESTORERESULT_SEQUENCEENTRIESENTRY = _descriptor.Descriptor(
-  name='SequenceEntriesEntry',
-  full_name='supergsl.ListSequenceStoreResult.SequenceEntriesEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='supergsl.ListSequenceStoreResult.SequenceEntriesEntry.key', index=0,
+      name='parent_entry_identifier', full_name='supergsl.SequenceLink.parent_entry_identifier', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='value', full_name='supergsl.ListSequenceStoreResult.SequenceEntriesEntry.value', index=1,
-      number=2, type=11, cpp_type=10, label=1,
+      name='child_entry_identifier', full_name='supergsl.SequenceLink.child_entry_identifier', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='source_slice', full_name='supergsl.SequenceLink.source_slice', index=2,
+      number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=876,
-  serialized_end=955,
-)
-
-_LISTSEQUENCESTORERESULT = _descriptor.Descriptor(
-  name='ListSequenceStoreResult',
-  full_name='supergsl.ListSequenceStoreResult',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
     _descriptor.FieldDescriptor(
-      name='sequence_entries', full_name='supergsl.ListSequenceStoreResult.sequence_entries', index=0,
-      number=1, type=11, cpp_type=10, label=3,
+      name='target_slice', full_name='supergsl.SequenceLink.target_slice', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='roles', full_name='supergsl.SequenceLink.roles', index=4,
+      number=5, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -503,7 +546,7 @@ _LISTSEQUENCESTORERESULT = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_LISTSEQUENCESTORERESULT_SEQUENCEENTRIESENTRY, ],
+  nested_types=[],
   enum_types=[
   ],
   serialized_options=None,
@@ -512,8 +555,8 @@ _LISTSEQUENCESTORERESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=767,
-  serialized_end=955,
+  serialized_start=855,
+  serialized_end=1059,
 )
 
 
@@ -558,8 +601,8 @@ _GETSEQUENCEDETAILREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=957,
-  serialized_end=1066,
+  serialized_start=1061,
+  serialized_end=1170,
 )
 
 
@@ -578,13 +621,6 @@ _GETSEQUENCEDETAILRESULT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='annotations', full_name='supergsl.GetSequenceDetailResult.annotations', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -597,8 +633,8 @@ _GETSEQUENCEDETAILRESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1068,
-  serialized_end=1188,
+  serialized_start=1172,
+  serialized_end=1246,
 )
 
 
@@ -629,8 +665,8 @@ _FUNCTIONCALLIDENTIFIER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1190,
-  serialized_end=1234,
+  serialized_start=1248,
+  serialized_end=1292,
 )
 
 
@@ -661,8 +697,8 @@ _MESSAGEFUNCTIONARGUMENTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1236,
-  serialized_end=1276,
+  serialized_start=1294,
+  serialized_end=1334,
 )
 
 
@@ -693,8 +729,8 @@ _FUNCTIONRETURNVALUE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1278,
-  serialized_end=1314,
+  serialized_start=1336,
+  serialized_end=1372,
 )
 
 
@@ -725,19 +761,20 @@ _SETFUNCTIONRETURNVALUERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1316,
-  serialized_end=1366,
+  serialized_start=1374,
+  serialized_end=1424,
 )
 
 _LISTSYMBOLTABLERESULT_SYMBOLSENTRY.fields_by_name['value'].message_type = _SYMBOL
 _LISTSYMBOLTABLERESULT_SYMBOLSENTRY.containing_type = _LISTSYMBOLTABLERESULT
 _LISTSYMBOLTABLERESULT.fields_by_name['symbols'].message_type = _LISTSYMBOLTABLERESULT_SYMBOLSENTRY
 _SYMBOL.fields_by_name['details'].message_type = google_dot_protobuf_dot_struct__pb2._STRUCT
-_LISTSEQUENCESTORERESULT_SEQUENCEENTRIESENTRY.fields_by_name['value'].message_type = _SEQUENCEENTRY
-_LISTSEQUENCESTORERESULT_SEQUENCEENTRIESENTRY.containing_type = _LISTSEQUENCESTORERESULT
-_LISTSEQUENCESTORERESULT.fields_by_name['sequence_entries'].message_type = _LISTSEQUENCESTORERESULT_SEQUENCEENTRIESENTRY
+_SEQUENCEENTRY.fields_by_name['roles'].message_type = _ROLE
+_SEQUENCEENTRY.fields_by_name['links'].message_type = _SEQUENCELINK
+_SEQUENCELINK.fields_by_name['source_slice'].message_type = _SEQUENCESLICE
+_SEQUENCELINK.fields_by_name['target_slice'].message_type = _SEQUENCESLICE
+_SEQUENCELINK.fields_by_name['roles'].message_type = _ROLE
 _GETSEQUENCEDETAILRESULT.fields_by_name['sequence_entry'].message_type = _SEQUENCEENTRY
-_GETSEQUENCEDETAILRESULT.fields_by_name['annotations'].message_type = google_dot_protobuf_dot_struct__pb2._STRUCT
 DESCRIPTOR.message_types_by_name['CreateCompilerSessionRequest'] = _CREATECOMPILERSESSIONREQUEST
 DESCRIPTOR.message_types_by_name['CreateCompilerSessionResult'] = _CREATECOMPILERSESSIONRESULT
 DESCRIPTOR.message_types_by_name['DestroyCompilerSessionRequest'] = _DESTROYCOMPILERSESSIONREQUEST
@@ -747,9 +784,10 @@ DESCRIPTOR.message_types_by_name['CompileResult'] = _COMPILERESULT
 DESCRIPTOR.message_types_by_name['ListSymbolTableRequest'] = _LISTSYMBOLTABLEREQUEST
 DESCRIPTOR.message_types_by_name['ListSymbolTableResult'] = _LISTSYMBOLTABLERESULT
 DESCRIPTOR.message_types_by_name['Symbol'] = _SYMBOL
+DESCRIPTOR.message_types_by_name['SequenceSlice'] = _SEQUENCESLICE
+DESCRIPTOR.message_types_by_name['Role'] = _ROLE
 DESCRIPTOR.message_types_by_name['SequenceEntry'] = _SEQUENCEENTRY
-DESCRIPTOR.message_types_by_name['ListSequenceStoreRequest'] = _LISTSEQUENCESTOREREQUEST
-DESCRIPTOR.message_types_by_name['ListSequenceStoreResult'] = _LISTSEQUENCESTORERESULT
+DESCRIPTOR.message_types_by_name['SequenceLink'] = _SEQUENCELINK
 DESCRIPTOR.message_types_by_name['GetSequenceDetailRequest'] = _GETSEQUENCEDETAILREQUEST
 DESCRIPTOR.message_types_by_name['GetSequenceDetailResult'] = _GETSEQUENCEDETAILRESULT
 DESCRIPTOR.message_types_by_name['FunctionCallIdentifier'] = _FUNCTIONCALLIDENTIFIER
@@ -829,6 +867,20 @@ Symbol = _reflection.GeneratedProtocolMessageType('Symbol', (_message.Message,),
   })
 _sym_db.RegisterMessage(Symbol)
 
+SequenceSlice = _reflection.GeneratedProtocolMessageType('SequenceSlice', (_message.Message,), {
+  'DESCRIPTOR' : _SEQUENCESLICE,
+  '__module__' : 'sgsl_pb2'
+  # @@protoc_insertion_point(class_scope:supergsl.SequenceSlice)
+  })
+_sym_db.RegisterMessage(SequenceSlice)
+
+Role = _reflection.GeneratedProtocolMessageType('Role', (_message.Message,), {
+  'DESCRIPTOR' : _ROLE,
+  '__module__' : 'sgsl_pb2'
+  # @@protoc_insertion_point(class_scope:supergsl.Role)
+  })
+_sym_db.RegisterMessage(Role)
+
 SequenceEntry = _reflection.GeneratedProtocolMessageType('SequenceEntry', (_message.Message,), {
   'DESCRIPTOR' : _SEQUENCEENTRY,
   '__module__' : 'sgsl_pb2'
@@ -836,27 +888,12 @@ SequenceEntry = _reflection.GeneratedProtocolMessageType('SequenceEntry', (_mess
   })
 _sym_db.RegisterMessage(SequenceEntry)
 
-ListSequenceStoreRequest = _reflection.GeneratedProtocolMessageType('ListSequenceStoreRequest', (_message.Message,), {
-  'DESCRIPTOR' : _LISTSEQUENCESTOREREQUEST,
+SequenceLink = _reflection.GeneratedProtocolMessageType('SequenceLink', (_message.Message,), {
+  'DESCRIPTOR' : _SEQUENCELINK,
   '__module__' : 'sgsl_pb2'
-  # @@protoc_insertion_point(class_scope:supergsl.ListSequenceStoreRequest)
+  # @@protoc_insertion_point(class_scope:supergsl.SequenceLink)
   })
-_sym_db.RegisterMessage(ListSequenceStoreRequest)
-
-ListSequenceStoreResult = _reflection.GeneratedProtocolMessageType('ListSequenceStoreResult', (_message.Message,), {
-
-  'SequenceEntriesEntry' : _reflection.GeneratedProtocolMessageType('SequenceEntriesEntry', (_message.Message,), {
-    'DESCRIPTOR' : _LISTSEQUENCESTORERESULT_SEQUENCEENTRIESENTRY,
-    '__module__' : 'sgsl_pb2'
-    # @@protoc_insertion_point(class_scope:supergsl.ListSequenceStoreResult.SequenceEntriesEntry)
-    })
-  ,
-  'DESCRIPTOR' : _LISTSEQUENCESTORERESULT,
-  '__module__' : 'sgsl_pb2'
-  # @@protoc_insertion_point(class_scope:supergsl.ListSequenceStoreResult)
-  })
-_sym_db.RegisterMessage(ListSequenceStoreResult)
-_sym_db.RegisterMessage(ListSequenceStoreResult.SequenceEntriesEntry)
+_sym_db.RegisterMessage(SequenceLink)
 
 GetSequenceDetailRequest = _reflection.GeneratedProtocolMessageType('GetSequenceDetailRequest', (_message.Message,), {
   'DESCRIPTOR' : _GETSEQUENCEDETAILREQUEST,
@@ -903,7 +940,6 @@ _sym_db.RegisterMessage(SetFunctionReturnValueResponse)
 
 DESCRIPTOR._options = None
 _LISTSYMBOLTABLERESULT_SYMBOLSENTRY._options = None
-_LISTSEQUENCESTORERESULT_SEQUENCEENTRIESENTRY._options = None
 
 _SUPERGSLCOMPILER = _descriptor.ServiceDescriptor(
   name='SuperGSLCompiler',
@@ -912,8 +948,8 @@ _SUPERGSLCOMPILER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=1369,
-  serialized_end=2139,
+  serialized_start=1427,
+  serialized_end=2103,
   methods=[
   _descriptor.MethodDescriptor(
     name='CreateCompilerSession',
@@ -956,19 +992,9 @@ _SUPERGSLCOMPILER = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
-    name='ListSequenceStore',
-    full_name='supergsl.SuperGSLCompiler.ListSequenceStore',
-    index=4,
-    containing_service=None,
-    input_type=_LISTSEQUENCESTOREREQUEST,
-    output_type=_LISTSEQUENCESTORERESULT,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
     name='GetSequenceDetail',
     full_name='supergsl.SuperGSLCompiler.GetSequenceDetail',
-    index=5,
+    index=4,
     containing_service=None,
     input_type=_GETSEQUENCEDETAILREQUEST,
     output_type=_GETSEQUENCEDETAILRESULT,
@@ -978,7 +1004,7 @@ _SUPERGSLCOMPILER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetFunctionArguments',
     full_name='supergsl.SuperGSLCompiler.GetFunctionArguments',
-    index=6,
+    index=5,
     containing_service=None,
     input_type=_FUNCTIONCALLIDENTIFIER,
     output_type=_MESSAGEFUNCTIONARGUMENTS,
@@ -988,7 +1014,7 @@ _SUPERGSLCOMPILER = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='SetFunctionReturnValue',
     full_name='supergsl.SuperGSLCompiler.SetFunctionReturnValue',
-    index=7,
+    index=6,
     containing_service=None,
     input_type=_FUNCTIONRETURNVALUE,
     output_type=_SETFUNCTIONRETURNVALUERESPONSE,

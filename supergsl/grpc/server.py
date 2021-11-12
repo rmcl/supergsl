@@ -1,9 +1,10 @@
-import uuid
+from uuid import uuid4, UUID
 from typing import Optional, Dict, Tuple, Any
 from concurrent import futures
 from grpc import server as grpc_server
 from google.protobuf.struct_pb2 import Struct
 
+from supergsl.core.pipeline import CompilerPipeline
 from supergsl.grpc.stubs.sgsl_pb2_grpc import (
     SuperGSLCompilerServicer,
     add_SuperGSLCompilerServicer_to_server
@@ -11,18 +12,15 @@ from supergsl.grpc.stubs.sgsl_pb2_grpc import (
 from supergsl.grpc.stubs.sgsl_pb2 import (
     CreateCompilerSessionRequest,
     CreateCompilerSessionResult,
-    ListSequenceStoreRequest,
-    ListSequenceStoreResult,
+    GetSequenceDetailRequest,
+    GetSequenceDetailResult,
     ListSymbolTableRequest,
     ListSymbolTableResult,
-    SequenceEntry,
     CompileRequest,
     CompileResult,
     Symbol
 )
-
-from supergsl.core.pipeline import CompilerPipeline
-
+from .serialize import sequence_entry_dto
 
 class SuperGSLCompilerService(SuperGSLCompilerServicer):
     """Implement the SuperGSL Compiler gRPC Service."""
@@ -64,44 +62,13 @@ class SuperGSLCompilerService(SuperGSLCompilerServicer):
 
         return result
 
-
-    def ListSequenceStore(
-        self,
-        request : ListSequenceStoreRequest,
-        context
-    ):
-        """Return a map of Sequence Entries in the compiler Sequence Store."""
-        serialized_entries : Dict[str, SequenceEntry] = {}
-
+    def GetSequenceDetail(self, request : GetSequenceDetailRequest, context):
+        """Return detail about the requested sequence"""
         compiler_pipeline = self.get_compiler_session(request.session_identifier)
         sequence_store = compiler_pipeline.symbols['sequences']
+        sequence_entry = sequence_store.lookup(UUID(request.sequence_identifier))
 
-        for identifier, sequence_entry in sequence_store.items():
-            serialized_entry = SequenceEntry(
-                identifier=str(identifier),
-                is_composite=sequence_entry.is_composite,
-                sequence=''
-            )
-            serialized_entries[str(identifier)] = serialized_entry
-
-        return ListSequenceStoreResult(sequence_entries=serialized_entries)
-
-    def GetSequenceDetail(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        compiler_pipeline = self.get_compiler_session(request.session_identifier)
-        sequence_store = compiler_pipeline.symbols['sequences']
-        sequence_entry = sequence_store.lookup(request.sequence_identifier)
-
-        sequence = ''
-        if request.include_sequence:
-            sequence = sequence_entry.sequence
-
-        entry = SequenceEntry(
-            identifier=sequence_entry.id,
-            is_composite=sequence_entry.is_composite,
-            sequence=sequence
-        )
-
+        entry = sequence_entry_dto(sequence_entry, request.include_sequence)
         return GetSequenceDetailResult(sequence_entry=entry)
 
     def ListSymbolTable(
@@ -139,7 +106,7 @@ class SuperGSLCompilerService(SuperGSLCompilerServicer):
 
     def create_compiler_session(self) -> Tuple[str, CompilerPipeline]:
         """Create a Compiler session and store it."""
-        identifier = str(uuid.uuid4())
+        identifier = str(uuid4())
         self.compiler_sessions[identifier] = CompilerPipeline(self.compiler_settings)
         return identifier, self.compiler_sessions[identifier]
 
