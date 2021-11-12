@@ -21,18 +21,19 @@ def role_dto(
         description=role.description)
 
 def entry_link_dto(
-    entry_link : EntryLink
+    entry_link : EntryLink,
+    child_sequence_entry : SequenceEntry
 ) -> SequenceLink:
     """Serialize a EntryLink as a gRPC SequenceLink."""
     sequence_link = SequenceLink(
         parent_entry_identifier=str(entry_link.parent_entry.id),
-        child_entry_identifier=str(sequence_entry.id),
+        child_entry_identifier=str(child_sequence_entry.id),
         source_slice=SequenceSlice(),
         target_slice=SequenceSlice())
 
     sequence_link.roles.extend([
         role_dto(role)
-        for role in entry_link
+        for role in entry_link.roles
     ])
     return sequence_link
 
@@ -56,8 +57,8 @@ def sequence_entry_dto(
     ])
 
     if sequence_entry.parent_links:
-        entry.extend([
-            entry_link_dto(entry_link)
+        entry.links.extend([
+            entry_link_dto(entry_link, sequence_entry)
             for entry_link in sequence_entry.parent_links
         ])
 
