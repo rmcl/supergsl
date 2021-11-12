@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import random
 from typing import Tuple, List
 from Bio.Seq import Seq
-from supergsl.core.sequence import SequenceStore, SequenceEntry, SliceMapping
+from supergsl.core.sequence import SequenceStore, SequenceEntry, SliceMapping, Role
 from supergsl.core.function import SuperGSLFunctionConfig
 from supergsl.core.parts.provider import PartProviderConfig
 from supergsl.core.types.primer import PrimerPair
@@ -17,6 +17,7 @@ from supergsl.core.types.assembly import (
     AssemblyResultSet
 )
 from supergsl.core.symbol_table import SymbolTable
+
 
 class SuperGSLCoreFixtures(object):
 
@@ -39,6 +40,9 @@ class SuperGSLCoreFixtures(object):
         """Make a sequence entry with random DNA of a given length."""
         sequence = self.mk_random_dna_sequence(seq_len)
         return self.mk_sequence_entry(sequence)
+
+    def mk_sequence_role(self):
+        return Role(uri='test/role/1', name='TestRole', description='test role')
 
     def mk_extraction_primers(self, part) -> PrimerPair:
         """Primers are often complementary sequences flanking the DNA sequence of interest.

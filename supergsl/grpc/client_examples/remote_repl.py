@@ -27,7 +27,14 @@ class SuperGSLCompilerClient(object):
             table_result = self.stub.ListSymbolTable(pb2.ListSymbolTableRequest(
                 session_identifier=session_identifier
             ))
+            print('Symbol Table')
             print(table_result)
+            print('Sequence Store')
+            sequence_store_result = self.stub.ListSequenceStore(
+                pb2.ListSequenceStoreRequest(
+                    session_identifier=session_identifier))
+
+            print(sequence_store_result)
 
             user_input = input()
 

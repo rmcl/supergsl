@@ -34,6 +34,11 @@ class SuperGSLCompilerStub(object):
                 request_serializer=sgsl__pb2.ListSymbolTableRequest.SerializeToString,
                 response_deserializer=sgsl__pb2.ListSymbolTableResult.FromString,
                 )
+        self.GetSequenceDetail = channel.unary_unary(
+                '/supergsl.SuperGSLCompiler/GetSequenceDetail',
+                request_serializer=sgsl__pb2.GetSequenceDetailRequest.SerializeToString,
+                response_deserializer=sgsl__pb2.GetSequenceDetailResult.FromString,
+                )
         self.GetFunctionArguments = channel.unary_unary(
                 '/supergsl.SuperGSLCompiler/GetFunctionArguments',
                 request_serializer=sgsl__pb2.FunctionCallIdentifier.SerializeToString,
@@ -73,6 +78,12 @@ class SuperGSLCompilerServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetSequenceDetail(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def GetFunctionArguments(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -107,6 +118,11 @@ def add_SuperGSLCompilerServicer_to_server(servicer, server):
                     servicer.ListSymbolTable,
                     request_deserializer=sgsl__pb2.ListSymbolTableRequest.FromString,
                     response_serializer=sgsl__pb2.ListSymbolTableResult.SerializeToString,
+            ),
+            'GetSequenceDetail': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetSequenceDetail,
+                    request_deserializer=sgsl__pb2.GetSequenceDetailRequest.FromString,
+                    response_serializer=sgsl__pb2.GetSequenceDetailResult.SerializeToString,
             ),
             'GetFunctionArguments': grpc.unary_unary_rpc_method_handler(
                     servicer.GetFunctionArguments,
@@ -193,6 +209,23 @@ class SuperGSLCompiler(object):
         return grpc.experimental.unary_unary(request, target, '/supergsl.SuperGSLCompiler/ListSymbolTable',
             sgsl__pb2.ListSymbolTableRequest.SerializeToString,
             sgsl__pb2.ListSymbolTableResult.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetSequenceDetail(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/supergsl.SuperGSLCompiler/GetSequenceDetail',
+            sgsl__pb2.GetSequenceDetailRequest.SerializeToString,
+            sgsl__pb2.GetSequenceDetailResult.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

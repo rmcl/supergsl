@@ -17,7 +17,6 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
 
 class CreateCompilerSessionRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
-
     def __init__(self,
         ) -> None: ...
 global___CreateCompilerSessionRequest = CreateCompilerSessionRequest
@@ -26,7 +25,6 @@ class CreateCompilerSessionResult(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
     SESSION_IDENTIFIER_FIELD_NUMBER: builtins.int
     session_identifier: typing.Text = ...
-
     def __init__(self,
         *,
         session_identifier : typing.Text = ...,
@@ -36,7 +34,6 @@ global___CreateCompilerSessionResult = CreateCompilerSessionResult
 
 class DestroyCompilerSessionRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
-
     def __init__(self,
         ) -> None: ...
 global___DestroyCompilerSessionRequest = DestroyCompilerSessionRequest
@@ -47,7 +44,6 @@ class DestroyCompilerSessionResult(google.protobuf.message.Message):
     ERROR_FIELD_NUMBER: builtins.int
     success: builtins.bool = ...
     error: typing.Text = ...
-
     def __init__(self,
         *,
         success : builtins.bool = ...,
@@ -62,7 +58,6 @@ class CompileRequest(google.protobuf.message.Message):
     SOURCE_CODE_FIELD_NUMBER: builtins.int
     session_identifier: typing.Text = ...
     source_code: typing.Text = ...
-
     def __init__(self,
         *,
         session_identifier : typing.Text = ...,
@@ -77,7 +72,6 @@ class CompileResult(google.protobuf.message.Message):
     ERROR_FIELD_NUMBER: builtins.int
     success: builtins.bool = ...
     error: typing.Text = ...
-
     def __init__(self,
         *,
         success : builtins.bool = ...,
@@ -90,7 +84,6 @@ class ListSymbolTableRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
     SESSION_IDENTIFIER_FIELD_NUMBER: builtins.int
     session_identifier: typing.Text = ...
-
     def __init__(self,
         *,
         session_identifier : typing.Text = ...,
@@ -105,10 +98,8 @@ class ListSymbolTableResult(google.protobuf.message.Message):
         KEY_FIELD_NUMBER: builtins.int
         VALUE_FIELD_NUMBER: builtins.int
         key: typing.Text = ...
-
         @property
         def value(self) -> global___Symbol: ...
-
         def __init__(self,
             *,
             key : typing.Text = ...,
@@ -118,10 +109,8 @@ class ListSymbolTableResult(google.protobuf.message.Message):
         def ClearField(self, field_name: typing_extensions.Literal[u"key",b"key",u"value",b"value"]) -> None: ...
 
     SYMBOLS_FIELD_NUMBER: builtins.int
-
     @property
     def symbols(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Symbol]: ...
-
     def __init__(self,
         *,
         symbols : typing.Optional[typing.Mapping[typing.Text, global___Symbol]] = ...,
@@ -134,10 +123,8 @@ class Symbol(google.protobuf.message.Message):
     TYPE_FIELD_NUMBER: builtins.int
     DETAILS_FIELD_NUMBER: builtins.int
     type: typing.Text = ...
-
     @property
     def details(self) -> google.protobuf.struct_pb2.Struct: ...
-
     def __init__(self,
         *,
         type : typing.Text = ...,
@@ -147,11 +134,117 @@ class Symbol(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal[u"details",b"details",u"type",b"type"]) -> None: ...
 global___Symbol = Symbol
 
+class SequenceSlice(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    def __init__(self,
+        ) -> None: ...
+global___SequenceSlice = SequenceSlice
+
+class Role(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    URI_FIELD_NUMBER: builtins.int
+    NAME_FIELD_NUMBER: builtins.int
+    DESCRIPTION_FIELD_NUMBER: builtins.int
+    uri: typing.Text = ...
+    name: typing.Text = ...
+    description: typing.Text = ...
+    def __init__(self,
+        *,
+        uri : typing.Text = ...,
+        name : typing.Text = ...,
+        description : typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal[u"description",b"description",u"name",b"name",u"uri",b"uri"]) -> None: ...
+global___Role = Role
+
+class SequenceEntry(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    IDENTIFIER_FIELD_NUMBER: builtins.int
+    IS_COMPOSITE_FIELD_NUMBER: builtins.int
+    ROLES_FIELD_NUMBER: builtins.int
+    LINKS_FIELD_NUMBER: builtins.int
+    SEQUENCE_FIELD_NUMBER: builtins.int
+    identifier: typing.Text = ...
+    is_composite: builtins.bool = ...
+    @property
+    def roles(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Role]: ...
+    @property
+    def links(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___SequenceLink]: ...
+    sequence: typing.Text = ...
+    def __init__(self,
+        *,
+        identifier : typing.Text = ...,
+        is_composite : builtins.bool = ...,
+        roles : typing.Optional[typing.Iterable[global___Role]] = ...,
+        links : typing.Optional[typing.Iterable[global___SequenceLink]] = ...,
+        sequence : typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal[u"identifier",b"identifier",u"is_composite",b"is_composite",u"links",b"links",u"roles",b"roles",u"sequence",b"sequence"]) -> None: ...
+global___SequenceEntry = SequenceEntry
+
+class SequenceLink(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    PARENT_ENTRY_IDENTIFIER_FIELD_NUMBER: builtins.int
+    CHILD_ENTRY_IDENTIFIER_FIELD_NUMBER: builtins.int
+    SOURCE_SLICE_FIELD_NUMBER: builtins.int
+    TARGET_SLICE_FIELD_NUMBER: builtins.int
+    ROLES_FIELD_NUMBER: builtins.int
+    parent_entry_identifier: typing.Text = ...
+    child_entry_identifier: typing.Text = ...
+    # Todo: We may want to simplify things for the client by making these
+    # "absolute" positions in the source or target sequence.
+    @property
+    def source_slice(self) -> global___SequenceSlice: ...
+    @property
+    def target_slice(self) -> global___SequenceSlice: ...
+    @property
+    def roles(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Role]: ...
+    def __init__(self,
+        *,
+        parent_entry_identifier : typing.Text = ...,
+        child_entry_identifier : typing.Text = ...,
+        source_slice : typing.Optional[global___SequenceSlice] = ...,
+        target_slice : typing.Optional[global___SequenceSlice] = ...,
+        roles : typing.Optional[typing.Iterable[global___Role]] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal[u"source_slice",b"source_slice",u"target_slice",b"target_slice"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal[u"child_entry_identifier",b"child_entry_identifier",u"parent_entry_identifier",b"parent_entry_identifier",u"roles",b"roles",u"source_slice",b"source_slice",u"target_slice",b"target_slice"]) -> None: ...
+global___SequenceLink = SequenceLink
+
+class GetSequenceDetailRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    SESSION_IDENTIFIER_FIELD_NUMBER: builtins.int
+    SEQUENCE_IDENTIFIER_FIELD_NUMBER: builtins.int
+    INCLUDE_SEQUENCE_FIELD_NUMBER: builtins.int
+    session_identifier: typing.Text = ...
+    sequence_identifier: typing.Text = ...
+    include_sequence: builtins.bool = ...
+    def __init__(self,
+        *,
+        session_identifier : typing.Text = ...,
+        sequence_identifier : typing.Text = ...,
+        include_sequence : builtins.bool = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal[u"include_sequence",b"include_sequence",u"sequence_identifier",b"sequence_identifier",u"session_identifier",b"session_identifier"]) -> None: ...
+global___GetSequenceDetailRequest = GetSequenceDetailRequest
+
+class GetSequenceDetailResult(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    SEQUENCE_ENTRY_FIELD_NUMBER: builtins.int
+    @property
+    def sequence_entry(self) -> global___SequenceEntry: ...
+    def __init__(self,
+        *,
+        sequence_entry : typing.Optional[global___SequenceEntry] = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal[u"sequence_entry",b"sequence_entry"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal[u"sequence_entry",b"sequence_entry"]) -> None: ...
+global___GetSequenceDetailResult = GetSequenceDetailResult
+
 class FunctionCallIdentifier(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
     IDENTIFIER_FIELD_NUMBER: builtins.int
     identifier: typing.Text = ...
-
     def __init__(self,
         *,
         identifier : typing.Text = ...,
@@ -163,7 +256,6 @@ class MessageFunctionArguments(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
     NAME_FIELD_NUMBER: builtins.int
     name: typing.Text = ...
-
     def __init__(self,
         *,
         name : typing.Text = ...,
@@ -175,7 +267,6 @@ class FunctionReturnValue(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
     VALUE_FIELD_NUMBER: builtins.int
     value: typing.Text = ...
-
     def __init__(self,
         *,
         value : typing.Text = ...,
@@ -187,7 +278,6 @@ class SetFunctionReturnValueResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
     RECEIVED_FIELD_NUMBER: builtins.int
     received: builtins.bool = ...
-
     def __init__(self,
         *,
         received : builtins.bool = ...,
@@ -220,6 +310,12 @@ class SuperGSLCompiler(google.protobuf.service.Service, metaclass=abc.ABCMeta):
         request: global___ListSymbolTableRequest,
         done: typing.Optional[typing.Callable[[global___ListSymbolTableResult], None]],
     ) -> concurrent.futures.Future[global___ListSymbolTableResult]: ...
+    @abc.abstractmethod
+    def GetSequenceDetail(self,
+        rpc_controller: google.protobuf.service.RpcController,
+        request: global___GetSequenceDetailRequest,
+        done: typing.Optional[typing.Callable[[global___GetSequenceDetailResult], None]],
+    ) -> concurrent.futures.Future[global___GetSequenceDetailResult]: ...
     @abc.abstractmethod
     def GetFunctionArguments(self,
         rpc_controller: google.protobuf.service.RpcController,
@@ -254,6 +350,11 @@ class SuperGSLCompiler_Stub(SuperGSLCompiler):
         request: global___ListSymbolTableRequest,
         done: typing.Optional[typing.Callable[[global___ListSymbolTableResult], None]],
     ) -> concurrent.futures.Future[global___ListSymbolTableResult]: ...
+    def GetSequenceDetail(self,
+        rpc_controller: google.protobuf.service.RpcController,
+        request: global___GetSequenceDetailRequest,
+        done: typing.Optional[typing.Callable[[global___GetSequenceDetailResult], None]],
+    ) -> concurrent.futures.Future[global___GetSequenceDetailResult]: ...
     def GetFunctionArguments(self,
         rpc_controller: google.protobuf.service.RpcController,
         request: global___FunctionCallIdentifier,
