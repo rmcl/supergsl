@@ -77,7 +77,7 @@ class SuperGSLCompilerServiceTestCase(unittest.TestCase):
             self.assertEqual(result.sequence_entry.sequence, str(sequence_entry.sequence))
 
     def test_GetSequenceDetail(self):
-        """"""
+        """Retrieve details about a sequence in the Sequence Store."""
         with patch('supergsl.grpc.server.CompilerPipeline') as compiler_pipeline_class_mock:
             compiler_pipeline = compiler_pipeline_class_mock.return_value
             compiler_pipeline.symbols = self.symbol_table
