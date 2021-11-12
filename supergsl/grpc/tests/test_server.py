@@ -1,5 +1,6 @@
+"""Tests for SuperGSL's builtin gRPC server."""
+from unittest import TestCase
 from unittest.mock import patch, Mock
-import unittest
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.grpc.server import SuperGSLCompilerService
 from supergsl.grpc.stubs.sgsl_pb2 import (
@@ -14,7 +15,7 @@ from supergsl.grpc.stubs.sgsl_pb2 import (
 )
 
 
-class SuperGSLCompilerServiceTestCase(unittest.TestCase):
+class SuperGSLCompilerServiceTestCase(TestCase):
     """Test case for `SuperGSLCompilerService` gRPC server."""
 
     def setUp(self):
