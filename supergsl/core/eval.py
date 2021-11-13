@@ -9,15 +9,21 @@ from supergsl.core.types.builtin import (
     AminoAcidSequence,
     Collection
 )
+from supergsl.utils import resolve_import
 from supergsl.core.types.part import Part
-from supergsl.core.parts.slice import convert_slice_position_to_seq_position
 from supergsl.core.types.assembly import AssemblyDeclaration
+from supergsl.core.types.position import (
+    Position,
+    Slice
+)
 
 from supergsl.core.constants import (
     UNAMBIGUOUS_DNA_SEQUENCE,
     UNAMBIGUOUS_PROTEIN_SEQUENCE,
     NUMBER_CONSTANT,
-    STRING_CONSTANT
+    STRING_CONSTANT,
+    FIVE_PRIME,
+    THREE_PRIME
 )
 
 from supergsl.core.ast import (
@@ -29,8 +35,8 @@ from supergsl.core.ast import (
     VariableDeclaration,
     ListDeclaration,
     FunctionInvocation,
-    Slice,
-    SlicePosition,
+    Slice as AstSlice,
+    SlicePosition as AstSlicePosition,
     SequenceConstant,
     Constant
 )
@@ -40,7 +46,9 @@ from supergsl.core.exception import (
     FunctionInvokeError,
     SuperGSLTypeError,
     SymbolNotFoundError,
-    FunctionNotFoundError
+    FunctionNotFoundError,
+    BackendError,
+    SuperGSLError
 )
 
 #pylint: disable=E1136
@@ -49,7 +57,7 @@ from supergsl.core.exception import (
 class EvaluatePass(BackendPipelinePass):
     """Traverse the AST to execute the GSL Program."""
 
-    def __init__(self, symbol_table : SymbolTable):
+    def __init__(self, symbol_table : Optional[SymbolTable]):
         self.symbol_table = symbol_table
 
     def get_node_handlers(self) -> Dict[Optional[str], Callable]:
@@ -79,7 +87,7 @@ class EvaluatePass(BackendPipelinePass):
         node_type : str = type(node).__name__
         handler_method = handlers.get(node_type, None)
         if not handler_method:
-            raise Exception('Handler for node %s not specified.' % node_type)
+            raise BackendError('Handler for node %s not specified.' % node_type)
 
         return handler_method(node, *args, **kwargs)
 
@@ -93,14 +101,10 @@ class EvaluatePass(BackendPipelinePass):
 
 
     def visit_import(self, import_node : Import):
-        import_table = self.symbol_table.enter_nested_scope('imports')
-
-        module_path = '.'.join(import_node.module_path)
-        provider = import_table.lookup(module_path)
-
         for program_import in import_node.imports:
-            provider.resolve_import(
+            resolve_import(
                 self.symbol_table,
+                import_node.module_path,
                 program_import.identifier,
                 program_import.alias)
 
@@ -145,7 +149,14 @@ class EvaluatePass(BackendPipelinePass):
         symbol = symbol.eval()
 
         if symbol_reference.slice:
-            symbol = self.visit(symbol_reference.slice, symbol)
+            parent_part = symbol
+            part_slice = self.visit(symbol_reference.slice)
+
+            child_identifier = '%s[%s]' % (
+                parent_part.identifier,
+                part_slice.get_slice_str()
+            )
+            symbol = parent_part.slice(part_slice, identifier=child_identifier)
 
         if symbol_reference.invert:
             #    inverter = self.visit(symbol_reference.invert)
@@ -154,26 +165,26 @@ class EvaluatePass(BackendPipelinePass):
 
         return symbol
 
+    def visit_slice(self, slice_node : AstSlice):
+        start_position = self.visit(slice_node.start)
+        end_position = self.visit(slice_node.end)
 
-    def visit_slice(self, slice_node : Slice, parent_part : Part):
-        start_position = self.visit(slice_node.start, parent_part)
-        end_position = self.visit(slice_node.end, parent_part)
+        return Slice(start_position, end_position)
 
-        child_identifier = '%s[%s]' % (
-            parent_part.identifier,
-            slice_node.get_slice_str()
-        )
-        new_part = parent_part.get_child_part_by_slice(
-            child_identifier, start_position, end_position)
+    def visit_slice_position(self, slice_position : AstSlicePosition):
+        """Convert a SlicePosition node into a Position for the given Part."""
 
-        return new_part
+        if slice_position.postfix == 'S':
+            rel_to = FIVE_PRIME
+        elif slice_position.postfix == 'E':
+            rel_to = THREE_PRIME
+        else:
+            raise SuperGSLError('Unknown postfix position. "%s"' % slice_position.postfix)
 
-
-    def visit_slice_position(self, slice_position : SlicePosition, parent_part : Part):
-        """Convert a SlicePosition node into a SeqPosition for the given Part."""
-        return convert_slice_position_to_seq_position(
-            parent_part,
-            slice_position)
+        return Position(
+            index=slice_position.index,
+            relative_to=rel_to,
+            approximate=slice_position.approximate)
 
 
     def visit_list_declaration(self, list_declaration : ListDeclaration) -> Collection:

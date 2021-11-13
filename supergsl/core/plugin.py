@@ -2,15 +2,17 @@
 
 import inspect
 import importlib
-from typing import Dict, Set, Type
+from typing import Dict, Set, Type, Mapping, cast
 from supergsl.core.exception import (
     ConfigurationError,
     NotFoundError,
     SymbolNotFoundError
 )
+from supergsl.core.types import SuperGSLType
 from supergsl.core.provider import SuperGSLProvider, ProviderGroup
 from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.symbol_table import SymbolTable
+from supergsl.core.sequence import SequenceStore
 
 
 class SuperGSLPlugin(object):
@@ -34,15 +36,17 @@ class SuperGSLPlugin(object):
 
     def resolve_import(
         self,
-        symbol_table : SymbolTable,
         identifier : str,
         alias : str
-    ) -> None:
+    ) -> Mapping[str, SuperGSLType]:
         """Import a identifier and register it in the symbol table."""
         if identifier not in self.functions:
             raise NotFoundError('%s not found in module.' % identifier)
 
-        symbol_table.insert(alias or identifier, self.functions[identifier])
+        symbol_alias = alias or identifier
+        return {
+            symbol_alias: self.functions[identifier]
+        }
 
     def get_or_create_provider_group_for_module_path(self, module_path):
         import_symbol_table = self.symbol_table.enter_nested_scope('imports')
@@ -70,6 +74,10 @@ class SuperGSLPlugin(object):
         function_declaration : SuperGSLFunctionDeclaration
     ):
         """Register a function making it available for import in SuperGSL."""
+
+        # Todo: Improve the setup of function declarations so this is better.
+        function_declaration.set_sequence_store(
+            cast(SequenceStore, self.symbol_table.lookup('sequences')))
 
         self.functions[function_name] = function_declaration
 

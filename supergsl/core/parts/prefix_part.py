@@ -1,11 +1,13 @@
 import typing
 import re
-from typing import Tuple, Callable
+from typing import Tuple, Callable, Optional, Mapping, Dict
 from re import Pattern, Match
-from supergsl.core.symbol_table import SymbolTable
+from supergsl.core.types import SuperGSLType
+from supergsl.core.types.position import Slice, Position
 from supergsl.core.exception import PartSliceError
 from supergsl.core.constants import (
     FIVE_PRIME,
+    THREE_PRIME,
     SO_GENE,
     SO_PROMOTER,
     SO_TERMINATOR,
@@ -95,17 +97,22 @@ class PrefixedSlicePartProviderMixin(_Base):
 
     def resolve_import(
         self,
-        symbol_table : SymbolTable,
         identifier : str,
-        alias : str
-    ) -> None:
+        alias : Optional[str]
+    ) -> Mapping[str, SuperGSLType]:
         """Resolve the import of a part from this provider.
 
         Override the default functionality and instead register a part for each
         of the part prefixes available to the user.
         """
 
+        new_symbols : Dict[str, SuperGSLType] = {}
         part_identifier = alias or identifier
+
+        # Add the parent part
+        new_symbols[part_identifier] = self.get_part(identifier)
+
+        # Add all the prefix parts.
         for part_prefix in self.PART_TYPES.keys():
             part_name = '{}{}'.format(part_prefix, part_identifier)
             lazy_part = PrefixedSliceLazyLoadedPart(
@@ -113,7 +120,9 @@ class PrefixedSlicePartProviderMixin(_Base):
                 self,
                 part_prefix)
 
-            symbol_table.insert(part_name, lazy_part)
+            new_symbols[part_name] = lazy_part
+
+        return new_symbols
 
 
     def get_prefixed_part(self, identifier : str, prefix : str) -> Part:
@@ -126,17 +135,15 @@ class PrefixedSlicePartProviderMixin(_Base):
         except KeyError:
             raise UnknownPartPrefixError('Invalid part prefix "{}" for "{}".'.format(
                 prefix,
-                identifier,
+                identifier))
 
-            ))
+        new_slice = self.build_part_type_slice_pos(parent_part, part_type)
 
-        start_pos, end_pos = self.build_part_type_slice_pos(parent_part, part_type)
         roles = self.get_roles_by_part_type(part_type)
         part = self.get_child_part_by_slice(
             parent_part=parent_part,
             identifier='{}{}'.format(prefix, identifier),
-            start=start_pos,
-            end=end_pos)
+            part_slice=new_slice)
         part.add_roles(roles)
         return part
 
@@ -156,7 +163,7 @@ class PrefixedSlicePartProviderMixin(_Base):
 
         return part_type_role_map[part_type]
 
-    def build_part_type_slice_pos(self, parent_part, part_slice_type):
+    def build_part_type_slice_pos(self, parent_part : Part, part_slice_type : str) -> Slice:
         """Build the slice of a part based on the requested part type.
 
         parts often have a part type specified by the prefix, for example
@@ -167,37 +174,28 @@ class PrefixedSlicePartProviderMixin(_Base):
 
         """
         if part_slice_type == 'promoter':
-            new_start = parent_part.start.get_relative_position(
-                x=-1 * get_promoter_len(),
-                approximate=True)
+            return Slice(
+                Position(-1 * get_promoter_len(), relative_to=FIVE_PRIME, approximate=True),
+                Position(0, relative_to=FIVE_PRIME))
 
-            return new_start, parent_part.start
+        if part_slice_type in ['orf', 'gene']:
+            return Slice(
+                Position(0, relative_to=FIVE_PRIME),
+                Position(0, relative_to=THREE_PRIME))
 
-        elif part_slice_type == 'orf':
-            return parent_part.start, parent_part.end
+        if part_slice_type == 'upstream':
+            return Slice(
+                Position(-1 * get_flank_len(), relative_to=FIVE_PRIME, approximate=True),
+                Position(0, relative_to=FIVE_PRIME))
 
-        elif part_slice_type == 'gene':
-            return parent_part.start, parent_part.end
+        if part_slice_type == 'downstream':
+            return Slice(
+                Position(0, relative_to=THREE_PRIME),
+                Position(1 * get_flank_len(), relative_to=THREE_PRIME, approximate=True))
 
-        elif part_slice_type == 'upstream':
-            new_start = parent_part.start.get_relative_position(
-                x=-1 * get_flank_len(),
-                approximate=True)
-
-            return new_start, parent_part.start
-
-        elif part_slice_type == 'downstream':
-            new_end = parent_part.end.get_relative_position(
-                x=get_flank_len(),
-                approximate=True)
-
-            return parent_part.end, new_end
-
-        elif part_slice_type == 'terminator':
-            new_end = parent_part.end.get_relative_position(
-                x=get_terminator_len(),
-                approximate=True)
-
-            return parent_part.end, new_end
+        if part_slice_type == 'terminator':
+            return Slice(
+                Position(0, relative_to=THREE_PRIME),
+                Position(get_terminator_len(), relative_to=THREE_PRIME, approximate=True))
 
         raise PartSliceError('"%s" prefix is not implemented yet.' % part_slice_type)

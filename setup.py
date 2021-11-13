@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="supergsl",
-    version="0.5.0",
+    version="0.8.1",
     author="Russell McLoughlin",
     author_email="russ.mcl@gmail.com",
     description="A python implementation of the Genome Specification Language (GSL) for genetic engineering.",
@@ -25,7 +25,7 @@ setuptools.setup(
         'rply',
         'nose',
         'coverage',
-        'biopython==1.78',
+        'biopython',
         'pydna',
         'sbol2',
         'mypy',

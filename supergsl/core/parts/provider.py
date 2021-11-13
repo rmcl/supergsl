@@ -1,23 +1,40 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, Mapping
 from Bio.Seq import Seq
 
 from supergsl.utils import import_class
 
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.provider import SuperGSLProvider
-from supergsl.core.symbol_table import SymbolTable
+from supergsl.core.types import SuperGSLType
 from supergsl.core.types.part import Part
-from supergsl.core.types.position import SeqPosition
+from supergsl.core.types.position import Slice
 
+from supergsl.core.sequence import SequenceStore
 from supergsl.core.exception import ConfigurationError, PartNotFoundError
 from supergsl.core.constants import THREE_PRIME
 
 
+class PartProviderConfig:
+    """Store config parameters for Part Providers"""
+
+    def __init__(self, sequence_store : SequenceStore, provider_config : dict):
+        self._sequence_store = sequence_store
+        self._provider_config = provider_config
+
+    @property
+    def provider_config(self) -> dict:
+        return self._provider_config
+
+    @property
+    def sequence_store(self) -> SequenceStore:
+        return self._sequence_store
+
 class PartProvider(SuperGSLProvider):
 
-    def __init__(self, name, compiler_settings):
+    def __init__(self, name : str, config : PartProviderConfig):
         self._provider_name = name
-        self._compiler_settings = compiler_settings
+        self.config = config
+
 
     @property
     def provider_name(self):
@@ -32,13 +49,14 @@ class PartProvider(SuperGSLProvider):
 
     def resolve_import(
         self,
-        symbol_table : SymbolTable,
         identifier : str,
-        alias : str
-    ) -> None:
+        alias : Optional[str]
+    ) -> Mapping[str, SuperGSLType]:
         """Resolve a part from the provider and register it in the symbol table."""
         part_identifier = alias or identifier
-        symbol_table.insert(part_identifier, self.get_part(identifier))
+        return {
+            part_identifier: self.get_part(identifier)
+        }
 
     def get_part(self, identifier : str) -> Part:
         """Retrieve a part from the provider.
@@ -52,8 +70,7 @@ class PartProvider(SuperGSLProvider):
         self,
         parent_part : Part,
         identifier : str,
-        start : SeqPosition,
-        end : SeqPosition
+        part_slice : Slice,
     ) -> Part:
         """Return a new part which is the child of the supplied parent."""
         raise NotImplementedError('Subclass to implement')
@@ -78,9 +95,9 @@ class ConstantPartProvider(PartProvider):
         'part-name': ('part description', 'ATGC', ['LIST OF ROLES']),
     }
 
-    def __init__(self, name : str, compiler_settings : dict):
+    def __init__(self, name : str, config : PartProviderConfig):
         self._provider_name = name
-        self._settings = compiler_settings
+        self._sequence_store = config.sequence_store
         self._cached_parts: Dict[str, Part] = {}
 
 
@@ -109,21 +126,18 @@ class ConstantPartProvider(PartProvider):
             raise PartNotFoundError(
                 'Part "%s" not found.' % identifier) from error
 
-        reference_sequence = Seq(reference_sequence)
+        if not isinstance(reference_sequence, Seq):
+            reference_sequence = Seq(reference_sequence)
 
-        start = SeqPosition.from_reference(
-            x=0,
-            rel_to=THREE_PRIME,
-            approximate=False,
-            reference=reference_sequence
-        )
-        end = start.get_relative_position(
-            x=len(reference_sequence))
+        sequence_entry = self._sequence_store.add_from_reference(reference_sequence)
+        # TODO: Add annotations to this sequence., [
+        #    Annotation(SEQ_ANNOTATION_ROLE, role)
+        #    for role in roles
+        #])
 
         part = Part(
             identifier,
-            start,
-            end,
+            sequence_entry,
             provider=self,
             description=description,
             roles=roles)
@@ -143,9 +157,13 @@ class PartProviderPlugin(SuperGSLPlugin):
             raise ConfigurationError(
                 'No part providers have been defined. Check your supergGSL settings.')
 
+        sequence_store = self.symbol_table.lookup('sequences')
+
         for provider_config in compiler_settings['part_providers']:
             print('Initializing "%s"' % provider_config['name'])
             provider_class = import_class(provider_config['provider_class'])
-            provider_inst = provider_class(provider_config['name'], provider_config)
+
+            config = PartProviderConfig(sequence_store, provider_config)
+            provider_inst = provider_class(provider_config['name'], config)
 
             self.register_provider(provider_config['name'], provider_inst)

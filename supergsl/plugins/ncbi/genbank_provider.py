@@ -1,12 +1,12 @@
 import gzip
-from typing import List
-from Bio import SeqIO
-from supergsl.core.constants import THREE_PRIME
+from typing import List, Dict, Tuple
+from Bio import SeqIO, SeqFeature
+from supergsl.core.constants import FIVE_PRIME
 from supergsl.core.exception import PartNotFoundError
-from supergsl.core.parts import PartProvider
+from supergsl.core.sequence import SequenceEntry
+from supergsl.core.parts import PartProvider, PartProviderConfig
+from supergsl.core.types.position import Slice, Position
 from supergsl.core.types.part import Part
-from supergsl.core.types.position import SeqPosition
-
 
 
 class GenBankFilePartProvider(PartProvider):
@@ -29,10 +29,12 @@ class GenBankFilePartProvider(PartProvider):
     `get_identifier_for_feature`. See method docstring for more information.
     """
 
-    def __init__(self, name, settings):
+    def __init__(self, name, config : PartProviderConfig):
         self._provider_name = name
-        self.genbank_file_path = settings['sequence_file_path']
-        self.features_by_identifier = {}
+
+        self.sequence_store = config.sequence_store
+        self.genbank_file_path = config.provider_config['sequence_file_path']
+        self.features_by_identifier : Dict[str, Tuple[SeqFeature, SequenceEntry]] = {}
         self.loaded = False
 
     def open_gb_file(self, path):
@@ -59,24 +61,23 @@ class GenBankFilePartProvider(PartProvider):
 
         return identifiers
 
-    def get_part_from_feature(self, identifier, feature, parent_sequence_record) -> Part:
+    def get_part_from_feature(
+        self,
+        identifier : str,
+        feature : SeqFeature,
+        sequence_entry : SequenceEntry
+    ) -> Part:
         """Create a `Part` from the provided feature and reference sequence."""
 
         location = feature.location
-        start = SeqPosition.from_reference(
-            x=location.start,
-            rel_to=THREE_PRIME,
-            approximate=False,
-            reference=parent_sequence_record.seq)
+        start = Position(location.start, relative_to=FIVE_PRIME, approximate=False)
+        end = Position(location.end, relative_to=FIVE_PRIME, approximate=False)
 
-        end = start.get_relative_position(
-            x=location.end-location.start)
-
+        new_sequence_entry = self.sequence_store.slice(sequence_entry, Slice(start, end))
         alternative_names = self.get_identifier_for_feature(feature)
         return Part(
             identifier,
-            start,
-            end,
+            new_sequence_entry,
             provider=self,
             description=None,
             alternative_names=alternative_names)
@@ -89,10 +90,12 @@ class GenBankFilePartProvider(PartProvider):
             records = SeqIO.parse(handle, 'genbank')
 
             for record in records:
+                sequence_entry = self.sequence_store.add_from_reference(record.seq)
+
                 for feature in record.features:
                     identifiers = self.get_identifier_for_feature(feature)
                     for identifier in identifiers:
-                        self.features_by_identifier[identifier] = (feature, record)
+                        self.features_by_identifier[identifier] = (feature, sequence_entry)
 
     def list_parts(self) -> List[Part]:
         if not self.loaded:
@@ -115,7 +118,7 @@ class GenBankFilePartProvider(PartProvider):
             self.load()
 
         try:
-            feature, parent_record = self.features_by_identifier[identifier]
+            feature, sequence_entry = self.features_by_identifier[identifier]
         except KeyError as error:
             raise PartNotFoundError('Part not found "%s" in %s.' % (
                 identifier, self.provider_name)) from error
@@ -123,4 +126,4 @@ class GenBankFilePartProvider(PartProvider):
         return self.get_part_from_feature(
             identifier,
             feature,
-            parent_record)
+            sequence_entry)

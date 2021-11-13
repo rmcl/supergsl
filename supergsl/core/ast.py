@@ -40,13 +40,6 @@ class SlicePosition(Node):
             'approximate': self.approximate
         }
 
-    def get_slice_pos_str(self):
-        return '%s%d%s' % (
-            '~' if self.approximate else '',
-            self.index,
-            self.postfix if self.postfix else ''
-        )
-
 class Slice(Node):
     def __init__(self, start : SlicePosition, end : SlicePosition):
         self.start = start
@@ -58,12 +51,6 @@ class Slice(Node):
             'start': self.start.to_dict(),
             'end': self.end.to_dict()
         }
-
-    def get_slice_str(self):
-        return '%s:%s' % (
-            self.start.get_slice_pos_str(),
-            self.end.get_slice_pos_str()
-        )
 
 
 class SymbolReference(Node):

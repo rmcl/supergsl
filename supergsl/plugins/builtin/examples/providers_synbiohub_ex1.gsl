@@ -6,9 +6,11 @@ Make sure the following configuration is in your `supergsl-config.yml` file:
     "part_providers": [
         ...
         {
-            "name": "igem",
-            "provider_class": "supergsl.plugins.synbiohub.SynBioHubPartProvider",
+            "name": "synbiohub",
+            "provider_class": "supergsl.plugins.builtin.providers.SynBioHubPartProvider",
             "repository_url": "https://synbiohub.org/public/igem",
+            "repository_username": null,
+            "repository_password": null
         }
     ],
     ...
@@ -17,6 +19,6 @@ Make sure the following configuration is in your `supergsl-config.yml` file:
 
 */
 
-from igem import BBa_E0040
+from synbiohub import BBa_E0040
 
 BBa_E0040

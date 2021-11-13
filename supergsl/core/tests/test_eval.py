@@ -3,8 +3,10 @@ import unittest
 from unittest.mock import Mock, call, patch
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.eval import EvaluatePass
+from supergsl.core.provider import SuperGSLProvider
 from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.constants import (
+    THREE_PRIME,
     STRING_CONSTANT,
     NUMBER_CONSTANT,
     UNAMBIGUOUS_DNA_SEQUENCE,
@@ -18,12 +20,14 @@ from supergsl.core.ast import (
     VariableDeclaration,
     SymbolReference,
     Slice,
+    SlicePosition,
     Constant,
     ListDeclaration,
     SequenceConstant,
     FunctionInvocation
 )
 
+from supergsl.core.types.position import Position
 from supergsl.core.types.builtin import (
     Collection,
     NucleotideSequence,
@@ -32,6 +36,7 @@ from supergsl.core.types.builtin import (
 
 from supergsl.core.exception import (
     SuperGSLTypeError,
+    SuperGSLError,
     FunctionNotFoundError
 )
 
@@ -63,8 +68,9 @@ class EvaluatePassTestCase(unittest.TestCase):
 
     def test_visit_import(self):
         """Test visiting a Import AST node."""
-        provider_mock = Mock()
+        provider_mock = Mock(__class__ = SuperGSLProvider)
         self.import_table.insert('mod_path.here', provider_mock)
+        provider_mock.resolve_import.return_value = {}
 
         import_node = Import(
             [
@@ -78,8 +84,8 @@ class EvaluatePassTestCase(unittest.TestCase):
         self.eval_pass.visit_import(import_node)
 
         provider_mock.resolve_import.assert_has_calls([
-            call(self.symbol_table, 'hello', None),
-            call(self.symbol_table, 'boop', None)
+            call('hello', None),
+            call('boop', None)
         ])
 
     def test_visit_assembly(self):
@@ -128,46 +134,45 @@ class EvaluatePassTestCase(unittest.TestCase):
         self.assertEqual(result, 'YES!')
 
     def test_visit_slice(self):
-        """Visit Slice should visit start and end positions and create a child part."""
+        """Visit Slice should visit start and end positions and create a Slice type."""
         start = Mock()
         end = Mock()
-        parent_part = Mock(identifier='HIII')
-        expected_child_part = Mock()
-        parent_part.get_child_part_by_slice.return_value = expected_child_part
-        self.eval_pass.visit.return_value = 'VISIT-RETURN-VAL'
+
+        self.eval_pass.visit.return_value = position_mock = Position(0)
 
         slice_node = Slice(start, end)
-        slice_node.get_slice_str = Mock(return_value='poop')
+        slice_obj = self.eval_pass.visit_slice(slice_node)
 
-        new_part = self.eval_pass.visit_slice(slice_node, parent_part)
+        self.assertEqual(slice_obj.start, position_mock)
+        self.assertEqual(slice_obj.end, position_mock)
 
-        self.assertEqual(new_part, expected_child_part)
         self.eval_pass.visit.assert_has_calls([
-            call(start, parent_part),
-            call(end, parent_part)
+            call(start),
+            call(end)
         ])
 
-        parent_part.get_child_part_by_slice.assert_called_once_with(
-            'HIII[poop]',
-            'VISIT-RETURN-VAL',
-            'VISIT-RETURN-VAL'
-        )
-
     def test_visit_slice_position(self):
-        """Visit slice position should convert a slice position to a SeqPosition"""
+        """Visit slice position should convert a SlicePosition AST node to a Position"""
 
-        parent_part = Mock()
-        slice_position = Mock()
+        slice_position = SlicePosition(123, 'E', False)
 
-        convert_util_path = 'supergsl.core.eval.convert_slice_position_to_seq_position'
-        with patch(convert_util_path) as convert_patch:
-            convert_patch.return_value = 'HELLOOO'
+        result = self.eval_pass.visit_slice_position(
+            slice_position)
 
-            result = self.eval_pass.visit_slice_position(
-                slice_position, parent_part)
+        self.assertEqual(result.index, 123)
+        self.assertEqual(result.relative_to, THREE_PRIME)
+        self.assertEqual(result.approximate, False)
 
-            convert_patch.assert_called_once_with(parent_part, slice_position)
-            self.assertEqual(result, 'HELLOOO')
+    def test_visit_slice_position_invalid_slice_position(self):
+        """Visit slice position should raise an error if invalid slice prefix is specified."""
+
+        slice_position = SlicePosition(123, 'R', False)
+
+        self.assertRaises(
+            SuperGSLError,
+            self.eval_pass.visit_slice_position,
+            slice_position)
+
 
     def test_visit_list_declaration(self):
         """Create a collection with result of visiting each item node in declaration."""

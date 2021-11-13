@@ -5,11 +5,17 @@ from mimetypes import guess_type
 from Bio import SeqIO
 from Bio.Seq import Seq
 
-from supergsl.core.constants import THREE_PRIME
-from supergsl.core.types.position import SeqPosition
+from supergsl.core.constants import (
+    FIVE_PRIME,
+    THREE_PRIME,
+    STRAND_WATSON,
+    STRAND_CRICK
+)
+from supergsl.core.types.position import Slice, Position
+from supergsl.core.sequence import SequenceEntry
 from supergsl.core.exception import PartNotFoundError
 from supergsl.core.types.part import Part
-from supergsl.core.parts import PartProvider
+from supergsl.core.parts import PartProvider, PartProviderConfig
 from supergsl.core.parts.prefix_part import PrefixedSlicePartProviderMixin
 from supergsl.plugins.pydna.primers import ExtractionPrimerBuilder
 
@@ -25,8 +31,11 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
 
     """
 
-    def __init__(self, name : str, settings : dict):
+    def __init__(self, name : str, config : PartProviderConfig):
         self._provider_name = name
+        self.sequence_store = config.sequence_store
+
+        settings = config.provider_config
         self.fasta_file_path : str = settings['fasta_file_path']
         self.feature_file_path : str = settings['feature_file_path']
         self._cached_parts : Dict[str, Part] = {}
@@ -54,10 +63,13 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
         with _open(self.fasta_file_path) as fp:
             chromosomes = SeqIO.parse(fp, 'fasta')
 
-            self._sequence_by_chromosome = {
-                chromosome.name: chromosome
-                for chromosome in chromosomes
-            }
+            self._sequence_by_chromosome = {}
+            for chromosome in chromosomes:
+
+                chromosome_entry = self.sequence_store.add_from_reference(chromosome.seq)
+                # Todo: Add annotations for this chromosome_entry
+
+                self._sequence_by_chromosome[chromosome.name] = chromosome_entry
 
     def list_parts(self):
         if not hasattr(self, '_sequence_by_chromosome'):
@@ -68,7 +80,7 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
             for gene_name in self._genes.keys()
         ]
 
-    def get_gene(self, gene_name : str) -> Tuple[Seq, dict]:
+    def get_gene(self, gene_name : str) -> Tuple[SequenceEntry, dict]:
 
         if not hasattr(self, '_sequence_by_chromosome'):
             self.load()
@@ -84,24 +96,33 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
         new_gene_feature : Dict[str, Any] = reference_feature.copy()
 
         chromosome_num = new_gene_feature['chrom#']
-        chromosome_sequence = self._sequence_by_chromosome[chromosome_num]
+        chromosome_sequence_entry = self._sequence_by_chromosome[chromosome_num]
 
         strand = new_gene_feature['strand']
         if strand == 'C':
-            # Translate the position present in the file to be relative to the
-            # other strand of DNA (reverse complement).
-            reference_sequence = chromosome_sequence.reverse_complement().seq
-            reference_len = len(reference_sequence)
-
-            new_gene_feature['from'] = reference_len - int(reference_feature['to']) - 1
-            new_gene_feature['to'] = reference_len - int(reference_feature['from'])
+            # This gene is on the reverse strand.
+            sequence_len = len(chromosome_sequence_entry.sequence)
+            new_gene_feature['from'] = sequence_len - int(reference_feature['to']) - 1
+            new_gene_feature['to'] = sequence_len - int(reference_feature['from'])
+            strand = STRAND_CRICK
 
         else:
+            # This gene is on the forward strand.
             new_gene_feature['from'] = int(reference_feature['from'])
             new_gene_feature['to'] = int(reference_feature['to']) + 1
-            reference_sequence = chromosome_sequence.seq
+            strand = STRAND_WATSON
 
-        return reference_sequence, new_gene_feature
+
+        part_slice = Slice(
+            Position(new_gene_feature['from'], FIVE_PRIME, False),
+            Position(new_gene_feature['to'], FIVE_PRIME, False),
+            strand=strand)
+
+        new_entry = self.sequence_store.slice(
+            chromosome_sequence_entry,
+            part_slice)
+
+        return new_entry, new_gene_feature
 
     def _get_alternative_names_from_feature(self, feature : dict) -> List[str]:
         alternative_names = set([
@@ -120,35 +141,24 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
             identifier  A identifier to select a part from this provider
         Return: `Part`
         """
-
         try:
             return self._cached_parts[identifier]
         except KeyError:
             pass
 
-        reference_sequence, feature = self.get_gene(identifier)
+        sequence_entry, feature = self.get_gene(identifier)
         alternative_names = self._get_alternative_names_from_feature(feature)
 
-        start = SeqPosition.from_reference(
-            x=feature['from'],
-            rel_to=THREE_PRIME,
-            approximate=False,
-            reference=reference_sequence
-        )
-
-        end = start.get_relative_position(
-            x=feature['to']-feature['from'])
 
         part = Part(
             identifier,
-            start,
-            end,
+            sequence_entry,
             provider=self,
             description=feature['Notes'],
             alternative_names=alternative_names)
 
         # Build primers for this part.
-        self.primer_builder.build_primers_for_part(part)
+        #self.primer_builder.build_primers_for_part(part)
 
         self._cached_parts[identifier] = part
         return part
@@ -157,15 +167,17 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
         self,
         parent_part : Part,
         identifier : str,
-        start : SeqPosition,
-        end : SeqPosition
+        part_slice : Slice,
     ) -> Part:
         """Return a new part which is the child of the supplied parent."""
 
+        new_sequence_entry = self.sequence_store.slice(
+            parent_part.sequence_entry,
+            part_slice)
+
         return Part(
             identifier,
-            start,
-            end,
+            sequence_entry=new_sequence_entry,
             provider=self,
             parent_part=parent_part
         )

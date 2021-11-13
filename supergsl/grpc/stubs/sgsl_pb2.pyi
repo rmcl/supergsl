@@ -9,6 +9,7 @@ import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.message
 import google.protobuf.service
+import google.protobuf.struct_pb2
 import typing
 import typing_extensions
 
@@ -131,13 +132,19 @@ global___ListSymbolTableResult = ListSymbolTableResult
 class Symbol(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
     TYPE_FIELD_NUMBER: builtins.int
+    DETAILS_FIELD_NUMBER: builtins.int
     type: typing.Text = ...
+
+    @property
+    def details(self) -> google.protobuf.struct_pb2.Struct: ...
 
     def __init__(self,
         *,
         type : typing.Text = ...,
+        details : typing.Optional[google.protobuf.struct_pb2.Struct] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"type",b"type"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal[u"details",b"details"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal[u"details",b"details",u"type",b"type"]) -> None: ...
 global___Symbol = Symbol
 
 class FunctionCallIdentifier(google.protobuf.message.Message):
