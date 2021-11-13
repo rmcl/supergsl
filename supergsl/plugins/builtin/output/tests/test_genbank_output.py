@@ -27,7 +27,7 @@ class GenBankOutputTestCase(TestCase):
         self.assertEqual(record.name, assembly.identifier)
         self.assertEqual(
             record.description,
-            'this is a great assembly named asm1')
+            'This is a great assembly named asm1')
 
         self.assertEqual(len(record.features), 2)
         part0_feature = record.features[0]

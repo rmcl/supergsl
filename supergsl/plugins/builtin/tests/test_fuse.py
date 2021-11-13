@@ -57,7 +57,7 @@ class FuseAssemblerTestCase(unittest.TestCase):
             expected_parts = expected_result[1]
             self.assertEqual(result[result_index].identifier, expected_identifier)
 
-            self.assertEqual(result[result_index].parts, expected_parts)
+            self.assertEqual(result[result_index].reagents, expected_parts)
             self.assertEqual(result[result_index].sequence, ''.join([
                 str(part.sequence)
                 for part in expected_parts
