@@ -85,7 +85,7 @@ class SuperGSLCoreFixtures(object):
         identifier : str,
         sequence_entry : SequenceEntry,
         mk_primers : bool = True,
-        roles : Optional[Role] = None
+        roles : Optional[List[Role]] = None
     ):
         """Create a mock Part from a given SequenceEntry."""
         part = Part(
@@ -107,7 +107,7 @@ class SuperGSLCoreFixtures(object):
         identifier : str,
         part_seq_len : int,
         mk_primers : bool = True,
-        roles : Optional[Role] = None
+        roles : Optional[List[Role]] = None
     ) -> Tuple[Seq,Part]:
         """Create a mock Part.
 
