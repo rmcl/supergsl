@@ -18,6 +18,46 @@ class SyntheticOligoAssembler(AssemblerBase):
 
     These oligos are typically used as primers, but can be used for short parts
     without a template.
+
+    Example usage
+
+    In the iGEM community, there are some small parts such as bacterial promoters
+    where it is more convenient (and cheaper) to simply order a set of short
+    synthetic oligos. In this example we prepend and append the biobrick prefix
+    sequences to a bacterial promoter from `Anderson`. The resulting part can
+    then be used using the biobick 3a assembly method to make more interesting
+    and larger parts.
+
+    Given this snippet of SuperGSL code:
+
+    .. code-block:: gsl
+
+        # http://parts.igem.org/Help:Promoters/Construction
+        # http://parts.igem.org/Promoters/Catalog/Anderson
+
+        from biobrick import bbPrefix, bbSuffix
+
+        # http://parts.igem.org/Part:BBa_J23100
+        from synbiohub import BBa_J23100
+
+        synthetic-oligos {
+            bbPrefix ; BBa_J23100 ; bbSuffix
+        }
+
+    As a further example, if you wanted to create a whole collection of biobrick
+    promoter parts you could use SuperGSL collection syntax to generate the full
+    factorial of promoters with flanking biobrick regions.
+
+
+    .. code-block:: gsl
+
+        from biobrick import bbPrefix, bbSuffix
+        from anderson_promoters import promoters
+
+        synthetic-oligos {
+            bbPrefix ; promoters ; bbSuffix
+        }
+
     """
 
     def __init__(self, config_options):
