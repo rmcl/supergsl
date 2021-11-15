@@ -1,17 +1,13 @@
 from Bio.Seq import Seq
+from supergsl.core.sequence import SequenceEntry
+
 from .base import SuperGSLType
 from .builtin import NucleotideSequence
 
 
 class Primer(NucleotideSequence):
     """Represent a short nucleotide sequence that provides a starting point for replication"""
-    def __init__(self, primer_seq : Seq):
-        self._sequence = primer_seq
-
-    @property
-    def sequence(self) -> Seq:
-        """Return the amino acid sequence as a `Bio.Seq`."""
-        return self._sequence
+    pass
 
 
 class PairedPrimer(Primer):
