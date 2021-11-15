@@ -124,11 +124,11 @@ class SuperGSLCoreFixtures(object):
             roles)
 
 
-    def mk_part_collection(self, num_parts=3) -> Collection:
+    def mk_part_collection(self, num_parts=3, part_len=100) -> Collection:
         """Return a `Collection` of parts."""
 
         return Collection([
-            self.mk_part('pGAL%d' % index, 100)[1]
+            self.mk_part('pGAL%d' % index, part_len)[1]
             for index in range(num_parts)
         ])
 
