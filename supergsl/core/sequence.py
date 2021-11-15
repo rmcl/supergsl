@@ -32,6 +32,10 @@ class Role(NamedTuple):
     name : str
     description : str
 
+    def __eq__(self, obj):
+        """Roles are equal if they have the same uri."""
+        return isinstance(obj, Role) and obj.uri == self.uri
+
 
 class SliceMapping(NamedTuple):
     """Represent the mapping of a sub-slice of a parent sequence onto a new target sequence."""
@@ -84,6 +88,25 @@ class SequenceEntry:
     def id(self) -> UUID:
         """Return the UUID of the sequence entry."""
         return self.sequence_id
+
+    def filter_parents(self, role_filter : Optional[Union[Role, List[Role]]] = None) -> List[EntryLink]:
+        included_links = []
+        for parent_link in self.parent_links
+            include_link = False
+            if not role_filter:
+                include_link = True
+            else:
+                if not isinstance(role_filter, list):
+                    role_filter = [role_filter]
+
+                for role in parent_link.roles:
+                    if role in role_filter:
+                        include_link = True
+
+            if include_link:
+                included_links.append(parent_link)
+
+        return included_links
 
     @property
     def is_composite(self):
