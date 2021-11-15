@@ -3,7 +3,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 from supergsl.core.exception import PartError
-from supergsl.core.sequence import SequenceEntry
+from supergsl.core.sequence import SequenceEntry, Role
 from supergsl.core.types import SuperGSLType
 from supergsl.core.types.builtin import NucleotideSequence
 from supergsl.core.types.primer import PrimerPair
@@ -22,7 +22,7 @@ class Part(NucleotideSequence):
         extraction_primers : Optional[PrimerPair] = None,
         description : Optional[str] = None,
         alternative_names : Optional[List[str]] = None,
-        roles : Optional[List[str]]= None
+        roles : Optional[List[Role]]= None
     ):
         """Initialize a Part
 
@@ -43,7 +43,7 @@ class Part(NucleotideSequence):
         self.description = description
         self.alternative_names = alternative_names
 
-        self._roles = []
+        self._roles : List[Role] = []
         if roles:
             self._roles = roles
 
@@ -77,11 +77,11 @@ class Part(NucleotideSequence):
             description=description)
 
     @property
-    def roles(self):
+    def roles(self) -> List[Role]:
         """Return a list of ontology terms for this part."""
         return self._roles
 
-    def add_roles(self, roles : List[str]):
+    def add_roles(self, roles : List[Role]):
         """Add additional ontology terms to this part."""
         self._roles.extend(roles)
         self._roles = list(set(self._roles))

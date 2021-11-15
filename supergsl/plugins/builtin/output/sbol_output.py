@@ -53,7 +53,7 @@ class SBOLOutput(AssemblyResultOutputFunction):
         sbol_doc.addComponentDefinition(assembly_comp_def)
 
         part_components = []
-        for part in assembly.parts:
+        for part in assembly.reagents:
             sanitized_ident = self.sanitize_identifier(part.identifier)
 
             part_component = ComponentDefinition(sanitized_ident)

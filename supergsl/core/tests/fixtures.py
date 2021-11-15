@@ -1,9 +1,14 @@
 """Define fixture data for testing SuperGSL."""
+from typing import Tuple, List, Optional
 from unittest.mock import Mock
 import random
-from typing import Tuple, List
 from Bio.Seq import Seq
-from supergsl.core.sequence import SequenceStore, SequenceEntry, SliceMapping
+from supergsl.core.sequence import (
+    SequenceStore,
+    SequenceEntry,
+    SliceMapping,
+    Role
+)
 from supergsl.core.function import SuperGSLFunctionConfig
 from supergsl.core.parts.provider import PartProviderConfig
 from supergsl.core.types.primer import PrimerPair
@@ -75,23 +80,14 @@ class SuperGSLCoreFixtures(object):
     def mk_sequence_entry(self, sequence : Seq) -> SequenceEntry:
         return self.sequence_store.add_from_reference(sequence)
 
-    def mk_part(
+    def mk_part_by_sequence_entry(
         self,
-        identifier,
-        part_seq_len,
-        mk_primers=True,
-        roles=None
-    ) -> Tuple[Seq,Part]:
-        """Create a mock Part.
-
-        Part is derived from a reference sequence three times longer than the part
-        itself.
-        """
-        ref_seq_len = part_seq_len * 3
-        reference_sequence = self.mk_random_dna_sequence(ref_seq_len)
-
-        sequence_entry = self.mk_sequence_entry(reference_sequence)
-
+        identifier : str,
+        sequence_entry : SequenceEntry,
+        mk_primers : bool = True,
+        roles : Optional[List[Role]] = None
+    ):
+        """Create a mock Part from a given SequenceEntry."""
         part = Part(
             identifier,
             sequence_entry=sequence_entry,
@@ -103,7 +99,30 @@ class SuperGSLCoreFixtures(object):
             primer_pair = self.mk_extraction_primers(part)
             part.set_extraction_primers(primer_pair)
 
-        return reference_sequence, part
+        return sequence_entry.sequence, part
+
+
+    def mk_part(
+        self,
+        identifier : str,
+        part_seq_len : int,
+        mk_primers : bool = True,
+        roles : Optional[List[Role]] = None
+    ) -> Tuple[Seq,Part]:
+        """Create a mock Part.
+
+        Part is derived from a reference sequence three times longer than the part
+        itself.
+        """
+        ref_seq_len = part_seq_len * 3
+        reference_sequence = self.mk_random_dna_sequence(ref_seq_len)
+        sequence_entry = self.mk_sequence_entry(reference_sequence)
+        return self.mk_part_by_sequence_entry(
+            identifier,
+            sequence_entry,
+            mk_primers,
+            roles)
+
 
     def mk_part_collection(self, num_parts=3) -> Collection:
         """Return a `Collection` of parts."""
@@ -153,15 +172,17 @@ class SuperGSLCoreFixtures(object):
 
         assembly_sequence_entry = self.sequence_store.concatenate(slice_mappings)
 
-        assembly = Assembly(
+        new_part = Part(
             identifier,
             assembly_sequence_entry,
-            'this is a great assembly named %s' % identifier)
+            provider=self,
+            description='This is a great assembly named %s' % identifier)
 
-        # TODO: I don't love this interface to creating assembly. Think about
-        # how to refactor
-        for part, target_slice in part_mappings:
-            assembly.add_part(part, target_slice)
+        assembly = Assembly(
+            identifier,
+            new_part,
+            reagents=parts,
+            description='This is a great assembly named %s' % identifier)
 
         return assembly
 

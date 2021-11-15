@@ -143,23 +143,15 @@ class Assembly(SuperGSLType):
     def __init__(
         self,
         identifier : str,
-        sequence_entry : SequenceEntry,
+        part : Part,
+        reagents : List[Part],
         description : Optional[str] = None
     ):
         self._identifier : str = identifier
-        self._sequence_entry : SequenceEntry = sequence_entry
-        self._parts : List[Tuple[Part, Slice]] = []
+        self._part : Part = part
+        self._reagents : List[Part] = reagents
+
         self.description : Optional[str] = description
-
-    def add_part(
-        self,
-        part : Part,
-        target_slice : Slice
-    ):
-        """Add a part at a specific position in the Assembly."""
-
-        self._parts.append(
-            (part, target_slice))
 
     @property
     def identifier(self) -> str:
@@ -167,31 +159,19 @@ class Assembly(SuperGSLType):
         return self._identifier
 
     @property
-    def sequence_entry(self) -> Seq:
+    def part(self) -> Seq:
         """Return the sequence entry in the sequence store of the construct."""
-        return self._sequence_entry
+        return self._part
 
     @property
     def sequence(self) -> Seq:
         """Return the complete sequence of the construct."""
-        return self._sequence_entry.sequence
+        return self._part.sequence_entry.sequence
 
     @property
-    def parts_with_positions(self) -> List[Tuple[Part, Slice]]:
-        """Return a list of parts and their position in this assembly's sequence."""
-        return self._parts
-
-    @property
-    def parts(self) -> List[Part]:
+    def reagents(self) -> List[Part]:
         """Return a list of parts required to construct this assembly."""
-        return [
-            part_tuple[0]
-            for part_tuple in self._parts
-        ]
-
-    def get_part(self) -> Part:
-        """Retrieve a `Part` corresponding to this construct."""
-        raise NotImplementedError('Subclass to implement.')
+        return self._reagents
 
 
 class AssemblyResultSet(SuperGSLType):

@@ -56,9 +56,10 @@ class FusionAssembler(AssemblerBase):
                 (part, target_slice))
 
         assembly_sequence_entry = self.sequence_store.concatenate(slice_mappings)
+        new_part = Part(
+            design_label,
+            assembly_sequence_entry,
+            provider=self)
 
-        assembly = Assembly(design_label, assembly_sequence_entry)
-        for part, target_slice in part_mappings:
-            assembly.add_part(part, target_slice)
-
+        assembly = Assembly(design_label, new_part, reagents=design_parts)
         return assembly

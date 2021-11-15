@@ -25,22 +25,35 @@ class GenBankOutput(AssemblyResultOutputFunction):
     def build_seq_record_for_assembly(self, assembly : Assembly) -> SeqRecord:
         """Build a `SeqRecord` entry for the given `Assembly`."""
 
-        assembly_sequence = assembly.sequence
+        assembly_sequence = assembly.part.sequence
         record = SeqRecord(
             assembly_sequence,
             id='123456789', # random accession number
             name=assembly.identifier,
             description=assembly.description or '')
 
-        for part, target_slice in assembly.parts_with_positions:
+
+        sequence_entry_to_part = {}
+        for part in assembly.reagents:
+            sequence_entry_to_part[part.sequence_entry.id] = part
+
+        for parent_link in assembly.part.sequence_entry.parent_links:
+            parent_entry = parent_link.parent_entry
+            target_slice = parent_link.target_slice
             start_abs_pos = target_slice.start.build_absolute_position(len(assembly_sequence))
             end_abs_pos = target_slice.end.build_absolute_position(len(assembly_sequence))
 
+            parent_part = sequence_entry_to_part[parent_entry.id]
+
             feature = SeqFeature(
-                id=part.identifier,
+                id=parent_part.identifier,
                 qualifiers={
-                    'name': part.identifier,
-                    'description': part.description
+                    'name': parent_part.identifier,
+                    'description': parent_part.description,
+                    'roles': [
+                        role.uri
+                        for role in parent_link.roles
+                    ]
                 },
                 location=FeatureLocation(
                     start=start_abs_pos.index,
