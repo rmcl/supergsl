@@ -36,9 +36,9 @@ class SyntheticOligoAssembler(AssemblerBase):
     In the iGEM community, there are some small parts such as bacterial promoters
     where it is more convenient (and cheaper) to simply order a set of short
     synthetic oligos. In this example we prepend and append the biobrick prefix
-    sequences to a bacterial promoter from `Anderson`. The resulting part can
-    then be used using the biobick 3a assembly method to make more interesting
-    and larger parts.
+    sequences to a bacterial promoter from `Anderson Promoter Collection`. The
+    resulting part can then be used using the biobrick 3A assembly method to
+    make larger and more interesting parts.
 
     Given this snippet of SuperGSL code:
 
@@ -70,6 +70,13 @@ class SyntheticOligoAssembler(AssemblerBase):
             bbPrefix ; promoters ; bbSuffix
         }
 
+    There are three parameters which control this assembler.
+    * max_oligo_len (Default 200) The maximum length of the oligos to be designed.
+    * min_overlap_len (Default: 20) The number of bp overlap between the oligos
+    * max_num_oligos (Default: 2) The maximum number of oligos which can be concatenated.
+
+    These defaults have largely been selected arbitrarily. If you ever use this
+    technique and can propose more reasonable defaults please let us know!
     """
 
     def __init__(self, config : SuperGSLFunctionConfig):
