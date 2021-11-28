@@ -25,6 +25,12 @@ from supergsl.core.symbol_table import SymbolTable
 
 class SuperGSLCoreFixtures(object):
 
+    def mk_global_symbol_table(self) -> SymbolTable:
+        """Instantiate a symbol table with a sequencestore."""
+        symbol_table = SymbolTable('global', None)
+        symbol_table.insert('sequences', self.sequence_store)
+        return symbol_table
+
     def mk_symbol_table(self) -> SymbolTable:
         """Create a simple symbol table with a nested scope."""
         symbol_table = SymbolTable('awesome', None)

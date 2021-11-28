@@ -29,13 +29,13 @@ class NucleotideSequence(SuperGSLType):
 class AminoAcidSequence(SuperGSLType):
     """A type representing arbitrary an amino acid sequence."""
 
-    def __init__(self, sequence : Seq):
-        self._sequence = sequence
+    def __init__(self, sequence_entry : SequenceEntry):
+        self.sequence_entry = sequence_entry
 
     @property
     def sequence(self):
         """Return the amino acid sequence as a `Bio.Seq`."""
-        return self._sequence
+        return self.sequence_entry.sequence
 
     def __repr__(self):
         return 'AminoAcidSequence: %s' % self.sequence

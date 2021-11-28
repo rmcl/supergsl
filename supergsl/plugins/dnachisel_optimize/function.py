@@ -1,4 +1,5 @@
 from typing import List, Optional
+from Bio.Seq import Seq
 from supergsl.core.function import SuperGSLFunction
 from supergsl.core.types.builtin import (
     Collection,
@@ -105,4 +106,5 @@ class DNAChiselOptimizeFunction(SuperGSLFunction):
         #print(problem.constraints_text_summary())
         #print(problem.objectives_text_summary())
 
-        return problem.sequence
+        sequence_entry = self.sequence_store.add_from_reference(Seq(problem.sequence))
+        return sequence_entry

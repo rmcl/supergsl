@@ -59,6 +59,7 @@ class EvaluatePass(BackendPipelinePass):
 
     def __init__(self, symbol_table : Optional[SymbolTable]):
         self.symbol_table = symbol_table
+        self.sequence_store = self.symbol_table.lookup('sequences')
 
     def get_node_handlers(self) -> Dict[Optional[str], Callable]:
         """Define method handlers for each node in the AST."""
@@ -212,11 +213,12 @@ class EvaluatePass(BackendPipelinePass):
         """Return a Sequence Type based on the constant defined SequenceConstant Node."""
 
         sequence_type = sequence_constant.sequence_type
+        sequence_entry = self.sequence_store.add_from_reference(sequence_constant.sequence)
         if sequence_type == UNAMBIGUOUS_PROTEIN_SEQUENCE:
-            return AminoAcidSequence(sequence_constant.sequence)
+            return AminoAcidSequence(sequence_entry)
 
         if sequence_type == UNAMBIGUOUS_DNA_SEQUENCE:
-            return NucleotideSequence(sequence_constant.sequence)
+            return NucleotideSequence(sequence_entry)
 
         raise SuperGSLTypeError('Unhandled sequence type "%s"' % sequence_type)
 

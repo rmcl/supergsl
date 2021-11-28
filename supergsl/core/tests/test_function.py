@@ -17,7 +17,8 @@ class SuperGSLFunctionTestCase(unittest.TestCase):
         return_type = NucleotideSequence
 
         def execute(self, params : dict):
-            return NucleotideSequence(Seq('ATG'))
+            sequence_entry = self.sequence_store.add_from_reference(Seq('ATG'))
+            return NucleotideSequence(sequence_entry)
 
     def setUp(self):
         compiler_settings = {}

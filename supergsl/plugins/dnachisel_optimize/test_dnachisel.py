@@ -13,8 +13,8 @@ class DnaChiselTestCases(TestCase):
     def setUp(self):
         self.maxDiff = None
 
-        self.fixures = SuperGSLCoreFixtures()
-        config = self.fixures.mk_function_config_object()
+        self.fixtures = SuperGSLCoreFixtures()
+        config = self.fixtures.mk_function_config_object()
         self.optimize = DNAChiselOptimizeFunction(config)
 
         """
@@ -31,12 +31,14 @@ class DnaChiselTestCases(TestCase):
 
     def test_execute(self):
         """Call dnachisel codon_optimize execute function."""
+        entry = self.fixtures.sequence_store.add_from_reference(Seq('MAAATCAGAGAAAAC'))
         params = {
-            'aa_sequence': AminoAcidSequence(Seq('MAAATCAGAGAAAAC')),
+            'aa_sequence': AminoAcidSequence(entry),
             'num_results': 2
         }
+        new_entry = self.fixtures.sequence_store.add_from_reference(Seq('ATGAAAC'))
         self.optimize.create_new_sequence = Mock(
-            return_value=Seq('ATGAAAC'))
+            return_value=new_entry)
         results = self.optimize.execute(params)
 
         result_sequences = [
@@ -60,5 +62,5 @@ class DnaChiselTestCases(TestCase):
         )
 
         self.assertEqual(
-            Seq(result).translate(),
+            result.sequence.translate(),
             target_protein)
