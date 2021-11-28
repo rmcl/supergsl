@@ -14,7 +14,7 @@ class SyntheticOligoAssemblerTestCase(unittest.TestCase):
         self.fixtures = SuperGSLCoreFixtures()
         self.oligo_overlap = 20
         self.assembler = SyntheticOligoAssembler(self.fixtures.mk_function_config_object({
-            'max_oligo_len': 45,
+            'max_oligo_len': 80,
             'max_num_oligos': 5,
             'min_overlap_len': self.oligo_overlap
         }))
@@ -52,7 +52,7 @@ class SyntheticOligoAssemblerTestCase(unittest.TestCase):
         expected_part_sequence = ''.join(expected_primer_sequences)
         self.assertEqual(expected_part_sequence, assemblies[0].sequence)
 
-    '''
+
     def test_assemble_concatenates_part_sequences_with_collection(self):
         """Fuse assembler is expected to append part sequences together."""
         five_prime_flank = self.fixtures.mk_part('5p_flank', 25)[1]
@@ -65,9 +65,17 @@ class SyntheticOligoAssemblerTestCase(unittest.TestCase):
             three_prime_flank
         ])
 
-
         result = list(self.assembler.assemble([declaration]))
 
         assemblies = list(result)
-        self.assertEqual(assemblies[0].sequence, 'HI')
-    '''
+
+        # 1 upstream; 3 parts in collection; 1 downstream = 3 possibilities
+        self.assertEqual(len(assemblies), 1 * 3 * 1)
+
+        for assembly_idx, part in enumerate(promoter_collection):
+            expected_sequence = ''.join([
+                str(five_prime_flank.sequence),
+                str(part.sequence),
+                str(three_prime_flank.sequence)
+            ])
+            self.assertEqual(str(assemblies[assembly_idx].sequence), expected_sequence)
