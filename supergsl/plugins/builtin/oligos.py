@@ -5,6 +5,7 @@ from supergsl.core.function import SuperGSLFunctionConfig
 from supergsl.core.sequence import SequenceEntry, SliceMapping, Role
 from supergsl.core.types.part import Part
 from supergsl.core.types.position import Slice
+from supergsl.core.types.primer import Primer
 from supergsl.core.types.assembly import (
     AssemblyDeclaration,
     Assembly,
@@ -99,12 +100,12 @@ class SyntheticOligoAssembler(AssemblerBase):
 
         return self.sequence_store.concatenate(slice_mappings)
 
-    def build_oligos_for_sequence_entry(self, sequence_entry : SequenceEntry) -> List[SequenceEntry]:
+    def build_oligos_for_sequence_entry(self, sequence_entry : SequenceEntry) -> List[Primer]:
         sequence_length = sequence_entry.sequence_length
 
         oligo_idx = 0
         cur_seq_pos = 0
-        oligo_entries : List[SequenceEntry] = []
+        oligo_entries : List[Primer] = []
         while True:
             if oligo_idx == self.max_num_oligos:
                 raise Exception((
@@ -127,7 +128,8 @@ class SyntheticOligoAssembler(AssemblerBase):
                 new_sequence_roles = [synthetic_oligo_role],
                 entry_link_roles = [synthetic_oligo_role]) # TODO may need a different role for the entry link.
 
-            oligo_entries.append(oligo_entry)
+            new_primer = Primer(oligo_entry)
+            oligo_entries.append(new_primer)
 
             cur_seq_pos = end_pos
             if cur_seq_pos >= sequence_length:
@@ -160,7 +162,9 @@ class SyntheticOligoAssembler(AssemblerBase):
                 )
 
                 assembly = Assembly(
-                    identifier, new_part, oligos)
+                    identifier,
+                    part=new_part,
+                    reagents=oligos)
                 assemblies.append(assembly)
 
         return AssemblyResultSet(assemblies)

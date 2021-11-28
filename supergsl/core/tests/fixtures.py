@@ -14,7 +14,7 @@ from supergsl.core.parts.provider import PartProviderConfig
 from supergsl.core.types.primer import PrimerPair
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
-from supergsl.core.types.position import Slice
+from supergsl.core.types.position import Slice, Position
 from supergsl.core.types.builtin import Collection
 from supergsl.core.types.assembly import (
     Assembly,
@@ -53,10 +53,19 @@ class SuperGSLCoreFixtures(object):
         of a the particular PCR thermocycler.
         """
         complement_sequence = part.sequence.complement()
-        return PrimerPair.from_sequences(
-            complement_sequence[:20],
-            complement_sequence[-20:]
+        complement_sequence_entry = self.mk_sequence_entry(complement_sequence)
+
+        # complement_sequence[:20]
+        forward = self.sequence_store.slice(
+            complement_sequence_entry,
+            Slice.from_five_prime_indexes(0,20)
         )
+        # complement_sequence[-20:]
+        reverse = self.sequence_store.slice(
+            complement_sequence_entry,
+            Slice(Position(20), Position(0, relative_to=THREE_PRIME)))
+
+        return PrimerPair.from_sequence_entries(forward, reverse)
 
     def mk_function_config_object(self, options=None):
         """Make a config object for instantiating supergsl functions."""
