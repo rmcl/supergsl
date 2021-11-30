@@ -57,6 +57,17 @@ class EntryLink:
         self.target_slice = target_slice
         self.roles = roles
 
+    @property
+    def sequence(self) -> Seq:
+        """Return a sequence representing the slice of the parent entry."""
+        reference_source_sequence, absolute_source_slice = \
+            self.parent_entry.get_slice_absolute_position_and_reference(
+                self.source_slice)
+
+        return get_slice_sequence_from_reference(
+            reference_source_sequence,
+            absolute_source_slice)
+
 
 class SequenceEntry:
     """Represent a sequence in the sequence store."""

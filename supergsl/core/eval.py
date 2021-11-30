@@ -1,5 +1,5 @@
 """Evaluate a SuperGSL Program."""
-from typing import Any, Dict, Optional, Callable, Union
+from typing import Any, Dict, Optional, Callable, Union, cast
 
 from supergsl.core.types import SuperGSLType
 from supergsl.core.symbol_table import SymbolTable
@@ -10,6 +10,7 @@ from supergsl.core.types.builtin import (
     Collection
 )
 from supergsl.utils import resolve_import
+from supergsl.core.sequence import SequenceStore
 from supergsl.core.types.part import Part
 from supergsl.core.types.assembly import AssemblyDeclaration
 from supergsl.core.types.position import (
@@ -57,9 +58,11 @@ from supergsl.core.exception import (
 class EvaluatePass(BackendPipelinePass):
     """Traverse the AST to execute the GSL Program."""
 
-    def __init__(self, symbol_table : Optional[SymbolTable]):
+    def __init__(self, symbol_table : SymbolTable):
         self.symbol_table = symbol_table
-        self.sequence_store = self.symbol_table.lookup('sequences')
+        self.sequence_store = cast(
+            SequenceStore,
+            self.symbol_table.lookup('sequences'))
 
     def get_node_handlers(self) -> Dict[Optional[str], Callable]:
         """Define method handlers for each node in the AST."""

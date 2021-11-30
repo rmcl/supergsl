@@ -1,5 +1,5 @@
 """Define SuperGSL Types related to the construction of new genetic assemblies"""
-from typing import Generator, List, Optional, Union, Tuple, Set
+from typing import Generator, List, Optional, Union, Tuple, Set, Sequence
 from Bio.Seq import Seq
 from pyDOE2 import fullfact
 
@@ -143,12 +143,12 @@ class Assembly(SuperGSLType):
         self,
         identifier : str,
         part : Part,
-        reagents : List[Part],
+        reagents : Sequence[SuperGSLType],
         description : Optional[str] = None
     ):
         self._identifier : str = identifier
         self._part : Part = part
-        self._reagents : List[Part] = reagents
+        self._reagents : Sequence[SuperGSLType] = reagents
 
         self.description : Optional[str] = description
 
@@ -168,7 +168,7 @@ class Assembly(SuperGSLType):
         return self._part.sequence_entry.sequence
 
     @property
-    def reagents(self) -> List[SuperGSLType]:
+    def reagents(self) -> Sequence[SuperGSLType]:
         """Return a list of parts required to construct this assembly."""
         return self._reagents
 

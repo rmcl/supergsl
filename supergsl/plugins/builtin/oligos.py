@@ -151,7 +151,7 @@ class SyntheticOligoAssembler(AssemblerBase):
     def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyResultSet:
         """Iterate over `Part` and generate an Assembly object."""
 
-        oligos : List[Seq] = []
+        oligos : List[Primer] = []
         assemblies : List[Assembly] = []
 
         for assembly_idx, assembly_request in enumerate(assembly_requests):

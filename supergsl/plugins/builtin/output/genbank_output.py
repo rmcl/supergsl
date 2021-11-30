@@ -6,6 +6,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 
+from supergsl.core.types.part import Part
 from supergsl.core.assembly import AssemblyResultOutputFunction
 from supergsl.core.types.assembly import AssemblyResultSet, Assembly
 
@@ -34,8 +35,12 @@ class GenBankOutput(AssemblyResultOutputFunction):
 
 
         sequence_entry_to_part = {}
-        for part in assembly.reagents:
-            sequence_entry_to_part[part.sequence_entry.id] = part
+        for reagent in assembly.reagents:
+            if not isinstance(reagent, Part):
+                # Exclude all reagents that are not parts
+                continue
+
+            sequence_entry_to_part[reagent.sequence_entry.id] = reagent
 
         for parent_link in assembly.part.sequence_entry.parent_links:
             parent_entry = parent_link.parent_entry

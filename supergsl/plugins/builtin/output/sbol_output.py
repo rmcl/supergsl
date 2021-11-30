@@ -1,4 +1,5 @@
 from typing import TextIO
+from supergsl.core.types.part import Part
 from supergsl.core.types.assembly import Assembly
 from supergsl.core.assembly import (
     AssemblyResultOutputFunction,
@@ -54,6 +55,11 @@ class SBOLOutput(AssemblyResultOutputFunction):
 
         part_components = []
         for part in assembly.reagents:
+
+            if not isinstance(part, Part):
+                # Exclude all reagents that are not parts
+                continue
+
             sanitized_ident = self.sanitize_identifier(part.identifier)
 
             part_component = ComponentDefinition(sanitized_ident)

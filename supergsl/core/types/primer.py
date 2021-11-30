@@ -1,6 +1,6 @@
 from Bio.Seq import Seq
 from supergsl.core.sequence import SequenceEntry, Role
-
+from supergsl.utils.sequence import filter_links_by_roles
 from .base import SuperGSLType
 from .builtin import NucleotideSequence
 
@@ -36,7 +36,7 @@ class PairedPrimer(Primer):
     @property
     def body(self) -> Seq:
         """Return a Sequence representing "body" region of the primer."""
-        links = self.primer_sequence_entry.filter_links(roles=[paired_primer_body_role])
+        links = filter_links_by_roles(self.primer_sequence_entry, [paired_primer_body_role])
         if len(links) == 0:
             raise Exception('Paired Primer does not have a body sub-sequence.')
         if len(links) > 1:
@@ -48,7 +48,7 @@ class PairedPrimer(Primer):
     def tail(self) -> Seq:
         """Return a Sequence representing "tail" region of the primer."""
 
-        links = filter_links_by_roles(self.primer_sequence_entry, roles=[paired_primer_tail_role])
+        links = filter_links_by_roles(self.primer_sequence_entry, [paired_primer_tail_role])
         if len(links) == 0:
             raise Exception('Paired Primer does not have a tail sub-sequence.')
         if len(links) > 1:

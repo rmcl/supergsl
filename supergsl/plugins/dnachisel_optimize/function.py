@@ -1,6 +1,7 @@
 from typing import List, Optional
 from Bio.Seq import Seq
 from supergsl.core.function import SuperGSLFunction
+from supergsl.core.sequence import SequenceEntry
 from supergsl.core.types.builtin import (
     Collection,
     NucleotideSequence,
@@ -56,7 +57,7 @@ class DNAChiselOptimizeFunction(SuperGSLFunction):
         num_results = params['num_results']
 
         naive_target_sequence = reverse_translate(protein_sequence)
-        proposed_sequences : List[str] = []
+        proposed_sequences : List[SequenceEntry] = []
         for i in range(num_results):
             print('Optimization run %s of %s' % (i, num_results))
             new_sequence = self.create_new_sequence(
@@ -74,8 +75,8 @@ class DNAChiselOptimizeFunction(SuperGSLFunction):
         self,
         naive_target_sequence : str,
         codon_usage_table : Optional[str],
-        existing_sequences : List[str]
-    ) -> str:
+        existing_sequences : List[SequenceEntry]
+    ) -> SequenceEntry:
         """Run DNAChisel to create a new codon optimized DNA sequence
 
         """
@@ -85,8 +86,8 @@ class DNAChiselOptimizeFunction(SuperGSLFunction):
         ]
 
         constraints.extend([
-            AvoidPattern(sequence)
-            for sequence in existing_sequences
+            AvoidPattern(entry.sequence)
+            for entry in existing_sequences
         ])
 
         problem = DnaOptimizationProblem(
