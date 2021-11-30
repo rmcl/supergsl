@@ -37,7 +37,18 @@ class SequenceUtilitiesTestCases(TestCase):
         ])
 
         results = filter_links_by_roles(new_entry, [])
-
         self.assertEqual(len(results), 0)
 
-        results = filter_links_by_roles(new_entry, [])
+        results_2 = filter_links_by_roles(new_entry, [role1])
+        self.assertEqual(len(results_2), 2)
+        self.assertEqual({
+            result.parent_entry
+            for result in results_2
+        }, { entry1, entry2 })
+
+        results_3 = filter_links_by_roles(new_entry, [role2])
+        self.assertEqual(len(results_3), 1)
+        self.assertEqual({
+            result.parent_entry
+            for result in results_3
+        }, { entry2 })
