@@ -95,6 +95,9 @@ class SuperGSLCoreFixtures(object):
     def mk_sequence_entry(self, sequence : Seq) -> SequenceEntry:
         return self.sequence_store.add_from_reference(sequence)
 
+    def mk_sequence_role(self, uri):
+        return Role(uri=uri, name=uri, description=uri)
+
     def mk_part_by_sequence_entry(
         self,
         identifier : str,
