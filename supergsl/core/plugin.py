@@ -111,6 +111,9 @@ class PluginProvider(object):
 
             self.resolve_plugins_from_config(plugin_path)
 
+    def get_adhoc_plugin(self):
+        return SuperGSLPlugin(self._symbol_table, self._compiler_settings)
+
 
     def resolve_plugins_from_config(self, module_path: str) -> None:
         """Attempt to resolve and register a plugin at a specific path."""

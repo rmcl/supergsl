@@ -1,1 +1,1 @@
-from .provider import PartProvider, PartProviderConfig
+from .provider import PartProvider

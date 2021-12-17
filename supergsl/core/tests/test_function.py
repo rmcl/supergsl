@@ -23,7 +23,7 @@ class SuperGSLFunctionTestCase(unittest.TestCase):
     def setUp(self):
         compiler_settings = {}
         self.fixtures = SuperGSLCoreFixtures()
-        self.function_config = self.fixtures.mk_function_config_object(compiler_settings)
+        self.function_config = self.fixtures.mk_provider_config(compiler_settings)
         self.function = SuperGSLFunctionTestCase.TestFunction(self.function_config)
 
     def test_build_argument_map_different_num_positional_args(self):

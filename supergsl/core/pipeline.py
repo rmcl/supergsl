@@ -1,11 +1,12 @@
 """Define the core pipeline for compiling and running SuperGSL."""
-from typing import Dict, List, Union, cast
+from typing import Dict, List, Union, cast, Callable
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.types.builtin import SuperGSLType
 from supergsl.core.plugin import PluginProvider
+from supergsl.core.provider import ProviderConfig
 from supergsl.core.backend import BackendPipelinePass
 from supergsl.core.eval import EvaluatePass
-from supergsl.utils import resolve_import
+from supergsl.utils import resolve_import, import_class
 from supergsl.core.sequence import SequenceStore
 
 from .lexer import SuperGSLLexer
@@ -19,8 +20,8 @@ class CompilerPipeline:
         self._global_symbol_table = SymbolTable('global', None)
         self._settings = settings
 
-        sequence_store = SequenceStore()
-        self._global_symbol_table.insert('sequences', sequence_store)
+        self._sequence_store = SequenceStore()
+        self._global_symbol_table.insert('sequences', self._sequence_store)
 
         self.plugins = PluginProvider(self._global_symbol_table, self._settings)
 
@@ -71,12 +72,25 @@ class CompilerPipeline:
         """Access the compiler's global symbol table."""
         return self._global_symbol_table
 
-
     def get_backend_passes(self) -> List[BackendPipelinePass]:
         """Return an ordered list of compiler backend passes to be executed."""
         return cast(List[BackendPipelinePass], [
             EvaluatePass
         ])
+
+    def register_provider(self, module_path : str, provider_class_path : Union[str, Callable], **kwargs):
+        """Instantiate and register a provider."""
+        plugin = self.plugins.get_adhoc_plugin()
+        config = ProviderConfig(self._sequence_store, settings=kwargs)
+
+        if callable(provider_class_path):
+            provider_class = provider_class_path
+        else:
+            provider_class = import_class(provider_class_path)
+
+        provider_inst = provider_class(config)
+        plugin.register_provider(module_path, provider_inst)
+        return provider_inst
 
 
     def get_provider(self, module_path):

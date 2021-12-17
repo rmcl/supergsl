@@ -9,8 +9,7 @@ from supergsl.core.sequence import (
     SliceMapping,
     Role
 )
-from supergsl.core.function import SuperGSLFunctionConfig
-from supergsl.core.parts.provider import PartProviderConfig
+from supergsl.core.provider import ProviderConfig
 from supergsl.core.types.primer import PrimerPair
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
@@ -73,18 +72,11 @@ class SuperGSLCoreFixtures(object):
 
         return PrimerPair.from_sequence_entries(forward, reverse)
 
-    def mk_function_config_object(self, options=None):
-        """Make a config object for instantiating supergsl functions."""
-        if not options:
-            options = {}
-
-        return SuperGSLFunctionConfig(self.sequence_store, options)
-
-    def mk_part_provider_config(self, options=None):
+    def mk_provider_config(self, options=None):
         """Make a config object for instantiating part providers."""
         if not options:
             options = {}
-        return PartProviderConfig(self.sequence_store, options)
+        return ProviderConfig(self.sequence_store, options)
 
     @property
     def sequence_store(self) -> SequenceStore:

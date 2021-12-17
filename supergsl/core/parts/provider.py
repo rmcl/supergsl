@@ -9,29 +9,14 @@ from supergsl.core.types import SuperGSLType
 from supergsl.core.types.part import Part
 from supergsl.core.types.position import Slice
 
-from supergsl.core.sequence import SequenceStore
 from supergsl.core.exception import ConfigurationError, PartNotFoundError
 from supergsl.core.constants import THREE_PRIME
+from supergsl.core.provider import ProviderConfig
 
-
-class PartProviderConfig:
-    """Store config parameters for Part Providers"""
-
-    def __init__(self, sequence_store : SequenceStore, provider_config : dict):
-        self._sequence_store = sequence_store
-        self._provider_config = provider_config
-
-    @property
-    def provider_config(self) -> dict:
-        return self._provider_config
-
-    @property
-    def sequence_store(self) -> SequenceStore:
-        return self._sequence_store
 
 class PartProvider(SuperGSLProvider):
 
-    def __init__(self, name : str, config : PartProviderConfig):
+    def __init__(self, name : str, config : ProviderConfig):
         self._provider_name = name
         self.config = config
 
@@ -95,7 +80,7 @@ class ConstantPartProvider(PartProvider):
         'part-name': ('part description', 'ATGC', ['LIST OF ROLES']),
     }
 
-    def __init__(self, name : str, config : PartProviderConfig):
+    def __init__(self, name : str, config : ProviderConfig):
         self._provider_name = name
         self._sequence_store = config.sequence_store
         self._cached_parts: Dict[str, Part] = {}
@@ -163,7 +148,7 @@ class PartProviderPlugin(SuperGSLPlugin):
             print('Initializing "%s"' % provider_config['name'])
             provider_class = import_class(provider_config['provider_class'])
 
-            config = PartProviderConfig(sequence_store, provider_config)
+            config = ProviderConfig(sequence_store, provider_config)
             provider_inst = provider_class(provider_config['name'], config)
 
             self.register_provider(provider_config['name'], provider_inst)

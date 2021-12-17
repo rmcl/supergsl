@@ -1,7 +1,7 @@
 """Implement a Assembler useful for creating parts via overlapping short oligonucleotides."""
 from typing import List
 from Bio.Seq import Seq
-from supergsl.core.function import SuperGSLFunctionConfig
+from supergsl.core.provider import ProviderConfig
 from supergsl.core.sequence import SequenceEntry, SliceMapping, Role
 from supergsl.core.types.part import Part
 from supergsl.core.types.position import Slice
@@ -79,8 +79,8 @@ class SyntheticOligoAssembler(AssemblerBase):
     technique and can propose more reasonable defaults please let us know!
     """
 
-    def __init__(self, config : SuperGSLFunctionConfig):
-        config_options = config.compiler_settings
+    def __init__(self, config : ProviderConfig):
+        config_options = config.settings
         self.sequence_store = config.sequence_store
         self.max_oligo_len = config_options.get('max_oligo_len', DEFAULT_MAX_OLIGO_LEN)
         self.min_overlap = config_options.get('min_overlap_len', DEFAULT_MIN_OVERLAP)

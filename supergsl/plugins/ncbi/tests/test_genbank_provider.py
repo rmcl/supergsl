@@ -2,7 +2,7 @@
 from unittest import TestCase
 from Bio import SeqIO
 from supergsl.core.sequence import SequenceStore
-from supergsl.core.parts.provider import PartProviderConfig
+from supergsl.core.provider import ProviderConfig
 from supergsl.plugins.ncbi.genbank_provider import GenBankFilePartProvider
 
 
@@ -10,7 +10,7 @@ class GenBankFilePartProviderTestCase(TestCase):
     """Test case for the file part provider."""
 
     def setUp(self):
-        config = PartProviderConfig(SequenceStore(), {
+        config = ProviderConfig(SequenceStore(), {
             'sequence_file_path': self.EXAMPLE_GB_FILE_PATH,
             'feature_types': ['CDS']
         })

@@ -13,15 +13,9 @@ from inspect import getdoc
 from supergsl.core.types import SuperGSLType
 from supergsl.core.exception import FunctionInvokeError
 from supergsl.core.sequence import SequenceStore
+from supergsl.core.provider import ProviderConfig
 
 #pylint: disable=E1136
-
-class SuperGSLFunctionConfig:
-    """Details required to instantiate a SuperGSL Function."""
-
-    def __init__(self, sequence_store : SequenceStore, compiler_settings : dict):
-        self.sequence_store = sequence_store
-        self.compiler_settings = compiler_settings
 
 
 class SuperGSLFunction(SuperGSLType):
@@ -33,8 +27,8 @@ class SuperGSLFunction(SuperGSLType):
     arguments : List[Tuple[str, Type]] = []
     return_type : Optional[Type[SuperGSLType]] = None
 
-    def __init__(self, config : SuperGSLFunctionConfig):
-        self.settings = config.compiler_settings
+    def __init__(self, config : ProviderConfig):
+        self.settings = config.settings
         self.sequence_store = config.sequence_store
 
     @classmethod
@@ -149,5 +143,5 @@ class SuperGSLFunctionDeclaration(SuperGSLType):
         if not self.sequence_store:
             raise Exception('SequenceStore not set.')
 
-        config = SuperGSLFunctionConfig(self.sequence_store, self.compiler_settings)
+        config = ProviderConfig(self.sequence_store, self.compiler_settings)
         return self.function_class(config)
