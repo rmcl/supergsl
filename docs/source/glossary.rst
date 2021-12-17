@@ -15,6 +15,3 @@ Glossary
     Paired Primer
       A :term:`Paired Primer` is :term:`Primer` with two regions `body` and `tail` which are complementary to different parts. These primers
       are used as a "homology bridge" to connect two parts during a PCR reaction.
-
-    Sublime Text
-      Sublime Text is a sophisticated text editor for code, markup and prose. You'll love the slick user interface, extraordinary features and amazing performance.

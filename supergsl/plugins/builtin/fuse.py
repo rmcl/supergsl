@@ -14,7 +14,23 @@ from supergsl.core.types.assembly import (
 
 
 class FusionAssembler(AssemblerBase):
-    """Create an assembly by fusing adjacent parts together without overlap."""
+    """Create an assembly by fusing adjacent parts together without overlap.
+
+    The most basic strategy is a "fusion" strategy where each part is annealed
+    to its neighbors. The product of this strategy is likely useful for direct
+    synthesis methods.
+
+    .. code-block:: gsl
+
+            from builtin import fuse
+            from S288C import ADH1, TDH1, ERG10, HO
+
+            fuse {
+                HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
+                HO_pTDA1_gERG10: uHO ; pTDH1 ; gERG10[1:728] ; dHO
+            }
+
+    """
 
     def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyResultSet:
         """Iterate over `AssemblyDeclaration` and generate a set of assemblies."""

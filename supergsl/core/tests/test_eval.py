@@ -39,12 +39,15 @@ from supergsl.core.exception import (
     SuperGSLError,
     FunctionNotFoundError
 )
+from .fixtures import SuperGSLCoreFixtures
+
 
 class EvaluatePassTestCase(unittest.TestCase):
     """Testcases to evaluate the EvaluatePass class."""
 
     def setUp(self):
-        self.symbol_table = SymbolTable('global', None)
+        self.fixtures = SuperGSLCoreFixtures()
+        self.symbol_table = self.fixtures.mk_global_symbol_table()
         self.import_table = self.symbol_table.enter_nested_scope('imports')
         self.eval_pass = EvaluatePass(self.symbol_table)
         self.eval_pass.visit = Mock()

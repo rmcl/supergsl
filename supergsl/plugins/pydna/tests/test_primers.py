@@ -9,7 +9,8 @@ class ExtractionPrimerBuilderTestCase(unittest.TestCase):
 
     def setUp(self):
         self.fixtures = SuperGSLCoreFixtures()
-        self.primer_builder = ExtractionPrimerBuilder()
+        self.primer_builder = ExtractionPrimerBuilder(
+            sequence_store=self.fixtures.sequence_store)
 
     def test_build_primers_for_part(self):
         """Test that primers are created for a part."""

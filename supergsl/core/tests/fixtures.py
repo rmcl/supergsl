@@ -14,7 +14,7 @@ from supergsl.core.parts.provider import PartProviderConfig
 from supergsl.core.types.primer import PrimerPair
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
-from supergsl.core.types.position import Slice
+from supergsl.core.types.position import Slice, Position
 from supergsl.core.types.builtin import Collection
 from supergsl.core.types.assembly import (
     Assembly,
@@ -24,6 +24,12 @@ from supergsl.core.types.assembly import (
 from supergsl.core.symbol_table import SymbolTable
 
 class SuperGSLCoreFixtures(object):
+
+    def mk_global_symbol_table(self) -> SymbolTable:
+        """Instantiate a symbol table with a sequencestore."""
+        symbol_table = SymbolTable('global', None)
+        symbol_table.insert('sequences', self.sequence_store)
+        return symbol_table
 
     def mk_symbol_table(self) -> SymbolTable:
         """Create a simple symbol table with a nested scope."""
@@ -53,10 +59,19 @@ class SuperGSLCoreFixtures(object):
         of a the particular PCR thermocycler.
         """
         complement_sequence = part.sequence.complement()
-        return PrimerPair.from_sequences(
-            complement_sequence[:20],
-            complement_sequence[-20:]
+        complement_sequence_entry = self.mk_sequence_entry(complement_sequence)
+
+        # complement_sequence[:20]
+        forward = self.sequence_store.slice(
+            complement_sequence_entry,
+            Slice.from_five_prime_indexes(0,20)
         )
+        # complement_sequence[-20:]
+        reverse = self.sequence_store.slice(
+            complement_sequence_entry,
+            Slice(Position(20), Position(0, relative_to=THREE_PRIME)))
+
+        return PrimerPair.from_sequence_entries(forward, reverse)
 
     def mk_function_config_object(self, options=None):
         """Make a config object for instantiating supergsl functions."""
@@ -79,6 +94,9 @@ class SuperGSLCoreFixtures(object):
 
     def mk_sequence_entry(self, sequence : Seq) -> SequenceEntry:
         return self.sequence_store.add_from_reference(sequence)
+
+    def mk_sequence_role(self, uri):
+        return Role(uri=uri, name=uri, description=uri)
 
     def mk_part_by_sequence_entry(
         self,
@@ -124,11 +142,11 @@ class SuperGSLCoreFixtures(object):
             roles)
 
 
-    def mk_part_collection(self, num_parts=3) -> Collection:
+    def mk_part_collection(self, num_parts=3, part_len=100) -> Collection:
         """Return a `Collection` of parts."""
 
         return Collection([
-            self.mk_part('pGAL%d' % index, 100)[1]
+            self.mk_part('pGAL%d' % index, part_len)[1]
             for index in range(num_parts)
         ])
 

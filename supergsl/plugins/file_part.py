@@ -39,7 +39,7 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
         self.fasta_file_path : str = settings['fasta_file_path']
         self.feature_file_path : str = settings['feature_file_path']
         self._cached_parts : Dict[str, Part] = {}
-        self.primer_builder = ExtractionPrimerBuilder()
+        self.primer_builder = ExtractionPrimerBuilder(self.sequence_store)
 
     def load(self) -> None:
         encoding = guess_type(self.feature_file_path)[1]

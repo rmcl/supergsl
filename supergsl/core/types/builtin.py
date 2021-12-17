@@ -2,6 +2,8 @@
 from Bio.Seq import Seq
 from typing import List, Type
 from collections import OrderedDict
+
+from supergsl.core.sequence import SequenceEntry
 from .base import SuperGSLType
 
 class SuperGSLEnum(SuperGSLType):
@@ -12,13 +14,13 @@ class SuperGSLEnum(SuperGSLType):
 class NucleotideSequence(SuperGSLType):
     """A type representing a nucleotide sequence."""
 
-    def __init__(self, sequence : Seq):
-        self._sequence = sequence
+    def __init__(self, sequence_entry : SequenceEntry):
+        self.sequence_entry = sequence_entry
 
     @property
     def sequence(self) -> Seq:
         """Return the nucleotide sequence as a `Bio.Seq`."""
-        return self._sequence
+        return self.sequence_entry.sequence
 
     def __repr__(self):
         return 'NucleotideSequence: %s' % self.sequence
@@ -27,13 +29,13 @@ class NucleotideSequence(SuperGSLType):
 class AminoAcidSequence(SuperGSLType):
     """A type representing arbitrary an amino acid sequence."""
 
-    def __init__(self, sequence : Seq):
-        self._sequence = sequence
+    def __init__(self, sequence_entry : SequenceEntry):
+        self.sequence_entry = sequence_entry
 
     @property
     def sequence(self):
         """Return the amino acid sequence as a `Bio.Seq`."""
-        return self._sequence
+        return self.sequence_entry.sequence
 
     def __repr__(self):
         return 'AminoAcidSequence: %s' % self.sequence
