@@ -4,7 +4,8 @@ from Bio import SeqIO, SeqFeature
 from supergsl.core.constants import FIVE_PRIME
 from supergsl.core.exception import PartNotFoundError
 from supergsl.core.sequence import SequenceEntry
-from supergsl.core.parts import PartProvider, PartProviderConfig
+from supergsl.core.parts import PartProvider
+from supergsl.core.provider import ProviderConfig
 from supergsl.core.types.position import Slice, Position
 from supergsl.core.types.part import Part
 
@@ -29,11 +30,11 @@ class GenBankFilePartProvider(PartProvider):
     `get_identifier_for_feature`. See method docstring for more information.
     """
 
-    def __init__(self, name, config : PartProviderConfig):
+    def __init__(self, name, config : ProviderConfig):
         self._provider_name = name
 
         self.sequence_store = config.sequence_store
-        self.genbank_file_path = config.provider_config['sequence_file_path']
+        self.genbank_file_path = config.settings['sequence_file_path']
         self.features_by_identifier : Dict[str, Tuple[SeqFeature, SequenceEntry]] = {}
         self.loaded = False
 

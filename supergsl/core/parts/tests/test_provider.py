@@ -4,8 +4,8 @@ from Bio.Seq import Seq
 
 from supergsl.core.exception import PartNotFoundError
 from supergsl.core.sequence import SequenceStore
+from supergsl.core.provider import ProviderConfig
 from supergsl.core.parts.provider import (
-    PartProviderConfig,
     PartProvider,
     ConstantPartProvider
 )
@@ -15,7 +15,7 @@ class PartProviderTestCase(TestCase):
     """Test the `PartProvider` functionality."""
 
     def setUp(self):
-        self.provider_config = PartProviderConfig(Mock(), {})
+        self.provider_config = ProviderConfig(Mock(), {})
 
     def test_provider_name(self):
         """Provider name returns the expected name."""
@@ -36,7 +36,7 @@ class ConstantPartProviderTestCase(TestCase):
     """Test case for `ConstantPartProvider`."""
 
     def setUp(self):
-        self.provider_config = PartProviderConfig(SequenceStore(), {})
+        self.provider_config = ProviderConfig(SequenceStore(), {})
 
     def test_constant_get_part(self):
         """Test that we can retrieve constant parts as `Part`."""

@@ -17,7 +17,7 @@ class SynBioHubProviderTestCase(unittest.TestCase):
             'enable_part_cache' : False
         }
         self.fixtures = SuperGSLCoreFixtures()
-        self.provider_config = self.fixtures.mk_part_provider_config(self.mock_settings)
+        self.provider_config = self.fixtures.mk_provider_config(self.mock_settings)
 
 
     def test_get_part_from_mocked_detail(self):

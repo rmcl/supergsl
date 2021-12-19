@@ -9,7 +9,7 @@ class FuseAssemblerTestCase(unittest.TestCase):
 
     def setUp(self):
         self.fixtures = SuperGSLCoreFixtures()
-        self.assembler = FusionAssembler(self.fixtures.mk_function_config_object())
+        self.assembler = FusionAssembler(self.fixtures.mk_provider_config())
 
     def test_assemble_concatenates_part_sequences(self):
         """Fuse assembler is expected to append part sequences together."""

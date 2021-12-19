@@ -2,6 +2,23 @@
 from typing import List, Optional, Mapping
 from supergsl.core.exception import NotFoundError
 from supergsl.core.types import SuperGSLType
+from supergsl.core.sequence import SequenceStore
+
+
+class ProviderConfig:
+    """Store config parameters for Part Providers"""
+
+    def __init__(self, sequence_store : SequenceStore, settings : dict):
+        self._sequence_store = sequence_store
+        self._settings = settings
+
+    @property
+    def settings(self) -> dict:
+        return self._settings
+
+    @property
+    def sequence_store(self) -> SequenceStore:
+        return self._sequence_store
 
 
 class SuperGSLProvider(SuperGSLType):

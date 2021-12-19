@@ -5,7 +5,8 @@ from sbol2 import Document, PartShop
 from supergsl.core.exception import ConfigurationError
 from supergsl.utils.cache import FileCache
 
-from supergsl.core.parts import PartProvider, PartProviderConfig
+from supergsl.core.parts import PartProvider
+from supergsl.core.provider import ProviderConfig
 from supergsl.core.types.part import Part
 
 
@@ -33,12 +34,12 @@ class SynBioHubPartProvider(PartProvider):
     * https://synbiohub.org/public/igem
     """
 
-    def __init__(self, name : str, config : PartProviderConfig):
+    def __init__(self, name : str, config : ProviderConfig):
         self._provider_name = name
         self._cached_parts: Dict[str, Part] = {}
         self.sequence_store = config.sequence_store
 
-        settings = config.provider_config
+        settings = config.settings
         self.repository_url = settings.get('repository_url', None)
         if not self.repository_url:
             ConfigurationError('"%s" requires that repository_url be set.')

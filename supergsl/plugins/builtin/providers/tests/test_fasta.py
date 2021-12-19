@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 from Bio.Seq import Seq
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.core.sequence import SequenceStore
-from supergsl.core.parts.provider import PartProviderConfig
+from supergsl.core.provider import ProviderConfig
 from supergsl.plugins.builtin.providers.fasta import FastaPartProvider
 
 
@@ -22,7 +22,7 @@ class FASTAProviderTestCase(unittest.TestCase):
         with open(temp_file_path, 'w+') as file_pointer:
             file_pointer.write('''>HELLO\natgc\n>YOYO\nttttaaaatgaacaaaa\n''')
 
-        config = PartProviderConfig(SequenceStore(), {
+        config = ProviderConfig(SequenceStore(), {
             'fasta_file_path': temp_file_path
         })
         self.provider = FastaPartProvider('bloop', config)

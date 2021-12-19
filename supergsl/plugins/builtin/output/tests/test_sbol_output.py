@@ -16,7 +16,7 @@ class SBOLOutputTestCase(TestCase):
 
     def setUp(self):
         self.fixtures = SuperGSLCoreFixtures()
-        self.sbol_output = SBOLOutput(self.fixtures.mk_function_config_object())
+        self.sbol_output = SBOLOutput(self.fixtures.mk_provider_config())
 
     @patch('supergsl.plugins.builtin.output.sbol_output.Document')
     def test_output(self, sbol_document_class_mock):

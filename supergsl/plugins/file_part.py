@@ -15,7 +15,8 @@ from supergsl.core.types.position import Slice, Position
 from supergsl.core.sequence import SequenceEntry
 from supergsl.core.exception import PartNotFoundError
 from supergsl.core.types.part import Part
-from supergsl.core.parts import PartProvider, PartProviderConfig
+from supergsl.core.parts import PartProvider
+from supergsl.core.provider import ProviderConfig
 from supergsl.core.parts.prefix_part import PrefixedSlicePartProviderMixin
 from supergsl.plugins.pydna.primers import ExtractionPrimerBuilder
 
@@ -31,11 +32,11 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
 
     """
 
-    def __init__(self, name : str, config : PartProviderConfig):
+    def __init__(self, name : str, config : ProviderConfig):
         self._provider_name = name
         self.sequence_store = config.sequence_store
 
-        settings = config.provider_config
+        settings = config.settings
         self.fasta_file_path : str = settings['fasta_file_path']
         self.feature_file_path : str = settings['feature_file_path']
         self._cached_parts : Dict[str, Part] = {}

@@ -11,7 +11,7 @@ class AssemblyResultOutputFunctionTestCase(unittest.TestCase):
 
     def setUp(self):
         self.fixtures = SuperGSLCoreFixtures()
-        self.function_config = self.fixtures.mk_function_config_object()
+        self.function_config = self.fixtures.mk_provider_config()
 
     def test_open_output_fp_stdout(self):
         """Test that open_output_fp returns a filepointer to stdout."""

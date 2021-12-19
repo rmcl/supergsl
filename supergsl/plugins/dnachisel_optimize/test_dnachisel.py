@@ -14,7 +14,7 @@ class DnaChiselTestCases(TestCase):
         self.maxDiff = None
 
         self.fixtures = SuperGSLCoreFixtures()
-        config = self.fixtures.mk_function_config_object()
+        config = self.fixtures.mk_provider_config()
         self.optimize = DNAChiselOptimizeFunction(config)
 
         """

@@ -4,7 +4,7 @@ from Bio import SeqIO
 from supergsl.core.pipeline import CompilerPipeline
 from supergsl.tests.fixtures import SuperGSLIntegrationFixtures
 from supergsl.plugins.file_part import FeatureTableWithFastaPartProvider
-from supergsl.core.parts.provider import PartProviderConfig
+from supergsl.core.provider import ProviderConfig
 from supergsl.core.sequence import SequenceStore
 
 
@@ -19,7 +19,7 @@ class FilePartTestCases(TestCase):
 
         self.fixtures = SuperGSLIntegrationFixtures()
         settings = self.fixtures.get_supergsl_settings()
-        config = PartProviderConfig(self.store, settings['part_providers'][0])
+        config = ProviderConfig(self.store, settings['part_providers'][0])
 
         self.provider = FeatureTableWithFastaPartProvider('TESTER', config)
 

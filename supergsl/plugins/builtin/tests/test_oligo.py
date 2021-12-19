@@ -13,7 +13,7 @@ class SyntheticOligoAssemblerTestCase(unittest.TestCase):
     def setUp(self):
         self.fixtures = SuperGSLCoreFixtures()
         self.oligo_overlap = 20
-        self.assembler = SyntheticOligoAssembler(self.fixtures.mk_function_config_object({
+        self.assembler = SyntheticOligoAssembler(self.fixtures.mk_provider_config({
             'max_oligo_len': 80,
             'max_num_oligos': 5,
             'min_overlap_len': self.oligo_overlap
