@@ -112,7 +112,10 @@ class PluginProvider(object):
             self.resolve_plugins_from_config(plugin_path)
 
     def get_adhoc_plugin(self):
-        return SuperGSLPlugin(self._symbol_table, self._compiler_settings)
+        """Return Plugin that can be used to instantiate providers not specified in supergsl config."""
+        if not hasattr(self, '_adhoc_plugin'):
+            self._adhoc_plugin = SuperGSLPlugin(self._symbol_table, self._compiler_settings)
+        return self._adhoc_plugin
 
 
     def resolve_plugins_from_config(self, module_path: str) -> None:
