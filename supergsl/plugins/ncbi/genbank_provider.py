@@ -17,6 +17,10 @@ class GenBankFilePartProvider(PartProvider):
     `name`: The name of the provider. This is used in your superGSL import statement.
     `provider_class`: For this provider, should be: "supergsl.plugins.ncbi.GenBankFilePartProvider".
     `sequence_file_path`: The path on the local filesystem to the genbank file.
+    `features` (optional): A list of features to be provided by this provider.
+        Default: ['gene', 'CDS']
+    `qualifiers` (optional): A list of qualifiers to include as importable parts
+        by this provider. Default: ['gene', 'locus_tag', 'product']
 
     Example of retrieving Adeno-associated virus 4, complete genome (U89790.1)
     {
@@ -25,8 +29,10 @@ class GenBankFilePartProvider(PartProvider):
         "sequence_file_path": "/mnt/genomes/nucleotide-U89790.gb.gz"
     }
 
-    If you don't like the features that this provider pulls out of your GenBank
-    file then you shoould consider subclassing and overriding
+    More details about GenBank feature tables here: https://www.insdc.org/files/feature_table.html
+
+    If you would like more flexibility in the features that this provider pulls
+    out of your GenBane file then you shoould consider subclassing and overriding
     `get_identifier_for_feature`. See method docstring for more information.
     """
 
@@ -37,6 +43,15 @@ class GenBankFilePartProvider(PartProvider):
         self.genbank_file_path = config.settings['sequence_file_path']
         self.features_by_identifier : Dict[str, Tuple[SeqFeature, SequenceEntry]] = {}
         self.loaded = False
+
+        self.desired_feature_types = ['gene', 'CDS']
+        if 'features' in config.settings:
+            self.desired_feature_types = config.settings['features']
+
+        self.desired_feature_qualifiers = ['gene', 'locus_tag', 'product']
+        if 'qualifiers' in config.settings:
+            self.desired_feature_qualifiers = config.settings['qualifiers']
+
 
     def open_gb_file(self, path):
         """Open a genbank file whether gunziped or uncompressed."""
@@ -54,9 +69,8 @@ class GenBankFilePartProvider(PartProvider):
         file.
         """
         identifiers = []
-        if feature.type in ['gene', 'CDS']:
-            desired_qualifiers = ['gene', 'locus_tag', 'product']
-            for qualifier_key in desired_qualifiers:
+        if feature.type in self.desired_feature_types:
+            for qualifier_key in self.desired_feature_qualifiers:
                 if qualifier_key in feature.qualifiers:
                     identifiers.extend(feature.qualifiers[qualifier_key])
 

@@ -7,7 +7,8 @@ from supergsl.core.sequence import SequenceStore
 from supergsl.core.provider import ProviderConfig
 from supergsl.core.parts.provider import (
     PartProvider,
-    ConstantPartProvider
+    ConstantPartProvider,
+    ConstantPartDetail
 )
 
 
@@ -40,14 +41,15 @@ class ConstantPartProviderTestCase(TestCase):
 
     def test_constant_get_part(self):
         """Test that we can retrieve constant parts as `Part`."""
-        provider = ConstantPartProvider('constant-part', self.provider_config)
-        provider.PART_DETAILS = {
-            'test-part': (
+        self.provider_config.settings['sequences'] = {
+            'test-part': ConstantPartDetail(
                 'THE GREATEST PART EVER',
                 'ATGCAAATAGACAA',
                 ['ROLE1', 'ROLE2']
             )
         }
+        provider = ConstantPartProvider('constant-part', self.provider_config)
+
 
         part = provider.get_part('test-part')
 
