@@ -9,6 +9,7 @@ class SuperGSLFunctionTestCase(unittest.TestCase):
     """Test that SuperGSL functions can process arguments and be invoked."""
 
     class TestFunction(SuperGSLFunction):
+        name = 'party'
         arguments = [
             ('awesome1', int),
             ('arg2', AminoAcidSequence)
