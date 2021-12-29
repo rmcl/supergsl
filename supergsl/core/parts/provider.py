@@ -1,4 +1,7 @@
-from typing import Optional, Dict, Mapping
+"""Implementation of part provider base class and plugin."""
+from typing import Optional, List, Dict, Mapping, NamedTuple
+from collections import namedtuple
+
 from Bio.Seq import Seq
 
 from supergsl.utils import import_class
@@ -61,13 +64,29 @@ class PartProvider(SuperGSLProvider):
         raise NotImplementedError('Subclass to implement')
 
 
-class ConstantPartProvider(PartProvider):
-    """Base class for providing constant parts.
+class ConstantPartDetail(NamedTuple):
+    description : str
+    sequence : str
+    roles: List[str]
 
-    To utilize this class, subclass and define a PART_DETAILS dictionary.
+
+class ConstantPartProvider(PartProvider):
+    """Load Parts from a python dictionary.
+
+    This class can either be subclassed to provide constant sequences or
+    instantiated with a `sequences` argument with desired parts.
+
+    Provider Arguments:
+    `name`: The name of the provider. This is used in your superGSL import statement.
+    `provider_class`: For this provider, should be: "supergsl.core.parts.ConstantPartProvider".
+    `sequences` (Mapping[str, ConstantPartDetail]): A dictionary containing the desired
+        parts
+
+    To utilize this class, pass the `sequence` arguemnet or subclass and define
+    a DEFAULT_PART_DETAILS dictionary.
     ```
     {
-        <part-identifier>: (
+        <part-identifier>: ConstantPartDetail(
             <description>
             <sequence>
             [<list of roles>]
@@ -76,19 +95,31 @@ class ConstantPartProvider(PartProvider):
     ```
     """
 
-    PART_DETAILS = {
-        'part-name': ('part description', 'ATGC', ['LIST OF ROLES']),
+    DEFAULT_PART_DETAILS : Mapping[str, ConstantPartDetail] = {
+        'part-name': ConstantPartDetail('part description', 'ATGC', ['LIST OF ROLES']),
     }
 
     def __init__(self, name : str, config : ProviderConfig):
         self._provider_name = name
         self._sequence_store = config.sequence_store
+
+        if 'sequences' in config.settings:
+            self._part_details = config.settings['sequences']
+        else:
+            self._part_details = self.DEFAULT_PART_DETAILS
+
         self._cached_parts: Dict[str, Part] = {}
 
+    def list_parts(self):
+        """Return all parts available through this provider."""
+        return [
+            self.get_part(identifier)
+            for identifier in self._part_details.keys()
+        ]
 
     def get_part_details(self, part_identifier):
         """Return constant details about a part."""
-        return self.PART_DETAILS[part_identifier]
+        return self._part_details[part_identifier]
 
     def get_part(self, identifier : str) -> Part:
         """Retrieve a part by identifier.

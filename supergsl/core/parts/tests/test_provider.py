@@ -7,7 +7,8 @@ from supergsl.core.sequence import SequenceStore
 from supergsl.core.provider import ProviderConfig
 from supergsl.core.parts.provider import (
     PartProvider,
-    ConstantPartProvider
+    ConstantPartProvider,
+    ConstantPartDetail
 )
 
 
@@ -40,20 +41,35 @@ class ConstantPartProviderTestCase(TestCase):
 
     def test_constant_get_part(self):
         """Test that we can retrieve constant parts as `Part`."""
-        provider = ConstantPartProvider('constant-part', self.provider_config)
-        provider.PART_DETAILS = {
-            'test-part': (
+        self.provider_config.settings['sequences'] = {
+            'test-part': ConstantPartDetail(
                 'THE GREATEST PART EVER',
                 'ATGCAAATAGACAA',
                 ['ROLE1', 'ROLE2']
             )
         }
+        provider = ConstantPartProvider('constant-part', self.provider_config)
+
 
         part = provider.get_part('test-part')
 
         self.assertEqual(part.identifier, 'test-part')
         self.assertEqual(part.sequence, 'ATGCAAATAGACAA')
         self.assertEqual(part.roles, ['ROLE1', 'ROLE2'])
+
+    def test_list_parts(self):
+        """Test that constant part lists parts correctly."""
+        self.provider_config.settings['sequences'] = {
+            'test-part': ConstantPartDetail(
+                'THE GREATEST PART EVER',
+                'ATGCAAATAGACAA',
+                ['ROLE1', 'ROLE2']
+            )
+        }
+        provider = ConstantPartProvider('constant-part', self.provider_config)
+
+        parts = provider.list_parts()
+        self.assertEqual(parts[0].identifier, "test-part")
 
     def test_constant_get_part_does_not_exist(self):
         """PartNotFoundError should be raised if part provider doesn't have the part."""
