@@ -57,6 +57,20 @@ class ConstantPartProviderTestCase(TestCase):
         self.assertEqual(part.sequence, 'ATGCAAATAGACAA')
         self.assertEqual(part.roles, ['ROLE1', 'ROLE2'])
 
+    def test_list_parts(self):
+        """Test that constant part lists parts correctly."""
+        self.provider_config.settings['sequences'] = {
+            'test-part': ConstantPartDetail(
+                'THE GREATEST PART EVER',
+                'ATGCAAATAGACAA',
+                ['ROLE1', 'ROLE2']
+            )
+        }
+        provider = ConstantPartProvider('constant-part', self.provider_config)
+
+        parts = provider.list_parts()
+        self.assertEqual(parts[0].identifier, "test-part")
+
     def test_constant_get_part_does_not_exist(self):
         """PartNotFoundError should be raised if part provider doesn't have the part."""
         provider = ConstantPartProvider('constant-part', self.provider_config)
