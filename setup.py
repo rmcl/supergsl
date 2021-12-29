@@ -35,6 +35,7 @@ setuptools.setup(
         'types-mock',
         'types-protobuf',
         'types-requests',
+        'typeguard',
     ],
     extras_require={
         "plugins": [
