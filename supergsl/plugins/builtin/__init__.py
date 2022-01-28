@@ -9,6 +9,10 @@ from .output.json_output import JSONOutput
 from .output.sbol_output import SBOLOutput
 from .output.genbank_output import GenBankOutput
 
+from .providers.fasta import FastaPartProvider
+from .providers.synbiohub import SynBioHubPartProvider
+from .providers.genbank import GenBankFilePartProvider
+
 
 class BuiltinPlugin(SuperGSLPlugin):
     """Plugin stub to help register basic Assemblers."""
@@ -44,3 +48,8 @@ class BuiltinPlugin(SuperGSLPlugin):
             'builtin',
             'output_genbank',
             SuperGSLFunctionDeclaration(GenBankOutput, compiler_settings))
+
+        # Available providers
+        self.register_available_provider('fasta', FastaPartProvider)
+        self.register_available_provider('synbiohub', SynBioHubPartProvider)
+        self.register_available_provider('genbank', GenBankFilePartProvider)

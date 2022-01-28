@@ -8,6 +8,7 @@ from supergsl.core.backend import BackendPipelinePass
 from supergsl.core.eval import EvaluatePass
 from supergsl.utils import resolve_import, import_class
 from supergsl.core.sequence import SequenceStore
+from supergsl.core.exception import SymbolNotFoundError
 
 from .lexer import SuperGSLLexer
 from .parser import SuperGSLParser
@@ -78,18 +79,39 @@ class CompilerPipeline:
             EvaluatePass
         ])
 
-    def register_provider(self, module_path : str, provider_class_path : Union[str, Callable], **kwargs):
+
+    def available_providers(self):
+        available_providers = self.symbols.enter_nested_scope('available_imports')
+        return [
+            item[0]
+            for item in available_providers
+        ]
+
+    def register_provider(self, provider_path : str, provider : Union[str, Callable], **kwargs):
         """Instantiate and register a provider."""
         plugin = self.plugins.get_adhoc_plugin()
         config = ProviderConfig(self._sequence_store, settings=kwargs)
 
-        if callable(provider_class_path):
-            provider_class = provider_class_path
+        if callable(provider):
+            provider_class = provider
         else:
-            provider_class = import_class(provider_class_path)
+            provider_class = None
+            try:
+                provider_class = import_class(provider)
+            except ValueError:
+                pass
+            except SymbolNotFoundError:
+                pass
 
-        provider_inst = provider_class(config)
-        plugin.register_provider(module_path, provider_inst)
+        if not provider_class:
+            available_providers = self.symbols.enter_nested_scope('available_imports')
+            try:
+                provider_class = available_providers[provider]
+            except KeyError:
+                raise Exception('Unknown Provider "%s"' % provider)
+
+        provider_inst = provider_class(provider_path, config)
+        plugin.register_provider(provider_path, provider_inst)
         return provider_inst
 
 

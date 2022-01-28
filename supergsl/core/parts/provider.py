@@ -102,13 +102,17 @@ class ConstantPartProvider(PartProvider):
     def __init__(self, name : str, config : ProviderConfig):
         self._provider_name = name
         self._sequence_store = config.sequence_store
+        self._config = config
 
-        if 'sequences' in config.settings:
-            self._part_details = config.settings['sequences']
-        else:
-            self._part_details = self.DEFAULT_PART_DETAILS
-
+        self.setup_part_details()
         self._cached_parts: Dict[str, Part] = {}
+
+    def setup_part_details(self):
+        if 'sequences' not in self._config.settings:
+            raise Exception('ConstantPartProvider requires a `sequences` argument.')
+
+        self._part_details = self._config.settings['sequences']
+
 
     def list_parts(self):
         """Return all parts available through this provider."""
@@ -168,6 +172,8 @@ class PartProviderPlugin(SuperGSLPlugin):
 
     def register(self, compiler_settings):
         """Instantiate and register each part_providers defined in settings."""
+
+        self.register_available_provider('constant_parts', ConstantPartProvider)
 
         if 'part_providers' not in compiler_settings:
             raise ConfigurationError(
