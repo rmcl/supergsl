@@ -14,7 +14,8 @@ class EntrezPartProviderTestCase(TestCase):
 
     def setUp(self):
         self.temp_dir = TemporaryDirectory()
-        self.settings = {
+        self.config = Mock()
+        self.config.settings = {
             'local_genome_path': self.temp_dir.name + 'sgsl-lib/',
             'entrez_email': 'test@testexample.notreal',
             'efetch_args': {
@@ -22,14 +23,15 @@ class EntrezPartProviderTestCase(TestCase):
                 'db': 'thedb'
             }
         }
-        self.entrez_provider = EntrezPartProvider('test', self.settings)
+        self.entrez_provider = EntrezPartProvider('test', self.config)
 
     def tearDown(self):
         self.temp_dir.cleanup()
 
     def test_check_for_required_settings(self):
         """ConfigurationError is raised if efetch_args and email not provided."""
-        bad_settings = {
+        bad_config = Mock()
+        bad_config.settings = {
             'efetch_args': {
                 'id': 'boom123',
                 'db': 'thedb'
@@ -40,7 +42,7 @@ class EntrezPartProviderTestCase(TestCase):
             ConfigurationError,
             EntrezPartProvider,
             'test',
-            bad_settings)
+            bad_config)
 
     def test_get_local_file_path(self):
         """The local path should be generated and containing directory created."""
@@ -60,7 +62,7 @@ class EntrezPartProviderTestCase(TestCase):
 
         self.entrez_provider.retrieve_sequence_file()
 
-        self.assertEqual(entrez_mock.email, self.settings['entrez_email'])
+        self.assertEqual(entrez_mock.email, self.config.settings['entrez_email'])
         entrez_mock.efetch.assert_called_once_with(
             id='boom123', db='thedb', rettype='gb', retmode='binary')
         self.assertEqual(

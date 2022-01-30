@@ -3,7 +3,7 @@ from unittest import TestCase
 from Bio import SeqIO
 from supergsl.core.sequence import SequenceStore
 from supergsl.core.provider import ProviderConfig
-from supergsl.plugins.ncbi.genbank_provider import GenBankFilePartProvider
+from supergsl.plugins.builtin.providers.genbank import GenBankFilePartProvider
 
 
 class GenBankFilePartProviderTestCase(TestCase):
