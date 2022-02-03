@@ -1,6 +1,7 @@
 import gzip
 from typing import List, Dict, Tuple, Optional
-from Bio import SeqIO, SeqFeature
+from Bio import SeqIO
+from Bio.SeqFeature import SeqFeature
 from supergsl.core.constants import FIVE_PRIME
 from supergsl.core.exception import PartNotFoundError
 from supergsl.core.sequence import SequenceEntry
