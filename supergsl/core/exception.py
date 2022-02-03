@@ -62,3 +62,11 @@ class SuperGSLTypeError(SuperGSLError):
 
 class SequenceStoreError(SuperGSLError):
     """A base class for errors related to the Sequence Store."""
+
+
+class DuplicateSequenceError(SequenceStoreError):
+    """"""
+
+
+class SequenceNotFoundError(SequenceStoreError):
+    """The desired sequence could not be found in the store."""
