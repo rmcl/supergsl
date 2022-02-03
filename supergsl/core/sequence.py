@@ -3,7 +3,11 @@ from uuid import UUID, uuid4
 from Bio.Seq import Seq
 from Bio.SeqFeature import SeqFeature
 
-from supergsl.core.exception import SequenceStoreError
+from supergsl.core.exception import (
+    SequenceStoreError,
+    SequenceNotFoundError,
+    DuplicateSequenceError
+)
 from supergsl.core.constants import THREE_PRIME, STRAND_CRICK
 from supergsl.core.types.position import Slice, Position, AbsoluteSlice
 
@@ -77,7 +81,8 @@ class SequenceEntry:
         sequence_id: UUID,
         roles : Optional[List[Role]] = None,
         parent_links : Optional[List[EntryLink]] = None,
-        reference : Optional[Seq] = None
+        reference : Optional[Seq] = None,
+        external_ids : Optional[Dict[str, str]] = None
     ):
         self.sequence_store = sequence_store
         self.sequence_id = sequence_id
@@ -85,11 +90,23 @@ class SequenceEntry:
         self.parent_links = parent_links
         self.reference = reference
 
+        if not external_ids:
+            self._external_ids : Dict[str, str] = {}
+
         if not (self.parent_links or self.reference):
             raise SequenceStoreError('Must specify either parents or reference.')
         if self.parent_links and self.reference:
             raise SequenceStoreError(
                 'Must only specify parents or a reference sequence, but not both')
+
+    @property
+    def external_ids(self):
+        """Return a dictionary containing all external ids."""
+        return self._external_ids
+
+    def get_external_id(self, external_system_name : str):
+        """Return the external id for a specific system."""
+        return self._external_ids[external_system_name]
 
     @property
     def id(self) -> UUID:
@@ -225,33 +242,89 @@ class SequenceStore:
 
     def __init__(self):
         self._sequences_by_uuid : Dict[UUID, SequenceEntry] = {}
+
+        """
+        Maintain a index of external unique ids.
+
+        Example:
+         {
+           'uniprot': {
+               'Q00955': SequenceEntry,
+               ....
+            },
+            ...
+        }
+        """
+        self._sequences_by_external_id : Dict[str, Dict[str, SequenceEntry]] = {}
         self._links_by_uuid : Dict[UUID, List[EntryLink]] = {}
 
     def lookup(self, sequence_id : UUID) -> SequenceEntry:
         """Lookup `SequenceEntry` by it's id."""
         return self._sequences_by_uuid[sequence_id]
 
-    def _create_record_id(self):
+    def lookup_by_external_id(self, external_system_name : str, external_id : str) -> SequenceEntry:
+        """Find sequences with a given external id."""
+        try:
+            external_system = self._sequences_by_external_id[external_system_name]
+        except KeyError as external_sys_error:
+            raise SequenceNotFoundError('Unknown external system "%s"' % (
+                external_system_name)) from external_sys_error
+
+        try:
+            return external_system[external_id]
+        except KeyError as external_id_error:
+            raise SequenceNotFoundError('Unknown sequence "%s" in "%s"' % (
+                external_id, external_system_name)) from external_id_error
+
+    def __create_record_id(self):
         """Create a new random id for a sequence entry."""
         return uuid4()
 
     def list(self):
         """List sequences in the store."""
-        raise NotImplementedError('implement me!')
+        return self._sequences_by_uuid.values()
 
-    def add_from_reference(self, sequence : Seq, roles : Optional[List[Role]] = None):
+    def add_from_reference(
+        self,
+        sequence : Seq,
+        roles : Optional[List[Role]] = None,
+        external_ids : Optional[Dict[str,str]] = None):
         """Add a sequence to the store."""
 
         # TODO: Do we want to support adding from a SeqRecord
         # If yes, consider iterating over the SeqRecord's features and adding them
         # as annotations on EntryLinks
 
+        if not external_ids:
+            external_ids = {}
+
+        for external_system_name, external_id in external_ids.items():
+            try:
+                self.lookup_by_external_id(external_system_name, external_id)
+            except SequenceNotFoundError:
+                continue
+            else:
+                raise DuplicateSequenceError(
+                    'Sequence "%s" from "%s" already exists in the store.' % (
+                        external_id,
+                        external_system_name
+                    ))
+
         entry = SequenceEntry(
             sequence_store=self,
-            sequence_id=self._create_record_id(),
+            sequence_id=self.__create_record_id(),
             reference=sequence,
-            roles=roles if roles else [])
+            roles=roles if roles else [],
+            external_ids=external_ids)
 
+        # Index any provided external ids.
+        for external_system_name, external_id in external_ids.items():
+            if external_system_name not in self._sequences_by_external_id:
+                self._sequences_by_external_id[external_system_name] = {}
+
+            self._sequences_by_external_id[external_system_name][external_id] = entry
+
+        # Index the entry's UUID
         self._sequences_by_uuid[entry.id] = entry
         return entry
 
@@ -283,7 +356,7 @@ class SequenceStore:
 
         entry = SequenceEntry(
             sequence_store=self,
-            sequence_id=self._create_record_id(),
+            sequence_id=self.__create_record_id(),
             parent_links=[link],
             roles=new_sequence_roles
         )
@@ -309,7 +382,7 @@ class SequenceStore:
         if not new_sequence_roles:
             new_sequence_roles = []
 
-        entry_id = self._create_record_id()
+        entry_id = self.__create_record_id()
         entry = SequenceEntry(self, entry_id, new_sequence_roles, links)
         self._sequences_by_uuid[entry_id] = entry
         return entry
