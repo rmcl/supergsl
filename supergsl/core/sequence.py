@@ -1,6 +1,7 @@
-from typing import List, Dict, Optional, Tuple, NamedTuple
+from typing import List, Dict, Optional, Tuple, NamedTuple, Union
 from uuid import UUID, uuid4
 from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
 from Bio.SeqFeature import SeqFeature
 
 from supergsl.core.exception import SequenceStoreError
@@ -225,7 +226,7 @@ class SequenceStore:
 
     def __init__(self):
         self._sequences_by_uuid : Dict[UUID, SequenceEntry] = {}
-        self._links_by_uuid : Dict[UUID, List[EntryLink]] = {}
+        self._links_by_parent_entry_id : Dict[UUID, List[EntryLink]] = {}
 
     def lookup(self, sequence_id : UUID) -> SequenceEntry:
         """Lookup `SequenceEntry` by it's id."""
@@ -239,12 +240,15 @@ class SequenceStore:
         """List sequences in the store."""
         raise NotImplementedError('implement me!')
 
-    def add_from_reference(self, sequence : Seq, roles : Optional[List[Role]] = None):
+    def add_from_reference(self, sequence : Union[Seq, SeqRecord], roles : Optional[List[Role]] = None):
         """Add a sequence to the store."""
 
         # TODO: Do we want to support adding from a SeqRecord
         # If yes, consider iterating over the SeqRecord's features and adding them
         # as annotations on EntryLinks
+        if isinstance(sequence, SeqRecord):
+            sequence_record = sequence
+            sequence = sequence_record.seq
 
         entry = SequenceEntry(
             sequence_store=self,
@@ -288,8 +292,14 @@ class SequenceStore:
             roles=new_sequence_roles
         )
         self._sequences_by_uuid[entry.id] = entry
+        self._add_link_to_parent_index(link)
 
         return entry
+
+    def _add_link_to_parent_index(self, entry_link : EntryLink):
+        if entry_link.id not in self._links_by_parent_entry_id:
+            self._links_by_parent_entry_id[entry_link.parent_entry.id] = []
+        self._links_by_parent_entry_id[entry_link.parent_entry.id].append(entry_link)
 
     def concatenate(
         self,
@@ -305,6 +315,8 @@ class SequenceStore:
                 slice_mapping.target_slice,
                 slice_mapping.roles if slice_mapping.roles else [])
             links.append(link)
+
+            self._add_link_to_parent_index(link)
 
         if not new_sequence_roles:
             new_sequence_roles = []

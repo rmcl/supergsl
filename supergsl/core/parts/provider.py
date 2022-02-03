@@ -125,6 +125,10 @@ class ConstantPartProvider(PartProvider):
         """Return constant details about a part."""
         return self._part_details[part_identifier]
 
+    def get_default_part(self) -> Part:
+        """Return the default part returned for `import <provider>` syntax.."""
+        return self.get_part('default')
+
     def get_part(self, identifier : str) -> Part:
         """Retrieve a part by identifier.
 
