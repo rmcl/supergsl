@@ -297,9 +297,10 @@ class SequenceStore:
         return entry
 
     def _add_link_to_parent_index(self, entry_link : EntryLink):
-        if entry_link.id not in self._links_by_parent_entry_id:
-            self._links_by_parent_entry_id[entry_link.parent_entry.id] = []
-        self._links_by_parent_entry_id[entry_link.parent_entry.id].append(entry_link)
+        parent_entry_id = entry_link.parent_entry.id
+        if parent_entry_id not in self._links_by_parent_entry_id:
+            self._links_by_parent_entry_id[parent_entry_id] = []
+        self._links_by_parent_entry_id[parent_entry_id].append(entry_link)
 
     def concatenate(
         self,
