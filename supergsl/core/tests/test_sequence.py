@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import Mock
 
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
-from supergsl.core.sequence import SequenceStore, SliceMapping
+from supergsl.core.sequence import SequenceStore, SliceMapping, SequenceAnnotation
 from supergsl.core.types.position import Slice, Position
 from supergsl.core.constants import STRAND_CRICK
 
@@ -144,4 +144,44 @@ class SequenceStoreTestCase(unittest.TestCase):
         expected_child_sequence = expected_parent_sequence[50:100]
         self.assertEqual(child_entry.sequence, expected_child_sequence)
 
-    # test_slice_out_of_bound_part_with_reference
+
+class SequenceAnnotationTestCase(unittest.TestCase):
+    """Testcases to evaluate the handling of sequence annotations."""
+
+    def setUp(self):
+        self.fixtures = SuperGSLCoreFixtures()
+        self.sequence_store = self.fixtures.sequence_store
+
+    def test_add_and_retrieve_annotation(self):
+        """Create an annotation, add it to a reference sequence and then retrieve it."""
+        seq1 = 'ATGAAACACAAATTTAGACACAGAGTAGACATACGATGGAA'
+
+        annotation1 = SequenceAnnotation.from_five_prime_indexes(0,20, ['HELLO'], {
+            'payload': 'party'
+        })
+
+        store = self.fixtures.sequence_store
+        entry1 = store.add_from_reference(seq1, annotations=[annotation1])
+
+        self.assertEqual(entry1.sequence_annotations(), [annotation1])
+
+
+    def test_retrieve_annotations_from_slice(self):
+        """"""
+        seq1 = self.fixtures.mk_random_dna_sequence(2000)
+        annotations = [
+            SequenceAnnotation.from_five_prime_indexes(0,20, ['HELLO'], {}),
+            SequenceAnnotation.from_five_prime_indexes(50,200, ['YO'], {}),
+            SequenceAnnotation.from_five_prime_indexes(70,190, ['YO2'], {}),
+            SequenceAnnotation.from_five_prime_indexes(55,215, ['YO3'], {}),
+            SequenceAnnotation.from_five_prime_indexes(500,1000, ['YO4'], {})
+        ]
+
+        store = self.fixtures.sequence_store
+        entry1 = store.add_from_reference(seq1, annotations=annotations)
+
+        results = entry1.sequence_annotations_for_slice(
+            Slice.from_five_prime_indexes(40,210))
+
+        expected_results = [annotations[1], annotations[2]]
+        self.assertEqual(results, expected_results)

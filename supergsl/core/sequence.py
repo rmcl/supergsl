@@ -47,8 +47,30 @@ class SliceMapping(NamedTuple):
     roles : Optional[List[Role]] = None
 
 
+class SequenceAnnotation(NamedTuple):
+    """Store a annotation at a position relative to a sequence."""
+    location: Slice
+    roles: Optional[List[Role]]
+    payload: dict
+
+    @classmethod
+    def from_five_prime_indexes(
+        cls,
+        start : int,
+        end : int,
+        roles : Optional[List[Role]],
+        payload : dict
+    ):
+        """Create a sequence annotation relative to five prime end of a sequence."""
+        return SequenceAnnotation(
+            Slice.from_five_prime_indexes(start, end),
+            roles,
+            payload
+        )
+
+
 class EntryLink:
-    """A link between two sequences in the store or a sequence annotation."""
+    """A link between two sequences in the store."""
 
     def __init__(
         self,
@@ -73,6 +95,10 @@ class EntryLink:
             reference_source_sequence,
             absolute_source_slice)
 
+    def sequence_annotations(self) -> List[SequenceAnnotation]:
+        """Return all annotations within the slice of the parent entry."""
+        return self.parent_entry.sequence_annotations_for_slice(self.source_slice)
+
 
 class SequenceEntry:
     """Represent a sequence in the sequence store."""
@@ -83,13 +109,17 @@ class SequenceEntry:
         roles : Optional[List[Role]] = None,
         parent_links : Optional[List[EntryLink]] = None,
         reference : Optional[Seq] = None,
-        external_ids : Optional[Dict[str, str]] = None
+        external_ids : Optional[Dict[str, str]] = None,
+        annotations : Optional[List[SequenceAnnotation]] = None
     ):
         self.sequence_store = sequence_store
         self.sequence_id = sequence_id
         self.roles = roles if roles else []
         self.parent_links = parent_links
         self.reference = reference
+
+        # Annotations ordered by start position
+        self._annotations = annotations
 
         if not external_ids:
             self._external_ids : Dict[str, str] = {}
@@ -99,6 +129,56 @@ class SequenceEntry:
         if self.parent_links and self.reference:
             raise SequenceStoreError(
                 'Must only specify parents or a reference sequence, but not both')
+
+    def _get_local_sequence_annotations_for_slice(self, desired_slice : Slice):
+        """Get annotations for a slice of this entity."""
+
+        # TODO MAYBE WE DONT WANT TO CONVERT TO ABSOLUTE SLICE HERE!
+        # this is going to be called through a entity link so it would be better
+        # if this returned relative positions that were then converted.
+        absolute_desired_slice = desired_slice.build_absolute_slice(self.sequence_length)
+
+        filtered_annotations = []
+        for annotation in self._annotations:
+            annotation_absolute_slice = annotation.location.build_absolute_slice(
+                self.sequence_length)
+
+            ### TODO: VERY SKEPTICAL OF THIS LOGIC!
+            ### REVISIT AND MAKE SURE IT DOES WHAT WE EXPECT.
+            if annotation_absolute_slice.start < absolute_desired_slice.start:
+                continue
+            if annotation_absolute_slice.end >= absolute_desired_slice.end:
+                continue
+
+            filtered_annotations.append(annotation)
+
+        return filtered_annotations
+
+    def sequence_annotations_for_slice(self, desired_slice: Slice):
+        """Retrieve annotations contained in the given slice."""
+
+        # Retrieve annotations stored on this entry
+        all_annotations = self._get_local_sequence_annotations_for_slice(desired_slice)
+
+        # Get annotations for each parent
+            # Translate to absolute positions in this part
+
+        if self.parent_links:
+            for parent_link in self.parent_links:
+                all_annotations.extend(parent_link.sequence_annotations())
+
+        return all_annotations
+
+    def sequence_annotations(self) -> SequenceAnnotation:
+        """Return the sequence annotations for this entry.
+
+        Recursively include all annotations present in the parent links composing this entry.
+        """
+        return self.sequence_annotations_for_slice(Slice.from_entire_sequence())
+
+    def add_annotation(self, annotation : SequenceAnnotation):
+        """Add an annotation to the entry."""
+        self._annotations.append(annotation)
 
     @property
     def external_ids(self):
@@ -243,7 +323,6 @@ class SequenceStore:
 
     def __init__(self):
         self._sequences_by_uuid : Dict[UUID, SequenceEntry] = {}
-        self._links_by_parent_entry_id : Dict[UUID, List[EntryLink]] = {}
 
         """
         Maintain a index of external unique ids.
@@ -289,9 +368,11 @@ class SequenceStore:
 
     def add_from_reference(
         self,
-        sequence : Seq,
+        sequence : Union[Seq, SeqRecord],
         roles : Optional[List[Role]] = None,
-        external_ids : Optional[Dict[str,str]] = None):
+        external_ids : Optional[Dict[str,str]] = None,
+        annotations : Optional[List[SequenceAnnotation]] = None
+    ):
         """Add a sequence to the store."""
 
         # TODO: Do we want to support adding from a SeqRecord
@@ -301,34 +382,19 @@ class SequenceStore:
             sequence_record = sequence
             sequence = sequence_record.seq
 
-        if not external_ids:
-            external_ids = {}
-
-        for external_system_name, external_id in external_ids.items():
-            try:
-                self.lookup_by_external_id(external_system_name, external_id)
-            except SequenceNotFoundError:
-                continue
-            else:
-                raise DuplicateSequenceError(
-                    'Sequence "%s" from "%s" already exists in the store.' % (
-                        external_id,
-                        external_system_name
-                    ))
+        external_ids = external_ids or {}
+        self._check_for_duplicate_external_ids(external_ids)
 
         entry = SequenceEntry(
             sequence_store=self,
             sequence_id=self.__create_record_id(),
             reference=sequence,
             roles=roles if roles else [],
-            external_ids=external_ids)
+            external_ids=external_ids,
+            annotations=annotations)
 
         # Index any provided external ids.
-        for external_system_name, external_id in external_ids.items():
-            if external_system_name not in self._sequences_by_external_id:
-                self._sequences_by_external_id[external_system_name] = {}
-
-            self._sequences_by_external_id[external_system_name][external_id] = entry
+        self._add_entry_to_external_id_index(entry, external_ids)
 
         # Index the entry's UUID
         self._sequences_by_uuid[entry.id] = entry
@@ -367,15 +433,29 @@ class SequenceStore:
             roles=new_sequence_roles
         )
         self._sequences_by_uuid[entry.id] = entry
-        self._add_link_to_parent_index(link)
 
         return entry
 
-    def _add_link_to_parent_index(self, entry_link : EntryLink):
-        parent_entry_id = entry_link.parent_entry.id
-        if parent_entry_id not in self._links_by_parent_entry_id:
-            self._links_by_parent_entry_id[parent_entry_id] = []
-        self._links_by_parent_entry_id[parent_entry_id].append(entry_link)
+    def _check_for_duplicate_external_ids(self, external_ids):
+        for external_system_name, external_id in external_ids.items():
+            try:
+                self.lookup_by_external_id(external_system_name, external_id)
+            except SequenceNotFoundError:
+                continue
+            else:
+                raise DuplicateSequenceError(
+                    'Sequence "%s" from "%s" already exists in the store.' % (
+                        external_id,
+                        external_system_name
+                    ))
+
+    def _add_entry_to_external_id_index(self, entry : SequenceEntry, external_ids : Dict[str,str]):
+        """Index any provided external ids."""
+        for external_system_name, external_id in external_ids.items():
+            if external_system_name not in self._sequences_by_external_id:
+                self._sequences_by_external_id[external_system_name] = {}
+
+            self._sequences_by_external_id[external_system_name][external_id] = entry
 
     def concatenate(
         self,
@@ -391,8 +471,6 @@ class SequenceStore:
                 slice_mapping.target_slice,
                 slice_mapping.roles if slice_mapping.roles else [])
             links.append(link)
-
-            self._add_link_to_parent_index(link)
 
         if not new_sequence_roles:
             new_sequence_roles = []

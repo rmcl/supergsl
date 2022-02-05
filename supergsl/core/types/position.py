@@ -38,6 +38,25 @@ class AbsolutePosition:
 
         return new_abs_position
 
+    def __lt__(self, other):
+        return self.index < other.index
+
+    def __gt__(self, other):
+        return self.index > other.index
+
+    def __ge__(self, other):
+        return self.index >= other.index
+
+    def __le__(self, other):
+        return self.index <= other.index
+
+    def __eq__(self, other):
+        return self.index == other.index
+
+    def __ne__(self, other):
+        return self.index != other.index
+
+
 class AbsoluteSlice:
     def __init__(self, start : AbsolutePosition, end : AbsolutePosition, strand = STRAND_WATSON):
         self.start = start
