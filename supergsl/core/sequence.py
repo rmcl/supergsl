@@ -38,6 +38,7 @@ class Role(NamedTuple):
     description : str
 
     def __eq__(self, other):
+        """Roles with the same uri should be considered identical."""
         return self.uri == other.uri
 
 
@@ -56,14 +57,18 @@ class SequenceAnnotation(NamedTuple):
     payload: dict
 
     def __eq__(self, other):
+        """Annotations with the same position, roles and payload are the same."""
         return (
             self.location == other.location and
             self.roles == other.roles and
             self.payload == other.payload
         )
 
-    def derive_absolute_position_annotation(self, annotation_start : AbsolutePosition) -> 'SequenceAnnotation':
-
+    def derive_absolute_position_annotation(
+        self,
+        annotation_start : AbsolutePosition
+    ) -> 'SequenceAnnotation':
+        """Derive a new Annotation with a location relative to the given start position."""
         annotation_location = AbsoluteSlice(
             AbsolutePosition(
                 annotation_start.target_sequence_length,

@@ -70,3 +70,7 @@ class DuplicateSequenceError(SequenceStoreError):
 
 class SequenceNotFoundError(SequenceStoreError):
     """The desired sequence could not be found in the store."""
+
+
+class SequencePositionComparisonError(SuperGSLError):
+    """An error occurred when comparing positions in a sequence."""

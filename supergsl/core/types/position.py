@@ -1,11 +1,13 @@
 """Define SuperGSL types for dealing with positions and slices of sequences."""
 from typing import Dict, Any
+from supergsl.core.exception import SequencePositionComparisonError
 from supergsl.core.constants import (
     FIVE_PRIME,
     THREE_PRIME,
     STRAND_WATSON
 )
 from .base import SuperGSLType
+
 
 
 class AbsolutePosition:
@@ -40,42 +42,60 @@ class AbsolutePosition:
 
     def get_slice_pos_str(self) -> str:
         """Return a string representation of the AbsolutePosition."""
-        return '%s%d' % (
-            '~' if self.approximate else '',
-            self.index
-        )
+        approximate='~' if self.approximate else ''
+        return f"{approximate}{self.index}"
+
+    def can_position_be_compared(self, other) -> bool:
+        """Determine if AbsolutePosition objects can be compared."""
+        if self.target_sequence_length != other.target_sequence_length:
+            raise SequencePositionComparisonError(
+                'AbsolutePositions with different target sequence lengths cannot '
+                'be compared.')
+        return True
 
     def __lt__(self, other):
+        self.can_position_be_compared(other)
         return self.index < other.index
 
     def __gt__(self, other):
+        self.can_position_be_compared(other)
         return self.index > other.index
 
     def __ge__(self, other):
+        self.can_position_be_compared(other)
         return self.index >= other.index
 
     def __le__(self, other):
+        self.can_position_be_compared(other)
         return self.index <= other.index
 
     def __eq__(self, other):
+        """Positions with same index are considered the same.
+
+        TODO: How should we deal with approximate positions? Should we allow
+        a fudge factor?
+        """
+        self.can_position_be_compared(other)
         return self.index == other.index
 
 
-
 class AbsoluteSlice:
+    """Represent a range between two AbsolutePositions."""
+
     def __init__(self, start : AbsolutePosition, end : AbsolutePosition, strand = STRAND_WATSON):
         self.start = start
         self.end = end
         self.strand = strand
 
-        assert self.start.target_sequence_length == self.end.target_sequence_length
+        # Determine if start and end AbsolutePositions are comparable.
+        self.start.can_position_be_compared(self.end)
 
     def __len__(self):
         """Return the length of the sliced sequence."""
-        return self.start.target_sequence_length
+        return self.end.index - self.start.index
 
     def derive_from_relative_slice(self, child_slice: 'Slice'):
-        """Derive a new AbsoluteSlice from a Slice creating a subslice in this absolute slices reference sequence."""
+        """Create a AbsoluteSlice from a Slice creating a subslice in this absolute slice's reference sequence."""
 
         if child_slice.start.relative_to == FIVE_PRIME:
             start_child_abs_pos = self.start.derive_from_relative_position(child_slice.start)
@@ -93,6 +113,7 @@ class AbsoluteSlice:
         return self.get_slice_str()
 
     def __eq__(self, other):
+        """AbsoluteSlice with the same start, end and strand are considered the same."""
         return (
             self.start == other.start and
             self.end == other.end and
