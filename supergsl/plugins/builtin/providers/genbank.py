@@ -4,7 +4,7 @@ from Bio import SeqIO
 from Bio.SeqFeature import SeqFeature
 from supergsl.core.constants import FIVE_PRIME
 from supergsl.core.exception import PartNotFoundError
-from supergsl.core.sequence import SequenceEntry
+from supergsl.core.sequence import SequenceEntry, SequenceAnnotation
 from supergsl.core.parts import PartProvider
 from supergsl.core.provider import ProviderConfig
 from supergsl.core.types.position import Slice, Position
@@ -47,7 +47,7 @@ class GenBankFilePartProvider(PartProvider):
 
         self.desired_feature_types = config.settings.get(
             'features',
-            ['gene', 'CDS'])
+            ['gene', 'CDS', 'misc_feature'])
 
         self.desired_feature_qualifiers = config.settings.get(
             'qualifiers',
@@ -125,6 +125,17 @@ class GenBankFilePartProvider(PartProvider):
                     self.default_part_identifier = record.name
 
                 for feature in record.features:
+                    location = feature.location
+
+                    annotation_roles = [feature.type]
+                    annotation_payload = dict(feature.qualifiers)
+
+                    new_annotation = SequenceAnnotation.from_five_prime_indexes(
+                        location.start, location.end,
+                        annotation_roles,
+                        annotation_payload)
+                    sequence_entry.add_annotation(new_annotation)
+
                     identifiers = self.get_identifier_for_feature(feature)
                     for identifier in identifiers:
                         self.features_by_identifier[identifier] = (feature, sequence_entry)

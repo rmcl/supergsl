@@ -117,9 +117,7 @@ class SequenceEntry:
         self.roles = roles if roles else []
         self.parent_links = parent_links
         self.reference = reference
-
-        # Annotations ordered by start position
-        self._annotations = annotations
+        self._annotations = annotations or []
 
         if not external_ids:
             self._external_ids : Dict[str, str] = {}
@@ -154,7 +152,7 @@ class SequenceEntry:
 
         return filtered_annotations
 
-    def sequence_annotations_for_slice(self, desired_slice: Slice):
+    def sequence_annotations_for_slice(self, desired_slice: Slice) -> List[SequenceAnnotation]:
         """Retrieve annotations contained in the given slice."""
 
         # Retrieve annotations stored on this entry
@@ -169,7 +167,7 @@ class SequenceEntry:
 
         return all_annotations
 
-    def sequence_annotations(self) -> SequenceAnnotation:
+    def sequence_annotations(self) -> List[SequenceAnnotation]:
         """Return the sequence annotations for this entry.
 
         Recursively include all annotations present in the parent links composing this entry.
@@ -405,17 +403,15 @@ class SequenceStore:
         sequence_entry : SequenceEntry,
         sequence_slice : Slice,
         new_sequence_roles : Optional[List[Role]] = None,
-        entry_link_roles : Optional[List[Role]] = None
-    ):
+        entry_link_roles : Optional[List[Role]] = None,
+        annotations : Optional[List[SequenceAnnotation]] = None
+    ) -> SequenceEntry:
         """Create a new entry from a subsequence of the provided sequence_entry.
 
         The new sequence will be defined by the `sequence_slice`.
         """
-        if not new_sequence_roles:
-            new_sequence_roles = []
-
-        if not entry_link_roles:
-            entry_link_roles = []
+        new_sequence_roles = new_sequence_roles or []
+        entry_link_roles = entry_link_roles or []
 
         link = EntryLink(
             parent_entry=sequence_entry,
@@ -430,11 +426,28 @@ class SequenceStore:
             sequence_store=self,
             sequence_id=self.__create_record_id(),
             parent_links=[link],
-            roles=new_sequence_roles
+            roles=new_sequence_roles,
+            annotations=annotations
         )
         self._sequences_by_uuid[entry.id] = entry
 
         return entry
+
+    def slice_from_annotation(
+        self,
+        sequence_entry : SequenceEntry,
+        annotation : SequenceAnnotation
+    ) -> SequenceEntry:
+        """Create a new sequence entry for an annotation."""
+        return self.slice(
+            sequence_entry,
+            annotation.location,
+            new_sequence_roles=annotation.roles,
+            annotations=SequenceAnnotation(
+                location=Slice.from_entire_sequence(),
+                roles=annotation.roles,
+                payload=annotation.payload
+            ))
 
     def _check_for_duplicate_external_ids(self, external_ids):
         for external_system_name, external_id in external_ids.items():
