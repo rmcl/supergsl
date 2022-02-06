@@ -69,15 +69,18 @@ class SequenceAnnotation(NamedTuple):
         annotation_start : AbsolutePosition
     ) -> 'SequenceAnnotation':
         """Derive a new Annotation with a location relative to the given start position."""
-        annotation_location = AbsoluteSlice(
-            AbsolutePosition(
-                annotation_start.target_sequence_length,
+
+        # TODO: Highly skeptical that this will work on the reverse strand.
+        # Need to build test case.
+        annotation_location = Slice(
+            Position(
                 self.location.start.index - annotation_start.index,
-                False),
-            AbsolutePosition(
-                annotation_start.target_sequence_length,
-                self.location.end.index - annotation_start.index ,
-                False)
+                self.location.start.relative_to,
+                self.location.start.approximate),
+            Position(
+                self.location.end.index - annotation_start.index,
+                self.location.end.relative_to,
+                self.location.end.approximate)
         )
 
         print('ARGH', annotation_location, annotation_start.index)
@@ -499,12 +502,7 @@ class SequenceStore:
         return self.slice(
             sequence_entry,
             annotation.location,
-            new_sequence_roles=annotation.roles,
-            annotations=SequenceAnnotation(
-                location=Slice.from_entire_sequence(),
-                roles=annotation.roles,
-                payload=annotation.payload
-            ))
+            new_sequence_roles=annotation.roles)
 
     def _check_for_duplicate_external_ids(self, external_ids):
         for external_system_name, external_id in external_ids.items():
