@@ -24,7 +24,7 @@ class GenBankFilePartProviderTestCase(TestCase):
         """Test that we can load a genbank file and inspect the parts loaded."""
         parts = self.provider.list_parts()
 
-        self.assertEqual(len(parts), 2)
+        self.assertEqual(len(parts), 3)
         parts_by_identifier = {
             part.identifier: part
             for part in parts

@@ -38,6 +38,13 @@ class AbsolutePosition:
 
         return new_abs_position
 
+    def get_slice_pos_str(self) -> str:
+        """Return a string representation of the AbsolutePosition."""
+        return '%s%d' % (
+            '~' if self.approximate else '',
+            self.index
+        )
+
     def __lt__(self, other):
         return self.index < other.index
 
@@ -53,8 +60,6 @@ class AbsolutePosition:
     def __eq__(self, other):
         return self.index == other.index
 
-    def __ne__(self, other):
-        return self.index != other.index
 
 
 class AbsoluteSlice:
@@ -83,6 +88,23 @@ class AbsoluteSlice:
             end_child_abs_pos = self.end.derive_from_relative_position(child_slice.end)
 
         return AbsoluteSlice(start_child_abs_pos, end_child_abs_pos, self.strand)
+
+    def __repr__(self):
+        return self.get_slice_str()
+
+    def __eq__(self, other):
+        return (
+            self.start == other.start and
+            self.end == other.end and
+            self.strand == other.strand
+        )
+
+    def get_slice_str(self):
+        """Return a string representation of the `Slice`."""
+        return '%s:%s' % (
+            self.start.get_slice_pos_str(),
+            self.end.get_slice_pos_str()
+        )
 
 class Position:
     """Capture a position relative to a declared end of a Sequence."""
@@ -127,6 +149,13 @@ class Position:
             'relative_to': self.relative_to,
             'approximate': self.approximate,
         }
+
+    def __eq__(self, other):
+        return (
+            self.index == other.index and
+            self.relative_to == other.relative_to and
+            self.approximate == other.approximate
+        )
 
     def get_slice_pos_str(self) -> str:
         """Return a string representation of the Position."""
@@ -196,6 +225,13 @@ class Slice(SuperGSLType):
 
     def __repr__(self):
         return self.get_slice_str()
+
+    def __eq__(self, other):
+        return (
+            self.start == other.start and
+            self.end == other.end and
+            self.strand == other.strand
+        )
 
     def get_slice_str(self):
         """Return a string representation of the `Slice`."""

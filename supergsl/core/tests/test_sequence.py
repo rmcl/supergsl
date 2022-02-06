@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.core.sequence import SequenceStore, SliceMapping, SequenceAnnotation
-from supergsl.core.types.position import Slice, Position
+from supergsl.core.types.position import Slice, Position, AbsolutePosition
 from supergsl.core.constants import STRAND_CRICK
 
 
@@ -165,9 +165,8 @@ class SequenceAnnotationTestCase(unittest.TestCase):
 
         self.assertEqual(entry1.sequence_annotations(), [annotation1])
 
-
     def test_retrieve_annotations_from_slice(self):
-        """"""
+        """Return only annotations that are found within a slice."""
         seq1 = self.fixtures.mk_random_dna_sequence(2000)
         annotations = [
             SequenceAnnotation.from_five_prime_indexes(0,20, ['HELLO'], {}),
@@ -184,4 +183,33 @@ class SequenceAnnotationTestCase(unittest.TestCase):
             Slice.from_five_prime_indexes(40,210))
 
         expected_results = [annotations[1], annotations[2]]
+        self.assertEqual(results, expected_results)
+
+    def test_annotations_from_parent_parts(self):
+        """Return annotations that have been defined on a parent part."""
+        seq1 = self.fixtures.mk_random_dna_sequence(2000)
+        annotations_on_parent = [
+            SequenceAnnotation.from_five_prime_indexes(0, 20, ['HELLO'], {}),
+            SequenceAnnotation.from_five_prime_indexes(50, 200, ['YO'], {}),
+            SequenceAnnotation.from_five_prime_indexes(70, 190, ['YO2'], {}),
+        ]
+        store = self.fixtures.sequence_store
+        entry1 = store.add_from_reference(seq1, annotations=annotations_on_parent)
+
+        part_slice = Slice.from_five_prime_indexes(50, 250, strand=STRAND_CRICK)
+        annotations_on_child = [
+            SequenceAnnotation.from_five_prime_indexes(10, 30, ['X1'], {}),
+            SequenceAnnotation.from_five_prime_indexes(80, 190, ['X2'], {}),
+        ]
+        entry2 = store.slice(entry1, part_slice, annotations=annotations_on_child)
+
+        expected_results = [
+            annotations_on_child[0],
+            annotations_on_parent[2].derive_absolute_position_annotation(
+                AbsolutePosition(entry2.sequence_length, 50, False)),
+            annotations_on_child[1]
+        ]
+        results = entry2.sequence_annotations()
+        print(results)
+        print('expected', expected_results)
         self.assertEqual(results, expected_results)

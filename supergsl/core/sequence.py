@@ -10,7 +10,7 @@ from supergsl.core.exception import (
     DuplicateSequenceError
 )
 from supergsl.core.constants import THREE_PRIME, STRAND_CRICK
-from supergsl.core.types.position import Slice, Position, AbsoluteSlice
+from supergsl.core.types.position import Slice, Position, AbsoluteSlice, AbsolutePosition
 
 
 def get_slice_sequence_from_reference(sequence_reference, absolute_slice) -> Seq:
@@ -37,10 +37,12 @@ class Role(NamedTuple):
     name : str
     description : str
 
+    def __eq__(self, other):
+        return self.uri == other.uri
+
 
 class SliceMapping(NamedTuple):
     """Represent the mapping of a sub-slice of a parent sequence onto a new target sequence."""
-
     parent_entry: 'SequenceEntry'
     source_slice: Slice
     target_slice: Slice
@@ -52,6 +54,32 @@ class SequenceAnnotation(NamedTuple):
     location: Slice
     roles: Optional[List[Role]]
     payload: dict
+
+    def __eq__(self, other):
+        return (
+            self.location == other.location and
+            self.roles == other.roles and
+            self.payload == other.payload
+        )
+
+    def derive_absolute_position_annotation(self, annotation_start : AbsolutePosition) -> 'SequenceAnnotation':
+
+        annotation_location = AbsoluteSlice(
+            AbsolutePosition(
+                annotation_start.target_sequence_length,
+                self.location.start.index - annotation_start.index,
+                False),
+            AbsolutePosition(
+                annotation_start.target_sequence_length,
+                self.location.end.index - annotation_start.index ,
+                False)
+        )
+
+        print('ARGH', annotation_location, annotation_start.index)
+        return SequenceAnnotation(
+            location=annotation_location,
+            roles=self.roles,
+            payload=self.payload)
 
     @classmethod
     def from_five_prime_indexes(
@@ -155,17 +183,41 @@ class SequenceEntry:
     def sequence_annotations_for_slice(self, desired_slice: Slice) -> List[SequenceAnnotation]:
         """Retrieve annotations contained in the given slice."""
 
+        annotations = []
         # Retrieve annotations stored on this entry
-        all_annotations = self._get_local_sequence_annotations_for_slice(desired_slice)
-
-        # Get annotations for each parent
-            # Translate to absolute positions in this part
+        local_annotations = self._get_local_sequence_annotations_for_slice(desired_slice)
+        for annotation in local_annotations:
+            absolute_slice = annotation.location.build_absolute_slice(self.sequence_length)
+            annotations.append(annotation)
 
         if self.parent_links:
             for parent_link in self.parent_links:
-                all_annotations.extend(parent_link.sequence_annotations())
+                """
+                absolute_parent_target_slice = parent_link.target_slice.build_absolute_slice(
+                    self.sequence_length)
+                """
 
-        return all_annotations
+                target_start_pos = AbsolutePosition(
+                    self.sequence_length,
+                    parent_link.source_slice.start.index,
+                    False)
+
+                for parent_annotation in parent_link.sequence_annotations():
+                    print('YOOO111', self.sequence_length)
+
+                    new_annotation = parent_annotation.derive_absolute_position_annotation(target_start_pos)
+
+                    ## PROBLEM IS WE NEED TO DERIVE THIS LOCATION RELATIVE TO THE START
+                    # OF THE PARENT PART IN THE CHILD PART
+                    print(parent_annotation.location, new_annotation.location)
+
+                annotations.append(new_annotation)
+
+        annotations = sorted(
+            annotations,
+            key=lambda annotation: annotation.location.start.index)
+
+        return annotations
 
     def sequence_annotations(self) -> List[SequenceAnnotation]:
         """Return the sequence annotations for this entry.
