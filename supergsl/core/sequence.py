@@ -9,7 +9,7 @@ from supergsl.core.exception import (
     SequenceNotFoundError,
     DuplicateSequenceError
 )
-from supergsl.core.constants import THREE_PRIME, STRAND_CRICK
+from supergsl.core.constants import THREE_PRIME, STRAND_CRICK, STRAND_WATSON
 from supergsl.core.types.position import Slice, Position, AbsoluteSlice, AbsolutePosition
 
 
@@ -94,11 +94,12 @@ class SequenceAnnotation(NamedTuple):
         start : int,
         end : int,
         roles : Optional[List[Role]],
-        payload : dict
+        payload : dict,
+        strand : str = STRAND_WATSON
     ):
         """Create a sequence annotation relative to five prime end of a sequence."""
         return SequenceAnnotation(
-            Slice.from_five_prime_indexes(start, end),
+            Slice.from_five_prime_indexes(start, end, strand=strand),
             roles,
             payload
         )

@@ -208,7 +208,7 @@ class Slice(SuperGSLType):
         )
 
     @classmethod
-    def from_five_prime_indexes(self, start_index, end_index, strand='FORWARD'):
+    def from_five_prime_indexes(self, start_index, end_index, strand=STRAND_WATSON):
         """Create a Slice from two sequence indexes both relative to the FIVE_PRIME side of the molecule."""
         start = Position(start_index)
         end = Position(end_index)
