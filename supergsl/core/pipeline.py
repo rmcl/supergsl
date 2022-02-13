@@ -8,7 +8,7 @@ from supergsl.core.backend import BackendPipelinePass
 from supergsl.core.eval import EvaluatePass
 from supergsl.utils import resolve_import, import_class
 from supergsl.core.sequence import SequenceStore
-from supergsl.core.exception import SymbolNotFoundError
+from supergsl.core.exception import SymbolNotFoundError, ProviderNotFoundError
 
 from .lexer import SuperGSLLexer
 from .parser import SuperGSLParser
@@ -87,28 +87,34 @@ class CompilerPipeline:
             for item in available_providers
         ]
 
+    def _find_or_import_provider(self, provider : Union[str, Callable]):
+        """Determine if the provider is a class or a string that needs the be imported."""
+        # If provider is callable then we are done.
+        if callable(provider):
+            return provider
+
+        # If provider is not callable then attempt to import it.
+        try:
+            return import_class(provider)
+        except ValueError:
+            pass
+
+        # If we can't determine the provider class then maybe it is already been
+        # registered. Attempt to find it in the symbol table.
+        available_providers = self.symbols.enter_nested_scope('available_imports')
+        try:
+            return available_providers[provider]
+        except KeyError as error:
+            raise ProviderNotFoundError(f'Unknown Provider "{provider}"') from error
+
+
     def register_provider(self, provider_path : str, provider : Union[str, Callable], **kwargs):
         """Instantiate and register a provider."""
+
+        provider_class = self._find_or_import_provider(provider)
+
         plugin = self.plugins.get_adhoc_plugin()
         config = ProviderConfig(self._sequence_store, settings=kwargs)
-
-        if callable(provider):
-            provider_class = provider
-        else:
-            provider_class = None
-            try:
-                provider_class = import_class(provider)
-            except ValueError:
-                pass
-            except SymbolNotFoundError:
-                pass
-
-        if not provider_class:
-            available_providers = self.symbols.enter_nested_scope('available_imports')
-            try:
-                provider_class = available_providers[provider]
-            except KeyError:
-                raise Exception('Unknown Provider "%s"' % provider)
 
         provider_inst = provider_class(provider_path, config)
         plugin.register_provider(provider_path, provider_inst)

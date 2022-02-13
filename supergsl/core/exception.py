@@ -65,7 +65,7 @@ class SequenceStoreError(SuperGSLError):
 
 
 class DuplicateSequenceError(SequenceStoreError):
-    """"""
+    """A duplicate sequence was attempted to be addeed to the store."""
 
 
 class SequenceNotFoundError(SequenceStoreError):
