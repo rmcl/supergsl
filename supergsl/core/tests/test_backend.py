@@ -1,3 +1,4 @@
+"""Unittests for the backend.py module."""
 from unittest import TestCase
 from unittest.mock import Mock, call
 from typing import Optional, List
@@ -9,12 +10,13 @@ from supergsl.core.backend import (
 
 
 class ExampleNode(Node):
+    """An example AST node which makes it easy to set child nodes."""
     def __init__(self, name, child_nodes : Optional[List[Node]] = None):
         self.name = name
         self._child_nodes = child_nodes
 
     def child_nodes(self) -> List[Node]:
-        return self._child_nodes
+        return self._child_nodes or []
 
     def __repr__(self) -> str:
         return self.name
