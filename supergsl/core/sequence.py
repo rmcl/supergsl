@@ -94,12 +94,11 @@ class SequenceAnnotation(NamedTuple):
         start : int,
         end : int,
         roles : Optional[List[Role]],
-        payload : dict,
-        strand : str = STRAND_WATSON
+        payload : dict
     ):
         """Create a sequence annotation relative to five prime end of a sequence."""
         return SequenceAnnotation(
-            Slice.from_five_prime_indexes(start, end, strand=strand),
+            Slice.from_five_prime_indexes(start, end),
             roles,
             payload
         )

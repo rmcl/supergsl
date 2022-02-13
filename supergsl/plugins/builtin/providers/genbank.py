@@ -2,7 +2,12 @@ import gzip
 from typing import List, Dict, Tuple, Optional
 from Bio import SeqIO
 from Bio.SeqFeature import SeqFeature
-from supergsl.core.constants import FIVE_PRIME, STRAND_WATSON, STRAND_CRICK
+from supergsl.core.constants import (
+    THREE_PRIME,
+    FIVE_PRIME,
+    STRAND_WATSON,
+    STRAND_CRICK
+)
 from supergsl.core.exception import PartNotFoundError
 from supergsl.core.sequence import SequenceEntry, SequenceAnnotation
 from supergsl.core.parts import PartProvider
@@ -106,6 +111,16 @@ class GenBankFilePartProvider(PartProvider):
             description=None,
             alternative_names=alternative_names)
 
+    def get_slice_from_feature_location(self, location) -> Slice:
+        """Build a slice from a `Bio.SeqFeature.FeatureLocation` object."""
+        strand = STRAND_WATSON if location.strand == 1 else STRAND_CRICK
+        if strand == STRAND_WATSON:
+            return Slice.from_five_prime_indexes(location.start, location.end)
+
+        return Slice(
+            Position(location.end, THREE_PRIME, False),
+            Position(location.start, THREE_PRIME, False),
+            strand=strand)
 
     def load(self):
         """Open and load features from a genbank file."""
@@ -123,19 +138,14 @@ class GenBankFilePartProvider(PartProvider):
                     self.default_part_identifier = record.name
 
                 for feature in record.features:
-                    location = feature.location
-
                     annotation_roles = [feature.type]
                     annotation_payload = dict(feature.qualifiers)
+                    feature_slice = self.get_slice_from_feature_location(feature.location)
 
-
-                    strand = STRAND_WATSON if location.strand == 1 else STRAND_CRICK
-                    new_annotation = SequenceAnnotation.from_five_prime_indexes(
-                        location.start,
-                        location.end,
+                    new_annotation = SequenceAnnotation(
+                        feature_slice,
                         annotation_roles,
-                        annotation_payload,
-                        strand = strand)
+                        annotation_payload)
                     sequence_entry.add_annotation(new_annotation)
 
                     identifiers = self.get_identifier_for_feature(feature)
