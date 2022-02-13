@@ -41,19 +41,10 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
         If you want a catch-all handler specify "None" in get_node_handlers. If you
         just want a simple pass you can override this method.
         """
-        handlers : Dict[Optional[str], ASTNodeHandlerMethod] = self.get_node_handlers()
-        handler_method : Optional[ASTNodeHandlerMethod] = None
-
         if not node:
             raise BackendError('Past "{}" was passed a null AST.'.format(self.get_pass_name()))
 
-        node_type : str = type(node).__name__
-        handler_method = handlers.get(node_type, None)
-        if not handler_method:
-            # No Node specific handler defined for this node_type
-            # see if there is a default handler defined.
-            handler_method = handlers.get(None, None)
-
+        handler_method = self.get_handler_for_node(node)
         if handler_method:
             result_node = self.call_handler_and_check_result(handler_method, node)
             if result_node != node:
@@ -62,6 +53,22 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
                         'You cannot update the root Program AST node. Tried to update "%s"' % node)
 
                 parent_node.replace_child_node(node, result_node)
+
+    def get_handler_for_node(self, node : Node) -> Optional[ASTNodeHandlerMethod]:
+        """Get the handler for the given AST node.
+
+        If no handler specified, try to return the default node handler. If no
+        default handler speciifed then return None.
+        """
+        handlers = self.get_node_handlers()
+
+        node_type = type(node).__name__
+        try:
+            return handlers[node_type]
+        except KeyError:
+            # No Node specific handler defined for this node_type
+            # see if there is a default handler defined.
+            return handlers.get(None, None)
 
     def get_node_handlers(self) -> Dict[Optional[str], ASTNodeHandlerMethod]:
         """Define handler methods for each node type.
