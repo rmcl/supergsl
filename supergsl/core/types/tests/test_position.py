@@ -29,6 +29,24 @@ class AbsolutePositionTestCase(TestCase):
         self.assertEqual(new_abs_pos.target_sequence_length, 1000)
         self.assertEqual(new_abs_pos.index, 150)
 
+    def test_get_slice_pos_str(self):
+        start = AbsolutePosition(1000, 100, True)
+        self.assertEqual(start.get_slice_pos_str(), "~100")
+
+    def test_absolute_positions_equality(self):
+        """Absolute positions with same sequence length, index, and approximate should be equal."""
+        pos1 = AbsolutePosition(1000, 100, True)
+        pos2 = AbsolutePosition(1000, 100, True)
+        self.assertEqual(pos1, pos2)
+
+    def test_absolute_positions_less_than(self):
+        """Absolute positions with same sequence length, index, and approximate should be equal."""
+        pos1 = AbsolutePosition(1000, 90, True)
+        pos2 = AbsolutePosition(1000, 100, True)
+        self.assertTrue(pos1 < pos2)
+        self.assertTrue(pos1 <= pos2)
+        self.assertTrue(pos2 > pos1)
+        self.assertTrue(pos2 >= pos1)
 
 class AbsoluteSliceTestCase(TestCase):
     """Test the AbsoluteSlice class."""
