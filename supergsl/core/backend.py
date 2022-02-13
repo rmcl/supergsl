@@ -118,11 +118,9 @@ class DepthFirstNodeFilteredPass(BreadthFirstNodeFilteredPass):
     """Perform a postorder depth first traversal of the AST and only visit a subset of node types."""
 
     def perform(self, ast : Node) -> Node:
-        ast = self.before_pass(ast)
+        ast = self.call_handler_and_check_result(self.before_pass, ast)
 
-        if not ast:
-            raise BackendError('before_pass of "%s" did not return an AST node object.' % self)
-
+        # Store both current node and parent.
         node_stack : List[Tuple[Node, Optional[Node]]] = [(ast, None)]
         discovered = set()
 
@@ -134,13 +132,12 @@ class DepthFirstNodeFilteredPass(BreadthFirstNodeFilteredPass):
                 self.visit(cur_node, cur_node_parent)
             else:
                 discovered.add(cur_node)
-                node_stack += [
-                    (child_node, cur_node) # Store both current node and parent.
-                    for child_node in cur_node.child_nodes()
-                ]
+                child_nodes = cur_node.child_nodes()
+                if child_nodes:
+                    node_stack.extend([
+                        (child_node, cur_node)
+                        for child_node in child_nodes
+                    ])
 
-        ast = self.after_pass(ast)
-        if not ast:
-            raise BackendError('after_pass of "%s" did not return an AST node object.' % self)
-
+        ast = self.call_handler_and_check_result(self.after_pass, ast)
         return ast
