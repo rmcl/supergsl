@@ -203,13 +203,16 @@ class SequenceAnnotationTestCase(unittest.TestCase):
         ]
         entry2 = store.slice(entry1, part_slice, annotations=annotations_on_child)
 
+        parent_start = AbsolutePosition(entry2.sequence_length, 50, False)
         expected_results = [
+            annotations_on_parent[1].derive_from_absolute_start_position(parent_start),
             annotations_on_child[0],
-            annotations_on_parent[2].derive_absolute_position_annotation(
-                AbsolutePosition(entry2.sequence_length, 50, False)),
+            annotations_on_parent[2].derive_from_absolute_start_position(parent_start),
             annotations_on_child[1]
         ]
         results = entry2.sequence_annotations()
         print(results)
-        print('expected', expected_results)
         self.assertEqual(results, expected_results)
+
+    def test_annotations_from_parent_part_reverse_strand(self):
+        """Test that we accurately return annotations from parent parts on reverse strand."""

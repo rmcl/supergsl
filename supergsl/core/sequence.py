@@ -64,7 +64,7 @@ class SequenceAnnotation(NamedTuple):
             self.payload == other.payload
         )
 
-    def derive_absolute_position_annotation(
+    def derive_from_absolute_start_position(
         self,
         annotation_start : AbsolutePosition
     ) -> 'SequenceAnnotation':
@@ -83,7 +83,6 @@ class SequenceAnnotation(NamedTuple):
                 self.location.end.approximate)
         )
 
-        print('ARGH', annotation_location, annotation_start.index)
         return SequenceAnnotation(
             location=annotation_location,
             roles=self.roles,
@@ -131,9 +130,13 @@ class EntryLink:
             reference_source_sequence,
             absolute_source_slice)
 
-    def sequence_annotations(self) -> List[SequenceAnnotation]:
+    def sequence_annotations(self, target_start_position : AbsolutePosition) -> List[SequenceAnnotation]:
         """Return all annotations within the slice of the parent entry."""
-        return self.parent_entry.sequence_annotations_for_slice(self.source_slice)
+        annotations =  self.parent_entry.sequence_annotations_for_slice(self.source_slice)
+        return [
+            annotation.derive_from_absolute_start_position(target_start_position)
+            for annotation in annotations
+        ]
 
 
 class SequenceEntry:
@@ -195,31 +198,16 @@ class SequenceEntry:
         # Retrieve annotations stored on this entry
         local_annotations = self._get_local_sequence_annotations_for_slice(desired_slice)
         for annotation in local_annotations:
-            absolute_slice = annotation.location.build_absolute_slice(self.sequence_length)
             annotations.append(annotation)
 
         if self.parent_links:
             for parent_link in self.parent_links:
-                """
-                absolute_parent_target_slice = parent_link.target_slice.build_absolute_slice(
-                    self.sequence_length)
-                """
-
-                target_start_pos = AbsolutePosition(
+                target_start_position = AbsolutePosition(
                     self.sequence_length,
                     parent_link.source_slice.start.index,
                     False)
 
-                for parent_annotation in parent_link.sequence_annotations():
-                    print('YOOO111', self.sequence_length)
-
-                    new_annotation = parent_annotation.derive_absolute_position_annotation(target_start_pos)
-
-                    ## PROBLEM IS WE NEED TO DERIVE THIS LOCATION RELATIVE TO THE START
-                    # OF THE PARENT PART IN THE CHILD PART
-                    print(parent_annotation.location, new_annotation.location)
-
-                annotations.append(new_annotation)
+                annotations.extend(parent_link.sequence_annotations(target_start_position))
 
         annotations = sorted(
             annotations,

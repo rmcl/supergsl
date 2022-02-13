@@ -42,7 +42,7 @@ class GenBankFilePartProvider(PartProvider):
 
         self.sequence_store = config.sequence_store
         self.genbank_file_path = config.settings['sequence_file_path']
-        self.features_by_identifier : Dict[str, Tuple[SeqFeature, SequenceEntry]] = {}
+        self.annotation_by_identifier : Dict[str, Tuple[SeqFeature, SequenceEntry]] = {}
         self.loaded = False
 
         self.desired_feature_types = config.settings.get(
@@ -81,24 +81,22 @@ class GenBankFilePartProvider(PartProvider):
 
         return identifiers
 
-    def get_part_from_feature(
+    def get_part_from_annotation(
         self,
         identifier : str,
-        feature : Optional[SeqFeature],
-        sequence_entry : SequenceEntry
+        sequence_annotation : Optional[SequenceAnnotation],
+        parent_sequence_entry : SequenceEntry
     ) -> Part:
         """Create a `Part` from the provided feature and reference sequence."""
 
-        if feature:
-            location = feature.location
-            start = Position(location.start, relative_to=FIVE_PRIME, approximate=False)
-            end = Position(location.end, relative_to=FIVE_PRIME, approximate=False)
-
-            new_sequence_entry = self.sequence_store.slice(sequence_entry, Slice(start, end))
-            alternative_names = self.get_identifier_for_feature(feature)
+        if sequence_annotation:
+            new_sequence_entry = self.sequence_store.slice_from_annotation(
+                parent_sequence_entry,
+                sequence_annotation)
+            alternative_names = [identifier]
 
         else:
-            new_sequence_entry = sequence_entry
+            new_sequence_entry = parent_sequence_entry
             alternative_names = []
 
         return Part(
@@ -119,7 +117,7 @@ class GenBankFilePartProvider(PartProvider):
                 sequence_entry = self.sequence_store.add_from_reference(record)
 
                 # Add a record for the entire record
-                self.features_by_identifier[record.name] = (None, sequence_entry)
+                self.annotation_by_identifier[record.name] = (None, sequence_entry)
 
                 if not self.default_part_identifier:
                     self.default_part_identifier = record.name
@@ -138,7 +136,7 @@ class GenBankFilePartProvider(PartProvider):
 
                     identifiers = self.get_identifier_for_feature(feature)
                     for identifier in identifiers:
-                        self.features_by_identifier[identifier] = (feature, sequence_entry)
+                        self.annotation_by_identifier[identifier] = (new_annotation, sequence_entry)
 
     def list_parts(self) -> List[Part]:
         if not self.loaded:
@@ -146,10 +144,11 @@ class GenBankFilePartProvider(PartProvider):
 
         return [
             self.get_part(identifier)
-            for identifier in self.features_by_identifier
+            for identifier in self.annotation_by_identifier
         ]
 
     def get_default_part(self) -> Part:
+        """Return the default part for this provider."""
         return self.get_part(self.default_part_identifier)
 
     def get_part(self, identifier) -> Part:
@@ -164,12 +163,12 @@ class GenBankFilePartProvider(PartProvider):
             self.load()
 
         try:
-            feature, sequence_entry = self.features_by_identifier[identifier]
+            sequence_annotation, sequence_entry = self.annotation_by_identifier[identifier]
         except KeyError as error:
-            raise PartNotFoundError('Part not found "%s" in %s.' % (
-                identifier, self.provider_name)) from error
+            raise PartNotFoundError(
+                f'Part not found "{identifier}" in {self.provider_name}.') from error
 
-        return self.get_part_from_feature(
+        return self.get_part_from_annotation(
             identifier,
-            feature,
+            sequence_annotation,
             sequence_entry)
