@@ -2,7 +2,7 @@ import gzip
 from typing import List, Dict, Tuple, Optional
 from Bio import SeqIO
 from Bio.SeqFeature import SeqFeature
-from supergsl.core.constants import FIVE_PRIME
+from supergsl.core.constants import FIVE_PRIME, STRAND_WATSON, STRAND_CRICK
 from supergsl.core.exception import PartNotFoundError
 from supergsl.core.sequence import SequenceEntry, SequenceAnnotation
 from supergsl.core.parts import PartProvider
@@ -128,10 +128,14 @@ class GenBankFilePartProvider(PartProvider):
                     annotation_roles = [feature.type]
                     annotation_payload = dict(feature.qualifiers)
 
+
+                    strand = STRAND_WATSON if location.strand == 1 else STRAND_CRICK
                     new_annotation = SequenceAnnotation.from_five_prime_indexes(
-                        location.start, location.end,
+                        location.start,
+                        location.end,
                         annotation_roles,
-                        annotation_payload)
+                        annotation_payload,
+                        strand = strand)
                     sequence_entry.add_annotation(new_annotation)
 
                     identifiers = self.get_identifier_for_feature(feature)
