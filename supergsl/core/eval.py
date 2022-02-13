@@ -9,7 +9,7 @@ from supergsl.core.types.builtin import (
     AminoAcidSequence,
     Collection
 )
-from supergsl.utils import resolve_import
+from supergsl.utils.resolve import resolve_import
 from supergsl.core.sequence import SequenceStore
 from supergsl.core.types.part import Part
 from supergsl.core.types.assembly import AssemblyDeclaration

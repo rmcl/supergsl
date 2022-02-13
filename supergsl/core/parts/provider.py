@@ -4,7 +4,7 @@ from collections import namedtuple
 
 from Bio.Seq import Seq
 
-from supergsl.utils import import_class
+from supergsl.utils.resolve import import_class
 
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.provider import SuperGSLProvider
@@ -32,8 +32,7 @@ class PartProvider(SuperGSLProvider):
     def list_parts(self):
         """Return all parts available through this provider."""
         raise NotImplementedError(
-            'List parts is not supported by "%s" part provider.' % self.provider_name
-        )
+            f'List parts is not supported by "{self.provider_name}" part provider.')
 
     def resolve_import(
         self,
