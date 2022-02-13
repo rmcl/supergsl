@@ -90,7 +90,6 @@ class CompilerPipeline:
             for item in available_providers
         ]
 
-
     def register_provider(self, provider_path : str, provider : Union[str, Callable], **kwargs):
         """Instantiate and register a provider."""
 
