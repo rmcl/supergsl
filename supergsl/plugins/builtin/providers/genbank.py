@@ -118,8 +118,8 @@ class GenBankFilePartProvider(PartProvider):
             return Slice.from_five_prime_indexes(location.start, location.end)
 
         return Slice(
-            Position(location.end, THREE_PRIME, False),
-            Position(location.start, THREE_PRIME, False),
+            Position(location.end * -1, THREE_PRIME, False),
+            Position(location.start * -1, THREE_PRIME, False),
             strand=strand)
 
     def load(self):
