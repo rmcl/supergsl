@@ -5,7 +5,7 @@ from unittest.mock import Mock
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.core.sequence import SequenceStore, SliceMapping, SequenceAnnotation
 from supergsl.core.types.position import Slice, Position, AbsolutePosition
-from supergsl.core.constants import STRAND_CRICK
+from supergsl.core.constants import STRAND_CRICK, THREE_PRIME, FIVE_PRIME
 
 
 class SequenceStoreTestCase(unittest.TestCase):
@@ -215,4 +215,24 @@ class SequenceAnnotationTestCase(unittest.TestCase):
         self.assertEqual(results, expected_results)
 
     def test_annotations_from_parent_part_reverse_strand(self):
-        """Test that we accurately return annotations from parent parts on reverse strand."""
+        """Test that we return annotations from parent parts on reverse strand."""
+
+        seq1 = self.fixtures.mk_random_dna_sequence(2000)
+        a1_slice = Slice(
+            Position(-20, THREE_PRIME, False),
+            Position(0, THREE_PRIME, False),
+            strand=STRAND_CRICK)
+        annotations_on_parent = [
+            SequenceAnnotation(a1_slice, ['HELLO-FROM-REV-STRAND'], {}),
+        ]
+        store = self.fixtures.sequence_store
+        entry1 = store.add_from_reference(seq1, annotations=annotations_on_parent)
+        entry2 = store.slice(
+            entry1,
+            Slice.from_five_prime_indexes(0, 250))
+
+        parent_start = AbsolutePosition(entry2.sequence_length, 0, False)
+        results = entry2.sequence_annotations()
+        self.assertEqual(results, [
+            annotations_on_parent[0].derive_from_absolute_start_position(parent_start)
+        ])

@@ -170,6 +170,7 @@ class SequenceEntry:
     def _get_local_sequence_annotations_for_slice(self, desired_slice : Slice):
         """Get annotations for a slice of this entity."""
 
+        print('yOOO')
         # TODO MAYBE WE DONT WANT TO CONVERT TO ABSOLUTE SLICE HERE!
         # this is going to be called through a entity link so it would be better
         # if this returned relative positions that were then converted.
@@ -177,14 +178,13 @@ class SequenceEntry:
 
         filtered_annotations = []
         for annotation in self._annotations:
-            annotation_absolute_slice = annotation.location.build_absolute_slice(
-                self.sequence_length)
 
-            ### TODO: VERY SKEPTICAL OF THIS LOGIC!
-            ### REVISIT AND MAKE SURE IT DOES WHAT WE EXPECT.
+            annotation_absolute_slice = annotation.location.build_absolute_slice(
+                self.sequence_length).get_watson_strand_slice()
+
             if annotation_absolute_slice.start < absolute_desired_slice.start:
                 continue
-            if annotation_absolute_slice.end >= absolute_desired_slice.end:
+            if annotation_absolute_slice.end > absolute_desired_slice.end:
                 continue
 
             filtered_annotations.append(annotation)
@@ -395,14 +395,16 @@ class SequenceStore:
         try:
             external_system = self._sequences_by_external_id[external_system_name]
         except KeyError as external_sys_error:
-            raise SequenceNotFoundError('Unknown external system "%s"' % (
-                external_system_name)) from external_sys_error
+            raise SequenceNotFoundError(
+                f'Unknown external system "{external_system_name}"'
+            ) from external_sys_error
 
         try:
             return external_system[external_id]
         except KeyError as external_id_error:
-            raise SequenceNotFoundError('Unknown sequence "%s" in "%s"' % (
-                external_id, external_system_name)) from external_id_error
+            raise SequenceNotFoundError(
+                f'Unknown sequence "{external_id}" in "{external_system_name}"'
+            ) from external_id_error
 
     def __create_record_id(self):
         """Create a new random id for a sequence entry."""

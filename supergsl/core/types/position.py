@@ -4,7 +4,8 @@ from supergsl.core.exception import SequencePositionComparisonError
 from supergsl.core.constants import (
     FIVE_PRIME,
     THREE_PRIME,
-    STRAND_WATSON
+    STRAND_WATSON,
+    STRAND_CRICK
 )
 from .base import SuperGSLType
 
@@ -28,6 +29,13 @@ class AbsolutePosition:
             return True
         return False
 
+    def get_complement_strand_position(self) -> 'AbsolutePosition':
+        """Return a new absolute position representing this position on the complement strand."""
+        return AbsolutePosition(
+            self.target_sequence_length,
+            self.target_sequence_length - self.index,
+            self.approximate)
+
     def derive_from_relative_position(self, position: 'Position'):
         """Derive a new AbsolutePosition using a position relative to this slice."""
         new_abs_position = AbsolutePosition(
@@ -47,10 +55,12 @@ class AbsolutePosition:
 
     def can_position_be_compared(self, other) -> bool:
         """Determine if AbsolutePosition objects can be compared."""
+
         if self.target_sequence_length != other.target_sequence_length:
             raise SequencePositionComparisonError(
                 'AbsolutePositions with different target sequence lengths cannot '
                 'be compared.')
+
         return True
 
     def __lt__(self, other):
@@ -90,6 +100,7 @@ class AbsoluteSlice:
         # Determine if start and end AbsolutePositions are comparable.
         self.start.can_position_be_compared(self.end)
 
+
     def __len__(self):
         """Return the length of the sliced sequence."""
         return self.end.index - self.start.index
@@ -118,6 +129,22 @@ class AbsoluteSlice:
             self.start == other.start and
             self.end == other.end and
             self.strand == other.strand
+        )
+
+    def get_watson_strand_slice(self) -> 'AbsoluteSlice':
+        """Return a AbsolutePosition that represents this position, but on the watson strand.
+
+        If this AbsoluteSlice is defined on the watson strand then return self.
+        Otherwise, instantiate a new AbsoluteSlice with the start and end reversed
+            and complement with the sequence length.
+        """
+        if self.strand == STRAND_WATSON:
+            return self
+
+        return AbsoluteSlice(
+            self.end.get_complement_strand_position(),
+            self.start.get_complement_strand_position(),
+            STRAND_CRICK
         )
 
     def get_slice_str(self):
