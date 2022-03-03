@@ -2,10 +2,17 @@
 import unittest
 from unittest.mock import Mock
 
+from Bio.Seq import Seq
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
-from supergsl.core.sequence import SequenceStore, SliceMapping, SequenceAnnotation
+from supergsl.core.sequence import (
+    SequenceStore,
+    SequenceEntry,
+    SliceMapping,
+    SequenceAnnotation
+)
 from supergsl.core.types.position import Slice, Position, AbsolutePosition
 from supergsl.core.constants import STRAND_CRICK, THREE_PRIME, FIVE_PRIME
+from supergsl.core.exception import SequenceStoreError
 
 
 class SequenceStoreTestCase(unittest.TestCase):
@@ -14,6 +21,27 @@ class SequenceStoreTestCase(unittest.TestCase):
     def setUp(self):
         self.fixtures = SuperGSLCoreFixtures()
         self.sequence_store = self.fixtures.sequence_store
+
+    def test_initialize_sequence_entry(self):
+        """SequenceEntry must be initialized with reference or parents, but not both."""
+
+        with self.assertRaises(SequenceStoreError) as store_error:
+            SequenceEntry(self.fixtures.sequence_store, 123)
+
+        self.assertEqual(
+            str(store_error.exception),
+            'Must specify either parents or reference.')
+
+        with self.assertRaises(SequenceStoreError) as store_error_2:
+            SequenceEntry(
+                self.fixtures.sequence_store,
+                123,
+                reference=Seq('ATGC'),
+                parent_links=['hi'])
+
+        self.assertEqual(
+            str(store_error_2.exception),
+            'Must only specify parents or a reference sequence, but not both')
 
     def test_add_from_reference(self):
         seq1 = 'ATGAAACACAAATTTAGACACAGAGTAGACATACGATGGAA'
