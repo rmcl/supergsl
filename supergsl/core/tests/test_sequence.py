@@ -163,7 +163,7 @@ class SequenceAnnotationTestCase(unittest.TestCase):
         store = self.fixtures.sequence_store
         entry1 = store.add_from_reference(seq1, annotations=[annotation1])
 
-        self.assertEqual(entry1.sequence_annotations(), [annotation1])
+        self.assertEqual(entry1.annotations(), [annotation1])
 
     def test_retrieve_annotations_from_slice(self):
         """Return only annotations that are found within a slice."""
@@ -179,7 +179,7 @@ class SequenceAnnotationTestCase(unittest.TestCase):
         store = self.fixtures.sequence_store
         entry1 = store.add_from_reference(seq1, annotations=annotations)
 
-        results = entry1.sequence_annotations_for_slice(
+        results = entry1.annotations_for_slice(
             Slice.from_five_prime_indexes(40,210))
 
         expected_results = [annotations[1], annotations[2]]
@@ -210,7 +210,7 @@ class SequenceAnnotationTestCase(unittest.TestCase):
             annotations_on_parent[2].derive_from_absolute_start_position(parent_start),
             annotations_on_child[1]
         ]
-        results = entry2.sequence_annotations()
+        results = entry2.annotations()
         print(results)
         self.assertEqual(results, expected_results)
 
@@ -232,7 +232,22 @@ class SequenceAnnotationTestCase(unittest.TestCase):
             Slice.from_five_prime_indexes(0, 250))
 
         parent_start = AbsolutePosition(entry2.sequence_length, 0, False)
-        results = entry2.sequence_annotations()
+        results = entry2.annotations()
         self.assertEqual(results, [
             annotations_on_parent[0].derive_from_absolute_start_position(parent_start)
         ])
+
+    def test_entry_link_sequence(self):
+        """A entry link sequence should return the correct sequence from the parent entry."""
+
+        reference_sequence = self.fixtures.mk_random_dna_sequence(500)
+        sequence_entry = self.fixtures.mk_sequence_entry(reference_sequence)
+
+        new_entry = self.sequence_store.slice(
+            sequence_entry,
+            Slice.from_five_prime_indexes(100,150)
+        )
+
+        self.assertEqual(
+            new_entry.parent_links[0].sequence,
+            reference_sequence[100:150])

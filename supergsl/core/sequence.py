@@ -132,7 +132,7 @@ class EntryLink:
 
     def sequence_annotations(self, target_start_position : AbsolutePosition) -> List[SequenceAnnotation]:
         """Return all annotations within the slice of the parent entry."""
-        annotations =  self.parent_entry.sequence_annotations_for_slice(self.source_slice)
+        annotations =  self.parent_entry.annotations_for_slice(self.source_slice)
         return [
             annotation.derive_from_absolute_start_position(target_start_position)
             for annotation in annotations
@@ -170,7 +170,6 @@ class SequenceEntry:
     def _get_local_sequence_annotations_for_slice(self, desired_slice : Slice):
         """Get annotations for a slice of this entity."""
 
-        print('yOOO')
         # TODO MAYBE WE DONT WANT TO CONVERT TO ABSOLUTE SLICE HERE!
         # this is going to be called through a entity link so it would be better
         # if this returned relative positions that were then converted.
@@ -191,7 +190,7 @@ class SequenceEntry:
 
         return filtered_annotations
 
-    def sequence_annotations_for_slice(self, desired_slice: Slice) -> List[SequenceAnnotation]:
+    def annotations_for_slice(self, desired_slice: Slice) -> List[SequenceAnnotation]:
         """Retrieve annotations contained in the given slice."""
 
         annotations = []
@@ -215,12 +214,12 @@ class SequenceEntry:
 
         return annotations
 
-    def sequence_annotations(self) -> List[SequenceAnnotation]:
+    def annotations(self) -> List[SequenceAnnotation]:
         """Return the sequence annotations for this entry.
 
         Recursively include all annotations present in the parent links composing this entry.
         """
-        return self.sequence_annotations_for_slice(Slice.from_entire_sequence())
+        return self.annotations_for_slice(Slice.from_entire_sequence())
 
     def add_annotation(self, annotation : SequenceAnnotation):
         """Add an annotation to the entry."""
