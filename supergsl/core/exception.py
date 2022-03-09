@@ -74,3 +74,7 @@ class SequenceNotFoundError(SequenceStoreError):
 
 class SequencePositionComparisonError(SuperGSLError):
     """An error occurred when comparing positions in a sequence."""
+
+
+class UnknownRoleError(SuperGSLTypeError):
+    """A sequence role could not be found."""

@@ -1,4 +1,5 @@
 from typing import NamedTuple
+from supergsl.core.exception import UnknownRoleError
 
 
 class Role(NamedTuple):
@@ -45,10 +46,20 @@ role_to_biopython_types = {
     CDS_FRAGMENT: 'cds'
 }
 
+def convert_biopython_type_to_role(type_name : str) -> Role:
+    """Convert a biopython type to corresponding `Role`."""
+    for role, role_type_name in role_to_biopython_types.items():
+        if role_type_name == type_name.lower():
+            return role
+
+    raise UnknownRoleError(
+        f'Unknown mapping from {type_name} to Role.')
+
+
 def convert_role_to_biopython_type(role : Role) -> str:
     """Convert a given `Role` to the corresponding biopython type."""
     try:
         return role_to_biopython_types[role]
     except TypeError as error:
-        raise Exception(
-            'Unknown mapping from {role.uri} to biopython type.') from error
+        raise UnknownRoleError(
+            f'Unknown mapping from {role.uri} to biopython type.') from error

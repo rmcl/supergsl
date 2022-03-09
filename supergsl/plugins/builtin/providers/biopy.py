@@ -8,12 +8,13 @@ from supergsl.core.constants import (
     STRAND_WATSON,
     STRAND_CRICK
 )
-from supergsl.core.exception import PartNotFoundError
+from supergsl.core.exception import PartNotFoundError, UnknownRoleError
 from supergsl.core.sequence import SequenceEntry, SequenceAnnotation
 from supergsl.core.parts import PartProvider
 from supergsl.core.provider import ProviderConfig
 from supergsl.core.types.position import Slice, Position
 from supergsl.core.types.part import Part
+from supergsl.core.types.role import convert_biopython_type_to_role
 
 
 class BioPythonFilePartProvider(PartProvider):
@@ -139,7 +140,13 @@ class BioPythonFilePartProvider(PartProvider):
                     self.default_part_identifier = record.name
 
                 for feature in record.features:
-                    annotation_roles = [feature.type]
+                    try:
+                        annotation_roles = [convert_biopython_type_to_role(feature.type)]
+                    except UnknownRoleError:
+                        # If we don't know how to handle this annotation type
+                        # then skip it for now.
+                        continue
+
                     annotation_payload = dict(feature.qualifiers)
                     annotation_payload['type'] = feature.type
                     feature_slice = self.get_slice_from_feature_location(feature.location)
