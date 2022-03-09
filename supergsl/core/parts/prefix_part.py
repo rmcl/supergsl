@@ -7,14 +7,17 @@ from supergsl.core.types.position import Slice, Position
 from supergsl.core.exception import PartSliceError
 from supergsl.core.constants import (
     FIVE_PRIME,
-    THREE_PRIME,
-    SO_GENE,
-    SO_PROMOTER,
-    SO_TERMINATOR,
-    SO_HOMOLOGOUS_REGION,
-    SO_CDS,
-    SO_CDS_FRAGMENT,
-    SO_MRNA
+    THREE_PRIME
+)
+
+from supergsl.core.types.role import (
+    GENE,
+    PROMOTER,
+    TERMINATOR,
+    HOMOLOGOUS_REGION,
+    CDS,
+    CDS_FRAGMENT,
+    MRNA
 )
 
 from supergsl.core.ast import SymbolReference
@@ -151,14 +154,14 @@ class PrefixedSlicePartProviderMixin(_Base):
     def get_roles_by_part_type(self, part_type):
         """Return a list of roles based on part type."""
         part_type_role_map = {
-            'gene': [SO_GENE],
-            'promoter': [SO_PROMOTER],
-            'terminator': [SO_TERMINATOR],
-            'upstream': [SO_HOMOLOGOUS_REGION],
-            'downstream': [SO_HOMOLOGOUS_REGION],
-            'orf': [SO_CDS],
-            'fusible_orf': [SO_CDS_FRAGMENT],
-            'mRNA': [SO_MRNA],
+            'gene': [GENE],
+            'promoter': [PROMOTER],
+            'terminator': [TERMINATOR],
+            'upstream': [HOMOLOGOUS_REGION],
+            'downstream': [HOMOLOGOUS_REGION],
+            'orf': [CDS],
+            'fusible_orf': [CDS_FRAGMENT],
+            'mRNA': [MRNA],
         }
 
         return part_type_role_map[part_type]

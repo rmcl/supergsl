@@ -11,6 +11,7 @@ from supergsl.core.exception import (
 )
 from supergsl.core.constants import THREE_PRIME, STRAND_CRICK, STRAND_WATSON
 from supergsl.core.types.position import Slice, Position, AbsoluteSlice, AbsolutePosition
+from supergsl.core.types.role import Role
 
 
 def get_slice_sequence_from_reference(sequence_reference, absolute_slice) -> Seq:
@@ -29,17 +30,6 @@ def get_slice_sequence_from_reference(sequence_reference, absolute_slice) -> Seq
         sequence = sequence_reference[absolute_slice.start.index:absolute_slice.end.index]
 
     return sequence
-
-
-class Role(NamedTuple):
-    """Represent a sequence role."""
-    uri : str
-    name : str
-    description : str
-
-    def __eq__(self, other):
-        """Roles with the same uri should be considered identical."""
-        return self.uri == other.uri
 
 
 class SliceMapping(NamedTuple):

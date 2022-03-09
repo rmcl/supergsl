@@ -7,7 +7,7 @@ from .print import SuperGSLTypeDetailFunction, SuperGSLTypeHelpFunction
 from .declare import AssemblyDeclarationFunction
 from .output.json_output import JSONOutput
 from .output.sbol_output import SBOLOutput
-from .output.genbank_output import GenBankOutput
+from .output.biopy import SeqRecordAssemblyOutput
 
 from .providers.fasta import FastaPartProvider
 from .providers.synbiohub import SynBioHubPartProvider
@@ -47,7 +47,7 @@ class BuiltinPlugin(SuperGSLPlugin):
         self.register_function(
             'builtin',
             'output_genbank',
-            SuperGSLFunctionDeclaration(GenBankOutput, compiler_settings))
+            SuperGSLFunctionDeclaration(SeqRecordAssemblyOutput, compiler_settings))
 
         # Available providers
         self.register_available_provider('fasta', FastaPartProvider)

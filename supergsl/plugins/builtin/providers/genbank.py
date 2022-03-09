@@ -50,6 +50,7 @@ class GenBankFilePartProvider(PartProvider):
         self.annotation_by_identifier : Dict[str, Tuple[SeqFeature, SequenceEntry]] = {}
         self.loaded = False
 
+        self.file_format = 'genbank'
         self.desired_feature_types = config.settings.get(
             'features',
             ['gene', 'CDS', 'misc_feature'])
@@ -126,7 +127,7 @@ class GenBankFilePartProvider(PartProvider):
         """Open and load features from a genbank file."""
         self.loaded = True
         with self.open_gb_file(self.genbank_file_path) as handle:
-            records = SeqIO.parse(handle, 'genbank')
+            records = SeqIO.parse(handle, self.file_format)
 
             for record in records:
                 sequence_entry = self.sequence_store.add_from_reference(record)
@@ -140,6 +141,7 @@ class GenBankFilePartProvider(PartProvider):
                 for feature in record.features:
                     annotation_roles = [feature.type]
                     annotation_payload = dict(feature.qualifiers)
+                    annotation_payload['type'] = feature.type
                     feature_slice = self.get_slice_from_feature_location(feature.location)
 
                     new_annotation = SequenceAnnotation(
