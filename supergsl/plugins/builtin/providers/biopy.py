@@ -124,6 +124,30 @@ class BioPythonFilePartProvider(PartProvider):
             Position(location.start * -1, THREE_PRIME, False),
             strand=strand)
 
+    def create_sequence_annotation_for_feature(
+        self,
+        sequence_entry : SequenceEntry,
+        feature : SeqFeature
+    ) -> SequenceAnnotation:
+        """Create a SequenceAnnotation for the provided feature."""
+
+        annotation_roles = [convert_biopython_type_to_role(feature.type)]
+        annotation_payload = dict(feature.qualifiers)
+        annotation_payload['type'] = feature.type
+        feature_slice = self.get_slice_from_feature_location(feature.location)
+
+        new_annotation = SequenceAnnotation(
+            feature_slice,
+            annotation_roles,
+            annotation_payload)
+        sequence_entry.add_annotation(new_annotation)
+
+        identifiers = self.get_identifier_for_feature(feature)
+        for identifier in identifiers:
+            self.annotation_by_identifier[identifier] = (new_annotation, sequence_entry)
+
+        return new_annotation
+
     def load(self):
         """Open and load features from a genbank file."""
         self.loaded = True
@@ -141,25 +165,12 @@ class BioPythonFilePartProvider(PartProvider):
 
                 for feature in record.features:
                     try:
-                        annotation_roles = [convert_biopython_type_to_role(feature.type)]
+                        self.create_sequence_annotation_for_feature(
+                            sequence_entry, feature)
                     except UnknownRoleError:
                         # If we don't know how to handle this annotation type
                         # then skip it for now.
                         continue
-
-                    annotation_payload = dict(feature.qualifiers)
-                    annotation_payload['type'] = feature.type
-                    feature_slice = self.get_slice_from_feature_location(feature.location)
-
-                    new_annotation = SequenceAnnotation(
-                        feature_slice,
-                        annotation_roles,
-                        annotation_payload)
-                    sequence_entry.add_annotation(new_annotation)
-
-                    identifiers = self.get_identifier_for_feature(feature)
-                    for identifier in identifiers:
-                        self.annotation_by_identifier[identifier] = (new_annotation, sequence_entry)
 
     def list_parts(self) -> List[Part]:
         if not self.loaded:
