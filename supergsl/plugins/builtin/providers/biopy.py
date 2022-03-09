@@ -16,7 +16,7 @@ from supergsl.core.types.position import Slice, Position
 from supergsl.core.types.part import Part
 
 
-class GenBankFilePartProvider(PartProvider):
+class BioPythonFilePartProvider(PartProvider):
     """Load Parts from a Genbank formatted file.
 
     Provider Arguments for `supergsl-config.json`:
@@ -31,7 +31,7 @@ class GenBankFilePartProvider(PartProvider):
     Example of retrieving Adeno-associated virus 4, complete genome (U89790.1)
     {
         "name": "genbank.AAV4",
-        "provider_class": "supergsl.plugins.ncbi.GenBankFilePartProvider",
+        "provider_class": "supergsl.plugins.builtin.providers.BioPythonFilePartProvider",
         "sequence_file_path": "/mnt/genomes/nucleotide-U89790.gb.gz"
     }
 

@@ -1,10 +1,10 @@
 import os
 from Bio import Entrez
 from supergsl.core.exception import ConfigurationError
-from supergsl.plugins.builtin.providers import GenBankFilePartProvider
+from supergsl.plugins.builtin.providers import BioPythonFilePartProvider
 
 
-class EntrezPartProvider(GenBankFilePartProvider):
+class EntrezPartProvider(BioPythonFilePartProvider):
     """Retrieve genomes and sequences from Entrez-linked public databases.
 
     Provider Arguments for `supergsl-config.json`:

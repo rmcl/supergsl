@@ -11,7 +11,7 @@ from .output.biopy import SeqRecordAssemblyOutput
 
 from .providers.fasta import FastaPartProvider
 from .providers.synbiohub import SynBioHubPartProvider
-from .providers.genbank import GenBankFilePartProvider
+from .providers.biopy import BioPythonFilePartProvider
 
 
 class BuiltinPlugin(SuperGSLPlugin):
@@ -52,4 +52,4 @@ class BuiltinPlugin(SuperGSLPlugin):
         # Available providers
         self.register_available_provider('fasta', FastaPartProvider)
         self.register_available_provider('synbiohub', SynBioHubPartProvider)
-        self.register_available_provider('genbank', GenBankFilePartProvider)
+        self.register_available_provider('genbank', BioPythonFilePartProvider)

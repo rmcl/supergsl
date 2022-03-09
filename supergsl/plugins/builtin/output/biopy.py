@@ -124,6 +124,15 @@ def build_seq_record_for_assembly(assembly : Assembly) -> SeqRecord:
 
         sequence_entry_to_part[reagent.sequence_entry.id] = reagent
 
+    sequence_entry = assembly.part.sequence_entry
+    for annotation_idx, annotation in enumerate(sequence_entry.annotations()):
+        feature = create_seq_feature_for_sequence_annotation(
+            annotation,
+            str(annotation_idx),
+            sequence_entry.sequence_length)
+
+        record.features.append(feature)
+
     for parent_link in assembly.part.sequence_entry.parent_links:
         parent_entry = parent_link.parent_entry
         target_slice = parent_link.target_slice
