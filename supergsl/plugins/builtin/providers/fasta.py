@@ -39,6 +39,10 @@ class FastaPartProvider(PartProvider):
         self._sequences_by_identifier : Dict[str, SequenceEntry] = {}
         self._loaded : bool = False
 
+        self.default_part_identifier = config.settings.get(
+            'default_part_identifier',
+            None)
+
     def load(self) -> None:
         def _open(file_path : str) -> TextIO:
             encoding = guess_type(file_path)[1]
@@ -63,6 +67,11 @@ class FastaPartProvider(PartProvider):
             self.load()
 
         return list(self._sequences_by_identifier.keys())
+
+    def get_default_part(self) -> Part:
+        if not self._loaded:
+            self.load()
+        return self.get_part(self.default_part_identifier)
 
     def get_part(self, identifier : str) -> Part:
         """Retrieve a part by identifier.

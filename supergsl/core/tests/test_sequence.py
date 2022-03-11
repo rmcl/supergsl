@@ -2,10 +2,17 @@
 import unittest
 from unittest.mock import Mock
 
+from Bio.Seq import Seq
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
-from supergsl.core.sequence import SequenceStore, SliceMapping
-from supergsl.core.types.position import Slice, Position
-from supergsl.core.constants import STRAND_CRICK
+from supergsl.core.sequence import (
+    SequenceStore,
+    SequenceEntry,
+    SliceMapping,
+    SequenceAnnotation
+)
+from supergsl.core.types.position import Slice, Position, AbsolutePosition
+from supergsl.core.constants import STRAND_CRICK, THREE_PRIME, FIVE_PRIME
+from supergsl.core.exception import SequenceStoreError
 
 
 class SequenceStoreTestCase(unittest.TestCase):
@@ -14,6 +21,27 @@ class SequenceStoreTestCase(unittest.TestCase):
     def setUp(self):
         self.fixtures = SuperGSLCoreFixtures()
         self.sequence_store = self.fixtures.sequence_store
+
+    def test_initialize_sequence_entry(self):
+        """SequenceEntry must be initialized with reference or parents, but not both."""
+
+        with self.assertRaises(SequenceStoreError) as store_error:
+            SequenceEntry(self.fixtures.sequence_store, 123)
+
+        self.assertEqual(
+            str(store_error.exception),
+            'Must specify either parents or reference.')
+
+        with self.assertRaises(SequenceStoreError) as store_error_2:
+            SequenceEntry(
+                self.fixtures.sequence_store,
+                123,
+                reference=Seq('ATGC'),
+                parent_links=['hi'])
+
+        self.assertEqual(
+            str(store_error_2.exception),
+            'Must only specify parents or a reference sequence, but not both')
 
     def test_add_from_reference(self):
         seq1 = 'ATGAAACACAAATTTAGACACAGAGTAGACATACGATGGAA'
@@ -144,4 +172,110 @@ class SequenceStoreTestCase(unittest.TestCase):
         expected_child_sequence = expected_parent_sequence[50:100]
         self.assertEqual(child_entry.sequence, expected_child_sequence)
 
-    # test_slice_out_of_bound_part_with_reference
+
+class SequenceAnnotationTestCase(unittest.TestCase):
+    """Testcases to evaluate the handling of sequence annotations."""
+
+    def setUp(self):
+        self.fixtures = SuperGSLCoreFixtures()
+        self.sequence_store = self.fixtures.sequence_store
+
+    def test_add_and_retrieve_annotation(self):
+        """Create an annotation, add it to a reference sequence and then retrieve it."""
+        seq1 = 'ATGAAACACAAATTTAGACACAGAGTAGACATACGATGGAA'
+
+        annotation1 = SequenceAnnotation.from_five_prime_indexes(0,20, ['HELLO'], {
+            'payload': 'party'
+        })
+
+        store = self.fixtures.sequence_store
+        entry1 = store.add_from_reference(seq1, annotations=[annotation1])
+
+        self.assertEqual(entry1.annotations(), [annotation1])
+
+    def test_retrieve_annotations_from_slice(self):
+        """Return only annotations that are found within a slice."""
+        seq1 = self.fixtures.mk_random_dna_sequence(2000)
+        annotations = [
+            SequenceAnnotation.from_five_prime_indexes(0,20, ['HELLO'], {}),
+            SequenceAnnotation.from_five_prime_indexes(50,200, ['YO'], {}),
+            SequenceAnnotation.from_five_prime_indexes(70,190, ['YO2'], {}),
+            SequenceAnnotation.from_five_prime_indexes(55,215, ['YO3'], {}),
+            SequenceAnnotation.from_five_prime_indexes(500,1000, ['YO4'], {})
+        ]
+
+        store = self.fixtures.sequence_store
+        entry1 = store.add_from_reference(seq1, annotations=annotations)
+
+        results = entry1.annotations_for_slice(
+            Slice.from_five_prime_indexes(40,210))
+
+        expected_results = [annotations[1], annotations[2]]
+        self.assertEqual(results, expected_results)
+
+    def test_annotations_from_parent_parts(self):
+        """Return annotations that have been defined on a parent part."""
+        seq1 = self.fixtures.mk_random_dna_sequence(2000)
+        annotations_on_parent = [
+            SequenceAnnotation.from_five_prime_indexes(0, 20, ['HELLO'], {}),
+            SequenceAnnotation.from_five_prime_indexes(50, 200, ['YO'], {}),
+            SequenceAnnotation.from_five_prime_indexes(70, 190, ['YO2'], {}),
+        ]
+        store = self.fixtures.sequence_store
+        entry1 = store.add_from_reference(seq1, annotations=annotations_on_parent)
+
+        part_slice = Slice.from_five_prime_indexes(50, 250, strand=STRAND_CRICK)
+        annotations_on_child = [
+            SequenceAnnotation.from_five_prime_indexes(10, 30, ['X1'], {}),
+            SequenceAnnotation.from_five_prime_indexes(80, 190, ['X2'], {}),
+        ]
+        entry2 = store.slice(entry1, part_slice, annotations=annotations_on_child)
+
+        parent_start = AbsolutePosition(entry2.sequence_length, 50, False)
+        expected_results = [
+            annotations_on_parent[1].derive_from_absolute_start_position(parent_start),
+            annotations_on_child[0],
+            annotations_on_parent[2].derive_from_absolute_start_position(parent_start),
+            annotations_on_child[1]
+        ]
+        results = entry2.annotations()
+        print(results)
+        self.assertEqual(results, expected_results)
+
+    def test_annotations_from_parent_part_reverse_strand(self):
+        """Test that we return annotations from parent parts on reverse strand."""
+
+        seq1 = self.fixtures.mk_random_dna_sequence(2000)
+        a1_slice = Slice(
+            Position(-20, THREE_PRIME, False),
+            Position(0, THREE_PRIME, False),
+            strand=STRAND_CRICK)
+        annotations_on_parent = [
+            SequenceAnnotation(a1_slice, ['HELLO-FROM-REV-STRAND'], {}),
+        ]
+        store = self.fixtures.sequence_store
+        entry1 = store.add_from_reference(seq1, annotations=annotations_on_parent)
+        entry2 = store.slice(
+            entry1,
+            Slice.from_five_prime_indexes(0, 250))
+
+        parent_start = AbsolutePosition(entry2.sequence_length, 0, False)
+        results = entry2.annotations()
+        self.assertEqual(results, [
+            annotations_on_parent[0].derive_from_absolute_start_position(parent_start)
+        ])
+
+    def test_entry_link_sequence(self):
+        """A entry link sequence should return the correct sequence from the parent entry."""
+
+        reference_sequence = self.fixtures.mk_random_dna_sequence(500)
+        sequence_entry = self.fixtures.mk_sequence_entry(reference_sequence)
+
+        new_entry = self.sequence_store.slice(
+            sequence_entry,
+            Slice.from_five_prime_indexes(100,150)
+        )
+
+        self.assertEqual(
+            new_entry.parent_links[0].sequence,
+            reference_sequence[100:150])

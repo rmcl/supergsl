@@ -3,10 +3,10 @@ from unittest import TestCase
 from Bio import SeqIO
 from supergsl.core.sequence import SequenceStore
 from supergsl.core.provider import ProviderConfig
-from supergsl.plugins.ncbi.genbank_provider import GenBankFilePartProvider
+from supergsl.plugins.builtin.providers.biopy import BioPythonFilePartProvider
 
 
-class GenBankFilePartProviderTestCase(TestCase):
+class BioPythonFilePartProviderTestCase(TestCase):
     """Test case for the file part provider."""
 
     def setUp(self):
@@ -14,7 +14,7 @@ class GenBankFilePartProviderTestCase(TestCase):
             'sequence_file_path': self.EXAMPLE_GB_FILE_PATH,
             'feature_types': ['CDS']
         })
-        self.provider = GenBankFilePartProvider('test', config)
+        self.provider = BioPythonFilePartProvider('test', config)
 
         self.expected_sequences = SeqIO.index(
             self.EXAMPLE_FASTA_FILE_PATH, 'fasta')
@@ -24,7 +24,7 @@ class GenBankFilePartProviderTestCase(TestCase):
         """Test that we can load a genbank file and inspect the parts loaded."""
         parts = self.provider.list_parts()
 
-        self.assertEqual(len(parts), 2)
+        self.assertEqual(len(parts), 3)
         parts_by_identifier = {
             part.identifier: part
             for part in parts

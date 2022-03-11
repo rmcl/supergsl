@@ -6,8 +6,12 @@ from supergsl.core.plugin import PluginProvider
 from supergsl.core.provider import ProviderConfig
 from supergsl.core.backend import BackendPipelinePass
 from supergsl.core.eval import EvaluatePass
-from supergsl.utils import resolve_import, import_class
+from supergsl.utils.resolve import resolve_provider_import, resolve_import
 from supergsl.core.sequence import SequenceStore
+from supergsl.core.exception import (
+    SymbolNotFoundError,
+    ProviderNotFoundError
+)
 
 from .lexer import SuperGSLLexer
 from .parser import SuperGSLParser
@@ -78,18 +82,24 @@ class CompilerPipeline:
             EvaluatePass
         ])
 
-    def register_provider(self, module_path : str, provider_class_path : Union[str, Callable], **kwargs):
+
+    def available_providers(self):
+        available_providers = self.symbols.enter_nested_scope('available_imports')
+        return [
+            item[0]
+            for item in available_providers
+        ]
+
+    def register_provider(self, provider_path : str, provider : Union[str, Callable], **kwargs):
         """Instantiate and register a provider."""
+
+        provider_class = resolve_provider_import(provider, self.symbols)
+
         plugin = self.plugins.get_adhoc_plugin()
         config = ProviderConfig(self._sequence_store, settings=kwargs)
 
-        if callable(provider_class_path):
-            provider_class = provider_class_path
-        else:
-            provider_class = import_class(provider_class_path)
-
-        provider_inst = provider_class(config)
-        plugin.register_provider(module_path, provider_inst)
+        provider_inst = provider_class(provider_path, config)
+        plugin.register_provider(provider_path, provider_inst)
         return provider_inst
 
 

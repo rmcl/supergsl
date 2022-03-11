@@ -3,7 +3,8 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 from supergsl.core.exception import PartError
-from supergsl.core.sequence import SequenceEntry, Role
+from supergsl.core.sequence import SequenceEntry
+from supergsl.core.types.role import Role
 from supergsl.core.types import SuperGSLType
 from supergsl.core.types.builtin import NucleotideSequence
 from supergsl.core.types.primer import PrimerPair

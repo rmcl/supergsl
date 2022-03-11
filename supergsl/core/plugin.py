@@ -58,6 +58,14 @@ class SuperGSLPlugin(object):
 
         return provider_group
 
+    def register_available_provider(self,
+        provider_alias : str,
+        provider_class : Type[SuperGSLProvider]
+    ):
+        """Make a provider available for instantiation via sgsl.register_provider."""
+        available_import_symbols = self.symbol_table.enter_nested_scope('available_imports')
+        available_import_symbols.insert(provider_alias, provider_class)
+
     def register_provider(
         self,
         import_path : str,

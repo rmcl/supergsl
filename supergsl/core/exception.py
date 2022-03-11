@@ -62,3 +62,19 @@ class SuperGSLTypeError(SuperGSLError):
 
 class SequenceStoreError(SuperGSLError):
     """A base class for errors related to the Sequence Store."""
+
+
+class DuplicateSequenceError(SequenceStoreError):
+    """A duplicate sequence was attempted to be addeed to the store."""
+
+
+class SequenceNotFoundError(SequenceStoreError):
+    """The desired sequence could not be found in the store."""
+
+
+class SequencePositionComparisonError(SuperGSLError):
+    """An error occurred when comparing positions in a sequence."""
+
+
+class UnknownRoleError(SuperGSLTypeError):
+    """A sequence role could not be found."""

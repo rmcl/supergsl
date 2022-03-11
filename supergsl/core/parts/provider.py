@@ -4,7 +4,7 @@ from collections import namedtuple
 
 from Bio.Seq import Seq
 
-from supergsl.utils import import_class
+from supergsl.utils.resolve import import_class
 
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.provider import SuperGSLProvider
@@ -32,8 +32,7 @@ class PartProvider(SuperGSLProvider):
     def list_parts(self):
         """Return all parts available through this provider."""
         raise NotImplementedError(
-            'List parts is not supported by "%s" part provider.' % self.provider_name
-        )
+            f'List parts is not supported by "{self.provider_name}" part provider.')
 
     def resolve_import(
         self,
@@ -102,13 +101,17 @@ class ConstantPartProvider(PartProvider):
     def __init__(self, name : str, config : ProviderConfig):
         self._provider_name = name
         self._sequence_store = config.sequence_store
+        self._config = config
 
-        if 'sequences' in config.settings:
-            self._part_details = config.settings['sequences']
-        else:
-            self._part_details = self.DEFAULT_PART_DETAILS
-
+        self.setup_part_details()
         self._cached_parts: Dict[str, Part] = {}
+
+    def setup_part_details(self):
+        if 'sequences' not in self._config.settings:
+            raise Exception('ConstantPartProvider requires a `sequences` argument.')
+
+        self._part_details = self._config.settings['sequences']
+
 
     def list_parts(self):
         """Return all parts available through this provider."""
@@ -120,6 +123,10 @@ class ConstantPartProvider(PartProvider):
     def get_part_details(self, part_identifier):
         """Return constant details about a part."""
         return self._part_details[part_identifier]
+
+    def get_default_part(self) -> Part:
+        """Return the default part returned for `import <provider>` syntax.."""
+        return self.get_part('default')
 
     def get_part(self, identifier : str) -> Part:
         """Retrieve a part by identifier.
@@ -168,6 +175,8 @@ class PartProviderPlugin(SuperGSLPlugin):
 
     def register(self, compiler_settings):
         """Instantiate and register each part_providers defined in settings."""
+
+        self.register_available_provider('constant_parts', ConstantPartProvider)
 
         if 'part_providers' not in compiler_settings:
             raise ConfigurationError(

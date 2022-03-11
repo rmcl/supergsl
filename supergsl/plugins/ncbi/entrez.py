@@ -1,10 +1,10 @@
 import os
 from Bio import Entrez
 from supergsl.core.exception import ConfigurationError
-from .genbank_provider import GenBankFilePartProvider
+from supergsl.plugins.builtin.providers import BioPythonFilePartProvider
 
 
-class EntrezPartProvider(GenBankFilePartProvider):
+class EntrezPartProvider(BioPythonFilePartProvider):
     """Retrieve genomes and sequences from Entrez-linked public databases.
 
     Provider Arguments for `supergsl-config.json`:
@@ -27,8 +27,9 @@ class EntrezPartProvider(GenBankFilePartProvider):
 
     """
 
-    def __init__(self, name, settings):
+    def __init__(self, name, config):
         self.name = name
+        settings = config.settings
         self.efetch_args = settings.get('efetch_args', None)
         self.entrez_email = settings.get('entrez_email', None)
         self.use_cached_records = settings.get('cache_records', True)
@@ -38,6 +39,7 @@ class EntrezPartProvider(GenBankFilePartProvider):
         self.allowed_feature_types = set(settings.get('feature_types', [
             'gene'
         ]))
+        self.loaded = False
 
         if not self.efetch_args or not self.entrez_email:
             raise ConfigurationError(

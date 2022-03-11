@@ -73,6 +73,13 @@ class ConstantPartProviderTestCase(TestCase):
 
     def test_constant_get_part_does_not_exist(self):
         """PartNotFoundError should be raised if part provider doesn't have the part."""
+        self.provider_config.settings['sequences'] = {
+            'test-part': ConstantPartDetail(
+                'THE GREATEST PART EVER',
+                'ATGCAAATAGACAA',
+                ['ROLE1', 'ROLE2']
+            )
+        }
         provider = ConstantPartProvider('constant-part', self.provider_config)
 
         with self.assertRaises(PartNotFoundError):

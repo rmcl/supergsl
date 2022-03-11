@@ -1,7 +1,7 @@
 from unittest import TestCase
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
+from supergsl.core.types.role import PROMOTER
 from supergsl.core.constants import (
-    SO_PROMOTER,
     PART_SLICE_POSTFIX_START,
     PART_SLICE_POSTFIX_END
 )
@@ -16,10 +16,10 @@ class PartTestCase(TestCase):
 
     def test_part_roles_are_recapitulated(self):
         _, p1 = self.fixtures.mk_part('SWEET', 300, roles=[
-            SO_PROMOTER
+            PROMOTER
         ])
 
-        self.assertEqual(p1.roles, [SO_PROMOTER])
+        self.assertEqual(p1.roles, [PROMOTER])
 
     def test_part_print(self):
         """Test the part print statement outputs in a nice format."""
