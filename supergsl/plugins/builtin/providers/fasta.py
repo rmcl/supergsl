@@ -69,6 +69,8 @@ class FastaPartProvider(PartProvider):
         return list(self._sequences_by_identifier.keys())
 
     def get_default_part(self) -> Part:
+        if not self._loaded:
+            self.load()
         return self.get_part(self.default_part_identifier)
 
     def get_part(self, identifier : str) -> Part:
