@@ -72,6 +72,11 @@ def create_seq_feature_for_sequence_annotation(
         parent_sequence_length)
 
     feature_id, qualifiers = get_feature_id_and_qualifiers(annotation, default_id)
+    if annotation.location.strand == STRAND_CRICK:
+        tmp_end_abs_pos = start_abs_pos.get_complement_strand_position()
+        start_abs_pos = end_abs_pos.get_complement_strand_position()
+        end_abs_pos = tmp_end_abs_pos
+
     feature = SeqFeature(
         id=feature_id,
         qualifiers=qualifiers,

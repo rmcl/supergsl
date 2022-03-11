@@ -183,6 +183,9 @@ class BioPythonFilePartProvider(PartProvider):
 
     def get_default_part(self) -> Part:
         """Return the default part for this provider."""
+        if not self.loaded:
+            self.load()
+
         return self.get_part(self.default_part_identifier)
 
     def get_part(self, identifier) -> Part:

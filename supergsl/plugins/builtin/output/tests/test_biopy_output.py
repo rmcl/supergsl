@@ -2,10 +2,13 @@
 from unittest import TestCase
 from io import StringIO
 from Bio.Seq import Seq
+from Bio import SeqIO
+from Bio.SeqFeature import SeqFeature
 
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.core.sequence import SequenceAnnotation
 from supergsl.core.types.role import PROMOTER, TERMINATOR
+from supergsl.plugins.builtin.providers.biopy import BioPythonFilePartProvider
 from supergsl.plugins.builtin.output.biopy import (
     SeqRecordAssemblyOutput,
     create_seq_record_from_sequence_entry,
@@ -47,6 +50,41 @@ class BioPythonSeqRecordOutputTestCase(TestCase):
         self.assertEqual(terminator_feature.location.end, 190)
         self.assertEqual(terminator_feature.type, 'terminator')
 
+
+class BiopyOutputRoundTripTestCase(TestCase):
+    def setUp(self):
+        self.fixtures = SuperGSLCoreFixtures()
+
+        self.sequence_file_path = 'supergsl/tests/fixtures/pCas_orig.gb'
+        self.config = self.fixtures.mk_provider_config({
+            'sequence_file_path': self.sequence_file_path
+        })
+        self.pCas_provider = BioPythonFilePartProvider('pCAS', self.config)
+
+    def test_seq_record_round_trip(self):
+        """Load a record with annotations then generate a new SeqRecord and check."""
+
+        pCas_part = self.pCas_provider.get_default_part()
+
+        seq_record = create_seq_record_from_sequence_entry(
+            pCas_part.sequence_entry, 'output')
+
+        with open(self.sequence_file_path, 'r') as handle:
+            expected_record = list(SeqIO.parse(handle, 'genbank'))[0]
+
+        self.assertEqual(seq_record.seq, expected_record.seq)
+
+        expected_features_by_label = {}
+        for expected_feature in expected_record.features:
+            if 'label' in expected_feature.qualifiers:
+                label = expected_feature.qualifiers['label'][0]
+                expected_features_by_label[label] = expected_feature
+
+        for feature in seq_record.features:
+            label = feature.qualifiers['label'][0]
+
+            expected_feature = expected_features_by_label[label]
+            self.assertEqual(feature.location, expected_feature.location)
 
 class SeqRecordAssemblyOutputTestCase(TestCase):
     """Test the behavior of GenBank Assembly output"""
