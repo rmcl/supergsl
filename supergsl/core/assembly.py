@@ -20,7 +20,7 @@ class AssemblerBase(SuperGSLFunction):
 
     def execute(self, params):
         assembly_requests : List[AssemblyDeclaration] = params['children']
-        contraints : List[Constraint] = params['constraints']
+        constraints : List[Constraint] = params['constraints']
 
         result_set = AssemblyResultSet([])
         for assembly_idx, assembly_request in enumerate(assembly_requests):
@@ -31,9 +31,9 @@ class AssemblerBase(SuperGSLFunction):
                 if not self.evaluate_definition_contraints(design_description, constraints):
                     continue
 
-                assembly = self.assemble(design_idx, design_description)
+                assembly = self.assemble(assembly_idx, design_idx, design_description)
 
-                if not self.evaluate_sequence_constraints(assembly, constraints):
+                if not self.evaluate_assembly_constraints(assembly, constraints):
                     continue
 
                 result_set.add_assembly(assembly)
@@ -52,9 +52,12 @@ class AssemblerBase(SuperGSLFunction):
         """
         for constraint in constraints:
             if not constraint.is_definition_constraint:
-                return True
+                continue
 
-            return constraint.evaluate_definition(design_description)
+            if not constraint.evaluate_definition(design_description):
+                return False
+
+        return True
 
     def evaluate_assembly_constraints(
         self,
@@ -68,11 +71,19 @@ class AssemblerBase(SuperGSLFunction):
         """
         for constraint in constraints:
             if not constraint.is_assembly_constraint:
-                return True
+                continue
 
-            return constraint.evaluate_assembly(assembly)
+            if not constraint.evaluate_assembly(assembly):
+                return False
 
-    def assemble(self, assembly : List[AssemblyLevel]) -> Assembly:
+        return True
+
+    def assemble(
+        self,
+        assembly_idx : int,
+        design_idx : int,
+        assembly_request : List[AssemblyLevel]
+    ) -> Assembly:
         """Iterate over a list of `Part` and generate an Assembly object."""
         raise NotImplementedError('Not implemented. Subclass to implement.')
 

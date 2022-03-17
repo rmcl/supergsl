@@ -32,7 +32,7 @@ class FusionAssembler(AssemblerBase):
 
     """
 
-    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyResultSet:
+    def assemble(self, assembly_declaration : AssemblyDeclaration) -> AssemblyResultSet:
         """Iterate over `AssemblyDeclaration` and generate a set of assemblies."""
 
         assemblies : List[Assembly] = []

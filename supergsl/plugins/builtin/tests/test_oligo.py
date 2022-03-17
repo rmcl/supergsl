@@ -31,7 +31,10 @@ class SyntheticOligoAssemblerTestCase(unittest.TestCase):
             three_prime_flank
         ])
 
-        assembly_result_set = list(self.assembler.assemble([declaration]))
+        assembly_result_set = list(self.assembler.execute({
+            'children': [declaration],
+            'constraints': []
+        }))
         assemblies = list(assembly_result_set)
         self.assertEqual(len(assemblies), 1)
         self.assertEqual(assemblies[0].sequence, Seq(''.join([
@@ -65,7 +68,10 @@ class SyntheticOligoAssemblerTestCase(unittest.TestCase):
             three_prime_flank
         ])
 
-        result = list(self.assembler.assemble([declaration]))
+        result = list(self.assembler.execute({
+            'children': [declaration],
+            'constraints': []
+        }))
 
         assemblies = list(result)
 
