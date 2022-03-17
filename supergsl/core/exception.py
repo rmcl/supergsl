@@ -78,3 +78,7 @@ class SequencePositionComparisonError(SuperGSLError):
 
 class UnknownRoleError(SuperGSLTypeError):
     """A sequence role could not be found."""
+
+
+class MaxDesignsExceededError(SuperGSLTypeError):
+    """An AssemblyDeclaration was defined such that it exceeds the maximum number of designs."""

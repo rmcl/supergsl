@@ -3,6 +3,7 @@ from typing import Generator, List, Optional, Union, Tuple, Set, Sequence
 from Bio.Seq import Seq
 from pyDOE2 import fullfact
 
+from supergsl.core.exception import MaxDesignsExceededError
 from supergsl.core.types import SuperGSLType
 from supergsl.core.types.builtin import Collection
 from supergsl.core.types.part import Part
@@ -118,11 +119,12 @@ class AssemblyDeclaration(SuperGSLType):
 
         return levels
 
-    def get_full_factorial_designs(self) -> Generator[List[AssemblyLevel], None, None]:
+    def get_designs(self) -> Generator[List[AssemblyLevel], None, None]:
         """Return full-factorial iterator of the assembly designs."""
 
         if self.num_designs > 500:
-            raise Exception('AssemblyDeclaration will generate %d designs.' % self.num_designs)
+            raise MaxDesignsExceededError(
+                f'AssemblyDeclaration will generate {self.num_designs} designs.')
 
         designs = fullfact([
             len(factor.levels)
@@ -130,10 +132,12 @@ class AssemblyDeclaration(SuperGSLType):
         ])
 
         for design in designs:
-            yield [
+            design_description = [
                 self._factors[factor_index][int(level_index)]
                 for factor_index, level_index in enumerate(design)
             ]
+
+            yield design_description
 
 
 class Assembly(SuperGSLType):
