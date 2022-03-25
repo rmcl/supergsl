@@ -186,6 +186,10 @@ class AssemblyResultSet(SuperGSLType):
         """Add an assembly to this assembly result set."""
         self.assemblies.append(assembly)
 
+    def __len__(self):
+        """Return the number of assemblies in the collection."""
+        return len(self.assemblies)
+
     def __iter__(self):
         """Iterating over a result set should iterate over each assembly."""
         return iter(self.assemblies)

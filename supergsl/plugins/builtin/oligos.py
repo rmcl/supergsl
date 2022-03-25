@@ -145,8 +145,8 @@ class SyntheticOligoAssembler(AssemblerBase):
 
     def assemble(
         self,
-        assembly_idx : int,
-        design_idx : int,
+        assembly_label : str,
+        design_label : str,
         assembly_request : List[AssemblyLevel]
     ) -> Assembly:
         """Iterate over `Part` and generate an Assembly object."""
@@ -154,7 +154,7 @@ class SyntheticOligoAssembler(AssemblerBase):
         sequence_entry = self.build_one_sequence_entry(assembly_request)
         oligos = self.build_oligos_for_sequence_entry(sequence_entry)
 
-        identifier = str('ASM-%03d-%05d' % (design_idx, assembly_idx))
+        identifier = f'ASM-{design_label}-{assembly_label}'
 
         new_part = Part(
             identifier,

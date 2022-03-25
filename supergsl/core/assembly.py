@@ -20,18 +20,21 @@ class AssemblerBase(SuperGSLFunction):
 
     def execute(self, params):
         assembly_requests : List[AssemblyDeclaration] = params['children']
-        constraints : List[Constraint] = params['constraints']
+        constraints : List[Constraint] = []
+        if 'constraints' in params:
+            constraints = params['constraints'] or []
 
         result_set = AssemblyResultSet([])
         for assembly_idx, assembly_request in enumerate(assembly_requests):
+            assembly_label = assembly_request.label or '%03d' % assembly_idx
 
             designs = assembly_request.get_designs()
             for design_idx, design_description in enumerate(designs):
-
+                design_label = '%03d' % design_idx
                 if not self.evaluate_definition_contraints(design_description, constraints):
                     continue
 
-                assembly = self.assemble(assembly_idx, design_idx, design_description)
+                assembly = self.assemble(assembly_label, design_label, design_description)
 
                 if not self.evaluate_assembly_constraints(assembly, constraints):
                     continue
@@ -80,8 +83,8 @@ class AssemblerBase(SuperGSLFunction):
 
     def assemble(
         self,
-        assembly_idx : int,
-        design_idx : int,
+        assembly_label : str,
+        design_label : str,
         assembly_request : List[AssemblyLevel]
     ) -> Assembly:
         """Iterate over a list of `Part` and generate an Assembly object."""
