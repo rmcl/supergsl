@@ -1,5 +1,5 @@
 """Evaluate a SuperGSL Program."""
-from typing import Any, Dict, Optional, Callable, Union, cast
+from typing import Any, Dict, Optional, Callable, Union, List, cast
 
 from supergsl.core.types import SuperGSLType
 from supergsl.core.symbol_table import SymbolTable
@@ -11,8 +11,10 @@ from supergsl.core.types.builtin import (
 )
 from supergsl.utils.resolve import resolve_import
 from supergsl.core.sequence import SequenceStore
-from supergsl.core.types.part import Part
-from supergsl.core.types.assembly import AssemblyDeclaration
+from supergsl.core.types.assembly import (
+    AssemblyDeclaration,
+    AssemblyLevelDeclaration
+)
 from supergsl.core.types.position import (
     Position,
     Slice
@@ -116,9 +118,13 @@ class EvaluatePass(BackendPipelinePass):
     def visit_assembly(self, assembly : Assembly) -> SuperGSLType:
         """Evaluate the Assembly node by traversing eval'ing all the child symbol references."""
 
-        parts = []
+        level_declarations : List[AssemblyLevelDeclaration] = []
         for symbol_reference in assembly.symbol_references:
             part = self.visit(symbol_reference)
+            # somehow we need to get this label to AssemblyFactor or something like it
+            level_declaration = AssemblyLevelDeclaration(
+                symbol_reference.label,
+                part)
 
             # TODO: We need to do type checking here.
             # Ultimately I think these "parts" can be part collections, parts,
@@ -130,9 +136,9 @@ class EvaluatePass(BackendPipelinePass):
             #            'Type error. Assembly declaration expected a set of parts. '
             #            'Got a "%s"' % part)
 
-            parts.append(part)
+            level_declarations.append(level_declaration)
 
-        return AssemblyDeclaration(assembly.label, parts)
+        return AssemblyDeclaration(assembly.label, level_declarations)
 
     def visit_variable_declaration(self, variable_declaration : VariableDeclaration) -> None:
         """Evaluate by visiting child expression and assigning the result to the symobl table."""

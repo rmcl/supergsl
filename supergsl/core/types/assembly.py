@@ -19,7 +19,12 @@ from supergsl.core.sequence import SequenceEntry
 # By way of a concrete example, a "Part Collection" can be used to declare levels,
 # but must be converted to its list of explicit "Parts" to be used in an
 # AssemblyFactor.
-AssemblyLevelDeclaration = Union[Part, Collection]
+class AssemblyLevelDeclaration:
+    def __init__(self, item : Union[Part, Collection], label : str):
+        self.item = item
+        self.label = label
+
+
 AssemblyLevel = Union[Part]
 
 class AssemblyFactor:
@@ -30,15 +35,16 @@ class AssemblyFactor:
 
         let promoters = [pGAL1, pGAL3, pGAL7]
         assembly {
-            uHO ; promoters ; gGENE ; dHO
+            uHO ; promoters as p1 ; gGENE ; dHO
         }
 
     The AssemblyFactor corresponding to the second position in the above assembly
-    has three levels pGAL1, pGAL3, and pGAL7
+    has three levels pGAL1, pGAL3, and pGAL7 and a label "p1"
     """
-    def __init__(self, factor_type : str, levels : List[AssemblyLevel]):
+    def __init__(self, factor_type : str, levels : List[AssemblyLevel], label : str):
         self._factor_type = factor_type
         self._levels : List[AssemblyLevel] = levels
+        self.label = label
 
     @property
     def factor_type(self) -> str:
@@ -67,25 +73,25 @@ class AssemblyDeclaration(SuperGSLType):
     def __init__(
         self,
         label : Optional[str],
-        items : List[AssemblyLevelDeclaration]
+        level_declarations : List[AssemblyLevelDeclaration]
     ):
         self._label : Optional[str] = label
-        self._factors : List[AssemblyFactor] = self._build_factors_from_parts(items)
+        self._factors : List[AssemblyFactor] = self._build_factors_from_parts(level_declarations)
 
     def _build_factors_from_parts(
         self,
-        items : List[AssemblyLevelDeclaration]
+        level_declarations : List[AssemblyLevelDeclaration]
     ) -> List[AssemblyFactor]:
         """Build a list of AssemblyFactors for the parts of this assembly declaration."""
         factors : List[AssemblyFactor] = []
-        for item in items:
+        for level_declaration in level_declarations:
             levels : List[AssemblyLevel] = []
-            if isinstance(item, Collection):
-                levels = list(item)
+            if isinstance(level_declaration.item, Collection):
+                levels = list(level_declaration.item)
             else:
-                levels = [item]
+                levels = [level_declaration.item]
 
-            factors.append(AssemblyFactor('Part', levels))
+            factors.append(AssemblyFactor('Part', levels, level_declaration.label))
         return factors
 
     @property

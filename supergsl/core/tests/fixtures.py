@@ -18,6 +18,7 @@ from supergsl.core.types.builtin import Collection
 from supergsl.core.types.assembly import (
     Assembly,
     AssemblyDeclaration,
+    AssemblyLevelDeclaration,
     AssemblyResultSet
 )
 from supergsl.core.symbol_table import SymbolTable
@@ -150,10 +151,10 @@ class SuperGSLCoreFixtures(object):
         downstream = self.mk_part('dHO', 50)[1]
 
         return AssemblyDeclaration(name, [
-            upstream,
-            promoter_collection,
-            gene,
-            downstream
+            AssemblyLevelDeclaration(upstream, None),
+            AssemblyLevelDeclaration(promoter_collection, None),
+            AssemblyLevelDeclaration(gene, None),
+            AssemblyLevelDeclaration(downstream, None)
         ])
 
     def mk_assembly(self, identifier='asm1', num_parts=2) -> Assembly:
