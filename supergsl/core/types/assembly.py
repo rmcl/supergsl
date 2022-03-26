@@ -20,7 +20,7 @@ from supergsl.core.sequence import SequenceEntry
 # but must be converted to its list of explicit "Parts" to be used in an
 # AssemblyFactor.
 class AssemblyLevelDeclaration:
-    def __init__(self, item : Union[Part, Collection], label : str):
+    def __init__(self, item : Union[Part, Collection], label : Optional[str]):
         self.item = item
         self.label = label
 
@@ -41,7 +41,7 @@ class AssemblyFactor:
     The AssemblyFactor corresponding to the second position in the above assembly
     has three levels pGAL1, pGAL3, and pGAL7 and a label "p1"
     """
-    def __init__(self, factor_type : str, levels : List[AssemblyLevel], label : str):
+    def __init__(self, factor_type : str, levels : List[AssemblyLevel], label : Optional[str]):
         self._factor_type = factor_type
         self._levels : List[AssemblyLevel] = levels
         self.label = label

@@ -123,8 +123,8 @@ class EvaluatePass(BackendPipelinePass):
             part = self.visit(symbol_reference)
             # somehow we need to get this label to AssemblyFactor or something like it
             level_declaration = AssemblyLevelDeclaration(
-                symbol_reference.label,
-                part)
+                part,
+                symbol_reference.label)
 
             # TODO: We need to do type checking here.
             # Ultimately I think these "parts" can be part collections, parts,
