@@ -182,9 +182,7 @@ class PrefixedSlicePartProviderMixin(_Base):
                 Position(0, relative_to=FIVE_PRIME))
 
         if part_slice_type in ['orf', 'gene']:
-            return Slice(
-                Position(0, relative_to=FIVE_PRIME),
-                Position(0, relative_to=THREE_PRIME))
+            return Slice.from_entire_sequence()
 
         if part_slice_type == 'upstream':
             return Slice(

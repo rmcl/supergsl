@@ -289,8 +289,10 @@ class SequenceEntry:
             return self.reference, absolute_slice
 
         if not self.is_composite:
-            if not self.parent_links:
-                raise Exception('no parent links')
+            if not self.parent_links or len(self.parent_links) != 1:
+                raise Exception(
+                    'There must be exactly one parent link for a non-composite /'
+                    ' no reference backed part.')
 
             parent_link = self.parent_links[0]
             parent_sequence_entry = parent_link.parent_entry
@@ -350,7 +352,7 @@ class SequenceEntry:
         return Seq(result_sequence)
 
     def __repr__(self):
-        return '%s: %s or %s' % (self.id, self.parent_links, self.reference)
+        return f'{self.id}'
 
 
 class SequenceStore:

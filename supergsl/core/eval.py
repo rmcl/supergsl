@@ -169,9 +169,8 @@ class EvaluatePass(BackendPipelinePass):
             symbol = parent_part.slice(part_slice, identifier=child_identifier)
 
         if symbol_reference.invert:
-            #    inverter = self.visit(symbol_reference.invert)
-            #    symbol = inverter.eval(symbol)
-            raise NotImplementedError('Inverted parts not implemented yet!')
+            child_identifier = f'!{parent_part.identifier}'
+            symbol = symbol.invert(identifier=child_identifier)
 
         return symbol
 
