@@ -6,7 +6,10 @@ from unittest import TestCase
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.core.sequence import SliceMapping
 from supergsl.core.types.position import Slice
-from supergsl.utils.sequence import filter_links_by_roles
+from supergsl.utils.sequence import (
+    filter_links_by_roles,
+    filter_annotations_by_roles
+)
 
 
 class SequenceUtilitiesTestCases(TestCase):
@@ -17,6 +20,7 @@ class SequenceUtilitiesTestCases(TestCase):
         self.sequence_store = self.fixtures.sequence_store
 
     def test_filter_links_by_roles(self):
+        """Test that we can filter parent links by a list of roles."""
         role1 = self.fixtures.mk_sequence_role('AWESOME')
         role2 = self.fixtures.mk_sequence_role('AN_OKAY_ROLE')
 
@@ -52,3 +56,28 @@ class SequenceUtilitiesTestCases(TestCase):
             result.parent_entry
             for result in results_3
         }, { entry2 })
+
+    def test_filter_annotations_by_roles(self):
+        """Test that we can filter annotations on a sequence entry by roles."""
+        role1 = self.fixtures.mk_sequence_role('AWESOME')
+        role2 = self.fixtures.mk_sequence_role('AN_OKAY_ROLE')
+        role3 = self.fixtures.mk_sequence_role('BOOP_ROLE')
+
+        annotations = [
+            self.fixtures.mk_random_sequence_annotation(200, roles=[role1]),
+            self.fixtures.mk_random_sequence_annotation(200, roles=[role1, role2]),
+            self.fixtures.mk_random_sequence_annotation(200, roles=[role3])
+        ]
+        entry1 = self.fixtures.mk_random_dna_sequence_entry(200, annotations)
+
+        self.assertEqual(
+            filter_annotations_by_roles(entry1, [role2]),
+            [annotations[1]])
+
+        self.assertEqual(
+            filter_annotations_by_roles(entry1, [role3]),
+            [annotations[2]])
+
+        self.assertEqual(
+            filter_annotations_by_roles(entry1, [role1, role3]),
+            annotations)
