@@ -56,7 +56,7 @@ class SuperGSLCoreFixtures(object):
         return self.mk_sequence_entry(sequence, annotations)
 
     def mk_random_sequence_annotation(self, seq_len : int, roles : List[Role]) -> SequenceAnnotation:
-        start = randint(0, seq_len / 2)
+        start = randint(0, int(seq_len / 2))
         end = randint(start, seq_len)
         return SequenceAnnotation.from_five_prime_indexes(
             start,
