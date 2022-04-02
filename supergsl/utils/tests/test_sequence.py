@@ -79,5 +79,5 @@ class SequenceUtilitiesTestCases(TestCase):
             [annotations[2]])
 
         self.assertEqual(
-            filter_annotations_by_roles(entry1, [role1, role3]),
-            annotations)
+            len(filter_annotations_by_roles(entry1, [role1, role3])),
+            3)
