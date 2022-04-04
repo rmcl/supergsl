@@ -1,11 +1,12 @@
 """Define fixture data for testing SuperGSL."""
 from typing import Tuple, List, Optional
 from unittest.mock import Mock
-import random
+from random import randint, choice
 from Bio.Seq import Seq
 from supergsl.core.sequence import (
     SequenceStore,
     SequenceEntry,
+    SequenceAnnotation,
     SliceMapping,
     Role
 )
@@ -42,13 +43,28 @@ class SuperGSLCoreFixtures(object):
 
     def mk_random_dna_sequence(self, seq_len : int) -> Seq:
         """Make a `Seq` with random DNA of a given length."""
-        seq_str = ''.join(random.choice('CGTA') for _ in range(seq_len))
+        seq_str = ''.join(choice('CGTA') for _ in range(seq_len))
         return Seq(seq_str)
 
-    def mk_random_dna_sequence_entry(self, seq_len : int) -> SequenceEntry:
+    def mk_random_dna_sequence_entry(
+        self,
+        seq_len : int, annotations : Optional[List[SequenceAnnotation]] = None
+    ) -> SequenceEntry:
         """Make a sequence entry with random DNA of a given length."""
         sequence = self.mk_random_dna_sequence(seq_len)
-        return self.mk_sequence_entry(sequence)
+        return self.mk_sequence_entry(sequence, annotations)
+
+    def mk_random_sequence_annotation(self, seq_len : int, roles : List[Role]) -> SequenceAnnotation:
+        start = randint(0, int(seq_len / 2))
+        end = randint(start, seq_len)
+        return SequenceAnnotation.from_five_prime_indexes(
+            start,
+            end,
+            roles=roles,
+            payload={
+                'pay': 'load'
+            })
+
 
     def mk_extraction_primers(self, part) -> PrimerPair:
         """Primers are often complementary sequences flanking the DNA sequence of interest.
@@ -84,8 +100,16 @@ class SuperGSLCoreFixtures(object):
             self._store = SequenceStore()
         return self._store
 
-    def mk_sequence_entry(self, sequence : Seq) -> SequenceEntry:
-        return self.sequence_store.add_from_reference(sequence)
+
+    def mk_sequence_entry(
+        self,
+        sequence : Seq,
+        annotations : Optional[List[SequenceAnnotation]] = None
+    ) -> SequenceEntry:
+        """Create a sequence entry with the given sequence and number of annotaitons."""
+        return self.sequence_store.add_from_reference(
+            sequence,
+            annotations=annotations)
 
     def mk_sequence_role(self, uri):
         return Role(uri=uri, name=uri, description=uri)
@@ -159,7 +183,7 @@ class SuperGSLCoreFixtures(object):
     def mk_assembly(self, identifier='asm1', num_parts=2) -> Assembly:
         """Create a `Assembly` containing num_parts with random sequences of len 0 to 100."""
         parts : List[Part] = list([
-            self.mk_part('part-%03d' % part_index, random.randint(20, 100))[1]
+            self.mk_part('part-%03d' % part_index, randint(20, 100))[1]
             for part_index in range(num_parts)
         ])
 
@@ -201,6 +225,6 @@ class SuperGSLCoreFixtures(object):
         return AssemblyResultSet([
             self.mk_assembly(
                 'asm-%d' % assembly_index,
-                num_parts=random.randint(1,5))
+                num_parts=randint(1,5))
             for assembly_index in range(num_assembly)
         ])

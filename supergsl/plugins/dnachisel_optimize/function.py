@@ -86,7 +86,7 @@ class DNAChiselOptimizeFunction(SuperGSLFunction):
         ]
 
         constraints.extend([
-            AvoidPattern(entry.sequence)
+            AvoidPattern(str(entry.sequence))
             for entry in existing_sequences
         ])
 

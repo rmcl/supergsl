@@ -172,6 +172,20 @@ class SequenceStoreTestCase(unittest.TestCase):
         expected_child_sequence = expected_parent_sequence[50:100]
         self.assertEqual(child_entry.sequence, expected_child_sequence)
 
+    def test_invert_sequence(self):
+        """Use slice to get the reverse complement of a sequence."""
+        reference_sequence = self.fixtures.mk_random_dna_sequence(500)
+        entry = self.fixtures.mk_sequence_entry(reference_sequence)
+
+        rc_entry = self.sequence_store.slice(
+            entry,
+            Slice.from_entire_sequence(strand=STRAND_CRICK)
+        )
+
+        self.assertEqual(
+            reference_sequence.reverse_complement(),
+            rc_entry.sequence)
+
 
 class SequenceAnnotationTestCase(unittest.TestCase):
     """Testcases to evaluate the handling of sequence annotations."""
@@ -231,6 +245,9 @@ class SequenceAnnotationTestCase(unittest.TestCase):
         ]
         entry2 = store.slice(entry1, part_slice, annotations=annotations_on_child)
 
+        self.assertEqual(len(entry2.sequence), entry2.sequence_length)
+        self.assertEqual(entry2.sequence, seq1.reverse_complement()[50:250])
+
         parent_start = AbsolutePosition(entry2.sequence_length, 50, False)
         expected_results = [
             annotations_on_parent[1].derive_from_absolute_start_position(parent_start),
@@ -239,7 +256,6 @@ class SequenceAnnotationTestCase(unittest.TestCase):
             annotations_on_child[1]
         ]
         results = entry2.annotations()
-        print(results)
         self.assertEqual(results, expected_results)
 
     def test_annotations_from_parent_part_reverse_strand(self):
@@ -250,6 +266,7 @@ class SequenceAnnotationTestCase(unittest.TestCase):
             Position(-20, THREE_PRIME, False),
             Position(0, THREE_PRIME, False),
             strand=STRAND_CRICK)
+
         annotations_on_parent = [
             SequenceAnnotation(a1_slice, ['HELLO-FROM-REV-STRAND'], {}),
         ]
@@ -258,6 +275,8 @@ class SequenceAnnotationTestCase(unittest.TestCase):
         entry2 = store.slice(
             entry1,
             Slice.from_five_prime_indexes(0, 250))
+
+        self.assertEqual(entry2.sequence, seq1[0:250])
 
         parent_start = AbsolutePosition(entry2.sequence_length, 0, False)
         results = entry2.annotations()

@@ -1,6 +1,6 @@
 from Bio.Seq import Seq
-from supergsl.core.sequence import SequenceEntry, Role
-from supergsl.utils.sequence import filter_links_by_roles
+from supergsl.core.sequence import SequenceStore, SequenceEntry, Role, SequenceAnnotation
+from supergsl.utils.sequence import filter_annotations_by_roles
 from .base import SuperGSLType
 from .builtin import NucleotideSequence
 
@@ -29,6 +29,26 @@ class PairedPrimer(Primer):
     def __init__(self, primer_sequence_entry : SequenceEntry):
         self.primer_sequence_entry = primer_sequence_entry
 
+    @classmethod
+    def from_sequences(self, sequence_store : SequenceStore, body : Seq, tail : Seq):
+        """Create a PairedPrimer from body and tail sequences."""
+        primer_seq_entry = sequence_store.add_from_reference(
+            body + tail,
+            annotations=[
+                SequenceAnnotation.from_five_prime_indexes(
+                    start=0,
+                    end=len(body),
+                    roles=[paired_primer_body_role],
+                    payload={}),
+                SequenceAnnotation.from_five_prime_indexes(
+                    start=len(body),
+                    end=len(body) + len(tail),
+                    roles=[paired_primer_tail_role],
+                    payload={})
+            ])
+
+        return PairedPrimer(primer_seq_entry)
+
     @property
     def sequence(self) -> Seq:
         return self.primer_sequence_entry.sequence
@@ -36,25 +56,42 @@ class PairedPrimer(Primer):
     @property
     def body(self) -> Seq:
         """Return a Sequence representing "body" region of the primer."""
-        links = filter_links_by_roles(self.primer_sequence_entry, [paired_primer_body_role])
-        if len(links) == 0:
+
+        # TODO: SHOULD WE FIGURE OUT HOW TO CACHE SLICING THE SAME PART MULTIPLE TIMES!?!?!?
+
+        annotations = filter_annotations_by_roles(
+            self.primer_sequence_entry,
+            [paired_primer_body_role])
+        if len(annotations) == 0:
             raise Exception('Paired Primer does not have a body sub-sequence.')
-        if len(links) > 1:
+        if len(annotations) > 1:
             raise Exception('Paired Primer has more than one body sub-sequence.')
 
-        return links[0].sequence
+        sequence_store = self.primer_sequence_entry.sequence_store
+        body_entry = sequence_store.slice_from_annotation(
+            self.primer_sequence_entry,
+            annotations[0])
+
+        return body_entry.sequence
 
     @property
     def tail(self) -> Seq:
         """Return a Sequence representing "tail" region of the primer."""
 
-        links = filter_links_by_roles(self.primer_sequence_entry, [paired_primer_tail_role])
-        if len(links) == 0:
+        annotations = filter_annotations_by_roles(
+            self.primer_sequence_entry,
+            [paired_primer_tail_role])
+        if len(annotations) == 0:
             raise Exception('Paired Primer does not have a tail sub-sequence.')
-        if len(links) > 1:
+        if len(annotations) > 1:
             raise Exception('Paired Primer has more than one tail sub-sequence.')
 
-        return links[0].sequence
+        sequence_store = self.primer_sequence_entry.sequence_store
+        body_entry = sequence_store.slice_from_annotation(
+            self.primer_sequence_entry,
+            annotations[0])
+
+        return body_entry.sequence
 
 
 class PrimerPair(SuperGSLType):

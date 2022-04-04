@@ -4,6 +4,7 @@ from Bio.SeqRecord import SeqRecord
 
 from supergsl.core.exception import PartError
 from supergsl.core.sequence import SequenceEntry
+from supergsl.core.constants import STRAND_CRICK
 from supergsl.core.types.role import Role
 from supergsl.core.types import SuperGSLType
 from supergsl.core.types.builtin import NucleotideSequence
@@ -96,16 +97,21 @@ class Part(NucleotideSequence):
             part_slice = Slice.from_str(part_slice)
 
         if not identifier:
-            identifier = '%s[%s]' % (
-                self.identifier,
-                part_slice.get_slice_str()
-            )
+            identifier = f'{self.identifier}[{part_slice.get_slice_str()}]'
 
         return self.provider.get_child_part_by_slice(
             self,
             identifier,
             part_slice
         )
+
+    def invert(self, identifier : Optional[str] = None):
+        """Return a new Part with sequence on reverse strand."""
+
+        if not identifier:
+            identifier = f'!{self.identifier}'
+
+        return self.slice(Slice.from_entire_sequence(strand=STRAND_CRICK), identifier)
 
     def eval(self):
         """Evaluate this part."""
