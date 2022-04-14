@@ -118,10 +118,9 @@ class AbsoluteSlice:
         else:
             end_child_abs_pos = self.end.derive_from_relative_position(child_slice.end)
 
+        new_strand = self.strand
 
         # If child slice calls for Crick strand then we flip.
-        # TODO: REALLY NEED TO REFLECT ON THIS!!!!! IS THIS THE LOGIC WE WANT!?!?!?!
-        new_strand = self.strand
         if child_slice.strand == STRAND_CRICK:
             # If the child slice is on the opposite strand then we need to swap the coordinates
             tmp_end_child_abs_pos = start_child_abs_pos.get_complement_strand_position()
