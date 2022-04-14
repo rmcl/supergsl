@@ -118,7 +118,17 @@ class AbsoluteSlice:
         else:
             end_child_abs_pos = self.end.derive_from_relative_position(child_slice.end)
 
-        return AbsoluteSlice(start_child_abs_pos, end_child_abs_pos, self.strand)
+        new_strand = self.strand
+
+        # If child slice calls for Crick strand then we flip.
+        if child_slice.strand == STRAND_CRICK:
+            # If the child slice is on the opposite strand then we need to swap the coordinates
+            tmp_end_child_abs_pos = start_child_abs_pos.get_complement_strand_position()
+            start_child_abs_pos = end_child_abs_pos.get_complement_strand_position()
+            end_child_abs_pos = tmp_end_child_abs_pos
+            new_strand = STRAND_CRICK
+
+        return AbsoluteSlice(start_child_abs_pos, end_child_abs_pos, new_strand)
 
     def __repr__(self):
         return self.get_slice_str()
@@ -149,10 +159,8 @@ class AbsoluteSlice:
 
     def get_slice_str(self):
         """Return a string representation of the `Slice`."""
-        return '%s:%s' % (
-            self.start.get_slice_pos_str(),
-            self.end.get_slice_pos_str()
-        )
+        prefix = '!' if self.strand == STRAND_CRICK else ''
+        return f'{prefix}{self.start.get_slice_pos_str()}:{self.end.get_slice_pos_str()}'
 
 class Position:
     """Capture a position relative to a declared end of a Sequence."""
@@ -244,12 +252,12 @@ class Slice(SuperGSLType):
 
 
     @classmethod
-    def from_entire_sequence(self):
+    def from_entire_sequence(self, strand=STRAND_WATSON):
         """Create a Slice capturing the entire sequence."""
         start = Position(0, relative_to=FIVE_PRIME)
         end = Position(0, relative_to=THREE_PRIME)
 
-        return Slice(start, end)
+        return Slice(start, end, strand)
 
 
     @classmethod
@@ -283,7 +291,10 @@ class Slice(SuperGSLType):
 
     def get_slice_str(self):
         """Return a string representation of the `Slice`."""
-        return '%s:%s' % (
-            self.start.get_slice_pos_str(),
-            self.end.get_slice_pos_str()
-        )
+
+        # TODO: FIGURE OUT IF THIS IS A GOOD IDEA
+        prefix = ''
+        if self.strand == STRAND_CRICK:
+            prefix = '!'
+
+        return f'{prefix}{self.start.get_slice_pos_str()}:{self.end.get_slice_pos_str()}'
