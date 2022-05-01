@@ -24,9 +24,9 @@ class SyntheticOligoAssemblerTestCase(unittest.TestCase):
 
     def test_assemble_concatenates_part_sequences(self):
         """Fuse assembler is expected to append part sequences together."""
-        five_prime_flank = self.fixtures.mk_part('5p_flank', 25)[1]
-        promoter = self.fixtures.mk_part('promoter', 30)[1]
-        three_prime_flank = self.fixtures.mk_part('3p_flank', 25)[1]
+        five_prime_flank = self.fixtures.mk_part('5p_flank', 25)
+        promoter = self.fixtures.mk_part('promoter', 30)
+        three_prime_flank = self.fixtures.mk_part('3p_flank', 25)
 
         declaration = AssemblyDeclaration('SweetAssembly', [
             AssemblyLevelDeclaration(five_prime_flank, None),
@@ -61,9 +61,9 @@ class SyntheticOligoAssemblerTestCase(unittest.TestCase):
 
     def test_assemble_concatenates_part_sequences_with_collection(self):
         """Fuse assembler is expected to append part sequences together also if their is a collection."""
-        five_prime_flank = self.fixtures.mk_part('5p_flank', 25)[1]
+        five_prime_flank = self.fixtures.mk_part('5p_flank', 25)
         promoter_collection = self.fixtures.mk_part_collection(num_parts=3, part_len=20)
-        three_prime_flank = self.fixtures.mk_part('3p_flank', 25)[1]
+        three_prime_flank = self.fixtures.mk_part('3p_flank', 25)
 
         declaration = AssemblyDeclaration('SweetAssembly', [
             AssemblyLevelDeclaration(five_prime_flank, None),

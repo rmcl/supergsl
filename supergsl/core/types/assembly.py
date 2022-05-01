@@ -19,8 +19,15 @@ from supergsl.core.sequence import SequenceEntry
 # By way of a concrete example, a "Part Collection" can be used to declare levels,
 # but must be converted to its list of explicit "Parts" to be used in an
 # AssemblyFactor.
+
+AssemblyLevelDeclarationItem = Union[Part, Collection]
+
 class AssemblyLevelDeclaration:
-    def __init__(self, item : Union[Part, Collection], label : Optional[str]):
+    def __init__(
+        self,
+        item : AssemblyLevelDeclarationItem,
+        label : Optional[str] = None
+    ):
         self.item = item
         self.label = label
 
@@ -70,6 +77,21 @@ class AssemblyDeclaration(SuperGSLType):
         Each factor has a set of possible values currenly must be discrete
 
     """
+
+    @classmethod
+    def from_list(
+        cls,
+        label,
+        items : List[AssemblyLevelDeclarationItem]
+    ) -> 'AssemblyDeclaration':
+        """Create from a list of items by wrapping them in AssemblyLevelDeclarations."""
+        level_declarations = [
+            AssemblyLevelDeclaration(item)
+            for item in items
+        ]
+
+        return AssemblyDeclaration(label, level_declarations)
+
     def __init__(
         self,
         label : Optional[str],

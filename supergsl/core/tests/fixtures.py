@@ -2,7 +2,9 @@
 from typing import Tuple, List, Optional
 from unittest.mock import Mock
 from random import randint, choice
+from Bio import Restriction
 from Bio.Seq import Seq
+
 from supergsl.core.sequence import (
     SequenceStore,
     SequenceEntry,
@@ -24,6 +26,7 @@ from supergsl.core.types.assembly import (
 )
 from supergsl.core.symbol_table import SymbolTable
 
+
 class SuperGSLCoreFixtures(object):
 
     def mk_global_symbol_table(self) -> SymbolTable:
@@ -35,17 +38,45 @@ class SuperGSLCoreFixtures(object):
     def mk_symbol_table(self) -> SymbolTable:
         """Create a simple symbol table with a nested scope."""
         symbol_table = SymbolTable('awesome', None)
-        symbol_table.insert('uHO', self.mk_part('uHO', 100)[1])
+        symbol_table.insert('uHO', self.mk_part('uHO', 100))
 
         nested_symbol_table = symbol_table.enter_nested_scope('awesome')
-        nested_symbol_table.insert('tHUG', self.mk_part('tHUG', 33)[1])
+        nested_symbol_table.insert('tHUG', self.mk_part('tHUG', 33))
 
         return symbol_table
 
-    def mk_random_dna_sequence(self, seq_len : int) -> Seq:
-        """Make a `Seq` with random DNA of a given length."""
-        seq_str = ''.join(choice('CGTA') for _ in range(seq_len))
-        return Seq(seq_str)
+    def mk_random_dna_sequence(
+        self,
+        seq_len : int,
+        excluded_restriction_sites : Optional[List[str]] = None
+    ) -> Seq:
+        """Make a `Seq` with random DNA of a given length devoid of the given restriction sites."""
+
+        restriction_sites = []
+        if excluded_restriction_sites:
+            for restriction_site_name in excluded_restriction_sites:
+                try:
+                    restriction_sites.append(
+                        getattr(Restriction, restriction_site_name))
+                except AttributeError as error:
+                    raise Exception(f'Unknown restriction {restriction_site_name}') \
+                        from error
+
+        while True:
+            random_seq = Seq(''.join(choice('CGTA') for _ in range(seq_len)))
+
+            bad_sequence = False
+            for restriction in restriction_sites:
+                if restriction.search(random_seq):
+                    bad_sequence = True
+
+            # If we encounter a bad restriction site, go to the top of the loop
+            # and generate a new sequence.
+            if bad_sequence:
+                continue
+
+            # Sequence is free of restriction sites so return.
+            return random_seq
 
     def mk_random_dna_sequence_entry(
         self,
@@ -74,6 +105,7 @@ class SuperGSLCoreFixtures(object):
         DNA sequence has a melting temperature that is conducive to the parameters
         of a the particular PCR thermocycler.
         """
+        print(part.sequence_entry.sequence_length)
         complement_sequence = part.sequence.complement()
         complement_sequence_entry = self.mk_sequence_entry(complement_sequence)
 
@@ -121,7 +153,7 @@ class SuperGSLCoreFixtures(object):
         sequence_entry : SequenceEntry,
         mk_primers : bool = True,
         roles : Optional[List[Role]] = None
-    ):
+    ) -> Part:
         """Create a mock Part from a given SequenceEntry."""
         part = Part(
             identifier,
@@ -134,7 +166,7 @@ class SuperGSLCoreFixtures(object):
             primer_pair = self.mk_extraction_primers(part)
             part.set_extraction_primers(primer_pair)
 
-        return sequence_entry.sequence, part
+        return part
 
 
     def mk_part(
@@ -142,19 +174,32 @@ class SuperGSLCoreFixtures(object):
         identifier : str,
         part_seq_len : int,
         mk_primers : bool = True,
-        roles : Optional[List[Role]] = None
-    ) -> Tuple[Seq,Part]:
+        roles : Optional[List[Role]] = None,
+        excluded_restriction_sites : List[str] = None
+    ) -> Part:
         """Create a mock Part.
 
         Part is derived from a reference sequence three times longer than the part
-        itself.
+        itself. That parent sequence is sliced and the part returned is the slice:
+        100:100+part_seq_len.
         """
-        ref_seq_len = part_seq_len * 3
-        reference_sequence = self.mk_random_dna_sequence(ref_seq_len)
+
+        # Ensure that the reference sequence length is at least
+        # 100bp + part_seq_len. That way when we slice the part out 100bp in we
+        # will avoid an out of bounds error.
+        ref_seq_len = max(part_seq_len * 3, 100 + part_seq_len)
+        reference_sequence = self.mk_random_dna_sequence(
+            ref_seq_len,
+            excluded_restriction_sites=excluded_restriction_sites)
+
         sequence_entry = self.mk_sequence_entry(reference_sequence)
+        part_sequence_entry = self.sequence_store.slice(
+            sequence_entry,
+            Slice.from_five_prime_indexes(100, 100 + part_seq_len))
+
         return self.mk_part_by_sequence_entry(
             identifier,
-            sequence_entry,
+            part_sequence_entry,
             mk_primers,
             roles)
 
@@ -163,16 +208,16 @@ class SuperGSLCoreFixtures(object):
         """Return a `Collection` of parts."""
 
         return Collection([
-            self.mk_part('pGAL%d' % index, part_len)[1]
+            self.mk_part('pGAL%d' % index, part_len)
             for index in range(num_parts)
         ])
 
     def mk_assembly_declaration_ex1(self, name='test_declaration') -> AssemblyDeclaration:
         """Make a AssemblyDeclaration with 4 parts including one with a collection of three parts"""
         promoter_collection = self.mk_part_collection(num_parts=3)
-        gene = self.mk_part('gGENE', 500)[1]
-        upstream = self.mk_part('uHO', 50)[1]
-        downstream = self.mk_part('dHO', 50)[1]
+        gene = self.mk_part('gGENE', 500)
+        upstream = self.mk_part('uHO', 50)
+        downstream = self.mk_part('dHO', 50)
 
         return AssemblyDeclaration(name, [
             AssemblyLevelDeclaration(upstream, None),
@@ -182,9 +227,9 @@ class SuperGSLCoreFixtures(object):
         ])
 
     def mk_assembly(self, identifier='asm1', num_parts=2) -> Assembly:
-        """Create a `Assembly` containing num_parts with random sequences of len 0 to 100."""
+        """Create a `Assembly` containing num_parts with random sequences of len 100 to 1000."""
         parts : List[Part] = list([
-            self.mk_part('part-%03d' % part_index, randint(20, 100))[1]
+            self.mk_part('part-%03d' % part_index, randint(10, 1000))
             for part_index in range(num_parts)
         ])
 

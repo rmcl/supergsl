@@ -7,7 +7,9 @@ from supergsl.core.backend import BackendPipelinePass
 from supergsl.core.types.builtin import (
     NucleotideSequence,
     AminoAcidSequence,
-    Collection
+    Collection,
+    SliceAndInvertCollection,
+    SliceInvertMixin
 )
 from supergsl.utils.resolve import resolve_import
 from supergsl.core.sequence import SequenceStore
@@ -155,24 +157,30 @@ class EvaluatePass(BackendPipelinePass):
 
 
     def visit_symbol_reference(self, symbol_reference : SymbolReference) -> SuperGSLType:
+        """Visit a SymbolReference node and return its evaluated symbol."""
         symbol = self.symbol_table.lookup(symbol_reference.identifier)
         symbol = symbol.eval()
 
-        if symbol_reference.slice:
-            parent_part = symbol
-            part_slice = self.visit(symbol_reference.slice)
+        if symbol_reference.slice or symbol_reference.invert:
+            if symbol_reference.slice:
+                part_slice = self.visit(symbol_reference.slice)
 
-            child_identifier = '%s[%s]' % (
-                parent_part.identifier,
-                part_slice.get_slice_str()
-            )
-            symbol = parent_part.slice(part_slice, identifier=child_identifier)
+            if isinstance(symbol, Collection):
+                symbol = SliceAndInvertCollection(
+                    symbol, part_slice, symbol_reference.invert)
 
-        if symbol_reference.invert:
-            child_identifier = f'!{parent_part.identifier}'
-            symbol = symbol.invert(identifier=child_identifier)
+            elif issubclass(type(symbol), SliceInvertMixin):
+                if symbol_reference.slice:
+                    symbol = symbol.slice(part_slice)
+
+                if symbol_reference.invert:
+                    symbol = symbol.invert()
+
+            else:
+                raise Exception(f'{type(symbol)} is not slice or invertable.')
 
         return symbol
+
 
     def visit_slice(self, slice_node : AstSlice):
         start_position = self.visit(slice_node.start)

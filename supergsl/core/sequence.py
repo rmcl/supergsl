@@ -9,7 +9,11 @@ from supergsl.core.exception import (
     SequenceNotFoundError,
     DuplicateSequenceError
 )
-from supergsl.core.constants import THREE_PRIME, STRAND_CRICK, STRAND_WATSON
+from supergsl.core.constants import (
+    THREE_PRIME,
+    STRAND_CRICK,
+    MOLECULE_LINEAR
+)
 from supergsl.core.types.position import Slice, Position, AbsoluteSlice, AbsolutePosition
 from supergsl.core.types.role import Role
 
@@ -139,7 +143,8 @@ class SequenceEntry:
         parent_links : Optional[List[EntryLink]] = None,
         reference : Optional[Seq] = None,
         external_ids : Optional[Dict[str, str]] = None,
-        annotations : Optional[List[SequenceAnnotation]] = None
+        annotations : Optional[List[SequenceAnnotation]] = None,
+        molecule_form : str = MOLECULE_LINEAR,
     ):
         self.sequence_store = sequence_store
         self.sequence_id = sequence_id
@@ -147,6 +152,7 @@ class SequenceEntry:
         self.parent_links = parent_links
         self.reference = reference
         self._annotations = annotations or []
+        self.molecule_form = molecule_form
 
         if not external_ids:
             self._external_ids : Dict[str, str] = {}
@@ -410,7 +416,8 @@ class SequenceStore:
         sequence : Union[Seq, SeqRecord],
         roles : Optional[List[Role]] = None,
         external_ids : Optional[Dict[str,str]] = None,
-        annotations : Optional[List[SequenceAnnotation]] = None
+        annotations : Optional[List[SequenceAnnotation]] = None,
+        molecule_form : str = MOLECULE_LINEAR
     ):
         """Add a sequence to the store."""
 
@@ -430,7 +437,8 @@ class SequenceStore:
             reference=sequence,
             roles=roles if roles else [],
             external_ids=external_ids,
-            annotations=annotations)
+            annotations=annotations,
+            molecule_form=molecule_form)
 
         # Index any provided external ids.
         self._add_entry_to_external_id_index(entry, external_ids)
@@ -509,7 +517,8 @@ class SequenceStore:
     def concatenate(
         self,
         slice_mappings : List[SliceMapping],
-        new_sequence_roles : Optional[List[Role]] = None
+        new_sequence_roles : Optional[List[Role]] = None,
+        molecule_form : str = MOLECULE_LINEAR
     ) -> SequenceEntry:
         """Concatenate several sequence slices into a composite sequence."""
         links = []
@@ -525,6 +534,12 @@ class SequenceStore:
             new_sequence_roles = []
 
         entry_id = self.__create_record_id()
-        entry = SequenceEntry(self, entry_id, new_sequence_roles, links)
+        entry = SequenceEntry(
+            self,
+            entry_id,
+            new_sequence_roles,
+            links,
+            molecule_form=molecule_form
+        )
         self._sequences_by_uuid[entry_id] = entry
         return entry

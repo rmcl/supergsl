@@ -143,7 +143,7 @@ class SyntheticOligoAssembler(AssemblerBase):
         return oligo_entries
 
 
-    def assemble(
+    def assemble_design(
         self,
         assembly_label : str,
         design_label : str,

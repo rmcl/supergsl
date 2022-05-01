@@ -1,7 +1,7 @@
 """Define the Assembler base class."""
 import sys
 import contextlib
-from typing import List, TextIO
+from typing import List, TextIO, Optional
 
 from supergsl.core.function import SuperGSLFunction
 from supergsl.core.types.assembly import (
@@ -24,6 +24,17 @@ class AssemblerBase(SuperGSLFunction):
         if 'constraints' in params:
             constraints = params['constraints'] or []
 
+        return self.assemble(assembly_requests, constraints)
+
+    def assemble(
+        self,
+        assembly_requests : List[AssemblyDeclaration],
+        constraints : Optional[List[Constraint]] = None
+    ) -> AssemblyResultSet:
+
+        if not constraints:
+            constraints = []
+
         result_set = AssemblyResultSet([])
         for assembly_idx, assembly_request in enumerate(assembly_requests):
             assembly_label = assembly_request.label or '%03d' % assembly_idx
@@ -34,7 +45,7 @@ class AssemblerBase(SuperGSLFunction):
                 if not self.evaluate_definition_contraints(design_description, constraints):
                     continue
 
-                assembly = self.assemble(assembly_label, design_label, design_description)
+                assembly = self.assemble_design(assembly_label, design_label, design_description)
 
                 if not self.evaluate_assembly_constraints(assembly, constraints):
                     continue
@@ -81,7 +92,7 @@ class AssemblerBase(SuperGSLFunction):
 
         return True
 
-    def assemble(
+    def assemble_design(
         self,
         assembly_label : str,
         design_label : str,

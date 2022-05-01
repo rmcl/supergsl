@@ -41,6 +41,9 @@ class PartError(SuperGSLError):
     """Raise by `PartProviders` when there is something wrong with a part."""
 
 
+class InvalidPartSequenceError(PartError):
+    """When a part contains a sequence that is disallowed by its assembly sysmtem."""
+
 class PartNotFoundError(NotFoundError):
     """Raised by `PartProvider` when a part cannot be found when imported or referenced."""
 
