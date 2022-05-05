@@ -1,5 +1,5 @@
 """Evaluate a SuperGSL Program."""
-from typing import Any, Dict, Optional, Callable, Union, cast
+from typing import Any, Dict, Optional, Callable, Union, List, cast
 
 from supergsl.core.types import SuperGSLType
 from supergsl.core.symbol_table import SymbolTable
@@ -7,12 +7,16 @@ from supergsl.core.backend import BackendPipelinePass
 from supergsl.core.types.builtin import (
     NucleotideSequence,
     AminoAcidSequence,
-    Collection
+    Collection,
+    SliceAndInvertCollection,
+    SliceInvertMixin
 )
 from supergsl.utils.resolve import resolve_import
 from supergsl.core.sequence import SequenceStore
-from supergsl.core.types.part import Part
-from supergsl.core.types.assembly import AssemblyDeclaration
+from supergsl.core.types.assembly import (
+    AssemblyDeclaration,
+    AssemblyLevelDeclaration
+)
 from supergsl.core.types.position import (
     Position,
     Slice
@@ -116,9 +120,13 @@ class EvaluatePass(BackendPipelinePass):
     def visit_assembly(self, assembly : Assembly) -> SuperGSLType:
         """Evaluate the Assembly node by traversing eval'ing all the child symbol references."""
 
-        parts = []
+        level_declarations : List[AssemblyLevelDeclaration] = []
         for symbol_reference in assembly.symbol_references:
             part = self.visit(symbol_reference)
+            # somehow we need to get this label to AssemblyFactor or something like it
+            level_declaration = AssemblyLevelDeclaration(
+                part,
+                symbol_reference.label)
 
             # TODO: We need to do type checking here.
             # Ultimately I think these "parts" can be part collections, parts,
@@ -130,9 +138,9 @@ class EvaluatePass(BackendPipelinePass):
             #            'Type error. Assembly declaration expected a set of parts. '
             #            'Got a "%s"' % part)
 
-            parts.append(part)
+            level_declarations.append(level_declaration)
 
-        return AssemblyDeclaration(assembly.label, parts)
+        return AssemblyDeclaration(assembly.label, level_declarations)
 
     def visit_variable_declaration(self, variable_declaration : VariableDeclaration) -> None:
         """Evaluate by visiting child expression and assigning the result to the symobl table."""
@@ -149,25 +157,30 @@ class EvaluatePass(BackendPipelinePass):
 
 
     def visit_symbol_reference(self, symbol_reference : SymbolReference) -> SuperGSLType:
+        """Visit a SymbolReference node and return its evaluated symbol."""
         symbol = self.symbol_table.lookup(symbol_reference.identifier)
         symbol = symbol.eval()
 
-        if symbol_reference.slice:
-            parent_part = symbol
-            part_slice = self.visit(symbol_reference.slice)
+        if symbol_reference.slice or symbol_reference.invert:
+            if symbol_reference.slice:
+                part_slice = self.visit(symbol_reference.slice)
 
-            child_identifier = '%s[%s]' % (
-                parent_part.identifier,
-                part_slice.get_slice_str()
-            )
-            symbol = parent_part.slice(part_slice, identifier=child_identifier)
+            if isinstance(symbol, Collection):
+                symbol = SliceAndInvertCollection(
+                    symbol, part_slice, symbol_reference.invert)
 
-        if symbol_reference.invert:
-            #    inverter = self.visit(symbol_reference.invert)
-            #    symbol = inverter.eval(symbol)
-            raise NotImplementedError('Inverted parts not implemented yet!')
+            elif issubclass(type(symbol), SliceInvertMixin):
+                if symbol_reference.slice:
+                    symbol = symbol.slice(part_slice)
+
+                if symbol_reference.invert:
+                    symbol = symbol.invert()
+
+            else:
+                raise Exception(f'{type(symbol)} is not slice or invertable.')
 
         return symbol
+
 
     def visit_slice(self, slice_node : AstSlice):
         start_position = self.visit(slice_node.start)

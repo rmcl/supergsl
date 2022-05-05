@@ -79,7 +79,8 @@ class ParserTestCase(TestCase):
                         'node': 'SymbolReference',
                         'identifier': 'uHO',
                         'invert': False,
-                        'slice': None
+                        'slice': None,
+                        'label': None
                     }]
                 }],
                 'node': 'DefinitionList'
@@ -128,7 +129,8 @@ class ParserTestCase(TestCase):
                         'node': 'SymbolReference',
                         'identifier': 'uHO',
                         'invert': False,
-                        'slice': None
+                        'slice': None,
+                        'label': None
                     }]
                 }],
                 'node': 'DefinitionList'
@@ -165,12 +167,51 @@ class ParserTestCase(TestCase):
                         'node': 'SymbolReference',
                         'identifier': 'uHO',
                         'invert': False,
-                        'slice': None
+                        'slice': None,
+                        'label': None,
                     }, {
                         'node': 'SymbolReference',
                         'identifier': 'pADH1',
                         'invert': False,
-                        'slice': None
+                        'slice': None,
+                        'label': None,
+                    }],
+                }]
+            },
+            'imports': [],
+            'node': 'Program'
+        })
+
+    def test_build_ast_assembly_with_label(self):
+        """Confirm parser can accept an assembly part with a label."""
+        tokens = iter((
+            Token('IDENTIFIER', 'uHO'),
+            Token('SEMICOLON', ';'),
+            Token('IDENTIFIER', 'promoters'),
+            Token('AS', 'as'),
+            Token('IDENTIFIER', 'p1')
+        ))
+        ast = self.parser.parse(tokens)
+
+        self.assertEqual(type(ast), Program)
+        self.assertEqual(ast.to_dict(), {
+            'definitions': {
+                'node': 'DefinitionList',
+                'items': [{
+                    'label': None,
+                    'node': 'Assembly',
+                    'parts': [{
+                        'node': 'SymbolReference',
+                        'identifier': 'uHO',
+                        'invert': False,
+                        'slice': None,
+                        'label': None
+                    }, {
+                        'node': 'SymbolReference',
+                        'identifier': 'promoters',
+                        'invert': False,
+                        'slice': None,
+                        'label': 'p1'
                     }],
                 }]
             },
@@ -203,7 +244,8 @@ class ParserTestCase(TestCase):
                                 'node': 'SymbolReference',
                                 'identifier': 'uHO',
                                 'invert': False,
-                                'slice': None
+                                'slice': None,
+                                'label': None
                             }]
                         }]
                     },
@@ -241,7 +283,8 @@ class ParserTestCase(TestCase):
                                 'node': 'SymbolReference',
                                 'identifier': 'uHO',
                                 'invert': False,
-                                'slice': None
+                                'slice': None,
+                                'label': None
                             }]
                         }]
                     },
@@ -275,7 +318,8 @@ class ParserTestCase(TestCase):
                         'identifier': 'CHEESE',
                         'invert': False,
                         'node': 'SymbolReference',
-                        'slice': None
+                        'slice': None,
+                        'label': None
                     }],
                     'label': None
                 }]
@@ -401,13 +445,15 @@ class ParserTestCase(TestCase):
                                     'node': 'SymbolReference',
                                     'identifier': 'pHO',
                                     'invert': False,
-                                    'slice': None
+                                    'slice': None,
+                                    'label': None
                                 },
                                 {
                                     'node': 'SymbolReference',
                                     'identifier': 'pGAL3',
                                     'invert': False,
-                                    'slice': None
+                                    'slice': None,
+                                    'label': None
                                 }
                             ]
                         },

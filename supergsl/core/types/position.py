@@ -10,7 +10,6 @@ from supergsl.core.constants import (
 from .base import SuperGSLType
 
 
-
 class AbsolutePosition:
     """Capture an absolute position in a sequence of fixed length."""
 

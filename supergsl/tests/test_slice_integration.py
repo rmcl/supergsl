@@ -39,8 +39,6 @@ class SuperGSLIntegrationTestCases(TestCase):
         for part_name in things_to_test:
             result = self.run_supergsl(gsl_template % part_name)
 
-            display_symbol_table(result.symbols)
-
             part = result.symbols['test_part']
             expected = self.expected_sequences.get(part_name, None)
             assert expected is not None, 'Could not find sequence %s' % (part_name)

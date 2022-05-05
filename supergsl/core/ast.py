@@ -54,17 +54,19 @@ class Slice(Node):
 
 
 class SymbolReference(Node):
-    def __init__(self, identifier : str, slice : Optional[Slice], invert : bool):
+    def __init__(self, identifier : str, slice : Optional[Slice], invert : bool, label : Optional[str]):
         self.identifier = identifier
         self.slice = slice
         self.invert = invert
+        self.label = label
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             'node': 'SymbolReference',
             'identifier': self.identifier,
             'invert': self.invert,
-            'slice': self.slice.to_dict() if self.slice else None
+            'slice': self.slice.to_dict() if self.slice else None,
+            'label': self.label
         }
 
     def child_nodes(self) -> List[Node]:
@@ -76,7 +78,10 @@ class SymbolReference(Node):
         return self.identifier
 
     def get_node_label(self):
-        return '%s:%s' % (self.__class__.__name__, self.identifier)
+        node_label = f'{self.__class__.__name__}:{self.identifier}'
+        if self.label:
+            node_label += f' as {self.label}'
+        return node_label
 
 
 class ImportIdentifier(Node):

@@ -1,9 +1,15 @@
+"""Define the Assembler base class."""
 import sys
 import contextlib
 from typing import List, TextIO
 
 from supergsl.core.function import SuperGSLFunction
-from supergsl.core.types.assembly import AssemblyDeclaration, AssemblyResultSet
+from supergsl.core.types.assembly import (
+    AssemblyDeclaration,
+    AssemblyResultSet,
+    AssemblyLevel,
+    Assembly
+)
 
 
 class AssemblerBase(SuperGSLFunction):
@@ -12,10 +18,35 @@ class AssemblerBase(SuperGSLFunction):
     return_type = AssemblyResultSet
 
     def execute(self, params):
-        return self.assemble(params['children'])
+        assembly_requests : List[AssemblyDeclaration] = params['children']
 
-    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyResultSet:
-        """Iterate over `Part` and generate an Assembly object."""
+        return self.assemble(assembly_requests)
+
+    def assemble(
+        self,
+        assembly_requests : List[AssemblyDeclaration]
+    ) -> AssemblyResultSet:
+        """Assemble a set of AssemblyDeclarations to create an AssemblyResultSet."""
+        result_set = AssemblyResultSet([])
+        for assembly_idx, assembly_request in enumerate(assembly_requests):
+            assembly_label = assembly_request.label or f'{assembly_idx:03}'
+
+            designs = assembly_request.get_designs()
+            for design_idx, design_description in enumerate(designs):
+                design_label = f'{design_idx:03}'
+                assembly = self.assemble_design(assembly_label, design_label, design_description)
+                result_set.add_assembly(assembly)
+
+        return result_set
+
+
+    def assemble_design(
+        self,
+        assembly_label : str,
+        design_label : str,
+        assembly_request : List[AssemblyLevel]
+    ) -> Assembly:
+        """Iterate over a list of `Part` and generate an Assembly object."""
         raise NotImplementedError('Not implemented. Subclass to implement.')
 
 

@@ -38,6 +38,10 @@ def get_promoter_len() -> int:
     return 501
 
 def get_terminator_len() -> int:
+    """Get the configured length of a terminator region.
+
+    ### TODO: REFACTOR THIS METHOD TO COME FROM PROVIDER CONFIG
+    """
     return 501
 
 def get_flank_len() -> int:
@@ -55,20 +59,6 @@ if typing.TYPE_CHECKING:
 else:
     _Base = object
 
-
-class PrefixedSliceLazyLoadedPart(LazyLoadedPart):
-    def __init__(self, identifier, parent_part, prefix):
-        self.identifier = identifier
-        self.parent_part = parent_part
-        self.part_prefix = prefix
-
-    def eval(self) -> Part:
-        return self.parent_part.get_prefixed_part(
-            self.identifier,
-            self.part_prefix)
-
-    def __str__(self):
-        'LazyPrefixPart: {} {}'.format(self.identifier, self.parent_part)
 
 class PrefixedSlicePartProviderMixin(_Base):
     """A Part Mixin which enables support for fGSL prefixed-parts.
@@ -94,8 +84,11 @@ class PrefixedSlicePartProviderMixin(_Base):
         'u': 'upstream',
         'd': 'downstream',
         'o': 'orf',
-        'f': 'fusible_orf',
-        'm': 'mRNA'
+
+        # Todo: these are implemented in fGSL, but more research is needed to
+        # understand what their implementation looks like.
+        #'f': 'fusible_orf',
+        #'m': 'mRNA'
     }
 
     def resolve_import(
@@ -113,17 +106,15 @@ class PrefixedSlicePartProviderMixin(_Base):
         part_identifier = alias or identifier
 
         # Add the parent part
-        new_symbols[part_identifier] = self.get_part(identifier)
+        parent_part = self.get_part(identifier)
+        new_symbols[part_identifier] = parent_part
 
         # Add all the prefix parts.
         for part_prefix in self.PART_TYPES.keys():
-            part_name = '{}{}'.format(part_prefix, part_identifier)
-            lazy_part = PrefixedSliceLazyLoadedPart(
+            prefixed_part_name = f'{part_prefix}{part_identifier}'
+            new_symbols[prefixed_part_name] = self.get_prefixed_part(
                 identifier,
-                self,
                 part_prefix)
-
-            new_symbols[part_name] = lazy_part
 
         return new_symbols
 
@@ -135,17 +126,16 @@ class PrefixedSlicePartProviderMixin(_Base):
 
         try:
             part_type = self.PART_TYPES[prefix]
-        except KeyError:
-            raise UnknownPartPrefixError('Invalid part prefix "{}" for "{}".'.format(
-                prefix,
-                identifier))
+        except KeyError as error:
+            raise UnknownPartPrefixError(
+                f'Invalid part prefix "{prefix}" for "{identifier}"') from error
 
         new_slice = self.build_part_type_slice_pos(parent_part, part_type)
 
         roles = self.get_roles_by_part_type(part_type)
         part = self.get_child_part_by_slice(
             parent_part=parent_part,
-            identifier='{}{}'.format(prefix, identifier),
+            identifier=f'{prefix}{identifier}',
             part_slice=new_slice)
         part.add_roles(roles)
         return part
@@ -199,4 +189,4 @@ class PrefixedSlicePartProviderMixin(_Base):
                 Position(0, relative_to=THREE_PRIME),
                 Position(get_terminator_len(), relative_to=THREE_PRIME, approximate=True))
 
-        raise PartSliceError('"%s" prefix is not implemented yet.' % part_slice_type)
+        raise PartSliceError(f'"{part_slice_type}" prefix is not implemented yet.')
