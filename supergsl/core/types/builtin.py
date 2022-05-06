@@ -4,6 +4,7 @@ from typing import List, Type, Optional, Union
 from collections import OrderedDict
 
 from supergsl.core.sequence import SequenceEntry
+from supergsl.utils.sequence import build_truncated_sequence
 from .base import SuperGSLType
 from .position import Slice
 
@@ -42,7 +43,7 @@ class NucleotideSequence(SuperGSLType, SliceInvertMixin):
 
     def __repr__(self):
         """Create a repr string representation of the Nucleotide Sequence."""
-        return 'NucleotideSequence: {self.sequence}'
+        return f'NucleotideSequence: {build_truncated_sequence(self.sequence)}'
 
 
 class AminoAcidSequence(SuperGSLType):
@@ -58,7 +59,7 @@ class AminoAcidSequence(SuperGSLType):
 
     def __repr__(self):
         """Create a repr string representation of the Amino Acid Sequence."""
-        return f'AminoAcidSequence: {self.sequence}'
+        return f'AminoAcidSequence: {build_truncated_sequence(self.sequence)}'
 
 
 class CodonTranslationTable(SuperGSLType):
