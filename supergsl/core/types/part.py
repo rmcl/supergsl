@@ -105,7 +105,7 @@ class Part(NucleotideSequence):
             part_slice
         )
 
-    def invert(self, identifier : Optional[str] = None):
+    def invert(self, identifier : Optional[str] = None) -> 'Part':
         """Return a new Part with sequence on reverse strand."""
 
         if not identifier:

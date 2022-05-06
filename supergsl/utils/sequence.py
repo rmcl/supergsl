@@ -1,5 +1,23 @@
-from typing import List
+from typing import List, Union
+from Bio.Seq import Seq
 from supergsl.core.sequence import SequenceEntry, SequenceAnnotation, Role, EntryLink
+
+
+def build_truncated_sequence(sequence : Union[str, Seq, SequenceEntry]) -> str:
+    """Build a truncated sequence string for display.
+
+    Include the first 54 basepairs and then the last three basepairs.
+    """
+
+    if isinstance(sequence, SequenceEntry):
+        sequence = sequence.sequence
+
+    if len(sequence) <= 60:
+        return str(sequence)
+
+    start = sequence[:55]
+    end = sequence[-3:]
+    return f'{start}...{end}'
 
 
 def filter_links_by_roles(sequence_entry : SequenceEntry, roles : List[Role]) -> List[EntryLink]:

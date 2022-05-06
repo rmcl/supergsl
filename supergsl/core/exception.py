@@ -41,6 +41,9 @@ class PartError(SuperGSLError):
     """Raise by `PartProviders` when there is something wrong with a part."""
 
 
+class InvalidPartSequenceError(PartError):
+    """When a part contains a sequence that is disallowed by its assembly sysmtem."""
+
 class PartNotFoundError(NotFoundError):
     """Raised by `PartProvider` when a part cannot be found when imported or referenced."""
 
@@ -78,3 +81,7 @@ class SequencePositionComparisonError(SuperGSLError):
 
 class UnknownRoleError(SuperGSLTypeError):
     """A sequence role could not be found."""
+
+
+class MaxDesignsExceededError(SuperGSLTypeError):
+    """An AssemblyDeclaration was defined such that it exceeds the maximum number of designs."""

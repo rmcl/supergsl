@@ -19,7 +19,7 @@ class FuseAssemblerTestCase(unittest.TestCase):
             for part in declaration.get_levels_by_factor_type('Part')
         }
 
-        result = list(self.assembler.assemble([declaration]))
+        results = self.assembler.execute({'children': [declaration]})
 
         expected_results = [
             (
@@ -51,14 +51,15 @@ class FuseAssemblerTestCase(unittest.TestCase):
             )
         ]
 
-        self.assertEqual(len(result), 3)
+        self.assertEqual(len(results), 3)
+        asm_results = list(results)
         for result_index, expected_result in enumerate(expected_results):
             expected_identifier = expected_result[0]
             expected_parts = expected_result[1]
-            self.assertEqual(result[result_index].identifier, expected_identifier)
+            self.assertEqual(asm_results[result_index].identifier, expected_identifier)
 
-            self.assertEqual(result[result_index].reagents, expected_parts)
-            self.assertEqual(result[result_index].sequence, ''.join([
+            self.assertEqual(asm_results[result_index].reagents, expected_parts)
+            self.assertEqual(asm_results[result_index].sequence, ''.join([
                 str(part.sequence)
                 for part in expected_parts
             ]))

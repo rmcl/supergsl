@@ -15,7 +15,7 @@ class PartTestCase(TestCase):
         self.fixtures = SuperGSLCoreFixtures()
 
     def test_part_roles_are_recapitulated(self):
-        _, p1 = self.fixtures.mk_part('SWEET', 300, roles=[
+        p1 = self.fixtures.mk_part('SWEET', 300, roles=[
             PROMOTER
         ])
 
@@ -23,7 +23,7 @@ class PartTestCase(TestCase):
 
     def test_part_print(self):
         """Test the part print statement outputs in a nice format."""
-        _, part = self.fixtures.mk_part(identifier='BOOM', part_seq_len=25)
+        part = self.fixtures.mk_part(identifier='BOOM', part_seq_len=25)
 
         self.assertEqual(
             part.print(),

@@ -7,9 +7,8 @@ from supergsl.core.types.part import Part
 from supergsl.core.types.position import Slice
 from supergsl.core.types.primer import Primer
 from supergsl.core.types.assembly import (
-    AssemblyDeclaration,
     Assembly,
-    AssemblyResultSet
+    AssemblyLevel
 )
 from supergsl.core.assembly import AssemblerBase
 
@@ -116,12 +115,8 @@ class SyntheticOligoAssembler(AssemblerBase):
         while True:
             if oligo_idx == self.max_num_oligos:
                 raise Exception((
-                    'Assembly is to large to be synthesized. Construct length: {} '
-                    'Max Oligo Length: {} Max Oligos: {} ').format(
-                        sequence_length,
-                        self.max_oligo_len,
-                        self.max_num_oligos
-                    ))
+                    f'Assembly is to large to be synthesized. Construct length: {sequence_length} '
+                    f'Max Oligo Length: {self.max_oligo_len} Max Oligos: {self.max_num_oligos} '))
 
             remaining_seq_len = sequence_length - cur_seq_pos
             if remaining_seq_len < self.max_oligo_len:
@@ -148,30 +143,26 @@ class SyntheticOligoAssembler(AssemblerBase):
         return oligo_entries
 
 
-    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyResultSet:
+    def assemble_design(
+        self,
+        assembly_label : str,
+        design_label : str,
+        assembly_request : List[AssemblyLevel]
+    ) -> Assembly:
         """Iterate over `Part` and generate an Assembly object."""
 
-        oligos : List[Primer] = []
-        assemblies : List[Assembly] = []
+        sequence_entry = self.build_one_sequence_entry(assembly_request)
+        oligos = self.build_oligos_for_sequence_entry(sequence_entry)
 
-        for assembly_idx, assembly_request in enumerate(assembly_requests):
-            designs = assembly_request.get_full_factorial_designs()
-            for design_idx, design_parts in enumerate(designs):
-                sequence_entry = self.build_one_sequence_entry(design_parts)
-                oligos = self.build_oligos_for_sequence_entry(sequence_entry)
+        identifier = f'ASM-{design_label}-{assembly_label}'
 
-                identifier = str('ASM-%03d-%05d' % (design_idx, assembly_idx))
+        new_part = Part(
+            identifier,
+            sequence_entry,
+            provider=self,
+        )
 
-                new_part = Part(
-                    identifier,
-                    sequence_entry,
-                    provider=self,
-                )
-
-                assembly = Assembly(
-                    identifier,
-                    part=new_part,
-                    reagents=oligos)
-                assemblies.append(assembly)
-
-        return AssemblyResultSet(assemblies)
+        return Assembly(
+            identifier,
+            part=new_part,
+            reagents=oligos)

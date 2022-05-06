@@ -99,12 +99,9 @@ class EvaluatePassTestCase(unittest.TestCase):
             Mock()
         ]
         assembly_node = Assembly(parts, 'LABEL1112')
-
         assembly_declaration = self.eval_pass.visit_assembly(assembly_node)
+
         self.assertEqual(assembly_declaration.label, 'LABEL1112')
-        self.assertEqual(assembly_declaration.get_levels_by_factor_type('Part'), {
-            'BOOM',
-        })
         self.eval_pass.visit.assert_has_calls([
             call(parts[0]),
             call(parts[1])
@@ -130,7 +127,7 @@ class EvaluatePassTestCase(unittest.TestCase):
         supergsl_type.eval.return_value = 'YES!'
 
         self.symbol_table.insert('IDENT', supergsl_type)
-        symbol_ref = SymbolReference('IDENT', None, False)
+        symbol_ref = SymbolReference('IDENT', None, False, None)
 
         result = self.eval_pass.visit_symbol_reference(symbol_ref)
 

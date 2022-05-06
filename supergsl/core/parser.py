@@ -249,15 +249,22 @@ class SuperGSLParser(object):
         def protein_constant(state, p):
             return ast.SequenceConstant(p[1].value[1:], UNAMBIGUOUS_PROTEIN_SEQUENCE)
 
+        @self.pg.production('symbol_reference : symbol_identifier OPEN_BRACKET slice_index CLOSE_BRACKET AS IDENTIFIER')
+        @self.pg.production('symbol_reference : symbol_identifier AS IDENTIFIER')
         @self.pg.production('symbol_reference : symbol_identifier OPEN_BRACKET slice_index CLOSE_BRACKET')
         @self.pg.production('symbol_reference : symbol_identifier')
         def symbol_reference(state, p):
             identifier, invert = p[0]
             part_slice = None
-            if len(p) == 4:
+            label = None
+            if len(p) == 4 or len(p) == 6:
                 part_slice = p[2]
+            if len(p) == 3:
+                label = p[2].value
+            if len(p) == 6:
+                label = p[4].value
 
-            return ast.SymbolReference(identifier, part_slice, invert)
+            return ast.SymbolReference(identifier, part_slice, invert, label)
 
         @self.pg.production('symbol_identifier : EXCLAMATION IDENTIFIER')
         @self.pg.production('symbol_identifier : IDENTIFIER')

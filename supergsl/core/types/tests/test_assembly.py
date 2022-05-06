@@ -63,7 +63,7 @@ class AssemblyTestCase(TestCase):
             for part in part_levels
         }
 
-        designs = declaration.get_full_factorial_designs()
+        designs = declaration.get_designs()
         self.assertEqual(list(designs), [
             [parts['uHO'], parts['pGAL0'], parts['gGENE'], parts['dHO']],
             [parts['uHO'], parts['pGAL1'], parts['gGENE'], parts['dHO']],
