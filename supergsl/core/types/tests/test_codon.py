@@ -1,8 +1,8 @@
-import unittest
+from unittest import TestCase
 from supergsl.core.types.codon import CodonFrequencyTable
 
 
-class CodonFrequencyTestCase(unittest.TestCase):
+class CodonFrequencyTestCase(TestCase):
     """Test case for CodonFrequencyTable."""
 
     def test_print_codon_frequency_table(self):

@@ -45,6 +45,10 @@ class SuperGSLCoreFixtures(object):
 
         return symbol_table
 
+    def mk_random_amino_acid_sequence(self, seq_len : int) -> Seq:
+        """Make a `Seq` with random Amino Acids of a given length."""
+        return Seq(''.join(choice('ARNDCEQGHILKMFPSTWYV') for _ in range(seq_len)))
+
     def mk_random_dna_sequence(
         self,
         seq_len : int,
