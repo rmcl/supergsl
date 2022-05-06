@@ -229,7 +229,7 @@ class SuperGSLCoreFixtures(object):
     def mk_assembly(self, identifier='asm1', num_parts=2) -> Assembly:
         """Create a `Assembly` containing num_parts with random sequences of len 100 to 1000."""
         parts : List[Part] = list([
-            self.mk_part('part-%03d' % part_index, randint(10, 1000))
+            self.mk_part('part-%03d' % part_index, randint(100, 1000))
             for part_index in range(num_parts)
         ])
 

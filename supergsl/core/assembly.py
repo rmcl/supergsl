@@ -37,11 +37,11 @@ class AssemblerBase(SuperGSLFunction):
 
         result_set = AssemblyResultSet([])
         for assembly_idx, assembly_request in enumerate(assembly_requests):
-            assembly_label = assembly_request.label or '%03d' % assembly_idx
+            assembly_label = assembly_request.label or f'{assembly_idx:03}'
 
             designs = assembly_request.get_designs()
             for design_idx, design_description in enumerate(designs):
-                design_label = '%03d' % design_idx
+                design_label = f'{design_idx:03}'
                 if not self.evaluate_definition_contraints(design_description, constraints):
                     continue
 
