@@ -162,6 +162,7 @@ class EvaluatePass(BackendPipelinePass):
         symbol = symbol.eval()
 
         if symbol_reference.slice or symbol_reference.invert:
+            part_slice = None
             if symbol_reference.slice:
                 part_slice = self.visit(symbol_reference.slice)
 
@@ -170,7 +171,7 @@ class EvaluatePass(BackendPipelinePass):
                     symbol, part_slice, symbol_reference.invert)
 
             elif issubclass(type(symbol), SliceInvertMixin):
-                if symbol_reference.slice:
+                if part_slice:
                     symbol = symbol.slice(part_slice)
 
                 if symbol_reference.invert:
