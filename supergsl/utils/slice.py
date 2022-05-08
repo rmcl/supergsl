@@ -1,3 +1,4 @@
+"""Define util functions for using supergsl lang slice strings."""
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.types.position import Slice
 
@@ -16,4 +17,4 @@ def parse_slice_str(slice_source_code : str) -> Slice:
     ast = parser.parse(tokens)
 
     eval_pass = EvaluatePass(SymbolTable('slice_eval', None))
-    return eval_pass.visit(ast)
+    return eval_pass.visit(ast, SymbolTable('temp', None))
