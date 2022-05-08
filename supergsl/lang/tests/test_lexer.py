@@ -1,6 +1,6 @@
 import unittest
 from rply.errors import LexingError
-from supergsl.core.lexer import SuperGSLLexer
+from supergsl.lang.lexer import SuperGSLLexer
 
 
 class LexerTestCase(unittest.TestCase):

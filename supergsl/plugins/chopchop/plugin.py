@@ -1,7 +1,6 @@
 from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.function import SuperGSLFunction
-from supergsl.core.ast import Assembly
 from supergsl.core.types.builtin import NucleotideSequence
 
 
@@ -24,7 +23,7 @@ class ChopChopFunction(SuperGSLFunction):
         ]
 
     def get_return_type(self):
-        return NucleotideConstant
+        return NucleotideSequence
 
     def execute(self, sgsl_args, child_nodes=None):
         """

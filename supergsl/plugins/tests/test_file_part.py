@@ -1,7 +1,7 @@
 from unittest import TestCase
 from unittest.mock import Mock
 from Bio import SeqIO
-from supergsl.core.pipeline import CompilerPipeline
+
 from supergsl.tests.fixtures import SuperGSLIntegrationFixtures
 from supergsl.plugins.file_part import FeatureTableWithFastaPartProvider
 from supergsl.core.provider import ProviderConfig
@@ -9,7 +9,7 @@ from supergsl.core.sequence import SequenceStore
 
 
 class FilePartTestCases(TestCase):
-
+    """Test for the FilePart provider."""
     def setUp(self):
         self.maxDiff = None
         self.expected_sequences = SeqIO.index(

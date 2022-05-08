@@ -1,8 +1,10 @@
-from supergsl.core.lexer import SuperGSLLexer
-from supergsl.core.parser import SuperGSLParser
 from supergsl.core.symbol_table import SymbolTable
-from supergsl.core.eval import EvaluatePass
 from supergsl.core.types.position import Slice
+
+from supergsl.lang.lexer import SuperGSLLexer
+from supergsl.lang.parser import SuperGSLParser
+from supergsl.lang.eval import EvaluatePass
+
 
 
 def parse_slice_str(slice_source_code : str) -> Slice:

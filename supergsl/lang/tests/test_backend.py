@@ -2,8 +2,8 @@
 from unittest import TestCase
 from unittest.mock import Mock, call
 from typing import Optional, List
-from supergsl.core.ast import Node
-from supergsl.core.backend import (
+from supergsl.lang.ast import Node
+from supergsl.lang.backend import (
     BreadthFirstNodeFilteredPass,
     DepthFirstNodeFilteredPass
 )

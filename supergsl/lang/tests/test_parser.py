@@ -1,9 +1,9 @@
 """Unit tests for the SuperGSL parser."""
 from unittest import TestCase
 from rply import Token
-from supergsl.core.parser import SuperGSLParser
-from supergsl.core.ast import Program, Slice
-from supergsl.core.exception import ParsingError
+from supergsl.lang.parser import SuperGSLParser
+from supergsl.lang.ast import Program, Slice
+from supergsl.lang.exception import ParsingError
 
 
 class SliceParserTestCase(TestCase):

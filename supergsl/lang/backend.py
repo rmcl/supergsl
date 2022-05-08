@@ -2,7 +2,7 @@ from typing import List, Tuple, Optional, Dict, Callable
 from .ast import Node
 
 from supergsl.core.symbol_table import SymbolTable
-from supergsl.core.exception import BackendError
+from supergsl.lang.exception import BackendError
 
 #pylint: disable=E1136
 

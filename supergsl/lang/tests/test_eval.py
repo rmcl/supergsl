@@ -2,7 +2,6 @@
 import unittest
 from unittest.mock import Mock, call, patch
 from supergsl.core.symbol_table import SymbolTable
-from supergsl.core.eval import EvaluatePass
 from supergsl.core.provider import SuperGSLProvider
 from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.constants import (
@@ -12,7 +11,9 @@ from supergsl.core.constants import (
     UNAMBIGUOUS_DNA_SEQUENCE,
     UNAMBIGUOUS_PROTEIN_SEQUENCE
 )
-from supergsl.core.ast import (
+
+from supergsl.lang.eval import EvaluatePass
+from supergsl.lang.ast import (
     Program,
     Import,
     ImportIdentifier,
@@ -39,7 +40,7 @@ from supergsl.core.exception import (
     SuperGSLError,
     FunctionNotFoundError
 )
-from .fixtures import SuperGSLCoreFixtures
+from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 
 
 class EvaluatePassTestCase(unittest.TestCase):
