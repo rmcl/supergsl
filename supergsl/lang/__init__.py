@@ -1,4 +1,4 @@
-"""Define a minimal entrypoint to initialize the supergsl interpreter."""
+"""Define the SuperGSL language."""
 from typing import Optional, List
 from supergsl.core.config import load_settings
 from .pipeline import CompilerPipeline
