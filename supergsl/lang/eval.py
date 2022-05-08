@@ -1,5 +1,5 @@
 """Evaluate a SuperGSL Program."""
-from typing import Any, Dict, Optional, Callable, Union, List, cast
+from typing import Dict, Optional, Callable, Union, List, cast
 
 from supergsl.core.types import SuperGSLType
 from supergsl.core.symbol_table import SymbolTable
@@ -39,7 +39,6 @@ from supergsl.core.exception import (
     SuperGSLError
 )
 
-from supergsl.lang.backend import BackendPipelinePass
 from supergsl.lang.ast import (
     Node,
     Program,
@@ -54,7 +53,10 @@ from supergsl.lang.ast import (
     SequenceConstant,
     Constant
 )
-from supergsl.lang.exception import BackendError
+from supergsl.lang.backend import BackendPipelinePass
+from supergsl.lang.exception import (
+    BackendError
+)
 
 #pylint: disable=E1136
 
@@ -63,10 +65,12 @@ class EvaluatePass(BackendPipelinePass):
     """Traverse the AST to execute the GSL Program."""
 
     def __init__(self, symbol_table : SymbolTable):
-        self.symbol_table = symbol_table
+        self.root_symbol_table = symbol_table
         self.sequence_store = cast(
             SequenceStore,
-            self.symbol_table.lookup('sequences'))
+            self.root_symbol_table.lookup('sequences'))
+
+        self.nested_scope_counter = 0
 
     def get_node_handlers(self) -> Dict[Optional[str], Callable]:
         """Define method handlers for each node in the AST."""
@@ -86,10 +90,10 @@ class EvaluatePass(BackendPipelinePass):
 
     def perform(self, ast_node : Node):
         """Initiate a traversal of the AST."""
-        self.visit(ast_node)
+        self.visit(ast_node, self.root_symbol_table)
         return ast_node
 
-    def visit(self, node, *args, **kwargs):
+    def visit(self, node, current_scope : SymbolTable):
         """Perform dyanmic dispatch to determine the handler for a node."""
         handlers : Dict[Optional[str], Callable] = self.get_node_handlers()
         node_type : str = type(node).__name__
@@ -97,36 +101,39 @@ class EvaluatePass(BackendPipelinePass):
         if not handler_method:
             raise BackendError('Handler for node %s not specified.' % node_type)
 
-        return handler_method(node, *args, **kwargs)
+        return handler_method(node, current_scope)
 
-    def visit_program(self, program_node : Program):
+    def visit_program(self, program_node : Program, current_scope : SymbolTable):
         for import_node in program_node.imports:
-            self.visit(import_node)
+            self.visit(import_node, current_scope)
 
         if program_node.definitions:
             for definition_node in program_node.definitions.definitions:
-                self.visit(definition_node)
+                self.visit(definition_node, current_scope)
 
 
-    def visit_import(self, import_node : Import):
+    def visit_import(self, import_node : Import, current_scope : SymbolTable):
         for program_import in import_node.imports:
             resolve_import(
-                self.symbol_table,
+                self.root_symbol_table,
                 import_node.module_path,
                 program_import.identifier,
                 program_import.alias)
 
 
-    def visit_assembly(self, assembly : Assembly) -> SuperGSLType:
+    def visit_assembly(self, assembly : Assembly, current_scope : SymbolTable) -> SuperGSLType:
         """Evaluate the Assembly node by traversing eval'ing all the child symbol references."""
 
         level_declarations : List[AssemblyLevelDeclaration] = []
         for symbol_reference in assembly.symbol_references:
-            part = self.visit(symbol_reference)
+            part = self.visit(symbol_reference, current_scope)
             # somehow we need to get this label to AssemblyFactor or something like it
             level_declaration = AssemblyLevelDeclaration(
                 part,
                 symbol_reference.label)
+
+            if symbol_reference.label:
+                current_scope.insert(symbol_reference.label, level_declaration)
 
             # TODO: We need to do type checking here.
             # Ultimately I think these "parts" can be part collections, parts,
@@ -142,54 +149,67 @@ class EvaluatePass(BackendPipelinePass):
 
         return AssemblyDeclaration(assembly.label, level_declarations)
 
-    def visit_variable_declaration(self, variable_declaration : VariableDeclaration) -> None:
+    def visit_variable_declaration(
+        self,
+        variable_declaration : VariableDeclaration,
+        current_scope : SymbolTable
+    ) -> None:
         """Evaluate by visiting child expression and assigning the result to the symobl table."""
         expression = variable_declaration.value
-        expression_result = self.visit(expression)
+        expression_result = self.visit(expression, current_scope)
 
         if variable_declaration.type_declaration:
             raise NotImplementedError(
                 'Variable explicit type declarations are not currently supported.')
 
-        self.symbol_table.insert(
+        current_scope.insert(
             variable_declaration.identifier,
             expression_result)
 
 
-    def visit_symbol_reference(self, symbol_reference : SymbolReference) -> SuperGSLType:
+    def visit_symbol_reference(
+        self,
+        symbol_reference : SymbolReference,
+        current_scope : SymbolTable
+    ) -> SuperGSLType:
         """Visit a SymbolReference node and return its evaluated symbol."""
-        symbol = self.symbol_table.lookup(symbol_reference.identifier)
+        symbol = current_scope.lookup(symbol_reference.identifier)
         symbol = symbol.eval()
 
         if symbol_reference.slice or symbol_reference.invert:
             part_slice = None
             if symbol_reference.slice:
-                part_slice = self.visit(symbol_reference.slice)
+                part_slice = self.visit(symbol_reference.slice, current_scope)
 
             if isinstance(symbol, Collection):
-                symbol = SliceAndInvertCollection(
+                return SliceAndInvertCollection(
                     symbol, part_slice, symbol_reference.invert)
 
-            elif issubclass(type(symbol), SliceInvertMixin):
+            if issubclass(type(symbol), SliceInvertMixin):
                 if part_slice:
-                    symbol = symbol.slice(part_slice)
+                    symbol = cast(SliceInvertMixin, symbol).slice(part_slice)
 
                 if symbol_reference.invert:
-                    symbol = symbol.invert()
+                    symbol = cast(SliceInvertMixin, symbol).invert()
 
-            else:
-                raise Exception(f'{type(symbol)} is not slice or invertable.')
+                return symbol
+
+            raise Exception(f'{type(symbol)} is not slice or invertable.')
 
         return symbol
 
 
-    def visit_slice(self, slice_node : AstSlice):
-        start_position = self.visit(slice_node.start)
-        end_position = self.visit(slice_node.end)
+    def visit_slice(self, slice_node : AstSlice, current_scope : SymbolTable):
+        start_position = self.visit(slice_node.start, current_scope)
+        end_position = self.visit(slice_node.end, current_scope)
 
         return Slice(start_position, end_position)
 
-    def visit_slice_position(self, slice_position : AstSlicePosition):
+    def visit_slice_position(
+        self,
+        slice_position : AstSlicePosition,
+        current_scope : SymbolTable
+    ) -> Position:
         """Convert a SlicePosition node into a Position for the given Part."""
 
         if slice_position.postfix == 'S':
@@ -197,7 +217,7 @@ class EvaluatePass(BackendPipelinePass):
         elif slice_position.postfix == 'E':
             rel_to = THREE_PRIME
         else:
-            raise SuperGSLError('Unknown postfix position. "%s"' % slice_position.postfix)
+            raise SuperGSLError(f'Unknown postfix position. "{slice_position.postfix}"')
 
         return Position(
             index=slice_position.index,
@@ -205,14 +225,22 @@ class EvaluatePass(BackendPipelinePass):
             approximate=slice_position.approximate)
 
 
-    def visit_list_declaration(self, list_declaration : ListDeclaration) -> Collection:
+    def visit_list_declaration(
+        self,
+        list_declaration : ListDeclaration,
+        current_scope : SymbolTable
+    ) -> Collection:
         """Instantiate a Collection based on details of list declaration."""
         return Collection([
-            self.visit(item_node)
+            self.visit(item_node, current_scope)
             for item_node in list_declaration.item_nodes
         ])
 
-    def visit_constant(self, constant_node : Constant):
+    def visit_constant(
+        self,
+        constant_node : Constant,
+        current_scope : SymbolTable
+    ):
         """Create the appropriate constant object based on `Constant` type."""
         if constant_node.constant_type == NUMBER_CONSTANT:
             return int(constant_node.value)
@@ -225,7 +253,8 @@ class EvaluatePass(BackendPipelinePass):
 
     def visit_sequence_constant(
         self,
-        sequence_constant : SequenceConstant
+        sequence_constant : SequenceConstant,
+        current_scope : SymbolTable
     ) -> Union[NucleotideSequence, AminoAcidSequence]:
         """Return a Sequence Type based on the constant defined SequenceConstant Node."""
 
@@ -237,31 +266,41 @@ class EvaluatePass(BackendPipelinePass):
         if sequence_type == UNAMBIGUOUS_DNA_SEQUENCE:
             return NucleotideSequence(sequence_entry)
 
-        raise SuperGSLTypeError('Unhandled sequence type "%s"' % sequence_type)
+        raise SuperGSLTypeError(f'Unhandled sequence type "{sequence_type}"')
 
-    def visit_function_invocation(self, function_invoke_node : FunctionInvocation) -> SuperGSLType:
+    def visit_function_invocation(
+        self,
+        function_invoke_node : FunctionInvocation,
+        current_scope : SymbolTable
+    ) -> SuperGSLType:
         """Evaluate this node by initializing and executing a SuperGSLFunction."""
 
         try:
-            function_declaration = self.symbol_table.lookup(function_invoke_node.identifier)
+            function_declaration = current_scope.lookup(function_invoke_node.identifier)
         except SymbolNotFoundError as error:
             raise FunctionNotFoundError(
-                'Function %s has not been imported.' % (
-                    function_invoke_node.identifier)) from error
+                f'Function {function_invoke_node.identifier} has not been imported.'
+            ) from error
 
         if not isinstance(function_declaration, SuperGSLFunctionDeclaration):
             raise SuperGSLTypeError(
-                '{} is not of type FunctionDeclaration. It is a "{}"'.format(
-                    function_invoke_node.identifier,
-                    type(function_declaration)))
+                f'{function_invoke_node.identifier} is not of type '
+                f'FunctionDeclaration. It is a "{type(function_declaration)}"'
+            )
 
         function_inst = function_declaration.eval()
+
+        # Variables declared within the body or parameters of a function called
+        # should be placed in a nested scope.
+        self.nested_scope_counter += 1
+        sub_scope = current_scope.enter_nested_scope(
+            f'{self.nested_scope_counter}-{function_invoke_node.identifier}')
 
         child_arguments = []
         children = function_invoke_node.children
         if children:
             child_arguments = [
-                self.visit(child)
+                self.visit(child, sub_scope)
                 for child in children.definitions
             ]
 
@@ -269,8 +308,13 @@ class EvaluatePass(BackendPipelinePass):
         positional_arguments = []
         if params:
             for param_value in params:
-                positional_arguments.append(self.visit(param_value))
+                positional_arguments.append(self.visit(param_value, sub_scope))
 
-        return function_inst.evaluate_arguments_and_execute(
+        result = function_inst.evaluate_arguments_and_execute(
             positional_arguments,
             child_arguments)
+
+        # Remove the function invocation nested scope.
+        sub_scope.destroy()
+
+        return result

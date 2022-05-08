@@ -1,7 +1,6 @@
 """Tests for the eval module."""
 import unittest
-from unittest.mock import Mock, call, patch
-from supergsl.core.symbol_table import SymbolTable
+from unittest.mock import Mock, call
 from supergsl.core.provider import SuperGSLProvider
 from supergsl.core.function import SuperGSLFunctionDeclaration
 from supergsl.core.constants import (
@@ -10,22 +9,6 @@ from supergsl.core.constants import (
     NUMBER_CONSTANT,
     UNAMBIGUOUS_DNA_SEQUENCE,
     UNAMBIGUOUS_PROTEIN_SEQUENCE
-)
-
-from supergsl.lang.eval import EvaluatePass
-from supergsl.lang.ast import (
-    Program,
-    Import,
-    ImportIdentifier,
-    Assembly,
-    VariableDeclaration,
-    SymbolReference,
-    Slice,
-    SlicePosition,
-    Constant,
-    ListDeclaration,
-    SequenceConstant,
-    FunctionInvocation
 )
 
 from supergsl.core.types.position import Position
@@ -41,6 +24,21 @@ from supergsl.core.exception import (
     FunctionNotFoundError
 )
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
+from supergsl.lang.ast import (
+    Program,
+    Import,
+    ImportIdentifier,
+    Assembly,
+    VariableDeclaration,
+    SymbolReference,
+    Slice,
+    SlicePosition,
+    Constant,
+    ListDeclaration,
+    SequenceConstant,
+    FunctionInvocation
+)
+from supergsl.lang.eval import EvaluatePass
 
 
 class EvaluatePassTestCase(unittest.TestCase):
@@ -60,14 +58,14 @@ class EvaluatePassTestCase(unittest.TestCase):
 
         program = Program([1,2,3], definitions)
 
-        self.eval_pass.visit_program(program)
+        self.eval_pass.visit_program(program, self.import_table)
 
         self.eval_pass.visit.assert_has_calls([
-            call(1),
-            call(2),
-            call(3),
-            call('d1'),
-            call('d2')
+            call(1, self.import_table),
+            call(2, self.import_table),
+            call(3, self.import_table),
+            call('d1', self.import_table),
+            call('d2', self.import_table)
         ])
 
     def test_visit_import(self):
@@ -85,7 +83,7 @@ class EvaluatePassTestCase(unittest.TestCase):
                 ImportIdentifier('boop', None)
             ])
 
-        self.eval_pass.visit_import(import_node)
+        self.eval_pass.visit_import(import_node, self.import_table)
 
         provider_mock.resolve_import.assert_has_calls([
             call('hello', None),
@@ -100,12 +98,12 @@ class EvaluatePassTestCase(unittest.TestCase):
             Mock()
         ]
         assembly_node = Assembly(parts, 'LABEL1112')
-        assembly_declaration = self.eval_pass.visit_assembly(assembly_node)
+        assembly_declaration = self.eval_pass.visit_assembly(assembly_node, self.import_table)
 
         self.assertEqual(assembly_declaration.label, 'LABEL1112')
         self.eval_pass.visit.assert_has_calls([
-            call(parts[0]),
-            call(parts[1])
+            call(parts[0], self.import_table),
+            call(parts[1], self.import_table)
         ])
 
     def test_visit_variable_declaration(self):
@@ -113,10 +111,10 @@ class EvaluatePassTestCase(unittest.TestCase):
         self.eval_pass.visit.return_value = 'RESULT'
         var_declare = VariableDeclaration('IDENT', None, 'BOOMVAL')
 
-        self.eval_pass.visit_variable_declaration(var_declare)
+        self.eval_pass.visit_variable_declaration(var_declare, self.symbol_table)
 
         self.eval_pass.visit.assert_has_calls([
-            call('BOOMVAL')
+            call('BOOMVAL', self.symbol_table)
         ])
 
         actual_result = self.symbol_table.lookup('IDENT')
@@ -130,7 +128,7 @@ class EvaluatePassTestCase(unittest.TestCase):
         self.symbol_table.insert('IDENT', supergsl_type)
         symbol_ref = SymbolReference('IDENT', None, False, None)
 
-        result = self.eval_pass.visit_symbol_reference(symbol_ref)
+        result = self.eval_pass.visit_symbol_reference(symbol_ref, self.import_table)
 
         self.assertEqual(result, 'YES!')
 
@@ -142,14 +140,14 @@ class EvaluatePassTestCase(unittest.TestCase):
         self.eval_pass.visit.return_value = position_mock = Position(0)
 
         slice_node = Slice(start, end)
-        slice_obj = self.eval_pass.visit_slice(slice_node)
+        slice_obj = self.eval_pass.visit_slice(slice_node, self.import_table)
 
         self.assertEqual(slice_obj.start, position_mock)
         self.assertEqual(slice_obj.end, position_mock)
 
         self.eval_pass.visit.assert_has_calls([
-            call(start),
-            call(end)
+            call(start, self.import_table),
+            call(end, self.import_table)
         ])
 
     def test_visit_slice_position(self):
@@ -158,7 +156,7 @@ class EvaluatePassTestCase(unittest.TestCase):
         slice_position = SlicePosition(123, 'E', False)
 
         result = self.eval_pass.visit_slice_position(
-            slice_position)
+            slice_position, self.import_table)
 
         self.assertEqual(result.index, 123)
         self.assertEqual(result.relative_to, THREE_PRIME)
@@ -172,7 +170,8 @@ class EvaluatePassTestCase(unittest.TestCase):
         self.assertRaises(
             SuperGSLError,
             self.eval_pass.visit_slice_position,
-            slice_position)
+            slice_position,
+            self.import_table)
 
 
     def test_visit_list_declaration(self):
@@ -184,11 +183,11 @@ class EvaluatePassTestCase(unittest.TestCase):
         ]
         list_declare_node = ListDeclaration(item_nodes)
 
-        result = self.eval_pass.visit_list_declaration(list_declare_node)
+        result = self.eval_pass.visit_list_declaration(list_declare_node, self.import_table)
 
         self.assertEqual(type(result), Collection)
         self.eval_pass.visit.assert_has_calls([
-            call(item_node)
+            call(item_node, self.import_table)
             for item_node in item_nodes
         ])
 
@@ -196,14 +195,14 @@ class EvaluatePassTestCase(unittest.TestCase):
         """Visit a constant node resolves to a number."""
         constant_node = Constant(55, NUMBER_CONSTANT)
 
-        result = self.eval_pass.visit_constant(constant_node)
+        result = self.eval_pass.visit_constant(constant_node, self.import_table)
         self.assertEqual(result, 55)
 
     def test_visit_constant_string(self):
         """Visit a constant node resolves to a string."""
         constant_node = Constant('party', STRING_CONSTANT)
 
-        result = self.eval_pass.visit_constant(constant_node)
+        result = self.eval_pass.visit_constant(constant_node, self.import_table)
         self.assertEqual(result, 'party')
 
     def test_visit_dna_sequence_constant(self):
@@ -211,7 +210,7 @@ class EvaluatePassTestCase(unittest.TestCase):
         constant_dna_node = SequenceConstant(
             'ATGC', UNAMBIGUOUS_DNA_SEQUENCE)
 
-        result = self.eval_pass.visit_sequence_constant(constant_dna_node)
+        result = self.eval_pass.visit_sequence_constant(constant_dna_node, self.import_table)
         self.assertEqual(type(result), NucleotideSequence)
         self.assertEqual(result.sequence, 'ATGC')
 
@@ -220,7 +219,7 @@ class EvaluatePassTestCase(unittest.TestCase):
         constant_protein_node = SequenceConstant(
             'MATTTGAC*', UNAMBIGUOUS_PROTEIN_SEQUENCE)
 
-        result = self.eval_pass.visit_sequence_constant(constant_protein_node)
+        result = self.eval_pass.visit_sequence_constant(constant_protein_node, self.import_table)
         self.assertEqual(type(result), AminoAcidSequence)
         self.assertEqual(result.sequence, 'MATTTGAC*')
 
@@ -232,7 +231,8 @@ class EvaluatePassTestCase(unittest.TestCase):
         self.assertRaises(
             SuperGSLTypeError,
             self.eval_pass.visit_sequence_constant,
-            constant_protein_node)
+            constant_protein_node,
+            self.import_table)
 
     def test_visit_function_invocation_function_not_defined(self):
         """Raise exception if the desired function is not in the symbol table."""
@@ -245,7 +245,8 @@ class EvaluatePassTestCase(unittest.TestCase):
         self.assertRaises(
             FunctionNotFoundError,
             self.eval_pass.visit_function_invocation,
-            function_invoke_node)
+            function_invoke_node,
+            self.import_table)
 
     def test_visit_function_invocation_not_function_declaration(self):
         """Raise exception if symbol in symbol table is not a function declare."""
@@ -259,7 +260,8 @@ class EvaluatePassTestCase(unittest.TestCase):
         self.assertRaises(
             SuperGSLTypeError,
             self.eval_pass.visit_function_invocation,
-            function_invoke_node)
+            function_invoke_node,
+            self.import_table)
 
     def test_visit_function_invocation(self):
         function_declare = SuperGSLFunctionDeclaration(Mock(), {})
@@ -271,7 +273,9 @@ class EvaluatePassTestCase(unittest.TestCase):
         function_invoke_node = FunctionInvocation(
             'great_function', [], [], None)
 
-        result = self.eval_pass.visit_function_invocation(function_invoke_node)
+        result = self.eval_pass.visit_function_invocation(
+            function_invoke_node,
+            self.import_table)
         self.assertEqual(result, 'HELLO world!')
         func_inst.evaluate_arguments_and_execute.assert_called_once_with(
             [], [])
