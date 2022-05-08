@@ -1,7 +1,7 @@
 """Define a minimal entrypoint to initialize the supergsl interpreter."""
 from typing import Optional, List
 from .core.config import load_settings
-from .core.pipeline import CompilerPipeline
+from .lang.pipeline import CompilerPipeline
 
 
 def get_interpreter(config_files : Optional[List[str]] = None):

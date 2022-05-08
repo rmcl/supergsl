@@ -18,7 +18,7 @@ from supergsl.grpc.stubs.sgsl_pb2 import (
     Symbol
 )
 
-from supergsl.core.pipeline import CompilerPipeline
+from supergsl.lang.pipeline import CompilerPipeline
 
 
 class SuperGSLCompilerService(SuperGSLCompilerServicer):

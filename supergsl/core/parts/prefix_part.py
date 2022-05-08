@@ -20,8 +20,7 @@ from supergsl.core.types.role import (
     MRNA
 )
 
-from supergsl.core.ast import SymbolReference
-from supergsl.core.types.part import Part, LazyLoadedPart
+from supergsl.core.types.part import Part
 from .provider import PartProvider
 
 

@@ -6,14 +6,6 @@ class ConfigurationError(SuperGSLError):
     """Raised when a plugin or other component of the system has been improperly configured."""
 
 
-class ParsingError(SuperGSLError):
-    """Raised when an error is encountered parsing the SuperGSL language."""
-
-
-class BackendError(SuperGSLError):
-    pass
-
-
 class NotFoundError(SuperGSLError):
     """Base class representing class of errors that occur when a SuperGSL object cannot be found."""
 

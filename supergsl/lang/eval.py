@@ -3,7 +3,6 @@ from typing import Any, Dict, Optional, Callable, Union, List, cast
 
 from supergsl.core.types import SuperGSLType
 from supergsl.core.symbol_table import SymbolTable
-from supergsl.core.backend import BackendPipelinePass
 from supergsl.core.types.builtin import (
     NucleotideSequence,
     AminoAcidSequence,
@@ -31,7 +30,17 @@ from supergsl.core.constants import (
     THREE_PRIME
 )
 
-from supergsl.core.ast import (
+from supergsl.core.function import SuperGSLFunctionDeclaration
+from supergsl.core.exception import (
+    FunctionInvokeError,
+    SuperGSLTypeError,
+    SymbolNotFoundError,
+    FunctionNotFoundError,
+    SuperGSLError
+)
+
+from supergsl.lang.backend import BackendPipelinePass
+from supergsl.lang.ast import (
     Node,
     Program,
     Import,
@@ -45,16 +54,7 @@ from supergsl.core.ast import (
     SequenceConstant,
     Constant
 )
-
-from supergsl.core.function import SuperGSLFunctionDeclaration
-from supergsl.core.exception import (
-    FunctionInvokeError,
-    SuperGSLTypeError,
-    SymbolNotFoundError,
-    FunctionNotFoundError,
-    BackendError,
-    SuperGSLError
-)
+from supergsl.lang.exception import BackendError
 
 #pylint: disable=E1136
 

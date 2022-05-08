@@ -1,9 +1,9 @@
 """Entrypoint for the `sgsl` command used to invoke the superGSL compiler."""
 import argparse
 from supergsl.core.config import load_settings
-from supergsl.core.pipeline import CompilerPipeline
 from supergsl.core.exception import SuperGSLError
 from supergsl.repl import SuperGSLShell
+from supergsl.lang.pipeline import CompilerPipeline
 from supergsl.grpc.server import SuperGSLCompilerService
 import pprint
 

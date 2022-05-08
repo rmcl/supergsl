@@ -4,8 +4,6 @@ from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.types.builtin import SuperGSLType
 from supergsl.core.plugin import PluginProvider
 from supergsl.core.provider import ProviderConfig
-from supergsl.core.backend import BackendPipelinePass
-from supergsl.core.eval import EvaluatePass
 from supergsl.utils.resolve import resolve_provider_import, resolve_import
 from supergsl.core.sequence import SequenceStore
 from supergsl.core.exception import (
@@ -13,6 +11,8 @@ from supergsl.core.exception import (
     ProviderNotFoundError
 )
 
+from .backend import BackendPipelinePass
+from .eval import EvaluatePass
 from .lexer import SuperGSLLexer
 from .parser import SuperGSLParser
 

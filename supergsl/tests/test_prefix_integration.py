@@ -1,6 +1,6 @@
 from unittest import TestCase
 from Bio import SeqIO
-from supergsl.core.pipeline import CompilerPipeline
+from supergsl.lang.pipeline import CompilerPipeline
 from supergsl.tests.fixtures import SuperGSLIntegrationFixtures
 from supergsl.tests.fixtures.utils import TestOutputAstPass
 

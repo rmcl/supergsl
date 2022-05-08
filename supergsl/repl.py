@@ -6,10 +6,9 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 
 from supergsl.core.config import load_settings
-from supergsl.core.pipeline import CompilerPipeline
 from supergsl.core.exception import SuperGSLError
 from supergsl.utils import get_logo, display_symbol_table
-
+from supergsl.lang.pipeline import CompilerPipeline
 
 class SuperGSLShell:
     intro = (
