@@ -53,6 +53,11 @@ class PartProvider(SuperGSLProvider):
         """
         raise NotImplementedError('Subclass to implement.')
 
+    def save_part(self, part : Part):
+        """Save a part to the provider"""
+        raise NotImplemented('This part provider does not support writing new parts.')
+
+
     def get_child_part_by_slice(
         self,
         parent_part : Part,
