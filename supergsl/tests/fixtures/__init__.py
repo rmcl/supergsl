@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, Optional
 
 
 class SuperGSLIntegrationFixtures(object):
     """Fixtures to assist in execution of integration tests."""
 
-    def get_supergsl_settings(self, extra_plugins: List = None) -> dict:
+    def get_supergsl_settings(self, extra_plugins: Optional[List[str]] = None) -> dict:
         """Return a basic nested dictionary of settings.
 
         extra_plugins (list): a list of paths to plugins to include in the settings.

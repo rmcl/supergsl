@@ -149,7 +149,7 @@ class SequenceEntry:
         self.sequence_store = sequence_store
         self.sequence_id = sequence_id
         self.roles = roles if roles else []
-        self.parent_links = parent_links
+        self.parent_links = parent_links or []
         self.reference = reference
         self._annotations = annotations or []
         self.molecule_form = molecule_form
@@ -236,7 +236,7 @@ class SequenceEntry:
         return self.sequence_id
 
     @property
-    def is_composite(self):
+    def is_composite(self) -> bool:
         """SequenceEntries can either by Composite or Hierarchical
 
         Composite parts are those that derive from more that one part at any
@@ -363,9 +363,12 @@ class SequenceEntry:
 
 class SequenceStore:
     """Store sequences and provided methods for deriving new sequences from existing ones."""
+    _sequences_by_uuid : Dict[UUID, SequenceEntry]
+    _sequences_by_external_id : Dict[str, Dict[str, SequenceEntry]]
+    _links_by_uuid : Dict[UUID, List[EntryLink]]
 
     def __init__(self):
-        self._sequences_by_uuid : Dict[UUID, SequenceEntry] = {}
+        self._sequences_by_uuid = {}
 
         """
         Maintain a index of external unique ids.
@@ -379,8 +382,8 @@ class SequenceStore:
             ...
         }
         """
-        self._sequences_by_external_id : Dict[str, Dict[str, SequenceEntry]] = {}
-        self._links_by_uuid : Dict[UUID, List[EntryLink]] = {}
+        self._sequences_by_external_id = {}
+        self._links_by_uuid = {}
 
 
     def lookup(self, sequence_id : UUID) -> SequenceEntry:

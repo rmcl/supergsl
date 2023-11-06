@@ -66,7 +66,7 @@ class SuperGSLFunction(SuperGSLType):
             expected_return_type = type(None)
 
         try:
-            check_type('', result, expected_return_type)
+            check_type(result, expected_return_type)
         except TypeError as error:
             raise FunctionInvokeError(
                 '"%s" Return type does not match expectation. Expected: "%s", Actual: "%s"' % (
@@ -100,7 +100,7 @@ class SuperGSLFunction(SuperGSLType):
                 raise FunctionInvokeError('Cannot define an argument named "children". It is reserved.')
 
             try:
-                check_type('', argument_value, expected_argument_type)
+                check_type(argument_value, expected_argument_type)
             except TypeError as error:
                 raise FunctionInvokeError(
                     'Provided type does not match expectation. '

@@ -4,7 +4,7 @@ from unittest import TestCase
 from unittest.mock import Mock, patch
 from Bio.Seq import Seq
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
-from supergsl.core.constants import SO_HOMOLOGOUS_REGION
+from supergsl.core.types.role import SO_HOMOLOGOUS_REGION
 from supergsl.plugins.igem.part_registry import (
     PartRegistry,
     BioBrickPartProvider

@@ -40,8 +40,10 @@ class SuperGSLProvider(SuperGSLType):
 class ProviderGroup(SuperGSLProvider):
     """A group of providers allowing for sharing of the same module path."""
 
+    _providers : List[SuperGSLProvider]
+
     def __init__(self):
-        self._providers : List[SuperGSLProvider] = []
+        self._providers = []
 
     def add_provider(self, provider: SuperGSLProvider):
         """Add a provider to the group. Providers are searched in the order which they are added."""

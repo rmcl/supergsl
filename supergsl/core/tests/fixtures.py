@@ -178,7 +178,7 @@ class SuperGSLCoreFixtures(object):
         part_seq_len : int,
         mk_primers : bool = True,
         roles : Optional[List[Role]] = None,
-        excluded_restriction_sites : List[str] = None
+        excluded_restriction_sites : Optional[List[str]] = None
     ) -> Part:
         """Create a mock Part.
 

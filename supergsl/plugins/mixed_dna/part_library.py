@@ -32,12 +32,13 @@ class MixedPartLibraryProvider(PartProvider):
         Return: `Part`
         """
 
-        part_details = self.retrieve_part_details(identifier)
-        payload_sequence = part_details['sequence']
+        part_details = self._library(identifier)
+        sequence_entry = self.sequence_store.add_from_reference(
+            part_details['sequence'])
 
         part = Part(
             identifier=identifier,
-            payload_sequence=payload_sequence,
+            sequence_entry=sequence_entry,
             provider=self,
             description=part_details['description'],
             roles=part_details['roles'])

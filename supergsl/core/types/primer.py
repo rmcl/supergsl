@@ -104,11 +104,13 @@ class PrimerPair(SuperGSLType):
         reverse_primer_sequence : SequenceEntry
     ):
         """Construct a PrimerPair from two sequences."""
-        return PrimerPair(Primer(forward_primer_sequence), Primer(reverse_primer_sequence))
+        return PrimerPair(
+            Primer(forward_primer_sequence),
+            Primer(reverse_primer_sequence))
 
-    def __init__(self, forward_primer, reverse_primer):
-        self._forward_primer : Primer = forward_primer
-        self._reverse_primer : Primer = reverse_primer
+    def __init__(self, forward_primer : Primer, reverse_primer : Primer):
+        self._forward_primer = forward_primer
+        self._reverse_primer = reverse_primer
 
     @property
     def forward(self) -> Primer:
