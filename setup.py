@@ -36,6 +36,7 @@ setuptools.setup(
         'types-protobuf',
         'types-requests',
         'typeguard',
+        'pytest',
     ],
     extras_require={
         "plugins": [

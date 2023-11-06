@@ -8,7 +8,7 @@ from typing import (
     Union,
     Any
 )
-from typeguard import check_type
+from typeguard import check_type, TypeCheckError
 from inspect import getdoc
 
 from supergsl.core.types import SuperGSLType
@@ -67,7 +67,7 @@ class SuperGSLFunction(SuperGSLType):
 
         try:
             check_type(result, expected_return_type)
-        except TypeError as error:
+        except TypeCheckError as error:
             raise FunctionInvokeError(
                 '"%s" Return type does not match expectation. Expected: "%s", Actual: "%s"' % (
                     self,
@@ -101,7 +101,7 @@ class SuperGSLFunction(SuperGSLType):
 
             try:
                 check_type(argument_value, expected_argument_type)
-            except TypeError as error:
+            except TypeCheckError as error:
                 raise FunctionInvokeError(
                     'Provided type does not match expectation. '
                     'Expected %s, but received %s' % (

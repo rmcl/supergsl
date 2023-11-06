@@ -99,7 +99,7 @@ class ConstantPartProvider(PartProvider):
     ```
     """
 
-    DEFAULT_PART_DETAILS : Mapping[str, ConstantPartDetail] = {
+    PART_DETAILS : Mapping[str, ConstantPartDetail] = {
         'part-name': ConstantPartDetail('part description', 'ATGC', ['LIST OF ROLES']),
     }
 
@@ -113,9 +113,9 @@ class ConstantPartProvider(PartProvider):
 
     def setup_part_details(self):
         if 'sequences' not in self._config.settings:
-            raise Exception('ConstantPartProvider requires a `sequences` argument.')
-
-        self._part_details = self._config.settings['sequences']
+            self._part_details = self.PART_DETAILS
+        else:
+            self._part_details = self._config.settings['sequences']
 
 
     def list_parts(self):

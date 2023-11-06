@@ -15,7 +15,7 @@ def typecheck(c):
 @task(typecheck)
 def test(c):
     "Run nostests and generate coverage report."""
-    c.run('nosetests supergsl --with-coverage --cover-package=supergsl --cover-xml', pty=True)
+    c.run('PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python python -m pytest supergsl', pty=True)
 
 
 @task(typecheck)

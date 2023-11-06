@@ -4,7 +4,7 @@ from Bio.Seq import Seq
 from Bio import SeqIO
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.role import SO_HOMOLOGOUS_REGION
-from supergsl.core.parts.provider import ConstantPartProvider
+from supergsl.core.parts.provider import ConstantPartProvider, ConstantPartDetail
 
 from supergsl.plugins.builtin.providers.synbiohub import SynBioHubPartProvider
 from .types import BioBrickPart
@@ -57,12 +57,12 @@ class BioBrickPartProvider(ConstantPartProvider):
     """
 
     PART_DETAILS = {
-        'prefix': (
+        'prefix': ConstantPartDetail(
             'Biobrick RFC[10] prefix',
             BIOBRICK_PREFIX_SEQUENCE,
             [SO_HOMOLOGOUS_REGION]
         ),
-        'suffix': (
+        'suffix': ConstantPartDetail(
             'Biobrick RFC[10] suffix',
             BIOBRICK_SUFFIX_SEQUENCE,
             [SO_HOMOLOGOUS_REGION]
