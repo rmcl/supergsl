@@ -25,7 +25,7 @@ setuptools.setup(
         'rply',
         'nose',
         'coverage',
-        'biopython==1.78',
+        'biopython',
         'pydna',
         'sbol2',
         'mypy',

@@ -35,7 +35,7 @@ class SynBioHubPartProvider(PartProvider):
     """
 
     def __init__(self, name : str, settings : dict):
-        self.name = name
+        self._provider_name = name
         self._cached_parts: Dict[str, Part] = {}
         self.repository_url = settings.get('repository_url', None)
         if not self.repository_url:
