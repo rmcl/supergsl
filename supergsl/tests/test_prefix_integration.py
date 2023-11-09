@@ -1,6 +1,6 @@
 from unittest import TestCase
 from Bio import SeqIO
-from supergsl.core.pipeline import CompilerPipeline
+from supergsl.lang.pipeline import CompilerPipeline
 from supergsl.tests.fixtures import SuperGSLIntegrationFixtures
 from supergsl.tests.fixtures.utils import TestOutputAstPass
 
@@ -38,8 +38,7 @@ class SuperGSLIntegrationTestCases(TestCase):
         for part_name in things_to_test:
             result = self.run_supergsl(gsl_template % part_name)
 
-            symbol_table = result.get_symbol_table()
-            part = symbol_table.lookup('test_part')
+            part = result.symbols['test_part']
             self.assertEqual(
                 part.sequence,
                 self.expected_sequences.get(part_name).seq,

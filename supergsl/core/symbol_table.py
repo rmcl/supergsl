@@ -30,17 +30,34 @@ class SymbolTable:
             self._nested_scopes[name] = SymbolTable(name, self)
             return self._nested_scopes[name]
 
-    def lookup(self, identifier: str) -> SuperGSLType:
+    def remove_nested_scope(self, name : str):
+        """Remove a nested scope."""
+        del self._nested_scopes[name]
+
+    def destroy(self):
+        """Destroy this symbol table / scope and remove it from its parent scope."""
+        self._parent.remove_nested_scope(self.name)
+
+    def lookup(self, identifier: str, lookup_in_parent_scope = True) -> SuperGSLType:
         """Lookup a symbol in the table."""
         try:
             return self._symbols[identifier]
-        except KeyError as error:
-            raise SymbolNotFoundError(
-                'Symbol "{}" does not exist.'.format(identifier)) from error
+        except KeyError:
+            pass
+
+        if lookup_in_parent_scope:
+            if self._parent:
+                return self._parent.lookup(identifier)
+
+        raise SymbolNotFoundError(f'Symbol "{identifier}" does not exist.')
 
     def insert(self, identifier : str, value : Any) -> None:
         """Set a symbol to a value in the current scope."""
         self._symbols[identifier] = value
+
+    def __getitem__(self, key):
+        """Lookup a symbol in the symbol table."""
+        return self.lookup(key)
 
     def __iter__(self):
         """Make the table iterable returning tuples of (key, value)."""

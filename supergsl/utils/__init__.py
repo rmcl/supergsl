@@ -1,14 +1,8 @@
-import importlib
 import logging
 import textwrap
-
-
-def import_class(class_path_str):
-    """Import a class via str."""
-    module_path, class_name = class_path_str.rsplit('.', 1)
-    module = importlib.import_module(module_path)
-
-    return getattr(module, class_name)
+from pathlib import Path
+from supergsl.core.config import load_settings
+from supergsl.core.symbol_table import SymbolTable
 
 
 def get_logger(class_inst):
@@ -18,6 +12,16 @@ def get_logger(class_inst):
     ])
 
     return logging.getLogger(full_path)
+
+def get_local_cache_path(provider_name) -> Path:
+    settings = load_settings()
+    cache_path = Path(
+        settings['local_cache_path'],
+        provider_name)
+
+    cache_path.mkdir(parents=True, exist_ok=True)
+
+    return cache_path
 
 def get_logo():
     """Return the SuperGSL ASCII logo.
@@ -38,7 +42,7 @@ def get_logo():
         """)
 
 
-def display_symbol_table(symbol_table, depth=0):
+def display_symbol_table(symbol_table : SymbolTable, depth=0):
     """Recursively display the table and all of its nested scopes."""
     indent = ' ' * (depth*4)
     print()

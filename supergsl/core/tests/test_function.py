@@ -1,5 +1,6 @@
 import unittest
 from Bio.Seq import Seq
+from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.core.function import SuperGSLFunction
 from supergsl.core.types.builtin import AminoAcidSequence, NucleotideSequence
 from supergsl.core.exception import FunctionInvokeError
@@ -8,6 +9,7 @@ class SuperGSLFunctionTestCase(unittest.TestCase):
     """Test that SuperGSL functions can process arguments and be invoked."""
 
     class TestFunction(SuperGSLFunction):
+        name = 'party'
         arguments = [
             ('awesome1', int),
             ('arg2', AminoAcidSequence)
@@ -16,11 +18,14 @@ class SuperGSLFunctionTestCase(unittest.TestCase):
         return_type = NucleotideSequence
 
         def execute(self, params : dict):
-            return NucleotideSequence(Seq('ATG'))
+            sequence_entry = self.sequence_store.add_from_reference(Seq('ATG'))
+            return NucleotideSequence(sequence_entry)
 
     def setUp(self):
         compiler_settings = {}
-        self.function = SuperGSLFunctionTestCase.TestFunction(compiler_settings)
+        self.fixtures = SuperGSLCoreFixtures()
+        self.function_config = self.fixtures.mk_provider_config(compiler_settings)
+        self.function = SuperGSLFunctionTestCase.TestFunction(self.function_config)
 
     def test_build_argument_map_different_num_positional_args(self):
         """Raise exception when the number of positional arguments differs from expected."""
@@ -58,7 +63,7 @@ class SuperGSLFunctionTestCase(unittest.TestCase):
                 ('children', int),
             ]
 
-        function = TestFunction2({})
+        function = TestFunction2(self.function_config)
 
         self.assertRaises(
             FunctionInvokeError,

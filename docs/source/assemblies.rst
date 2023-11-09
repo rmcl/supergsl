@@ -13,36 +13,26 @@ Built in Assembly Protocols
 Simple Fusion
 ===================================================
 
-The most basic strategy is a "fusion" strategy where each part is annealed to its neighbors. The product of this strategy is likely useful for direct synthesis methods.
-
-.. code-block:: gsl
-
-        from builtin import fuse
-        from S288C import ADH1, TDH1, ERG10, HO
-
-        fuse {
-            HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
-            HO_pTDA1_gERG10: uHO ; pTDH1 ; gERG10[1:728] ; dHO
-        }
+.. autoclass:: supergsl.plugins.builtin.fuse.FusionAssembler
 
 
 ===================================================
 Seamless Assembly
 ===================================================
 
-Two examples of this approach are, Ligase Chain Reaction (LCR), or Seamless Ligation Cloning Extract (SLiCE). Check out the j5 manual for a description of related approaches: `"The SLIC, Gibson, CPEC, and SLiCE assembly methods" <https://j5.jbei.org/j5manual/pages/22.html>`_.
+.. autoclass:: supergsl.plugins.pydna.seamless_ligation.SeamlessLigationAssembler
 
-.. code-block:: gsl
-
-        from builtin import seamless_ligation
-
-        seamless_ligation {
-            HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
-        }
 
 ===================================================
+Synthentic Oligo Synthesis
+===================================================
+
+.. autoclass:: supergsl.plugins.builtin.oligos.SyntheticOligoAssembler
+
+
+******************************************************************************
 Assembly Provider Setup
-===================================================
+******************************************************************************
 
 To avail yourself of the fusion assembler or seamless ligation based assembly strategies, add the following to your `supergsl-config.json`.
 
@@ -64,13 +54,14 @@ To avail yourself of the fusion assembler or seamless ligation based assembly st
         }
 
 
-=============================================================================
+******************************************************************************
 Other Standard Methods i'd like to implement someday
-=============================================================================
+******************************************************************************
 
-******************************************************************************
+
+=============================================================================
 BioBricks
-******************************************************************************
+=============================================================================
 
 "BioBrick parts are DNA sequences which conform to a restriction-enzyme assembly standard" [1]. Some great documentation of the BioBricks assembly method can be found in the j5 documentation `BioBrick article <https://j5.jbei.org/j5manual/pages/21.html>`_.
 
@@ -85,9 +76,9 @@ BioBricks
         }
 
 
-******************************************************************************
+=============================================================================
 Golden Gate Assembly
-******************************************************************************
+=============================================================================
 
 For an excellent overview of this method see the `J5 Documentation <https://j5.jbei.org/j5manual/pages/23.html>`_
 
@@ -108,21 +99,27 @@ Many biotechs have proprietary asssembly strategies and the infrastructure for b
 
 .. code-block:: gsl
 
+        from mycompany import secret-assembly-method
         from S288C import ADH1, ERG10, HO
 
-        assemble_company_parts {
+        secret-assembly-method {
             HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
             HO_pTDA1_gERG10: uHO ; pTDA1 ; gERG10[1:728] ; dHO
             HO_pGAL3_gERG10: uHO ; pGAL3 ; gERG10[1:728] ; dHO
             HO_pGAL7_gERG10: uHO ; pGAL7 ; gERG10[1:728] ; dHO
         }
 
+You can implement your own Assembly strategy by subclassing `AssemblerBase`
+
+.. autoclass:: supergsl.core.assembly.AssemblerBase
+    :members: assemble
+
 
 ===================================================
 Registering Custom Assembly Types
 ===================================================
 
-You can use the `assembly_strategies` section of `supergsl-config.json` to register custom assembly types or to override parameters of built in assembly types.
+Once you implement your Assembler, you should register it in a SuperGSL plugin and optionally add an assembly config section to your `supergsl-config.json` file.
 
 .. code-block:: json
 
@@ -136,9 +133,12 @@ You can use the `assembly_strategies` section of `supergsl-config.json` to regis
                         "max_part_len": 5000
                     }
                 }
+            ],
+            "plugins": [
+                ...
+                "path.to.your.plugin"
             ]
         }
-
 
 
 ******************************************************************************

@@ -1,12 +1,13 @@
 """Define SuperGSL Types related to the construction of new genetic assemblies"""
-from typing import Generator, List, Optional, Union, Tuple, Set
+from typing import Generator, List, Optional, Union, Tuple, Set, Sequence
 from Bio.Seq import Seq
 from pyDOE2 import fullfact
 
+from supergsl.core.exception import MaxDesignsExceededError
 from supergsl.core.types import SuperGSLType
 from supergsl.core.types.builtin import Collection
 from supergsl.core.types.part import Part
-from supergsl.core.types.position import SeqPosition
+from supergsl.core.sequence import SequenceEntry
 
 # pylint: disable=E1136
 
@@ -18,7 +19,19 @@ from supergsl.core.types.position import SeqPosition
 # By way of a concrete example, a "Part Collection" can be used to declare levels,
 # but must be converted to its list of explicit "Parts" to be used in an
 # AssemblyFactor.
-AssemblyLevelDeclaration = Union[Part, Collection]
+
+AssemblyLevelDeclarationItem = Union[Part, Collection]
+
+class AssemblyLevelDeclaration:
+    def __init__(
+        self,
+        item : AssemblyLevelDeclarationItem,
+        label : Optional[str] = None
+    ):
+        self.item = item
+        self.label = label
+
+
 AssemblyLevel = Union[Part]
 
 class AssemblyFactor:
@@ -29,15 +42,16 @@ class AssemblyFactor:
 
         let promoters = [pGAL1, pGAL3, pGAL7]
         assembly {
-            uHO ; promoters ; gGENE ; dHO
+            uHO ; promoters as p1 ; gGENE ; dHO
         }
 
     The AssemblyFactor corresponding to the second position in the above assembly
-    has three levels pGAL1, pGAL3, and pGAL7
+    has three levels pGAL1, pGAL3, and pGAL7 and a label "p1"
     """
-    def __init__(self, factor_type : str, levels : List[AssemblyLevel]):
+    def __init__(self, factor_type : str, levels : List[AssemblyLevel], label : Optional[str]):
         self._factor_type = factor_type
         self._levels : List[AssemblyLevel] = levels
+        self.label = label
 
     @property
     def factor_type(self) -> str:
@@ -63,28 +77,43 @@ class AssemblyDeclaration(SuperGSLType):
         Each factor has a set of possible values currenly must be discrete
 
     """
+
+    @classmethod
+    def from_list(
+        cls,
+        label,
+        items : List[AssemblyLevelDeclarationItem]
+    ) -> 'AssemblyDeclaration':
+        """Create from a list of items by wrapping them in AssemblyLevelDeclarations."""
+        level_declarations = [
+            AssemblyLevelDeclaration(item)
+            for item in items
+        ]
+
+        return AssemblyDeclaration(label, level_declarations)
+
     def __init__(
         self,
         label : Optional[str],
-        items : List[AssemblyLevelDeclaration]
+        level_declarations : List[AssemblyLevelDeclaration]
     ):
         self._label : Optional[str] = label
-        self._factors : List[AssemblyFactor] = self._build_factors_from_parts(items)
+        self._factors : List[AssemblyFactor] = self._build_factors_from_parts(level_declarations)
 
     def _build_factors_from_parts(
         self,
-        items : List[AssemblyLevelDeclaration]
+        level_declarations : List[AssemblyLevelDeclaration]
     ) -> List[AssemblyFactor]:
         """Build a list of AssemblyFactors for the parts of this assembly declaration."""
         factors : List[AssemblyFactor] = []
-        for item in items:
+        for level_declaration in level_declarations:
             levels : List[AssemblyLevel] = []
-            if isinstance(item, Collection):
-                levels = list(item)
+            if isinstance(level_declaration.item, Collection):
+                levels = list(level_declaration.item)
             else:
-                levels = [item]
+                levels = [level_declaration.item]
 
-            factors.append(AssemblyFactor('Part', levels))
+            factors.append(AssemblyFactor('Part', levels, level_declaration.label))
         return factors
 
     @property
@@ -118,11 +147,12 @@ class AssemblyDeclaration(SuperGSLType):
 
         return levels
 
-    def get_full_factorial_designs(self) -> Generator[List[AssemblyLevel], None, None]:
+    def get_designs(self) -> Generator[List[AssemblyLevel], None, None]:
         """Return full-factorial iterator of the assembly designs."""
 
         if self.num_designs > 500:
-            raise Exception('AssemblyDeclaration will generate %d designs.' % self.num_designs)
+            raise MaxDesignsExceededError(
+                f'AssemblyDeclaration will generate {self.num_designs} designs.')
 
         designs = fullfact([
             len(factor.levels)
@@ -130,10 +160,12 @@ class AssemblyDeclaration(SuperGSLType):
         ])
 
         for design in designs:
-            yield [
+            design_description = [
                 self._factors[factor_index][int(level_index)]
                 for factor_index, level_index in enumerate(design)
             ]
+
+            yield design_description
 
 
 class Assembly(SuperGSLType):
@@ -142,32 +174,15 @@ class Assembly(SuperGSLType):
     def __init__(
         self,
         identifier : str,
-        sequence : Seq,
+        part : Part,
+        reagents : Sequence[SuperGSLType],
         description : Optional[str] = None
     ):
         self._identifier : str = identifier
-        self._sequence : Seq = sequence
-        self._parts : List[Tuple[Part, SeqPosition, SeqPosition]] = []
+        self._part : Part = part
+        self._reagents : Sequence[SuperGSLType] = reagents
+
         self.description : Optional[str] = description
-
-    def add_part(
-        self,
-        part : Part,
-        start_position : SeqPosition,
-        end_position : SeqPosition
-    ):
-        """Add a part at a specific position in the Assembly."""
-
-        start_reference, _ = start_position.get_absolute_position_in_reference()
-        if start_reference != self.sequence:
-            raise Exception('Start `SeqPosition` must be from the Assembly sequence.')
-
-        end_reference, _ = start_position.get_absolute_position_in_reference()
-        if end_reference != self.sequence:
-            raise Exception('End `SeqPosition` must be from the Assembly sequence.')
-
-        self._parts.append(
-            (part, start_position, end_position))
 
     @property
     def identifier(self) -> str:
@@ -175,25 +190,19 @@ class Assembly(SuperGSLType):
         return self._identifier
 
     @property
+    def part(self) -> Seq:
+        """Return the sequence entry in the sequence store of the construct."""
+        return self._part
+
+    @property
     def sequence(self) -> Seq:
         """Return the complete sequence of the construct."""
-        return self._sequence
+        return self._part.sequence_entry.sequence
 
     @property
-    def parts_with_positions(self) -> List[Tuple[Part, SeqPosition, SeqPosition]]:
-        return self._parts
-
-    @property
-    def parts(self) -> List[Part]:
+    def reagents(self) -> Sequence[SuperGSLType]:
         """Return a list of parts required to construct this assembly."""
-        return [
-            part_tuple[0]
-            for part_tuple in self._parts
-        ]
-
-    def get_part(self) -> Part:
-        """Retrieve a `Part` corresponding to this construct."""
-        raise NotImplementedError('Subclass to implement.')
+        return self._reagents
 
 
 class AssemblyResultSet(SuperGSLType):
@@ -201,10 +210,20 @@ class AssemblyResultSet(SuperGSLType):
     def __init__(self, assemblies : List[Assembly]):
         self.assemblies = assemblies
 
+    def add_assembly(self, assembly : Assembly):
+        """Add an assembly to this assembly result set."""
+        self.assemblies.append(assembly)
+
+    def __len__(self):
+        """Return the number of assemblies in the collection."""
+        return len(self.assemblies)
+
     def __iter__(self):
+        """Iterating over a result set should iterate over each assembly."""
         return iter(self.assemblies)
 
     def print(self):
+        """Return a string with details about this result set."""
         result = 'Assembly Result Set: %d assemblies\n' % len(self.assemblies)
         for assembly in self.assemblies:
             result += '    %s\n' % assembly.identifier

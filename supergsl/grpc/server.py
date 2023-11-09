@@ -2,6 +2,7 @@ import uuid
 from typing import Optional, Dict, Tuple, Any
 from concurrent import futures
 from grpc import server as grpc_server
+from google.protobuf.struct_pb2 import Struct
 
 from supergsl.grpc.stubs.sgsl_pb2_grpc import (
     SuperGSLCompilerServicer,
@@ -17,7 +18,7 @@ from supergsl.grpc.stubs.sgsl_pb2 import (
     Symbol
 )
 
-from supergsl.core.pipeline import CompilerPipeline
+from supergsl.lang.pipeline import CompilerPipeline
 
 
 class SuperGSLCompilerService(SuperGSLCompilerServicer):
@@ -68,10 +69,15 @@ class SuperGSLCompilerService(SuperGSLCompilerServicer):
         """List the symbols from the given compiler session's symbol table."""
         compiler_pipeline = self.get_compiler_session(request.session_identifier)
 
-        symbol_table = compiler_pipeline.get_symbol_table()
+        symbol_table = compiler_pipeline.symbols
         symbol_map : Dict[str, Symbol] = {}
         for key, value in self.serialize_symbol_table(symbol_table).items():
-            symbol_map[key] = Symbol(type=type(value).__name__)
+            details = Struct()
+            details.update(value.serialize())
+
+            symbol_map[key] = Symbol(
+                type=type(value).__name__,
+                details=details)
 
         return ListSymbolTableResult(symbols=symbol_map)
 

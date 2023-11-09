@@ -1,10 +1,9 @@
 """Implement the most basic assembler which concatenates a series of parts."""
-from typing import List
-from Bio.Seq import Seq
-from supergsl.core.constants import THREE_PRIME
-from supergsl.core.assembly import AssemblerBase
+from typing import List, Tuple
+from supergsl.core.assembly import AssemblerBase, AssemblyLevel
 from supergsl.core.types.part import Part
-from supergsl.core.types.position import SeqPosition
+from supergsl.core.types.position import Slice
+from supergsl.core.sequence import SliceMapping
 from supergsl.core.types.assembly import (
     AssemblyDeclaration,
     Assembly,
@@ -13,48 +12,56 @@ from supergsl.core.types.assembly import (
 
 
 class FusionAssembler(AssemblerBase):
-    """Create an assembly by fusing adjacent parts together without overlap."""
+    """Create an assembly by fusing adjacent parts together without overlap.
 
-    def assemble(self, assembly_requests : List[AssemblyDeclaration]) -> AssemblyResultSet:
-        """Iterate over `AssemblyDeclaration` and generate a set of assemblies."""
+    The most basic strategy is a "fusion" strategy where each part is annealed
+    to its neighbors. The product of this strategy is likely useful for direct
+    synthesis methods.
 
-        assemblies : List[Assembly] = []
-        for assembly_idx, assembly_request in enumerate(assembly_requests):
+    .. code-block:: gsl
 
-            designs = assembly_request.get_full_factorial_designs()
-            for design_idx, design_parts in enumerate(designs):
+            from builtin import fuse
+            from S288C import ADH1, TDH1, ERG10, HO
 
-                assembly_sequence = Seq(''.join([
-                    str(part.sequence)
-                    for part in design_parts
-                ]))
+            fuse {
+                HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
+                HO_pTDA1_gERG10: uHO ; pTDH1 ; gERG10[1:728] ; dHO
+            }
 
-                assembly_label = assembly_request.label or ('%03d' % assembly_idx)
-                identifier = 'ASM-%s-%03d' % (
-                    assembly_label,
-                    design_idx)
+    """
 
-                assembly = Assembly(identifier, assembly_sequence)
-                cur_seq_pos = 0
-                for part in design_parts:
-                    start_pos, end_pos = self.get_part_position(
-                        assembly_sequence,
-                        part,
-                        cur_seq_pos)
+    def assemble_design(
+        self,
+        assembly_label : str,
+        design_label : str,
+        assembly_request : List[AssemblyLevel]
+    ) -> Assembly:
+        """Create an Assembly for a single design given a label and its parts."""
+        design_label = f'ASM-{assembly_label}-{design_label}'
 
-                    assembly.add_part(part, start_pos, end_pos)
-                    cur_seq_pos += len(part.sequence)
-                assemblies.append(assembly)
+        cur_seq_pos = 0
+        slice_mappings : List[SliceMapping] = []
+        part_mappings : List[Tuple[Part, Slice]] = []
+        for part in assembly_request:
+            start_pos = cur_seq_pos
+            end_pos = cur_seq_pos + len(part.sequence)
+            cur_seq_pos = end_pos
 
-        return AssemblyResultSet(assemblies)
+            source_slice = Slice.from_entire_sequence()
+            target_slice = Slice.from_five_prime_indexes(
+                start_index=start_pos,
+                end_index=end_pos)
 
-    def get_part_position(self, assembly_sequence : Seq, part : Part, start_pos : int):
-        """Create SeqPosition objects in the provided assembly sequence."""
-        start = SeqPosition.from_reference(
-            x=start_pos,
-            rel_to=THREE_PRIME,
-            approximate=False,
-            reference=assembly_sequence
-        )
-        end = start.get_relative_position(len(part.sequence))
-        return start, end
+            slice_mappings.append(
+                SliceMapping(part.sequence_entry, source_slice, target_slice))
+            part_mappings.append(
+                (part, target_slice))
+
+        assembly_sequence_entry = self.sequence_store.concatenate(slice_mappings)
+        new_part = Part(
+            design_label,
+            assembly_sequence_entry,
+            provider=self)
+
+        assembly = Assembly(design_label, new_part, reagents=assembly_request)
+        return assembly

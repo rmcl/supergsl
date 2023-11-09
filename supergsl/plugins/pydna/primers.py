@@ -12,8 +12,10 @@ from supergsl.core.types.primer import PrimerPair
 class ExtractionPrimerBuilder(object):
     """Use pydna to generate extraction primers for parts."""
 
-    def __init__(self, options = None):
+    def __init__(self, sequence_store, options = None):
+        self.sequence_store = sequence_store
         self.options = options or {}
+
 
     def build_primers_for_part(self, part):
         """Build extraction primers and assign them into the part."""
@@ -30,9 +32,9 @@ class ExtractionPrimerBuilder(object):
 
         if not part.has_primers:
             part.set_extraction_primers(
-                PrimerPair.from_sequences(
-                    amplicon.forward_primer.seq,
-                    amplicon.reverse_primer.seq
+                PrimerPair.from_sequence_entries(
+                    self.sequence_store.add_from_reference(amplicon.forward_primer.seq),
+                    self.sequence_store.add_from_reference(amplicon.reverse_primer.seq)
                 ))
 
         return amplicon

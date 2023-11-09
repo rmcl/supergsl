@@ -8,7 +8,7 @@ except ImportError:
 
 from supergsl.core.plugin import SuperGSLPlugin
 from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
-from supergsl.core.backend import BreadthFirstNodeFilteredPass
+from supergsl.lang.backend import BreadthFirstNodeFilteredPass
 
 
 class PartSliceTreeOutput(SuperGSLFunction):

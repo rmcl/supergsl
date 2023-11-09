@@ -1,79 +1,90 @@
 from unittest import TestCase
-from Bio.Seq import Seq
-from supergsl.core.constants import THREE_PRIME, FIVE_PRIME
-from supergsl.core.types.position import SeqPosition
-
-class SeqPositionTestCase(TestCase):
-    """Test case for SeqPosition."""
-    maxDiff = None
-
-    def setUp(self):
-        self.seq_ex1 = Seq(self.example_seq)
+from supergsl.core.constants import FIVE_PRIME, THREE_PRIME
+from supergsl.core.types.position import (
+    AbsoluteSlice,
+    AbsolutePosition,
+    Position,
+    Slice
+)
 
 
-    def test_get_reference_sequence(self):
-        """Return the reference sequence even for hierarchical positions."""
-        sp = SeqPosition.from_reference(
-            x=100,
-            rel_to=THREE_PRIME,
-            approximate=True,
-            reference=self.seq_ex1
+class AbsolutePositionTestCase(TestCase):
+    """Test the AbsolutePosition class."""
+
+    def test_derive_from_relative_five_prime_position(self):
+        """Compute a new absolute position using a relative position defined relative to FIVE PRIME."""
+        start = AbsolutePosition(1000, 100, False)
+        rel_pos = Position(50, FIVE_PRIME, False)
+
+        new_abs_pos = start.derive_from_relative_position(rel_pos)
+        self.assertEqual(new_abs_pos.target_sequence_length, 1000)
+        self.assertEqual(new_abs_pos.index, 150)
+
+    def test_derive_from_relative_three_prime_position(self):
+        """Compute a new absolute position using a relative position defined relative to THREE PRIME."""
+        start = AbsolutePosition(1000, 100, False)
+        rel_pos = Position(50, THREE_PRIME, False)
+
+        new_abs_pos = start.derive_from_relative_position(rel_pos)
+        self.assertEqual(new_abs_pos.target_sequence_length, 1000)
+        self.assertEqual(new_abs_pos.index, 150)
+
+    def test_get_slice_pos_str(self):
+        start = AbsolutePosition(1000, 100, True)
+        self.assertEqual(start.get_slice_pos_str(), "~100")
+
+    def test_absolute_positions_equality(self):
+        """Absolute positions with same sequence length, index, and approximate should be equal."""
+        pos1 = AbsolutePosition(1000, 100, True)
+        pos2 = AbsolutePosition(1000, 100, True)
+        self.assertEqual(pos1, pos2)
+
+    def test_absolute_positions_less_than(self):
+        """Absolute positions with same sequence length, index, and approximate should be equal."""
+        pos1 = AbsolutePosition(1000, 90, True)
+        pos2 = AbsolutePosition(1000, 100, True)
+        self.assertTrue(pos1 < pos2)
+        self.assertTrue(pos1 <= pos2)
+        self.assertTrue(pos2 > pos1)
+        self.assertTrue(pos2 >= pos1)
+
+class AbsoluteSliceTestCase(TestCase):
+    """Test the AbsoluteSlice class."""
+
+    def test_derive_from_relative_slice_five_prime(self):
+        """Get the correct absolute position when adjusted for a relative position."""
+        abs_slice = AbsoluteSlice(
+            AbsolutePosition(1000, 100, False),
+            AbsolutePosition(1000, 400, False))
+
+        new_abs_slice = abs_slice.derive_from_relative_slice(
+            Slice.from_five_prime_indexes(50,100)
         )
 
-        self.assertEqual(sp.reference_sequence, self.seq_ex1)
+        self.assertEqual(new_abs_slice.start.index, 150)
+        self.assertEqual(new_abs_slice.end.index, 200)
 
-        child_sp = sp.get_relative_position(x=25)
-        self.assertEqual(child_sp.reference_sequence, self.seq_ex1)
+    def test_derive_from_relative_slice_reverse_strand(self):
+        abs_slice = AbsoluteSlice(
+            AbsolutePosition(1000, 100, False),
+            AbsolutePosition(1000, 400, False))
 
-    def test_seq_position_string_representation(self):
-        sp = SeqPosition.from_reference(
-            x=100,
-            rel_to=THREE_PRIME,
-            approximate=True,
-            reference=self.seq_ex1
+        new_abs_slice = abs_slice.derive_from_relative_slice(
+            Slice.from_five_prime_indexes(100,50)
         )
 
-        self.assertEquals(str(sp), "3'+100bp Approx:True (Abs Pos: 100)")
+        self.assertEqual(new_abs_slice.start.index, 200)
+        self.assertEqual(new_abs_slice.end.index, 150)
 
-    def test_get_absolute_position_in_reference_no_parent_part_three_prime(self):
-        sp = SeqPosition.from_reference(
-            x=200,
-            rel_to=THREE_PRIME,
-            approximate=False,
-            reference=self.seq_ex1
+    def test_derive_from_relative_slice_three_prime(self):
+        abs_slice = AbsoluteSlice(
+            AbsolutePosition(1000, 100, False),
+            AbsolutePosition(1000, 400, False))
+
+        new_abs_slice = abs_slice.derive_from_relative_slice(Slice(
+            Position(50, FIVE_PRIME),
+            Position(-50, THREE_PRIME))
         )
 
-        ref, pos = sp.get_absolute_position_in_reference()
-
-        self.assertEquals(ref, self.seq_ex1)
-        self.assertEquals(pos, 200)
-
-    def test_get_absolute_position_in_reference_no_parent_part_five_prime(self):
-        sp = SeqPosition.from_reference(
-            x=255,
-            rel_to=FIVE_PRIME,
-            approximate=False,
-            reference=self.seq_ex1
-        )
-
-        ref, pos = sp.get_absolute_position_in_reference()
-
-        self.assertEquals(ref, self.seq_ex1)
-        self.assertEquals(pos, len(self.seq_ex1) - 255)
-
-    def test_get_absolute_position_in_reference_with_parent_part(self):
-        parent_pos = SeqPosition.from_reference(
-            x=150,
-            rel_to=FIVE_PRIME,
-            approximate=False,
-            reference=self.seq_ex1
-        )
-
-        child_pos = parent_pos.get_relative_position(50)
-
-        ref, pos = child_pos.get_absolute_position_in_reference()
-        self.assertEquals(ref, self.seq_ex1)
-        self.assertEquals(pos, len(self.seq_ex1) - 100)
-
-
-    example_seq  = '''AAATAGCCCTCATGTACGTCTCCTCCAAGCCCTGTTGTCTCTTACCCGGATGTTCAACCAAAAGCTACTTACTACCTTTATTTTATGTTTACTTTTTATAGGTTGTCTTTTTATCCCACTTCTTCGCACTTGTCTCTCGCTACTGCCGTGCAACAAACACTAAATCAAAACAATGAAATACTACTACATCAAAACGCATTTTCCCTAGAAAAAAAATTTTCTTACAATATACTATACTACACAATACATAATCACTGACTTTCGTAACAACAATTTCCTTCACTCTCCAACTTCTCTGCTCGAATCTCTACATAGTAATATTATATCAAATCTACCGTCTGGAACATCATCGCTATCCAGCTCTTTGTGAACCGCTACCATCAGCATGTACAGTGGTACCCTCGTGTTATCTGCAGCGAGAACTTCAACGTTTGCCAAATCAAGCCAATGTGGTAACAACCACATCTCCGAAATCTGCTCCAAAAGATATTCCAGTTTCTGCCGAAATGTTTTATTGTAGAACAGCCCTATCAGCATCGACAGGAATGCCGTCCAATGCGGCACTTTAGATGGGGTAACTCCCAGCGCAAGCTGATCTCGCAAGTGCATTCCTAGACTTAATTCATATCTGCTCCTCAACTGTCGATGATGCCTGCTAAACTGCAGCTTGACGTACTGCGGACCCTGCAGTCCAGCGCTCGTCATGGAACGCAAACGCTGAAAAACTCCAACTTTCTCGAGCGCTTCCACAAAGACCGTATCGTCTTTTGCCTCCCATTCTTCCCGGCACTTTTTTTCGTCCCAGTTCAAAAAGTACTGCAGCACCTCTGTCTTCGATTCACGCAAGTTGCTCCATACTTTATAATACAACTCTTTGATCTGCCTTCCAGACATGCGGAAAACTTGGCTCCCTTGCTTGCCTCTTGTCGAATCCAATACACTAATTGTTTCTCTTCTTCTAGTAATGGCCAGGTACCAAGCATAATTTCTCTGTATCTGAGAGTAGATCTCTCTCCTTTTTACGCTAAAATATTTCAAATATCCTACAGGGTCCCCATGATATGGCTCGATGTCTTCCAAGTATTCTTTGTATTCCTCATCATTTCGCAGCATTCTCTCCACAGCTAGTGCTTCCCAAGCTATCCTCCGATACGATACTTTCTGGCCAGCCCAACAGACACAGAGCCCGAACATCTTTTGACAGCCCTTGCATAATCCGTATTGTGTGAATACTCCCTCTGGGCAGAAGTATATGTCAATACCATAGAGGAAAAGATGTTTAATTTCGTCAGACCGAAATCCAAGAAACTGTAAGACATTCATATTCTCGGAAGTATTGGGAAATTGTGCTTTCAGTTTCTTTCTCTCTAGGAAAACCATTTGACTCCCTTTCCGCTTATACGACTCTTTGTTAATGTCGGTGACTGGATGGAATCTATTATCCTCAGCATTGCCATCTTTATTGGCGTCCTCCTTGGCACTAGCGTTGGTACTTTCAGTGGTAGTGGCATTAGTGCTGGAGTTGGTGCTAGCAGTGGTAGTGGCATTAGTGCTGGAGTTGGTGCTAGCAGTGGTAGTAGCACTAGTGTTGGAGTCGGTACTTTCGGTGGTAGTAGCACTAGTGTTGGAGTTGGTACTTTCAGT'''
+        self.assertEqual(new_abs_slice.start.index, 150)
+        self.assertEqual(new_abs_slice.end.index, 350)

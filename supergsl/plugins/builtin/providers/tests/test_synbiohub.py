@@ -14,12 +14,16 @@ class SynBioHubProviderTestCase(unittest.TestCase):
     def setUp(self):
         self.mock_settings = {
             'repository_url': 'http://example.testbla/repo',
+            'enable_part_cache' : False
         }
+        self.fixtures = SuperGSLCoreFixtures()
+        self.provider_config = self.fixtures.mk_provider_config(self.mock_settings)
+
 
     def test_get_part_from_mocked_detail(self):
         """Confirm that the provider correctly initializes and returns a SuperGSL Part"""
-        provider = SynBioHubPartProvider('igem', self.mock_settings)
-        provider.retrieve_part_details = Mock(
+        provider = SynBioHubPartProvider('igem', self.provider_config)
+        provider.get_part_details = Mock(
             return_value={
                 'roles': [
                     'http://identifiers.org/so/SO:0000167',
@@ -31,7 +35,7 @@ class SynBioHubProviderTestCase(unittest.TestCase):
 
         part = provider.get_part('BBa_J23106')
 
-        provider.retrieve_part_details.assert_called_once_with('BBa_J23106')
+        provider.get_part_details.assert_called_once_with('BBa_J23106')
         self.assertEqual(part.identifier, 'BBa_J23106')
         self.assertEqual(part.description, 'constitutive promoter family member')
         self.assertEqual(part.roles, [
@@ -44,7 +48,7 @@ class SynBioHubProviderTestCase(unittest.TestCase):
     @patch('requests.get')
     def test_get_part(self, request_mock_get):
         """Patch the http call to test the entire provider and part retrieval."""
-        provider = SynBioHubPartProvider('igem', self.mock_settings)
+        provider = SynBioHubPartProvider('igem', self.provider_config)
 
         request_mock_get.return_value.status_code = 200
         request_mock_get.return_value.content = open(

@@ -17,52 +17,47 @@ class ParserState(object):
     def __init__(self, filename=None):
         self.filename = filename
 
+# rply has it's own style which does not conform to pylint's expectations.
+# pylint: disable=W0613,C0103,W0612,C0301
 
 class SuperGSLParser(object):
     """Construct a parser for the SuperGSL Language."""
 
-    # A list of all token names accepted by the parser.
-    ACCEPTED_TOKENS = (
-        'FROM',
-        'IMPORT',
-        'AS',
-        'LET',
+    @classmethod
+    def create_supergsl_parser(cls):
+        """Create a parser suitable for interpreting the complete SuperGSL language."""
+        pg = ParserGenerator(cls.PROGRAM_ACCEPTED_TOKENS)
+        parser = SuperGSLParser(pg)
+        parser.build_program_parser_rules()
+        parser.build_slice_parser_rules()
+        return parser
 
-        'OPEN_CURLY_BRACKET',
-        'CLOSE_CURLY_BRACKET',
+    @classmethod
+    def create_slice_parser(cls):
+        """Create a parser for interpreting just the part slicing notation."""
+        pg = ParserGenerator(cls.SLICE_TOKENS)
+        parser = SuperGSLParser(pg)
 
-        'FORWARD_SLASH',
+        @parser.pg.production('program : slice_index')
+        def program(state, p):
+            return p[0]
 
-        'OPEN_PAREN',
-        'CLOSE_PAREN',
+        parser.build_slice_parser_rules()
+        return parser
 
-        'OPEN_BRACKET',
-        'CLOSE_BRACKET',
+    def __init__(self, pg):
+        """Construct the SuperGSLParser. This should not be called directly."""
+        self.pg = pg
 
-        'COLON',
-        'SEMICOLON',
-        'COMMA',
-        'PERIOD',
+    def parse(self, tokens):
+        """Given a iterator of tokens parse them into a AST."""
+        parser = self.pg.build()
 
-        'NUMBER',
-        'IDENTIFIER',
-        'AMINO_ACID_SEQUENCE',
-        'EQUAL',
-        'TILDE',
-        'EXCLAMATION',
+        parser_state = ParserState()
+        return parser.parse(tokens, state=parser_state)
 
-        'STRING_CONSTANT',
-    )
-
-    def __init__(self):
-        self.pg = ParserGenerator(self.ACCEPTED_TOKENS)
-        self.build_parser()
-
-    def build_parser(self):
-        """Define the parser rules."""
-
-        # rply has it's own style which does not conform to pylint's expectations.
-        # pylint: disable=W0613,C0103,W0612,C0301
+    def build_program_parser_rules(self):
+        """Define the parser rules with the exception of those related to slice notation."""
 
         @self.pg.production('program : import_list definition_list')
         @self.pg.production('program : import_list')
@@ -254,15 +249,22 @@ class SuperGSLParser(object):
         def protein_constant(state, p):
             return ast.SequenceConstant(p[1].value[1:], UNAMBIGUOUS_PROTEIN_SEQUENCE)
 
+        @self.pg.production('symbol_reference : symbol_identifier OPEN_BRACKET slice_index CLOSE_BRACKET AS IDENTIFIER')
+        @self.pg.production('symbol_reference : symbol_identifier AS IDENTIFIER')
         @self.pg.production('symbol_reference : symbol_identifier OPEN_BRACKET slice_index CLOSE_BRACKET')
         @self.pg.production('symbol_reference : symbol_identifier')
         def symbol_reference(state, p):
             identifier, invert = p[0]
             part_slice = None
-            if len(p) == 4:
+            label = None
+            if len(p) == 4 or len(p) == 6:
                 part_slice = p[2]
+            if len(p) == 3:
+                label = p[2].value
+            if len(p) == 6:
+                label = p[4].value
 
-            return ast.SymbolReference(identifier, part_slice, invert)
+            return ast.SymbolReference(identifier, part_slice, invert, label)
 
         @self.pg.production('symbol_identifier : EXCLAMATION IDENTIFIER')
         @self.pg.production('symbol_identifier : IDENTIFIER')
@@ -275,6 +277,14 @@ class SuperGSLParser(object):
                 identifier = p[0].value
 
             return (identifier, invert)
+
+        @self.pg.error
+        def error_handle(state, lookahead):
+            raise ParsingError(
+                'An error occurred parsing source document at %s' % lookahead.source_pos)
+
+    def build_slice_parser_rules(self):
+        """Initialize the parser rules related to slice notation."""
 
         @self.pg.production('slice_index : slice_position COLON slice_position')
         def index_slice(state, p):
@@ -296,7 +306,9 @@ class SuperGSLParser(object):
         @self.pg.production('slice_coordinates : NUMBER IDENTIFIER')
         def slice_coordinates(state, p):
             position_index = int(p[0].value)
-            postfix = None
+
+            # If postfix not specified it should default to 'S'
+            postfix = 'S'
             if len(p) == 2:
                 postfix = p[1].value
                 if postfix not in ['S', 'E']:
@@ -304,14 +316,45 @@ class SuperGSLParser(object):
 
             return (position_index, postfix)
 
-        @self.pg.error
-        def error_handle(state, lookahead):
-            raise ParsingError(
-                'An error occurred parsing source document at %s' % lookahead.source_pos)
 
-    def parse(self, tokens):
-        """Given a iterator of tokens parse them into a AST."""
-        parser = self.pg.build()
+    # A list of all token names accepted by the parsers.
+    # Slice tokens are only used by the slice parser.
+    SLICE_TOKENS = (
+        'COLON',
+        'NUMBER',
+        'IDENTIFIER',
+        'TILDE',
+    )
 
-        parser_state = ParserState()
-        return parser.parse(tokens, state=parser_state)
+    # Program tokens are all of the tokens used by the SuperGSL language.
+    PROGRAM_ACCEPTED_TOKENS = (
+        'FROM',
+        'IMPORT',
+        'AS',
+        'LET',
+
+        'OPEN_CURLY_BRACKET',
+        'CLOSE_CURLY_BRACKET',
+
+        'FORWARD_SLASH',
+
+        'OPEN_PAREN',
+        'CLOSE_PAREN',
+
+        'OPEN_BRACKET',
+        'CLOSE_BRACKET',
+
+        'COLON',
+        'SEMICOLON',
+        'COMMA',
+        'PERIOD',
+        'EXCLAMATION',
+
+        'NUMBER',
+        'IDENTIFIER',
+        'AMINO_ACID_SEQUENCE',
+        'EQUAL',
+
+        'STRING_CONSTANT',
+
+    ) + SLICE_TOKENS

@@ -7,6 +7,7 @@ from Bio.Seq import Seq
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 from supergsl.plugins.builtin.output.json_output import JSONOutput
 
+
 class JSONOutputTestCase(TestCase):
     """Test the behavior of SynBioHub provider"""
     maxDiff = None
@@ -15,7 +16,7 @@ class JSONOutputTestCase(TestCase):
         self.fixtures = SuperGSLCoreFixtures()
 
         self.compiler_settings = {}
-        self.output = JSONOutput(self.compiler_settings)
+        self.output = JSONOutput(self.fixtures.mk_provider_config(self.compiler_settings))
 
     def test_get_assemblies_from_mocked_detail(self):
         """Check that the assemblies serialized by JSON match to original assemblies."""
@@ -26,7 +27,7 @@ class JSONOutputTestCase(TestCase):
         for assembly in assembly_result:
             parts_by_assembly[assembly.identifier] = [
                 part.identifier
-                for part in assembly.parts
+                for part in assembly.reagents
             ]
             sequence_by_assembly[assembly.identifier] = assembly.sequence
 
@@ -50,7 +51,7 @@ class JSONOutputTestCase(TestCase):
         for assembly in assembly_result:
             expected_parts.update([
                 part.identifier
-                for part in assembly.parts
+                for part in assembly.reagents
             ])
 
         output_fp = StringIO()

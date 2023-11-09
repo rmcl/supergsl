@@ -2,7 +2,7 @@ from typing import List, Tuple, Optional, Dict, Callable
 from .ast import Node
 
 from supergsl.core.symbol_table import SymbolTable
-from supergsl.core.exception import BackendError
+from supergsl.lang.exception import BackendError
 
 #pylint: disable=E1136
 
@@ -17,9 +17,6 @@ class BackendPipelinePass(object):
     def __init__(self, symbol_table, allow_modification : bool = True):
         self.symbol_table = symbol_table
         self.allow_modification = allow_modification
-
-    def get_symbol_table(self):
-        return self.symbol_table
 
     def get_pass_name(self):
         if not self.name:
@@ -44,19 +41,10 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
         If you want a catch-all handler specify "None" in get_node_handlers. If you
         just want a simple pass you can override this method.
         """
-        handlers : Dict[Optional[str], ASTNodeHandlerMethod] = self.get_node_handlers()
-        handler_method : Optional[ASTNodeHandlerMethod] = None
-
         if not node:
             raise BackendError('Past "{}" was passed a null AST.'.format(self.get_pass_name()))
 
-        node_type : str = type(node).__name__
-        handler_method = handlers.get(node_type, None)
-        if not handler_method:
-            # No Node specific handler defined for this node_type
-            # see if there is a default handler defined.
-            handler_method = handlers.get(None, None)
-
+        handler_method = self.get_handler_for_node(node)
         if handler_method:
             result_node = self.call_handler_and_check_result(handler_method, node)
             if result_node != node:
@@ -65,6 +53,22 @@ class BreadthFirstNodeFilteredPass(BackendPipelinePass):
                         'You cannot update the root Program AST node. Tried to update "%s"' % node)
 
                 parent_node.replace_child_node(node, result_node)
+
+    def get_handler_for_node(self, node : Node) -> Optional[ASTNodeHandlerMethod]:
+        """Get the handler for the given AST node.
+
+        If no handler specified, try to return the default node handler. If no
+        default handler speciifed then return None.
+        """
+        handlers = self.get_node_handlers()
+
+        node_type = type(node).__name__
+        try:
+            return handlers[node_type]
+        except KeyError:
+            # No Node specific handler defined for this node_type
+            # see if there is a default handler defined.
+            return handlers.get(None, None)
 
     def get_node_handlers(self) -> Dict[Optional[str], ASTNodeHandlerMethod]:
         """Define handler methods for each node type.
@@ -121,11 +125,9 @@ class DepthFirstNodeFilteredPass(BreadthFirstNodeFilteredPass):
     """Perform a postorder depth first traversal of the AST and only visit a subset of node types."""
 
     def perform(self, ast : Node) -> Node:
-        ast = self.before_pass(ast)
+        ast = self.call_handler_and_check_result(self.before_pass, ast)
 
-        if not ast:
-            raise BackendError('before_pass of "%s" did not return an AST node object.' % self)
-
+        # Store both current node and parent.
         node_stack : List[Tuple[Node, Optional[Node]]] = [(ast, None)]
         discovered = set()
 
@@ -137,13 +139,12 @@ class DepthFirstNodeFilteredPass(BreadthFirstNodeFilteredPass):
                 self.visit(cur_node, cur_node_parent)
             else:
                 discovered.add(cur_node)
-                node_stack += [
-                    (child_node, cur_node) # Store both current node and parent.
-                    for child_node in cur_node.child_nodes()
-                ]
+                child_nodes = cur_node.child_nodes()
+                if child_nodes:
+                    node_stack.extend([
+                        (child_node, cur_node)
+                        for child_node in child_nodes
+                    ])
 
-        ast = self.after_pass(ast)
-        if not ast:
-            raise BackendError('after_pass of "%s" did not return an AST node object.' % self)
-
+        ast = self.call_handler_and_check_result(self.after_pass, ast)
         return ast

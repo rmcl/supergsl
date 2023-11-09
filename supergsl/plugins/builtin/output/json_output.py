@@ -22,19 +22,18 @@ class JSONOutput(AssemblyResultOutputFunction):
         }
 
         for assembly_idx, assembly in enumerate(assemblies):
-            assembly_parts = [
+            assembly_reagents = [
                 part.identifier
-                for part in assembly.parts
+                for part in assembly.reagents
             ]
 
             json_output['assemblies'].append({
                 'identifier': assembly.identifier,
-                'parts': assembly_parts,
+                'parts': assembly_reagents,
                 'sequence': str(assembly.sequence)
             })
 
-            for part in assembly.parts:
-                parts.add(part)
+            parts.update(assembly.reagents)
 
         for part in parts:
             part_details = {

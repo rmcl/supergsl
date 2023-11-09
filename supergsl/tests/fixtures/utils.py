@@ -1,6 +1,6 @@
 """Implement an AST Traversal used by tests to introspect the output of the compiler"""
 
-from supergsl.core.backend import BreadthFirstNodeFilteredPass
+from supergsl.lang.backend import BreadthFirstNodeFilteredPass
 
 
 class TestOutputAstPass(BreadthFirstNodeFilteredPass):

@@ -2,9 +2,9 @@
 from typing import cast
 from Bio.Seq import Seq
 from Bio import SeqIO
-from supergsl.core.constants import THREE_PRIME, SO_HOMOLOGOUS_REGION
-from supergsl.core.parts.provider import ConstantPartProvider
-from supergsl.core.types.position import SeqPosition
+from supergsl.core.constants import THREE_PRIME
+from supergsl.core.types.role import SO_HOMOLOGOUS_REGION
+from supergsl.core.parts.provider import ConstantPartProvider, ConstantPartDetail
 
 from supergsl.plugins.builtin.providers.synbiohub import SynBioHubPartProvider
 from .types import BioBrickPart
@@ -27,12 +27,11 @@ class PartRegistry(SynBioHubPartProvider):
         Return: `BioBrickPart`
         """
 
-        part_details = self.retrieve_part_details(identifier)
-        payload_sequence = part_details['sequence']
-
-        part = BioBrickPart(
+        part_details = self.get_part_details(identifier)
+        part = BioBrickPart.from_payload_sequence(
+            sequence_store=self.sequence_store,
+            payload_sequence=part_details['sequence'],
             identifier=identifier,
-            payload_sequence=payload_sequence,
             provider=self,
             description=part_details['description'],
             roles=part_details['roles'])
@@ -58,12 +57,12 @@ class BioBrickPartProvider(ConstantPartProvider):
     """
 
     PART_DETAILS = {
-        'prefix': (
+        'prefix': ConstantPartDetail(
             'Biobrick RFC[10] prefix',
             BIOBRICK_PREFIX_SEQUENCE,
             [SO_HOMOLOGOUS_REGION]
         ),
-        'suffix': (
+        'suffix': ConstantPartDetail(
             'Biobrick RFC[10] suffix',
             BIOBRICK_SUFFIX_SEQUENCE,
             [SO_HOMOLOGOUS_REGION]

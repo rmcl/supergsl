@@ -8,6 +8,7 @@ SuperGSL
    why_does_supergsl_exist
    common_use_cases
    getting_started
+   part_providers
    slicing
    assemblies
 
@@ -19,4 +20,8 @@ SuperGSL
    glossary
 
 
+Indices and tables
+==================
 * :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

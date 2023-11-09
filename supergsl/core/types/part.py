@@ -1,16 +1,15 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Union
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from supergsl.core.constants import (
-    PART_SLICE_POSTFIX_START,
-    PART_SLICE_POSTFIX_END
-)
 
+from supergsl.core.exception import PartError
+from supergsl.core.sequence import SequenceEntry
+from supergsl.core.constants import STRAND_CRICK
+from supergsl.core.types.role import Role
 from supergsl.core.types import SuperGSLType
 from supergsl.core.types.builtin import NucleotideSequence
 from supergsl.core.types.primer import PrimerPair
-from supergsl.core.exception import PartError
-from .position import SeqPosition
+from supergsl.core.types.position import Slice
 
 
 class Part(NucleotideSequence):
@@ -19,14 +18,13 @@ class Part(NucleotideSequence):
     def __init__(
         self,
         identifier : str,
-        start_position : SeqPosition,
-        end_position : SeqPosition,
+        sequence_entry : SequenceEntry,
         provider,
         parent_part : Optional['Part'] = None,
         extraction_primers : Optional[PrimerPair] = None,
         description : Optional[str] = None,
         alternative_names : Optional[List[str]] = None,
-        roles : Optional[List[str]]= None
+        roles : Optional[List[Role]]= None
     ):
         """Initialize a Part
 
@@ -36,10 +34,7 @@ class Part(NucleotideSequence):
         """
         self.identifier = identifier
 
-        self.start = start_position
-        self.end = end_position
-
-        start_position.check_position_compatibility(end_position)
+        self.sequence_entry = sequence_entry
 
         self.provider = provider
 
@@ -50,7 +45,7 @@ class Part(NucleotideSequence):
         self.description = description
         self.alternative_names = alternative_names
 
-        self._roles = []
+        self._roles : List[Role] = []
         if roles:
             self._roles = roles
 
@@ -72,13 +67,7 @@ class Part(NucleotideSequence):
 
     @property
     def sequence(self) -> Seq:
-        ref, start_pos = self.start.get_absolute_position_in_reference()
-        ref_2, end_pos = self.end.get_absolute_position_in_reference()
-
-        if ref != ref_2:
-            raise Exception("Reference sequences do not match.")
-
-        return ref[start_pos:end_pos]
+        return self.sequence_entry.sequence
 
     @property
     def sequence_record(self) -> SeqRecord:
@@ -90,27 +79,39 @@ class Part(NucleotideSequence):
             description=description)
 
     @property
-    def roles(self):
+    def roles(self) -> List[Role]:
         """Return a list of ontology terms for this part."""
         return self._roles
 
-    def add_roles(self, roles : List[str]):
+    def add_roles(self, roles : List[Role]):
         """Add additional ontology terms to this part."""
         self._roles.extend(roles)
         self._roles = list(set(self._roles))
 
-    def get_child_part_by_slice(
-        self,
-        identifier : str,
-        start : SeqPosition,
-        end : SeqPosition
-    ) -> 'Part':
+    def slice(self, part_slice : Union[Slice, str], identifier : Optional[str] = None) -> 'Part':
+        """Return a new part representing a sliced region.
+
+        part_slice is either a Slice object or a str.
+        """
+        if isinstance(part_slice, str):
+            part_slice = Slice.from_str(part_slice)
+
+        if not identifier:
+            identifier = f'{self.identifier}[{part_slice.get_slice_str()}]'
+
         return self.provider.get_child_part_by_slice(
             self,
             identifier,
-            start,
-            end
+            part_slice
         )
+
+    def invert(self, identifier : Optional[str] = None) -> 'Part':
+        """Return a new Part with sequence on reverse strand."""
+
+        if not identifier:
+            identifier = f'!{self.identifier}'
+
+        return self.slice(Slice.from_entire_sequence(strand=STRAND_CRICK), identifier)
 
     def eval(self):
         """Evaluate this part."""
@@ -119,9 +120,17 @@ class Part(NucleotideSequence):
     def __repr__(self):
         return self.identifier
 
+    def serialize(self) -> Dict:
+        return {
+            'identifier': self.identifier,
+            'description': self.description,
+            'sequence': str(self.sequence),
+        }
+
     def print(self) -> str:
         """Display details about the SuperGSL object."""
         return '%s: %s' % (self.identifier, self.sequence)
+
 
 class LazyLoadedPart(SuperGSLType):
     def eval(self) -> SuperGSLType:

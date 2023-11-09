@@ -152,7 +152,7 @@ class BioBrick3AAssembler(AssemblerBase):
         assemblies : List[Assembly] = []
         for assembly_idx, assembly_declaration in enumerate(assembly_declarations):
             #type of designs = Generator[List[AssemblyLevel]]
-            designs = assembly_declaration.get_full_factorial_designs()
+            designs = assembly_declaration.get_designs()
             for design_parts in designs:
 
                 p1 = design_parts[0]

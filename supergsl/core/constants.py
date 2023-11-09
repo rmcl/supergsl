@@ -9,20 +9,14 @@ FIVE_PRIME = 'FivePrime'
 PART_SLICE_POSTFIX_START = 'S'
 PART_SLICE_POSTFIX_END = 'E'
 
+# Note: Naming strands is really confusing
+# Todo: Does it make more sense to name these constants FORWARD, REVERSE
+# or SENSE, ANTISENSE? Totally unclear at this point.
+STRAND_WATSON = 'WATSON' # aka "Sense"
+STRAND_CRICK = 'CRICK' # aka "Anti-Sense"
+
+MOLECULE_LINEAR = 'LINEAR'
+MOLECULE_CIRCULAR = 'CIRCULAR'
+
 UNAMBIGUOUS_DNA_SEQUENCE = 'DNA'
 UNAMBIGUOUS_PROTEIN_SEQUENCE= 'PROTEIN'
-
-# Import commonly used Sequence Onotology Terms
-# Todo: Look into "tyto" (https://github.com/SynBioDex/tyto)
-from sbol2.constants import (
-    SO_GENE,
-    SO_PROMOTER,
-    SO_TERMINATOR,
-    SO_CDS,
-)
-
-# SO_ORF seems not to be defined in pysbol3
-SO_ORF = 'https://identifiers.org/SO:0000236'
-SO_MRNA = 'https://identifiers.org/SO:0000234'
-SO_HOMOLOGOUS_REGION = 'https://identifiers.org/SO:0000853'
-SO_CDS_FRAGMENT = 'https://identifiers.org/SO:0001384'

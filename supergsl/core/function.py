@@ -8,10 +8,14 @@ from typing import (
     Union,
     Any
 )
+from typeguard import check_type, TypeCheckError
 from inspect import getdoc
 
 from supergsl.core.types import SuperGSLType
 from supergsl.core.exception import FunctionInvokeError
+from supergsl.core.sequence import SequenceStore
+from supergsl.core.provider import ProviderConfig
+
 #pylint: disable=E1136
 
 
@@ -24,8 +28,9 @@ class SuperGSLFunction(SuperGSLType):
     arguments : List[Tuple[str, Type]] = []
     return_type : Optional[Type[SuperGSLType]] = None
 
-    def __init__(self, compiler_settings : dict):
-        self.settings = compiler_settings
+    def __init__(self, config : ProviderConfig):
+        self.settings = config.settings
+        self.sequence_store = config.sequence_store
 
     @classmethod
     def get_name(cls):
@@ -60,13 +65,15 @@ class SuperGSLFunction(SuperGSLType):
         if not expected_return_type:
             expected_return_type = type(None)
 
-        if not isinstance(result, expected_return_type):
+        try:
+            check_type(result, expected_return_type)
+        except TypeCheckError as error:
             raise FunctionInvokeError(
                 '"%s" Return type does not match expectation. Expected: "%s", Actual: "%s"' % (
                     self,
                     expected_return_type,
                     type(result)
-                ))
+                )) from error
 
     def build_argument_map(
         self,
@@ -92,13 +99,15 @@ class SuperGSLFunction(SuperGSLType):
             if argument_key == 'children':
                 raise FunctionInvokeError('Cannot define an argument named "children". It is reserved.')
 
-            if not isinstance(argument_value, expected_argument_type):
+            try:
+                check_type(argument_value, expected_argument_type)
+            except TypeCheckError as error:
                 raise FunctionInvokeError(
                     'Provided type does not match expectation. '
                     'Expected %s, but received %s' % (
                         expected_argument_type,
                         type(argument_value))
-                )
+                ) from error
 
             function_parameters[argument_key] = argument_value
 
@@ -124,12 +133,20 @@ class SuperGSLFunction(SuperGSLType):
         return result
 
 
-
-
 class SuperGSLFunctionDeclaration(SuperGSLType):
+    """Store details related to the declaration of a SuperGSL Function."""
+
     def __init__(self, function_class : Type[SuperGSLFunction], compiler_settings : dict):
         self.function_class = function_class
         self.compiler_settings = compiler_settings
+        self.sequence_store : Optional[SequenceStore] = None
+
+    def set_sequence_store(self, sequence_store : SequenceStore):
+        self.sequence_store = sequence_store
 
     def eval(self) -> SuperGSLFunction:
-        return self.function_class(self.compiler_settings)
+        if not self.sequence_store:
+            raise Exception('SequenceStore not set.')
+
+        config = ProviderConfig(self.sequence_store, self.compiler_settings)
+        return self.function_class(config)

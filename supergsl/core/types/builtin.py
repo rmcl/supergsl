@@ -1,42 +1,65 @@
 """Define SuperGSL builtin types that can be used by plugins."""
 from Bio.Seq import Seq
-from typing import List, Type
+from typing import List, Type, Optional, Union
 from collections import OrderedDict
+
+from supergsl.core.sequence import SequenceEntry
+from supergsl.utils.sequence import build_truncated_sequence
 from .base import SuperGSLType
+from .position import Slice
+
 
 class SuperGSLEnum(SuperGSLType):
     """Define a list of choices."""
     options : List[str] = []
 
 
-class NucleotideSequence(SuperGSLType):
+class SliceInvertMixin:
+    """A Mixin that allows a part to be sliced or inverted."""
+
+    def slice(
+        self,
+        part_slice : Union[Slice, str],
+        identifier : Optional[str] = None
+    ) -> 'SuperGSLType':
+        """Return a new part representing a sliced region."""
+        raise Exception(f'{type(self)} does not support slicing.')
+
+    def invert(self, identifier : Optional[str] = None):
+        """Return a new Part with sequence on reverse strand."""
+        raise Exception(f'{type(self)} does not support inverting.')
+
+
+class NucleotideSequence(SuperGSLType, SliceInvertMixin):
     """A type representing a nucleotide sequence."""
 
-    def __init__(self, sequence : Seq):
-        self._sequence = sequence
+    def __init__(self, sequence_entry : SequenceEntry):
+        self.sequence_entry = sequence_entry
 
     @property
     def sequence(self) -> Seq:
         """Return the nucleotide sequence as a `Bio.Seq`."""
-        return self._sequence
+        return self.sequence_entry.sequence
 
     def __repr__(self):
-        return 'NucleotideSequence: %s' % self.sequence
+        """Create a repr string representation of the Nucleotide Sequence."""
+        return f'NucleotideSequence: {build_truncated_sequence(self.sequence)}'
 
 
 class AminoAcidSequence(SuperGSLType):
     """A type representing arbitrary an amino acid sequence."""
 
-    def __init__(self, sequence : Seq):
-        self._sequence = sequence
+    def __init__(self, sequence_entry : SequenceEntry):
+        self.sequence_entry = sequence_entry
 
     @property
     def sequence(self):
         """Return the amino acid sequence as a `Bio.Seq`."""
-        return self._sequence
+        return self.sequence_entry.sequence
 
     def __repr__(self):
-        return 'AminoAcidSequence: %s' % self.sequence
+        """Create a repr string representation of the Amino Acid Sequence."""
+        return f'AminoAcidSequence: {build_truncated_sequence(self.sequence)}'
 
 
 class CodonTranslationTable(SuperGSLType):
@@ -45,7 +68,6 @@ class CodonTranslationTable(SuperGSLType):
     This is a thin wrapper around biopython's `Bio.Data.CodonTable`
     https://biopython.org/docs/1.75/api/Bio.Data.CodonTable.html
     """
-    pass
 
 
 class Collection(SuperGSLType):
@@ -55,19 +77,42 @@ class Collection(SuperGSLType):
         self._items = items
 
     def __iter__(self):
+        """Return an iterator over the items in the collection"""
         return iter(self._items)
 
-    def count(self):
+    def __len__(self):
+        """Return the number of items in the collection"""
         return len(self._items)
 
-    def get_by_label(self, idx):
-        pass
-
-    def get_by_index(self, idx):
-        pass
-
     def __repr__(self):
-        output = 'Collection (count: %d)\n' % len(self._items)
+        """Create a repr string representation of the collection."""
+        output = f'Collection (count: {len(self._items)})\n'
         for item_idx, item in enumerate(self._items):
-            output += '  %d. %s \n' % (item_idx, item)
+            output += f'  {item_idx}. {item} \n'
         return output
+
+
+class SliceAndInvertCollection(Collection):
+    """A list of items that can be either inverted or sliced."""
+
+    def __init__(
+        self,
+        item_collection : Collection,
+        item_slice : Optional[Slice],
+        inverted : bool
+    ):
+        super().__init__(item_collection._items)
+        self.item_slice = item_slice
+        self.inverted = inverted
+
+    def __iter__(self):
+        for item_symbol in self._items:
+            symbol = item_symbol
+
+            if self.item_slice:
+                symbol = symbol.slice(self.item_slice)
+
+            if self.inverted:
+                symbol = symbol.invert()
+
+            yield symbol

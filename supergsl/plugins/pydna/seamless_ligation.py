@@ -10,7 +10,22 @@ from .primers import ExtractionPrimerBuilder
 
 
 class SeamlessLigationAssembler(AssemblerBase):
-    """Create assemblies utilizing the primer algorithm implemented by fGSL."""
+    """Create assemblies utilizing the primer algorithm implemented by fGSL.
+
+    Two examples of this approach are, Ligase Chain Reaction (LCR), or Seamless
+    Ligation Cloning Extract (SLiCE). Check out the j5 manual for a description
+    of related approaches: `"The SLIC, Gibson, CPEC, and SLiCE assembly methods"
+    <https://j5.jbei.org/j5manual/pages/22.html>`_.
+
+    .. code-block:: gsl
+
+            from builtin import seamless_ligation
+
+            seamless_ligation {
+                HO_pADH1_gERG10: uHO ; pADH1 ; gERG10[1:728] ; dHO
+            }
+
+    """
 
     import_path = 'seamless'
     name = 'seamless-ligation'

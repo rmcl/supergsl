@@ -40,13 +40,6 @@ class SlicePosition(Node):
             'approximate': self.approximate
         }
 
-    def get_slice_pos_str(self):
-        return '%s%d%s' % (
-            '~' if self.approximate else '',
-            self.index,
-            self.postfix if self.postfix else ''
-        )
-
 class Slice(Node):
     def __init__(self, start : SlicePosition, end : SlicePosition):
         self.start = start
@@ -59,25 +52,21 @@ class Slice(Node):
             'end': self.end.to_dict()
         }
 
-    def get_slice_str(self):
-        return '%s:%s' % (
-            self.start.get_slice_pos_str(),
-            self.end.get_slice_pos_str()
-        )
-
 
 class SymbolReference(Node):
-    def __init__(self, identifier : str, slice : Optional[Slice], invert : bool):
+    def __init__(self, identifier : str, slice : Optional[Slice], invert : bool, label : Optional[str]):
         self.identifier = identifier
         self.slice = slice
         self.invert = invert
+        self.label = label
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             'node': 'SymbolReference',
             'identifier': self.identifier,
             'invert': self.invert,
-            'slice': self.slice.to_dict() if self.slice else None
+            'slice': self.slice.to_dict() if self.slice else None,
+            'label': self.label
         }
 
     def child_nodes(self) -> List[Node]:
@@ -89,7 +78,10 @@ class SymbolReference(Node):
         return self.identifier
 
     def get_node_label(self):
-        return '%s:%s' % (self.__class__.__name__, self.identifier)
+        node_label = f'{self.__class__.__name__}:{self.identifier}'
+        if self.label:
+            node_label += f' as {self.label}'
+        return node_label
 
 
 class ImportIdentifier(Node):

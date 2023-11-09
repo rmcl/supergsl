@@ -1,9 +1,32 @@
-import unittest
+from unittest import TestCase
 from supergsl.core.tests.fixtures import SuperGSLCoreFixtures
 
-from supergsl.core.types.assembly import AssemblyDeclaration
+from supergsl.core.types.assembly import (
+    Assembly,
+    AssemblyDeclaration,
+    AssemblyResultSet
+)
 
-class AssemblyTestCase(unittest.TestCase):
+
+class AssemblyResultSetTestCase(TestCase):
+    """Test the AssemblyResultSet functionality."""
+
+    def setUp(self):
+        self.fixtures = SuperGSLCoreFixtures()
+
+    def test_add_assembly(self):
+        """Build up a result set by adding assemblies."""
+        asm1 = self.fixtures.mk_assembly(identifier='asm1')
+        asm2 = self.fixtures.mk_assembly(identifier='asm2')
+
+        result = AssemblyResultSet([])
+        result.add_assembly(asm1)
+        result.add_assembly(asm2)
+
+        self.assertEqual(list(result), [asm1, asm2])
+
+
+class AssemblyTestCase(TestCase):
     """Test case for SeqPosition."""
     maxDiff = None
 
@@ -40,7 +63,7 @@ class AssemblyTestCase(unittest.TestCase):
             for part in part_levels
         }
 
-        designs = declaration.get_full_factorial_designs()
+        designs = declaration.get_designs()
         self.assertEqual(list(designs), [
             [parts['uHO'], parts['pGAL0'], parts['gGENE'], parts['dHO']],
             [parts['uHO'], parts['pGAL1'], parts['gGENE'], parts['dHO']],

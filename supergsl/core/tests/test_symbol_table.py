@@ -17,7 +17,7 @@ class SymbolTableTestCase(unittest.TestCase):
         result = table.lookup('HELLO')
         self.assertEqual(result, mock_symbol_1)
 
-    def test_create_nested_scopes(self):
+    def test_create_nested_scopes_no_traverse_parents(self):
         """Test that we create a nested scope and it can store same values as parent."""
         mock_symbol_1 = Mock()
         mock_symbol_2 = Mock()
@@ -27,7 +27,11 @@ class SymbolTableTestCase(unittest.TestCase):
 
         child_table = table.enter_nested_scope('child_scope')
 
-        self.assertRaises(SymbolNotFoundError, child_table.lookup, 'HELLO')
+        self.assertRaises(
+            SymbolNotFoundError,
+            child_table.lookup,
+            'HELLO',
+            lookup_in_parent_scope=False)
 
         child_table.insert('HELLO', mock_symbol_2)
 
