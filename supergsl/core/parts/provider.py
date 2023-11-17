@@ -86,7 +86,7 @@ class ConstantPartProvider(PartProvider):
     `sequences` (Mapping[str, ConstantPartDetail]): A dictionary containing the desired
         parts
 
-    To utilize this class, pass the `sequence` arguemnet or subclass and define
+    To utilize this class, pass the `sequence` argument or subclass and define
     a DEFAULT_PART_DETAILS dictionary.
     ```
     {
@@ -184,12 +184,17 @@ class PartProviderPlugin(SuperGSLPlugin):
         self.register_available_provider('constant_parts', ConstantPartProvider)
 
         if 'part_providers' not in compiler_settings:
-            raise ConfigurationError(
+            part_provider_configs = []
+            print(
+                'WARNING: '
                 'No part providers have been defined. Check your supergGSL settings.')
+        else:
+            part_provider_configs = compiler_settings['part_providers']
+
 
         sequence_store = self.symbol_table.lookup('sequences')
 
-        for provider_config in compiler_settings['part_providers']:
+        for provider_config in part_provider_configs:
             print('Initializing "%s"' % provider_config['name'])
             provider_class = import_class(provider_config['provider_class'])
 
