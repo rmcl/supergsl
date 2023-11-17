@@ -49,6 +49,10 @@ class ProviderGroup(SuperGSLProvider):
         """Add a provider to the group. Providers are searched in the order which they are added."""
         self._providers.append(provider)
 
+    def __iter__(self):
+        """Iterate through the providers in this group."""
+        return iter(self._providers)
+
     def __contains__(self, provider : SuperGSLProvider):
         """Test if a provider is present in the group."""
         return provider in self._providers

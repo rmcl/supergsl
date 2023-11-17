@@ -1,9 +1,10 @@
 """Define the core pipeline for compiling and running SuperGSL."""
-from typing import Dict, List, Union, cast, Callable
+from typing import Dict, List, Union, cast, Callable, Optional
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.types.builtin import SuperGSLType
 from supergsl.core.plugin import PluginProvider
-from supergsl.core.provider import ProviderConfig
+from supergsl.core.provider import ProviderConfig, ProviderGroup
+from supergsl.core.parts import PartProvider
 from supergsl.utils.resolve import resolve_provider_import, resolve_import
 from supergsl.core.sequence import SequenceStore
 from supergsl.core.exception import (
@@ -101,6 +102,25 @@ class CompilerPipeline:
         provider_inst = provider_class(provider_path, config)
         plugin.register_provider(provider_path, provider_inst)
         return provider_inst
+
+
+    def providers(self, provider_type : Optional[str] = 'part'):
+        """Return providers in the sgsl context"""
+        import_table = self._global_symbol_table.enter_nested_scope('imports')
+        all_providers = []
+        for _, symbol in import_table:
+            if isinstance(symbol, ProviderGroup):
+                all_providers.extend(iter(symbol))
+            else:
+                all_providers.append(symbol)
+
+        filtered_providers = []
+        for provider in all_providers:
+            if provider_type == 'part' and not issubclass(type(provider), PartProvider):
+                continue
+            filtered_providers.append(provider)
+
+        return filtered_providers
 
 
     def get_provider(self, module_path):
