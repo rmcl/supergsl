@@ -72,14 +72,14 @@ class MixedPartLibraryProvider(PartProvider):
             query: match identifier or description
             roles: list[str] match parts with a given role
         """
-        library_part_details = self._library.list(part_type='dna')
+        library_part_details = self._library.list(
+            part_type='dna',
+            include_sequence=True)
         parts = []
 
         for part_details in library_part_details:
             # Todo: Filter
-
             part = self._create_part_from_details(part_details)
-
             parts.append(part)
 
         return parts
