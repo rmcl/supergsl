@@ -104,8 +104,11 @@ class CompilerPipeline:
         return provider_inst
 
 
-    def providers(self, provider_type : Optional[str] = 'part'):
-        """Return providers in the sgsl context"""
+    def providers(self, provider_type : Optional[str] = None):
+        """Return providers in the sgsl context
+
+        provider_type: (str) 'part' or None
+        """
         import_table = self._global_symbol_table.enter_nested_scope('imports')
         all_providers = []
         for _, symbol in import_table:
@@ -114,10 +117,13 @@ class CompilerPipeline:
             else:
                 all_providers.append(symbol)
 
+        all_providers = list(set(all_providers))
+
         filtered_providers = []
         for provider in all_providers:
-            if provider_type == 'part' and not issubclass(type(provider), PartProvider):
-                continue
+            if provider_type is not None:
+                if provider_type == 'part' and not issubclass(type(provider), PartProvider):
+                    continue
             filtered_providers.append(provider)
 
         return filtered_providers
