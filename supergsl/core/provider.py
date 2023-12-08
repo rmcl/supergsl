@@ -25,8 +25,17 @@ class SuperGSLProvider(SuperGSLType):
     """Base class to define objects that can provide symbols."""
 
     @property
+    def provider_name(self):
+        """Return the name of this part provider."""
+        return self._provider_name
+
+    @property
     def help(self):
         return ''
+
+    def get(self, identifier : str) -> SuperGSLType:
+        """Return a part by identifier."""
+        raise NotImplementedError('Subclass to implement')
 
     def resolve_import(
         self,
@@ -49,6 +58,20 @@ class ProviderGroup(SuperGSLProvider):
         """Add a provider to the group. Providers are searched in the order which they are added."""
         self._providers.append(provider)
 
+    def get(self, identifier : str) -> SuperGSLType:
+        """Return a part by identifier."""
+        for provider in self._providers:
+            try:
+                return provider.get(identifier)
+            except NotFoundError:
+                continue
+            except NotImplementedError:
+                continue
+
+    def __len__(self):
+        """Return the number of providers in the group."""
+        return len(self._providers)
+
     def __iter__(self):
         """Iterate through the providers in this group."""
         return iter(self._providers)
@@ -56,6 +79,10 @@ class ProviderGroup(SuperGSLProvider):
     def __contains__(self, provider : SuperGSLProvider):
         """Test if a provider is present in the group."""
         return provider in self._providers
+
+    def __getitem__(self, index : int):
+        """Return a provider by index."""
+        return self._providers[index]
 
     @property
     def help(self) -> str:

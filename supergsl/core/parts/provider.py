@@ -23,12 +23,6 @@ class PartProvider(SuperGSLProvider):
         self._provider_name = name
         self.config = config
 
-
-    @property
-    def provider_name(self):
-        """Return the name of this part provider."""
-        return self._provider_name
-
     def list_parts(self):
         """Return all parts available through this provider."""
         raise NotImplementedError(
@@ -132,6 +126,10 @@ class ConstantPartProvider(PartProvider):
     def get_default_part(self) -> Part:
         """Return the default part returned for `import <provider>` syntax.."""
         return self.get_part('default')
+
+    def get(self, identifier : str) -> Part:
+        """Return a part by identifier."""
+        return self.get_part(identifier)
 
     def get_part(self, identifier : str) -> Part:
         """Retrieve a part by identifier.

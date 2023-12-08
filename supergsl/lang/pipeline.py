@@ -132,7 +132,17 @@ class CompilerPipeline:
     def get_provider(self, module_path):
         """Return the provider instantiated at a give module path."""
         import_table = self._global_symbol_table.enter_nested_scope('imports')
-        return import_table.lookup(module_path)
+        result = import_table.lookup(module_path)
+
+        if result is None:
+            raise ProviderNotFoundError(
+                'Provider "%s" not found.' % module_path)
+
+        if isinstance(result, ProviderGroup):
+            if len(result) == 1:
+                return result[0]
+
+        return result
 
 
     def perform_frontend_compile(self, source_code):

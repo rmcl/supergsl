@@ -38,7 +38,7 @@ class MixedPartLibraryProvider(PartProvider):
 
         return part
 
-    def get_part(self, identifier : str) -> Part:
+    def get(self, identifier : str) -> Part:
         """Retrieve a Part from mixed part library by identifier.
 
         Arguments:
@@ -51,7 +51,7 @@ class MixedPartLibraryProvider(PartProvider):
 
 
 
-    def save_part(self, part : Part):
+    def save(self, part : Part):
         """Save a part to the mixed part library"""
         self._library.create_part(
             identifier=part.identifier,
