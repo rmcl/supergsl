@@ -9,13 +9,15 @@ class Protein(AminoAcidSequence):
     def __init__(
         self,
         identifier : str,
+        provider,
         sequence_entry : SequenceEntry,
         alternative_names : Optional[List[str]] = None,
         description : Optional[str] = None,
-        roles : Optional[List[str]] = None
+        roles : Optional[List[str]] = None,
     ):
         """Initialize a Protein."""
         self.identifier = identifier
+        self.provider = provider
         self.sequence_entry = sequence_entry
         self.alternative_names = alternative_names
         self.description = description

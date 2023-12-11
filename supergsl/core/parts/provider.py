@@ -35,11 +35,18 @@ class PartProvider(SuperGSLProvider):
     ) -> Mapping[str, SuperGSLType]:
         """Resolve a part from the provider and register it in the symbol table."""
         part_identifier = alias or identifier
+
+        # TODO: Maybe this is not solution, but temporary fix to get access to provider.
+        if identifier == self._provider_name:
+            return {
+                part_identifier: self
+            }
+
         return {
-            part_identifier: self.get_part(identifier)
+            part_identifier: self.get(identifier)
         }
 
-    def get_part(self, identifier : str) -> Part:
+    def get(self, identifier : str) -> Part:
         """Retrieve a part from the provider.
 
         Arguments:
@@ -47,7 +54,7 @@ class PartProvider(SuperGSLProvider):
         """
         raise NotImplementedError('Subclass to implement.')
 
-    def save_part(self, part : Part):
+    def save(self, part : Part):
         """Save a part to the provider"""
         raise NotImplementedError('This part provider does not support writing new parts.')
 

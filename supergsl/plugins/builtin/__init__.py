@@ -4,10 +4,12 @@ from supergsl.core.function import SuperGSLFunctionDeclaration
 from .fuse import FusionAssembler
 from .oligos import SyntheticOligoAssembler
 from .print import SuperGSLTypeDetailFunction, SuperGSLTypeHelpFunction
+from .save import SaveFunction
 from .declare import AssemblyDeclarationFunction
 from .output.json_output import JSONOutput
 from .output.sbol_output import SBOLOutput
 from .output.biopy import SeqRecordAssemblyOutput
+
 
 from .providers.fasta import FastaPartProvider
 from .providers.synbiohub import SynBioHubPartProvider
@@ -33,6 +35,9 @@ class BuiltinPlugin(SuperGSLPlugin):
 
         self.register_function('builtin', 'declare', SuperGSLFunctionDeclaration(
             AssemblyDeclarationFunction, compiler_settings))
+
+        self.register_function('builtin', 'save', SuperGSLFunctionDeclaration(
+            SaveFunction, compiler_settings))
 
         self.register_function(
             'builtin',

@@ -1,9 +1,10 @@
 """Retrieve BioBrick parts."""
-from typing import cast, Dict, List, Optional
+from typing import cast, Dict, List, Optional, Union
 from Bio.Seq import Seq
 from Bio import SeqIO
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
+from supergsl.core.types.protein import Protein
 from supergsl.core.provider import ProviderConfig
 from supergsl.core.parts.provider import PartProvider
 
@@ -29,16 +30,26 @@ class MixedPartLibraryProvider(PartProvider):
         sequence_entry = self.sequence_store.add_from_reference(
             part_details['sequence'])
 
-        part = Part(
-            identifier=part_details['identifier'],
-            sequence_entry=sequence_entry,
-            provider=self,
-            description=part_details['description'],
-            roles=part_details['roles'])
+        if part_details['part_type'] == 'protein':
+            return Protein(
+                identifier=part_details['identifier'],
+                sequence_entry=sequence_entry,
+                provider=self,
+                description=part_details['description'],
+                roles=part_details['roles'])
+        elif part_details['part_type'] == 'dna':
+            return Part(
+                identifier=part_details['identifier'],
+                sequence_entry=sequence_entry,
+                provider=self,
+                description=part_details['description'],
+                roles=part_details['roles'])
 
-        return part
+        raise ValueError('Unknown part type "%s"' % part_details['part_type'])
 
-    def get(self, identifier : str) -> Part:
+
+
+    def get(self, identifier : str) -> Union[Part, Protein]:
         """Retrieve a Part from mixed part library by identifier.
 
         Arguments:
