@@ -2,7 +2,7 @@ from typing import Dict, List
 import requests
 from supergsl.core.types.part import Part
 from supergsl.core.provider import ProviderConfig, SuperGSLProvider
-from supergsl.core.types.builtin import AminoAcidSequence
+from supergsl.core.types.protein import Protein
 from supergsl.core.exception import ProviderError
 
 
@@ -11,33 +11,60 @@ class UniprotProvider(SuperGSLProvider):
 
     def __init__(self, name : str, config : ProviderConfig):
             self._provider_name = name
-            self._cached_parts: Dict[str, Part] = {}
             self.sequence_store = config.sequence_store
 
-            settings = config.settings
+
+    def get_nested_key(self, data : dict, key : str) -> dict:
+        """Get a nested key from a dictionary."""
+        keys = key.split('.')
+        current = data
+        for key in keys:
+            try:
+                current = current[key]
+                if isinstance(current, list):
+                    if len(current) == 0:
+                        return None
+                    current = current[0]
+
+            except KeyError:
+                return None
+        return current
 
     def get_details_from_uniprot_result(self, result : dict) -> dict:
         """Extract details from a UniProt result."""
-        function_comment = [
+        function_comments = [
             comment
             for comment in result['comments']
             if comment['commentType'] == 'FUNCTION'
-        ][0]
-
-        try:
-            short_names = result['proteinDescription']['recommendedName']['shortNames']
-        except KeyError:
-            short_names = []
-
-        alternative_names = [
-            name['value']
-            for name in short_names
         ]
 
+        if len(function_comments) > 0:
+            description = function_comments['texts'][0]['value']
+        else:
+            description = self.get_nested_key(
+                result, 'proteinDescription.submissionNames.fullName.value')
+
+
+        short_names = self.get_nested_key(
+            result, 'proteinDescription.recommendedName.shortNames')
+
+        alternative_names = []
+        if short_names:
+            alternative_names = [
+                name['value']
+                for name in short_names
+            ]
+
+        name = self.get_nested_key(
+            result, 'proteinDescription.recommendedName.fullName.value')
+        if not name:
+            name = self.get_nested_key(
+                result, 'genes.geneName.value')
+
         return {
-            'name': result['proteinDescription']['recommendedName']['fullName']['value'],
+            'name': name,
             'alternative_names': alternative_names,
-            'description': function_comment['texts'][0]['value']
+            'description': description
         }
 
     def get_protein_data(self, uniprot_id : str) -> dict:
@@ -49,6 +76,7 @@ class UniprotProvider(SuperGSLProvider):
 
         result = response.json()
 
+        print(result)
         details = self.get_details_from_uniprot_result(result)
 
         return {
@@ -91,8 +119,19 @@ class UniprotProvider(SuperGSLProvider):
 
         return results
 
-    def search(self, query : str) -> List[AminoAcidSequence]:
+    def search(self, query : str) -> List[Protein]:
         raise NotImplementedError()
 
-    def get_part(self, identifier : str) -> List[AminoAcidSequence]:
-        raise NotImplementedError()
+    def get(self, identifier : str) -> Protein:
+        """Get the protein with the given UniProt identifier."""
+        protein_data = self.get_protein_data(identifier)
+        alt_names = protein_data['alternative_names'].copy()
+        alt_names.insert(0, protein_data['name'])
+
+        seq_entry = self.sequence_store.add_from_reference(protein_data['sequence'])
+        return Protein(
+            identifier=protein_data['identifier'],
+            sequence_entry=seq_entry,
+            alternative_names=alt_names,
+            description=protein_data['description']
+        )

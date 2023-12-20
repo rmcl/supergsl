@@ -17,7 +17,7 @@ class AssemblerBase(SuperGSLFunction):
 
     return_type = AssemblyResultSet
 
-    def execute(self, params):
+    def execute(self, params : dict):
         assembly_requests : List[AssemblyDeclaration] = params['children']
 
         return self.assemble(assembly_requests)

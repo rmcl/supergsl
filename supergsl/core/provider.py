@@ -34,8 +34,16 @@ class SuperGSLProvider(SuperGSLType):
         return ''
 
     def get(self, identifier : str) -> SuperGSLType:
-        """Return a part by identifier."""
+        """Return a part by identifier.
+
+        Arguments:
+            identifier  A identifier to select a part from this provider
+        """
         raise NotImplementedError('Subclass to implement')
+
+    def save(self, part : SuperGSLType):
+        """Save an object to the provider"""
+        raise NotImplementedError('This provider does not support writing new parts.')
 
     def resolve_import(
         self,
@@ -67,6 +75,8 @@ class ProviderGroup(SuperGSLProvider):
                 continue
             except NotImplementedError:
                 continue
+
+        raise NotFoundError(f'{identifier} not found in module.')
 
     def __len__(self):
         """Return the number of providers in the group."""

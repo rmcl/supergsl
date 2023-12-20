@@ -72,7 +72,7 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
 
                 self._sequence_by_chromosome[chromosome.name] = chromosome_entry
 
-    def list_parts(self):
+    def list(self):
         if not hasattr(self, '_sequence_by_chromosome'):
             self.load()
 
@@ -135,7 +135,7 @@ class FeatureTableWithFastaPartProvider(PrefixedSlicePartProviderMixin, PartProv
 
         return list(alternative_names)
 
-    def get_part(self, identifier : str) -> Part:
+    def get(self, identifier : str) -> Part:
         """Retrieve a part by identifier.
 
         Arguments:

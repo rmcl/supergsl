@@ -105,7 +105,7 @@ class PrefixedSlicePartProviderMixin(_Base):
         part_identifier = alias or identifier
 
         # Add the parent part
-        parent_part = self.get_part(identifier)
+        parent_part = self.get(identifier)
         new_symbols[part_identifier] = parent_part
 
         # Add all the prefix parts.
@@ -119,7 +119,7 @@ class PrefixedSlicePartProviderMixin(_Base):
 
 
     def get_prefixed_part(self, identifier : str, prefix : str) -> Part:
-        parent_part = self.get_part(identifier)
+        parent_part = self.get(identifier)
         if prefix == '':
             return parent_part
 

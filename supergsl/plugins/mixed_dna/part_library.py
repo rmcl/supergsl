@@ -2,8 +2,11 @@
 from typing import cast, Dict, List, Optional, Union
 from Bio.Seq import Seq
 from Bio import SeqIO
+from supergsl.core.types import SuperGSLType
+from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
+from supergsl.core.types.builtin import Collection
 from supergsl.core.types.protein import Protein
 from supergsl.core.provider import ProviderConfig
 from supergsl.core.parts.provider import PartProvider
@@ -20,12 +23,17 @@ class MixedPartLibraryProvider(PartProvider):
         self._provider_name = name
         self._cached_parts: Dict[str, Part] = {}
         self.sequence_store = config.sequence_store
+        self._config = config
 
         settings = config.settings
 
         self._library = open_library(settings['library_path'])
 
-    def _create_part_from_details(self, part_details : dict) -> Part:
+    @property
+    def library(self):
+        return self._library
+
+    def _create_part_from_details(self, part_details : dict) -> Union[Part, Protein]:
         """Create a SuperGSL part from details provided."""
         sequence_entry = self.sequence_store.add_from_reference(
             part_details['sequence'])
@@ -49,7 +57,30 @@ class MixedPartLibraryProvider(PartProvider):
 
 
 
-    def get(self, identifier : str) -> Union[Part, Protein]:
+    def create_collection(self, name : str, description : str) -> Collection:
+        pass
+
+    def add_to_collection(self, collection : Collection, part : Part):
+        pass
+
+    def get_collection(self, name : str) -> Collection:
+        collection_detail = self._library.collections.get(name)
+
+        collection_items = []
+        for item in collection_detail['items']:
+            item_part = self.get(item['part_id'])
+            collection_items.append(item_part)
+
+        return Collection(collection_items)
+
+    def list_collections(self) -> List[str]:
+        return [
+            collection_detail['name']
+            for collection_detail in self._library.collections.list()
+        ]
+
+
+    def get(self, identifier : str) -> SuperGSLType:
         """Retrieve a Part from mixed part library by identifier.
 
         Arguments:
@@ -57,14 +88,13 @@ class MixedPartLibraryProvider(PartProvider):
         Return: `Part`
         """
 
-        part_details = self._library.get(identifier)
+        part_details = self._library.parts.get(identifier)
         return self._create_part_from_details(part_details)
-
 
 
     def save(self, part : Part):
         """Save a part to the mixed part library"""
-        self._library.create_part(
+        self._library.parts.create_part(
             identifier=part.identifier,
             part_type='dna',
             sequence=str(part.sequence),
@@ -83,7 +113,7 @@ class MixedPartLibraryProvider(PartProvider):
             query: match identifier or description
             roles: list[str] match parts with a given role
         """
-        library_part_details = self._library.list(
+        library_part_details = self._library.parts.list(
             part_type='dna',
             include_sequence=True)
         parts = []

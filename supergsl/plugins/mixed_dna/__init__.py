@@ -7,7 +7,7 @@ class MixedDnaPlugin(SuperGSLPlugin):
     """Plugin stub to register MixedDna SuperGSL utilities."""
 
     def register(self, compiler_settings):
-        """Register built in assemblers."""
+        """Register Mixed providers and functions."""
 
         self.register_available_provider(
             'mixed_part_library',
