@@ -130,6 +130,7 @@ class PrefixedSlicePartProviderMixin(_Base):
                 f'Invalid part prefix "{prefix}" for "{identifier}"') from error
 
         new_slice = self.build_part_type_slice_pos(parent_part, part_type)
+        description = self.get_part_description_by_slice_type(parent_part, part_type)
 
         roles = self.get_roles_by_part_type(part_type)
         part = self.get_child_part_by_slice(
@@ -137,6 +138,7 @@ class PrefixedSlicePartProviderMixin(_Base):
             identifier=f'{prefix}{identifier}',
             part_slice=new_slice)
         part.add_roles(roles)
+        part.description = description
         return part
 
 
@@ -189,3 +191,25 @@ class PrefixedSlicePartProviderMixin(_Base):
                 Position(get_terminator_len(), relative_to=THREE_PRIME, approximate=True))
 
         raise PartSliceError(f'"{part_slice_type}" prefix is not implemented yet.')
+
+    def get_part_description_by_slice_type(self, parent_part : Part, part_slice_type : str) -> str:
+        """Create a new description for a sliced part."""
+        if part_slice_type == 'promoter':
+            return f'Promoter region of {parent_part.identifier}'
+
+        if part_slice_type == 'orf':
+            return f'ORF region of {parent_part.identifier}'
+
+        if part_slice_type == 'gene':
+            return f'Gene region of {parent_part.identifier}'
+
+        if part_slice_type == 'upstream':
+            return f'Upstream region of {parent_part.identifier}'
+
+        if part_slice_type == 'downstream':
+            return f'Downstream region of {parent_part.identifier}'
+
+        if part_slice_type == 'terminator':
+            return f'Terminator region of {parent_part.identifier}'
+
+        return f'Slice "{part_slice_type}" of "{parent_part.identifier}"'

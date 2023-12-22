@@ -1,4 +1,4 @@
-"""Retrieve BioBrick parts."""
+"""Retrieve Parts from a MixedLibrary."""
 from typing import cast, Dict, List, Optional, Union
 from Bio.Seq import Seq
 from Bio import SeqIO
@@ -12,7 +12,7 @@ from supergsl.core.provider import ProviderConfig
 from supergsl.core.parts.provider import PartProvider
 
 from mixed_parts import open_library
-
+from mixed_parts.exceptions import RoleDoesNotExist
 
 class MixedPartLibraryProvider(PartProvider):
     """Retrieve and Save Parts to the Mixed Part Library File Format.
@@ -85,7 +85,7 @@ class MixedPartLibraryProvider(PartProvider):
 
         Arguments:
             identifier  A identifier to select a part from this provider
-        Return: `Part`
+        Return: `Union[Part]`
         """
 
         part_details = self._library.parts.get(identifier)
@@ -94,12 +94,26 @@ class MixedPartLibraryProvider(PartProvider):
 
     def save(self, part : Part):
         """Save a part to the mixed part library"""
+
+        for role in part.roles:
+            try:
+                self._library.parts.get_role(role.uri)
+            except RoleDoesNotExist:
+                self._library.parts.create_role(
+                    uri=role.uri,
+                    name=role.name,
+                    description=role.description
+                )
+
         self._library.parts.create_part(
             identifier=part.identifier,
             part_type='dna',
             sequence=str(part.sequence),
             description=part.description,
-            roles=part.roles
+            roles=[
+                role.uri
+                for role in part.roles
+            ]
         )
 
     def search(

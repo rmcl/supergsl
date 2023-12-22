@@ -28,6 +28,20 @@ class PartProvider(SuperGSLProvider):
         raise NotImplementedError(
             f'List parts is not supported by "{self.provider_name}" part provider.')
 
+    def search(
+        self,
+        query : Optional[str] = None,
+        roles : Optional[List[str]] = None
+    ) -> List[Part]:
+        """Search for parts in the part library.
+
+        Arguments:
+            query: match identifier or description
+            roles: list[str] match parts with a given role
+        """
+        raise NotImplementedError(
+            f'Search is not supported by "{self.provider_name}" part provider.')
+
     def resolve_import(
         self,
         identifier : str,
