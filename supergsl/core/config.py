@@ -18,7 +18,7 @@ def load_config_file(config_file_path, optional=False):
     except FileNotFoundError as error:
         logger.debug('Failed to load config file: "%s".' % config_file_path)
         if not optional:
-            raise ConfigFileNotFound('Error loading config file: "%s"' % config_file_path, error)
+            raise ConfigFileNotFound(f'Config file not found: "{config_file_path}"')
     except JSONDecodeError as error:
         raise ConfigurationError('Error parsing config file: "%s"' % config_file_path, error)
 

@@ -1,9 +1,10 @@
 """Define the core pipeline for compiling and running SuperGSL."""
-from typing import Dict, List, Union, cast, Callable
+from typing import Dict, List, Union, cast, Callable, Optional
 from supergsl.core.symbol_table import SymbolTable
 from supergsl.core.types.builtin import SuperGSLType
 from supergsl.core.plugin import PluginProvider
-from supergsl.core.provider import ProviderConfig
+from supergsl.core.provider import ProviderConfig, ProviderGroup
+from supergsl.core.parts import PartProvider
 from supergsl.utils.resolve import resolve_provider_import, resolve_import
 from supergsl.core.sequence import SequenceStore
 from supergsl.core.exception import (
@@ -103,10 +104,45 @@ class CompilerPipeline:
         return provider_inst
 
 
+    def providers(self, provider_type : Optional[str] = None):
+        """Return providers in the sgsl context
+
+        provider_type: (str) 'part' or None
+        """
+        import_table = self._global_symbol_table.enter_nested_scope('imports')
+        all_providers = []
+        for _, symbol in import_table:
+            if isinstance(symbol, ProviderGroup):
+                all_providers.extend(iter(symbol))
+            else:
+                all_providers.append(symbol)
+
+        all_providers = list(set(all_providers))
+
+        filtered_providers = []
+        for provider in all_providers:
+            if provider_type is not None:
+                if provider_type == 'part' and not issubclass(type(provider), PartProvider):
+                    continue
+            filtered_providers.append(provider)
+
+        return filtered_providers
+
+
     def get_provider(self, module_path):
         """Return the provider instantiated at a give module path."""
         import_table = self._global_symbol_table.enter_nested_scope('imports')
-        return import_table.lookup(module_path)
+        result = import_table.lookup(module_path)
+
+        if result is None:
+            raise ProviderNotFoundError(
+                'Provider "%s" not found.' % module_path)
+
+        if isinstance(result, ProviderGroup):
+            if len(result) == 1:
+                return result[0]
+
+        return result
 
 
     def perform_frontend_compile(self, source_code):

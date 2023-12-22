@@ -18,7 +18,11 @@ class SymbolNotFoundError(NotFoundError):
     """A symbol cannot be found in the symbol table."""
 
 
-class ProviderNotFoundError(NotFoundError):
+class ProviderError(SuperGSLError):
+    """Base class for errors related to providers."""
+
+
+class ProviderNotFoundError(ProviderError):
     """The specific provider cannot be found.
 
     This most often manifests in the context of a import statement.

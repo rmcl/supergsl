@@ -63,3 +63,22 @@ def convert_role_to_biopython_type(role : Role) -> str:
     except TypeError as error:
         raise UnknownRoleError(
             f'Unknown mapping from {role.uri} to biopython type.') from error
+
+def get_role_by_uri(uri : str) -> Role:
+    """Convert a sequence ontology URI to a `Role`."""
+    role_map = {
+        SO_GENE: GENE,
+        SO_PROMOTER: PROMOTER,
+        SO_TERMINATOR: TERMINATOR,
+        SO_ORF: ORF,
+        SO_MRNA: MRNA,
+        SO_HOMOLOGOUS_REGION: HOMOLOGOUS_REGION,
+        SO_CDS: CDS,
+        SO_CDS_FRAGMENT: CDS_FRAGMENT,
+    }
+
+    try:
+        return role_map[uri]
+    except KeyError as error:
+        raise UnknownRoleError(
+            f'Unknown sequence ontology URI {uri}.') from error

@@ -23,16 +23,24 @@ class PartProvider(SuperGSLProvider):
         self._provider_name = name
         self.config = config
 
-
-    @property
-    def provider_name(self):
-        """Return the name of this part provider."""
-        return self._provider_name
-
     def list_parts(self):
         """Return all parts available through this provider."""
         raise NotImplementedError(
             f'List parts is not supported by "{self.provider_name}" part provider.')
+
+    def search(
+        self,
+        query : Optional[str] = None,
+        roles : Optional[List[str]] = None
+    ) -> List[Part]:
+        """Search for parts in the part library.
+
+        Arguments:
+            query: match identifier or description
+            roles: list[str] match parts with a given role
+        """
+        raise NotImplementedError(
+            f'Search is not supported by "{self.provider_name}" part provider.')
 
     def resolve_import(
         self,
@@ -41,21 +49,16 @@ class PartProvider(SuperGSLProvider):
     ) -> Mapping[str, SuperGSLType]:
         """Resolve a part from the provider and register it in the symbol table."""
         part_identifier = alias or identifier
+
+        # TODO: Maybe this is not solution, but temporary fix to get access to provider.
+        if identifier == self._provider_name:
+            return {
+                part_identifier: self
+            }
+
         return {
-            part_identifier: self.get_part(identifier)
+            part_identifier: self.get(identifier)
         }
-
-    def get_part(self, identifier : str) -> Part:
-        """Retrieve a part from the provider.
-
-        Arguments:
-            identifier  A identifier to select a part from this provider
-        """
-        raise NotImplementedError('Subclass to implement.')
-
-    def save_part(self, part : Part):
-        """Save a part to the provider"""
-        raise NotImplementedError('This part provider does not support writing new parts.')
 
 
     def get_child_part_by_slice(
@@ -86,7 +89,7 @@ class ConstantPartProvider(PartProvider):
     `sequences` (Mapping[str, ConstantPartDetail]): A dictionary containing the desired
         parts
 
-    To utilize this class, pass the `sequence` arguemnet or subclass and define
+    To utilize this class, pass the `sequence` argument or subclass and define
     a DEFAULT_PART_DETAILS dictionary.
     ```
     {
@@ -132,6 +135,10 @@ class ConstantPartProvider(PartProvider):
     def get_default_part(self) -> Part:
         """Return the default part returned for `import <provider>` syntax.."""
         return self.get_part('default')
+
+    def get(self, identifier : str) -> Part:
+        """Return a part by identifier."""
+        return self.get_part(identifier)
 
     def get_part(self, identifier : str) -> Part:
         """Retrieve a part by identifier.
@@ -184,12 +191,17 @@ class PartProviderPlugin(SuperGSLPlugin):
         self.register_available_provider('constant_parts', ConstantPartProvider)
 
         if 'part_providers' not in compiler_settings:
-            raise ConfigurationError(
+            part_provider_configs = []
+            print(
+                'WARNING: '
                 'No part providers have been defined. Check your supergGSL settings.')
+        else:
+            part_provider_configs = compiler_settings['part_providers']
+
 
         sequence_store = self.symbol_table.lookup('sequences')
 
-        for provider_config in compiler_settings['part_providers']:
+        for provider_config in part_provider_configs:
             print('Initializing "%s"' % provider_config['name'])
             provider_class = import_class(provider_config['provider_class'])
 

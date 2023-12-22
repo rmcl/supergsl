@@ -23,7 +23,7 @@ def get_local_cache_path(provider_name) -> Path:
 
     return cache_path
 
-def get_logo():
+def get_logo() -> str:
     """Return the SuperGSL ASCII logo.
 
     >>> from supergsl.utils import get_logo
@@ -42,18 +42,20 @@ def get_logo():
         """)
 
 
-def display_symbol_table(symbol_table : SymbolTable, depth=0):
+def display_symbol_table(symbol_table : SymbolTable, depth=0) -> str:
     """Recursively display the table and all of its nested scopes."""
     indent = ' ' * (depth*4)
-    print()
-    print(indent + 'Table: {} ----'.format(symbol_table.name))
+
+    result = '\n'
+    result += indent + 'Table: {} ----\n'.format(symbol_table.name)
     for key, val in symbol_table._symbols.items():
-        print(indent + '    Key: {}, Type: {}'.format(
+        result += (indent + '    Key: {}, Type: {}\n'.format(
             key,
             type(val)
         ))
 
     for nested_scope in symbol_table._nested_scopes.values():
-        display_symbol_table(nested_scope, depth+1)
+        result += display_symbol_table(nested_scope, depth+1)
 
-    print(indent + '--- End Table: %s ----' % symbol_table.name)
+    result += indent + '--- End Table: %s ----\n' % symbol_table.name
+    return result
