@@ -6,10 +6,12 @@ from supergsl.core.types import SuperGSLType
 from supergsl.core.function import SuperGSLFunction, SuperGSLFunctionDeclaration
 from supergsl.core.constants import THREE_PRIME
 from supergsl.core.types.part import Part
+from supergsl.core.types.role import Role, get_role_by_uri
 from supergsl.core.types.builtin import Collection
 from supergsl.core.types.protein import Protein
 from supergsl.core.provider import ProviderConfig
 from supergsl.core.parts.provider import PartProvider
+from supergsl.core.exception import UnknownRoleError
 
 from mixed_parts import open_library
 from mixed_parts.exceptions import RoleDoesNotExist
@@ -38,20 +40,33 @@ class MixedPartLibraryProvider(PartProvider):
         sequence_entry = self.sequence_store.add_from_reference(
             part_details['sequence'])
 
+        sgsl_roles = []
+        for role in part_details['roles']:
+            try:
+                sgsl_role = get_role_by_uri(role['uri'])
+            except RoleDoesNotExist:
+                sgsl_role = Role(
+                    uri=role['uri'],
+                    name=role['name'],
+                    description=role['description']
+                )
+
+            sgsl_roles.append(sgsl_role)
+
         if part_details['part_type'] == 'protein':
             return Protein(
                 identifier=part_details['identifier'],
                 sequence_entry=sequence_entry,
                 provider=self,
                 description=part_details['description'],
-                roles=part_details['roles'])
+                roles=sgsl_roles)
         elif part_details['part_type'] == 'dna':
             return Part(
                 identifier=part_details['identifier'],
                 sequence_entry=sequence_entry,
                 provider=self,
                 description=part_details['description'],
-                roles=part_details['roles'])
+                roles=sgsl_roles)
 
         raise ValueError('Unknown part type "%s"' % part_details['part_type'])
 
